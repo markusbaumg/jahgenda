@@ -3,6 +3,975 @@
   "runs": [
     {
       "skill": "scrape-shows",
+      "at": "2026-10-13T01:47:54+02:00",
+      "added": 14,
+      "updated": 0,
+      "removed": 0,
+      "total": 99,
+      "failed_sources": [
+        "https://www.club-vaudeville.de/ (TLS-Fehler, Bot-Challenge)",
+        "https://www.osterialafabbrica.ch/ (TLS-Zertifikat falsch, keine Eventliste)",
+        "https://ned.ch/evento/vendredub-10 (404)",
+        "https://www.bandsintown.com/ (403, mehrere Artistseiten)",
+        "https://dubioza.org/tour-dates/ (nur per JavaScript)",
+        "https://www.dubkasm.com/ (ENOTFOUND)",
+        "https://www.elijahsalomon.com/ (ENOTFOUND)",
+        "https://www.callmemalcolm.com/ (leer gerendert)",
+        "https://www.fnacspectacles.com/ (timeout)",
+        "https://www.guidle.com/ Dubtopia 15 Years Zentralwäscherei (410)",
+        "https://www.petzi.ch/en/search/ (nur erste 54 Treffer je Suche, «load more» per JavaScript)"
+      ],
+      "dropped": [
+        {
+          "title": "Kabaka Pyramid @ L'Usine (Le Rez)",
+          "date": "2026-10-23",
+          "venue": "L'Usine",
+          "city": "Genève",
+          "url": "https://www.petzi.ch/en/events/61728-kalvingrad-usine-kabaka-pyramid/",
+          "why": "Auf Petzi als abgesagt markiert («This event is cancelled»)"
+        },
+        {
+          "title": "Dub Inc",
+          "date": "2027-03-18",
+          "venue": "Bierhübeli",
+          "city": "Bern",
+          "url": "https://bierhuebeli.ch/event/dub-inc-reggae-hip-hop-in-bern/",
+          "why": "Weiterhin «Abgesagt» auf bierhuebeli.ch (Skalender und Eventfrog führen den Termin noch)"
+        },
+        {
+          "title": "10 Years DMB Records: Fluffy Machine + Skaboom + KaButt + Mistio",
+          "date": "2026-11-14",
+          "venue": "Kulturhalle Sägegasse",
+          "city": "Burgdorf",
+          "url": "https://skalender.net/events/1874879395577947/",
+          "why": "Skate-Punk-Abend (Headliner Fluffy Machine), Skaboom nur einer von vier Acts – zu wenig Ska-Bezug (criteria.md)"
+        },
+        {
+          "title": "Sean Koch – Europe 2026",
+          "date": "2026-10-18",
+          "venue": "Bierhübeli",
+          "city": "Bern",
+          "url": "https://bierhuebeli.ch/event/sean-koch-indie-folk/",
+          "why": "Surf-Folk/Indie-Folk-Songwriter, Reggae nur dritter Tag (wie im letzten Lauf)"
+        },
+        {
+          "title": "Sound Bwoy – 1 Year Anniversary",
+          "date": "2026-10-16",
+          "venue": "Parterre One",
+          "city": "Basel",
+          "url": "https://eventfrog.ch/de/p/partys/dancehall/sound-bwoy-1-year-anniversary-basel-7508771343933938536.html",
+          "why": "Afrobeat/Dancehall/RnB/Amapiano – Dancehall nur ein Genre von vielen (criteria.md)"
+        },
+        {
+          "title": "Les Super Nanas by Kamikaze Sound System",
+          "date": "2026-11-06",
+          "venue": "Ebullition",
+          "city": "Bulle",
+          "url": "https://www.petzi.ch/en/events/64806-ebullition-les-super-nanas-by-kamikaze-sound-system/",
+          "why": "Tribe/Hardtechno-Party, «Sound System» nur im Crew-Namen"
+        },
+        {
+          "title": "Culmina x Case à Chocs: Malcom + Woodi + Flowerz",
+          "date": "2026-11-28",
+          "venue": "Case à Chocs",
+          "city": "Neuchâtel",
+          "url": "https://www.petzi.ch/en/events/64483-case-a-chocs-culmina-x-case-a-chocs-malcom-woodi-flowerz/",
+          "why": "Afro/Shatta/Amapiano/R&B-Abend, Dancehall nur ein Tag von vielen"
+        },
+        {
+          "title": "DJ Kenkylla (und weitere Gratis-DJ-Nächte: Deejay Greens 16.10., DJ Taloco 30.10., DJ Toots 20.11., DJ Tasty 21.11., DJ Scalpa 28.11.)",
+          "date": "2026-11-07",
+          "venue": "Le Chat Noir",
+          "city": "Carouge",
+          "url": "https://www.petzi.ch/en/events/65085-chat-noir-dj-kenkylla/",
+          "why": "Karibik/Soca/Afro/Kizomba/Hip-Hop gemischt, Dancehall nicht im Zentrum"
+        },
+        {
+          "title": "SPUK (Halloween)",
+          "date": "2026-10-31",
+          "venue": "Kraftfeld",
+          "city": "Winterthur",
+          "url": "https://www.petzi.ch/en/events/65028-kraftfeld-spuk/",
+          "why": "Electro/Techno-Party, Dancehall nur als Übergang im Opening-Set"
+        },
+        {
+          "title": "Elias J. Tv Europe Tour",
+          "date": "2026-10-31",
+          "venue": "Stadthalle Bülach",
+          "city": "Bülach",
+          "url": "https://eventfrog.ch/de/p/konzerte/reggae-ska/elias-j-tv-europe-tour-zurich-switzerland-buelach-7439788386003478323.html",
+          "why": "Keine Acts genannt, kein Reggae-Bezug erkennbar – nur die Eventfrog-Kategorie"
+        },
+        {
+          "title": "Santrofi (GH) + Tropical Six Pack Party",
+          "date": "2026-10-30",
+          "venue": "Kuppel",
+          "city": "Basel",
+          "url": "https://www.kuppel-basel.ch/programm/santrofi",
+          "why": "Highlife-Band, Reggae nur einer von vier Tags"
+        },
+        {
+          "title": "Fuse Party – DJ Layla",
+          "date": "2026-11-28",
+          "venue": "Bierhübeli",
+          "city": "Bern",
+          "url": "https://bierhuebeli.ch/event/fuse-party-afrobeats-dancehall-in-bern/",
+          "why": "Afrobeats/Dancehall/Trap-Clubnacht – Mainstream-Mix (criteria.md)"
+        },
+        {
+          "title": "Flavia Coelho – Entre Rio et lumière",
+          "date": "2027-01-23",
+          "venue": "Château Rouge",
+          "city": "Annemasse",
+          "url": "https://www.chateau-rouge.net/spectacle/flavia-coelho/",
+          "why": "Sitzkonzert «Voyage musical», Seite nennt weder Reggae noch Ragga – bleibt zweifelhaft"
+        },
+        {
+          "title": "Cali P (995 Concept 24.10. und La Jonquille 07.11.)",
+          "date": "2026-10-24",
+          "venue": "995 Concept",
+          "city": "Genève",
+          "url": "https://concerts.hypebot.com/artist/c/682157-cali-p",
+          "why": "Nur auf einem Aggregator (Hypebot/Bandsintown), keine Veranstalterseite gefunden, cali-p.com ist eine Verkaufsseite – nicht belegbar"
+        }
+      ],
+      "notes": [
+        "Zweiter Lauf am selben Tag (01:36, lokal), ca. 1 h nach dem Erstlauf – darum wenig Neues; Budget: ca. 140 Seitenabrufe und 52 Websuchen (31 Suchanfragen + 20 Watchlist-Acts + 1 Prüfung).",
+        "Neu aus den Venue-Seiten: fünf Soundsystem-Nächte am 17.10. (Bikini Test, Cafete, Rümpeltum, Kuppel) und 31.10. (Le Groove), Los Billtones im Albani 11.02.2027.",
+        "Watchlist: Dub Spencer & Trance Hill mit vier neuen CH-Daten (Rorschach, Stäfa, Losone, Seewen) gemäss dubspencer.com, drei davon auf der Venue-Seite bestätigt; Losone nur via Bandseite (La Fabbrica hat keinen Kalender). Famara 12.12. im Kulturkarussell Rössli Stäfa beim Prüfen gefunden.",
+        "Skaboom (DMB-Records-Nacht Dynamo 13.11.) jetzt aufgenommen: Dynamo und Skalender-Artistseite belegen Ska-Punk mit Bläsern (im Erstlauf wegen fehlender Quelle verworfen).",
+        "Ned Montreux: Vendredub #10 (30.10.) und #11 (27.11.) nur als Kalendertitel ohne Line-up – aufgenommen, weil die Reihe laut Venue die monatliche Roots/Dub-Soundsystem-Nacht ist.",
+        "Kabaka Pyramid L'Usine Genève 23.10. abgesagt (Petzi); Dub Inc Bierhübeli 18.03.2027 weiterhin abgesagt. Ensemble Château Rouge 10.12. ist ausverkauft (Complet).",
+        "Club Vaudeville Lindau nicht ladbar (TLS-Fehler, Bot-Challenge) – Dubioza Kolektiv 30.10. nicht erneut verifiziert, bleibt drin.",
+        "Venue-Rotation: 12 High-Venues + Medium-Venues Albani…Grabenhalle (20); nächster Lauf startet bei Hirscheneck.",
+        "Ausserhalb des Fensters, vormerken: Groundation Fri-Son 16.05.2027; Dub Spencer & Trance Hill Jazzhaus Freiburg 19.11.2027 und Schüür 20.11.2027. Keine Festivals 2027 angekündigt (Reeds, Plein-les-Watts, Lakesplash).",
+        "Neue Venues: Industrie36 Rorschach und Kulturkarussell Rössli Stäfa (Koordinaten OpenStreetMap/Nominatim)."
+      ],
+      "sources": [
+        {
+          "name": "Skalender",
+          "url": "https://skalender.net/",
+          "status": "ok",
+          "found": 95,
+          "kept": 44
+        },
+        {
+          "name": "Eventfrog – Reggae & Ska",
+          "url": "https://eventfrog.ch/de/events/ch/reggae-ska-konzerte.html",
+          "status": "ok",
+          "found": 24,
+          "kept": 19
+        },
+        {
+          "name": "Eventfrog – Dancehall",
+          "url": "https://eventfrog.ch/de/events/ch/dancehall-partys.html",
+          "status": "ok",
+          "found": 20,
+          "kept": 1
+        },
+        {
+          "name": "Petzi (reggae)",
+          "url": "https://www.petzi.ch/en/search/?q=reggae",
+          "status": "ok",
+          "found": 54,
+          "kept": 27
+        },
+        {
+          "name": "Petzi (ska)",
+          "url": "https://www.petzi.ch/en/search/?q=ska",
+          "status": "ok",
+          "found": 54,
+          "kept": 16
+        },
+        {
+          "name": "Petzi (dub)",
+          "url": "https://www.petzi.ch/en/search/?q=dub",
+          "status": "ok",
+          "found": 54,
+          "kept": 9
+        },
+        {
+          "name": "Petzi (dancehall)",
+          "url": "https://www.petzi.ch/en/search/?q=dancehall",
+          "status": "ok",
+          "found": 11,
+          "kept": 2
+        },
+        {
+          "name": "Petzi (sound system)",
+          "url": "https://www.petzi.ch/en/search/?q=sound%20system",
+          "status": "ok",
+          "found": 54,
+          "kept": 8
+        },
+        {
+          "name": "Bierhübeli (Prüfung Dub Inc / Sean Koch)",
+          "url": "https://bierhuebeli.ch/",
+          "status": "ok",
+          "found": 3,
+          "kept": 0
+        },
+        {
+          "name": "Dynamo (Prüfung Skaboom)",
+          "url": "https://www.dynamo.ch/veranstaltung/10-years-dmb-records-skabooom-monty-burning-fuses",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "dubspencer.com (Tourdaten)",
+          "url": "https://www.dubspencer.com/index.php?page=concerts",
+          "status": "ok",
+          "found": 6,
+          "kept": 6
+        },
+        {
+          "name": "Industrie36",
+          "url": "http://www.industrie36.events/event/dub-spencer-trance-hill/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Kulturkarussell Rössli",
+          "url": "http://www.kulturkarussell.ch/",
+          "status": "ok",
+          "found": 2,
+          "kept": 2
+        },
+        {
+          "name": "Osteria La Fabbrica",
+          "url": "https://www.osterialafabbrica.ch/",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "TLS-Zertifikat passt nicht zur Domain (Infomaniak-Preview); per curl geladen, aber keine Eventliste im HTML"
+        },
+        {
+          "name": "Bikini Test",
+          "url": "https://bikinitest.ch/programme",
+          "status": "ok",
+          "found": 3,
+          "kept": 3
+        },
+        {
+          "name": "Cafete",
+          "url": "https://cafete.ch/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Club Vaudeville",
+          "url": "https://www.club-vaudeville.de/",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "WebFetch: 'unable to get local issuer certificate'; curl returns only a JavaScript bot-challenge page ('Redirecting... Loading') – not worked around"
+        },
+        {
+          "name": "Galvanik",
+          "url": "https://galvanik-zug.ch/programm/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Krempel",
+          "url": "https://www.krempel.ch/events/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kuppel",
+          "url": "https://www.kuppel-basel.ch/programm",
+          "status": "ok",
+          "found": 2,
+          "kept": 1
+        },
+        {
+          "name": "Le Groove",
+          "url": "https://legroove.ch/agenda/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Ned",
+          "url": "https://ned.ch/calendier/",
+          "status": "ok",
+          "found": 2,
+          "kept": 2
+        },
+        {
+          "name": "OXIL",
+          "url": "https://oxil.ch/",
+          "status": "ok",
+          "found": 3,
+          "kept": 3
+        },
+        {
+          "name": "Plein-les-Watts Festival",
+          "url": "https://pleinleswatts.ch/festival-2026/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Poolbar Festival",
+          "url": "https://www.poolbar.at/programm",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Rümpeltum",
+          "url": "https://rumpeltum.ch/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Albani",
+          "url": "https://www.albani.ch/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Alte Kaserne",
+          "url": "https://altekaserne.ch/veranstaltungen",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Am Schluss",
+          "url": "https://www.amschluss.ch/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Bad Bonn",
+          "url": "https://club.badbonn.ch/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Bierhübeli",
+          "url": "https://bierhuebeli.ch/",
+          "status": "ok",
+          "found": 2,
+          "kept": 0
+        },
+        {
+          "name": "Bogen F",
+          "url": "https://www.bogenf.ch/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Café Mokka",
+          "url": "https://mokka.ch/",
+          "status": "ok",
+          "found": 3,
+          "kept": 3
+        },
+        {
+          "name": "Camäleon",
+          "url": "https://camaleon.li/aktuelles/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Case à Chocs",
+          "url": "https://case-a-chocs.ch/programme/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Chessu / Coupole",
+          "url": "https://ajz.ch/de-ch/chessu/programm/",
+          "status": "ok",
+          "found": 3,
+          "kept": 0
+        },
+        {
+          "name": "Château Rouge",
+          "url": "https://www.chateau-rouge.net/spectacles-saison/",
+          "status": "ok",
+          "found": 3,
+          "kept": 2
+        },
+        {
+          "name": "Dachstock",
+          "url": "https://www.dachstock.ch/events",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Das Viertel",
+          "url": "https://www.dasviertel.ch/programmklub",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Ebullition",
+          "url": "https://www.ebull.ch/fr",
+          "status": "ok",
+          "found": 4,
+          "kept": 3
+        },
+        {
+          "name": "Eisenwerk",
+          "url": "https://www.eisenwerk.ch/programm-bilder/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Fri-Son",
+          "url": "https://www.fri-son.ch/fr/programme",
+          "status": "ok",
+          "found": 2,
+          "kept": 2
+        },
+        {
+          "name": "Gare de Lion",
+          "url": "https://garedelion.ch/",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Gaswerk",
+          "url": "https://www.gaswerk.ch/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Gaswerk Eventbar",
+          "url": "https://www.gaswerk-eventbar.ch/",
+          "status": "ok",
+          "found": 2,
+          "kept": 2
+        },
+        {
+          "name": "Grabenhalle",
+          "url": "https://www.grabenhalle.ch/programm/",
+          "status": "ok",
+          "found": 1,
+          "kept": 1
+        },
+        {
+          "name": "Hirscheneck",
+          "url": "https://www.hirscheneck.ch/veranstaltungen",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Holästei",
+          "url": "https://www.holaestei.ch/events",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "ISC Club",
+          "url": "https://isc-club.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Jazzkantine",
+          "url": "https://www.jazzkantine.com/veranstaltungen",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "KAFF",
+          "url": "https://www.kaff.ch/events",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kammgarn",
+          "url": "https://kammgarn.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kaschemme",
+          "url": "https://www.kaschemme.ch/programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kaserne",
+          "url": "https://kaserne-basel.ch/de",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "KiFF",
+          "url": "https://www.kiff.ch/programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kraftfeld",
+          "url": "https://www.kraftfeld.ch/de/programm.html",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "KUFA",
+          "url": "https://kufa.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kulturfabrik Kofmehl",
+          "url": "https://kofmehl.net/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kulturfabrik Wetzikon",
+          "url": "https://kulti.ch/programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Kulturfestival St.Gallen",
+          "url": "https://www.kulturfestival.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "L'Usine",
+          "url": "https://www.usine.ch/agenda",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Lakelive Festival",
+          "url": "https://www.lakelive.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Le Chat Noir",
+          "url": "https://www.chatnoir.ch/live/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Le Romandie",
+          "url": "https://www.leromandie.ch/programmation",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Les Docks",
+          "url": "https://www.docks.ch/programme/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Mahogany Hall",
+          "url": "https://mahogany.ch/konzerte",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Moods",
+          "url": "https://www.moods.ch/en/program",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Musikfestwochen",
+          "url": "https://musikfestwochen.ch/programm/programm-a-z/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Neubad",
+          "url": "https://www.neubad.org/veranstaltungen",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Palace",
+          "url": "https://www.palace.sg/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Paléo Festival",
+          "url": "https://yeah.paleo.ch/fr/programme",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Parterre One",
+          "url": "https://www.parterre-one.ch/events/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Reitschule",
+          "url": "http://www.reitschule.ch/reitschule/?programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Roadhouse",
+          "url": "https://www.roadhouse.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Rock am Weier",
+          "url": "https://rockamweier.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Rocking Chair",
+          "url": "https://www.rocking-chair.ch/categorie/reggae-dub/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Royal",
+          "url": "https://www.royalbaden.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Salzhaus",
+          "url": "https://www.salzhaus.ch/de/programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Schall und Rauch",
+          "url": "https://www.schallundrauchbar.ch/index.php/musik-programm/oktober-2026-musik-kulturprogramm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Schüür",
+          "url": "https://www.schuur.ch/programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Sedel",
+          "url": "https://www.sedel.ch/club",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Sommercasino",
+          "url": "https://sommercasino.ch/Programm/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "TapTab Musikraum",
+          "url": "https://taptab.ch/programm",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Treppenhaus",
+          "url": "https://treppenhaus.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Volkshaus",
+          "url": "https://www.volkshaus.ch/veranstaltungen",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Werkstatt",
+          "url": "https://werkstattchur.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "X-TRA",
+          "url": "https://www.x-tra.ch/de/programm/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Z7",
+          "url": "https://z-7.ch/",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert schweiz Oktober 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0,
+          "error": "riddim.world list page opened but returned no content"
+        },
+        {
+          "name": "search: reggae konzert schweiz November 2026",
+          "status": "ok",
+          "found": 7,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert schweiz Dezember 2026",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "only lead bandsintown.com/c/wehr-germany reggae list -> HTTP 403"
+        },
+        {
+          "name": "search: dub soundsystem schweiz Oktober 2026",
+          "status": "ok",
+          "found": 1,
+          "kept": 0,
+          "error": "guidle.com Dubtopia 15 years (ZW) page -> HTTP 410 Gone"
+        },
+        {
+          "name": "search: dub soundsystem schweiz November 2026",
+          "status": "ok",
+          "found": 1,
+          "kept": 0
+        },
+        {
+          "name": "search: dub soundsystem schweiz Dezember 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: ska konzert schweiz Oktober 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: ska konzert schweiz November 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: ska konzert schweiz Dezember 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: dancehall party schweiz Oktober 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0,
+          "error": "zuri.net party agenda 17.10.2026 opened: no reggae/dancehall/dub/ska entries"
+        },
+        {
+          "name": "search: dancehall party schweiz November 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: dancehall party schweiz Dezember 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: concert reggae suisse romande octobre 2026",
+          "status": "ok",
+          "found": 0,
+          "kept": 0,
+          "error": "bandsintown.com/c/kreuzlingen-switzerland reggae -> HTTP 403; Cali P Coupole (known) surfaced via guidle snippet; Tribute to Bob Marley Carouge was 2026-10-09 (past)"
+        },
+        {
+          "name": "search: concert reggae suisse romande novembre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: concert reggae suisse romande décembre 2026",
+          "status": "ok",
+          "found": 0,
+          "kept": 0,
+          "error": "same hypebot Studen page as query 2 (already counted)"
+        },
+        {
+          "name": "search: concerto reggae ticino ottobre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: concerto reggae ticino novembre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: concerto reggae ticino dicembre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae festival schweiz 2026",
+          "status": "ok",
+          "found": 0,
+          "kept": 0,
+          "error": "frontstagefestivals.com -> ENOTFOUND; festt.io and reeds-festival.ch opened: no 2027 dates"
+        },
+        {
+          "name": "search: reggae konzert konstanz OR lörrach OR freiburg OR friedrichshafen OR lindau Oktober 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert konstanz OR lörrach OR freiburg OR friedrichshafen OR lindau November 2026",
+          "status": "ok",
+          "found": 2,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert konstanz OR lörrach OR freiburg OR friedrichshafen OR lindau Dezember 2026",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "bandsintown.com/en/c/ostwald-france reggae -> HTTP 403"
+        },
+        {
+          "name": "search: reggae concert annemasse OR thonon OR mulhouse OR annecy OR pontarlier octobre 2026",
+          "status": "ok",
+          "found": 4,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae concert annemasse OR thonon OR mulhouse OR annecy OR pontarlier novembre 2026",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "fnacspectacles.com Annecy reggae category -> timeout 60s"
+        },
+        {
+          "name": "search: reggae concert annemasse OR thonon OR mulhouse OR annecy OR pontarlier décembre 2026",
+          "status": "ok",
+          "found": 0,
+          "kept": 0,
+          "error": "same hypebot Annemasse page as octobre (already counted)"
+        },
+        {
+          "name": "search: concerto reggae como OR varese OR domodossola OR aosta ottobre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: concerto reggae como OR varese OR domodossola OR aosta novembre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: concerto reggae como OR varese OR domodossola OR aosta dicembre 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert bregenz OR dornbirn OR feldkirch OR vaduz Oktober 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert bregenz OR dornbirn OR feldkirch OR vaduz November 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "search: reggae konzert bregenz OR dornbirn OR feldkirch OR vaduz Dezember 2026",
+          "status": "empty",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "watchlist",
+          "status": "ok",
+          "found": 26,
+          "kept": 23
+        }
+      ]
+    },
+    {
+      "skill": "scrape-shows",
       "at": "2026-10-13T00:38:46+02:00",
       "added": 84,
       "updated": 0,
