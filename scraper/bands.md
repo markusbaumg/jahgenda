@@ -1,17 +1,18 @@
-# Bands: wer ist dabei?
+# Bands: who is in?
 
-Hier entscheiden wir von Hand, welche Acts der Scraper verfolgt. Diese Datei schlägt alles andere:
-steht eine Band unter **Dabei**, zählt sie – egal was `criteria.md` sagt. Steht sie unter **Nicht dabei**,
-werden auch ihre Konzerte nie in die Agenda aufgenommen.
+Here we decide by hand which acts the scraper follows. This file beats everything else: a band under
+**Included** counts no matter what `criteria.md` says; a band under **Excluded** never gets its shows into
+the agenda.
 
-`/harvest-bands` trägt neue Acts aus Festival-Line-ups unter **Vorschläge** ein (mit Genre und Grund).
-Wir verschieben die Zeile dann nach oben oder unten. Eine Zeile pro Act, Format: `- Name — Kommentar (optional)`.
+`/harvest-bands` adds new acts from festival line-ups under **Suggestions** (with genre and reason), and
+`/scrape-shows` adds acts it kept after researching them. We then move the line up or down.
+One line per act, format: `- Name — comment (optional)`.
 
-Einstellung: **Vorschläge automatisch berücksichtigen: ja**
-(`ja` = der Scraper sucht auch nach Konzerten von Vorschlägen, solange sie `criteria.md` erfüllen;
-`nein` = nur nach Bands unter «Dabei».)
+Setting: **Search suggestions automatically: yes**
+(`yes` = the scraper also searches for shows of acts under Suggestions, as long as they pass `criteria.md`;
+`no` = only bands under Included.)
 
-## Dabei
+## Included
 
 - Dub Inc
 - Alborosie
@@ -20,10 +21,10 @@ Einstellung: **Vorschläge automatisch berücksichtigen: ja**
 - Ska-P
 - Talco
 
-## Nicht dabei
+## Excluded
 
-- Seeed — zu Pop, nicht wirklich Reggae
-- Jan Delay — Funk/Hip-Hop
+- Seeed — too pop, not really reggae
+- Jan Delay — funk / hip-hop
 
-## Vorschläge
+## Suggestions
 

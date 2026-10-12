@@ -7,18 +7,18 @@ description: Research upcoming reggae, dub and ska shows in Switzerland (and jus
 
 You update the concert data of Jahgenda. The result of this run is one commit on `main` that changes
 `data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only), `data/runs.json` and — only
-new lines under **Vorschläge** — `scraper/bands.md`. Nothing else in the repo is touched.
+new lines under **Suggestions** — `scraper/bands.md`. Nothing else in the repo is touched.
 
 Work from the repository root. Today's date is what `date +%F` prints — use it, do not guess.
 
 ## 1. Load the inputs
 
-1. `scraper/criteria.md` — what counts as reggae, which places across the border count («Grenznah»), and
-   the **Genre-Slugs** list. **This file is authoritative.** Apply it literally.
-2. `scraper/bands.md` — the hand-curated band list. It overrides everything: an act under **Dabei** always
-   counts, an act under **Nicht dabei** never does. Read the setting line
-   `Vorschläge automatisch berücksichtigen: ja|nein` — it decides whether acts under **Vorschläge** are part
-   of the watchlist (step 2.4). Match names case-insensitively, ignoring punctuation and anything after ` — `.
+1. `scraper/criteria.md` — what counts as reggae, which places across the border count ("Nearby"), and
+   the **Genre slugs** list. **This file is authoritative.** Apply it literally.
+2. `scraper/bands.md` — the hand-curated band list. It overrides everything: an act under **Included**
+   always counts, an act under **Excluded** never does. Read the setting line
+   `Search suggestions automatically: yes|no` — it decides whether acts under **Suggestions** are part of
+   the watchlist (step 2.4). Match names case-insensitively, ignoring punctuation and anything after ` — `.
 3. `scraper/sources.json` — agenda pages, nearby regions and search queries (`festivals` is used by
    `/harvest-bands`, not here).
 4. `data/venues.json` — the venue database: city, canton, coordinates, programme `url`, `scrape` flag and a
@@ -49,8 +49,8 @@ take the next 6 months, not everything.
 3. **Web search** (`search_queries`): run each distinct query once per month for the current and the next
    two months. `{monat}` is the month name in the language of the query, `{jahr}` the year; a query without
    `{monat}` runs once. Open at most 3 promising results per query.
-4. **Band watchlist**: the acts under **Dabei** in `bands.md`, plus the acts under **Vorschläge** if the
-   setting says `ja`. Pick the 20 of them whose `tour_checked` in `data/artists.json` is oldest or missing.
+4. **Band watchlist**: the acts under **Included** in `bands.md`, plus the acts under **Suggestions** if the
+   setting says `yes`. Pick the 20 of them whose `tour_checked` in `data/artists.json` is oldest or missing.
    For each, search `"<name>" konzert schweiz <year> OR <year+1>` (French variant for Romandie acts) and open
    the act's tour-dates page if there is one. Keep Swiss and nearby-region dates. Afterwards set
    `tour_checked` to today for every act you checked, found or not; if the act has no cache entry yet,
@@ -71,29 +71,29 @@ Rules while collecting:
   venue name as the venue itself writes it; if a venue has several rooms that are listed in venues.json
   (e.g. Dachstock in the Reitschule), use the room's entry. Never invent coordinates for a specific street
   address — city centre is the honest fallback.
-- Across the border: only the places listed in `criteria.md` → «Grenznah» count. `canton` is then the
+- Across the border: only the places listed in `criteria.md` → "Nearby" count. `canton` is then the
   country code `D`, `F`, `I`, `A` or `FL`. Everything else outside Switzerland is dropped.
 
 ## 3. Decide what counts
 
 Decision order for each candidate:
 
-1. Its headliner (first/main act) is under **Nicht dabei** in `bands.md`, or it is the only act → drop.
-   A **Nicht dabei** act as one of several acts: keep the show, ignore that act for the genres.
-2. An act under **Dabei** → keep.
+1. Its headliner (first/main act) is under **Excluded** in `bands.md`, or it is the only act → drop.
+   An **Excluded** act as one of several acts: keep the show, ignore that act for the genres.
+2. An act under **Included** → keep.
 3. Otherwise decide with `criteria.md`. When unsure about an act, research it (step 4) and then decide.
    Drop candidates that stay doubtful — the criteria file says so.
 
-Apply rule 1 to existing shows as well: an existing show whose headliner is now under **Nicht dabei** is
+Apply rule 1 to existing shows as well: an existing show whose headliner is now under **Excluded** is
 removed (count it under `removed`).
 
 Acts you researched, decided to keep, and that are not in `bands.md` yet: append them under
-**Vorschläge** as `- Name — <genres>, gefunden via <venue or source>` so a human can confirm or reject them.
+**Suggestions** as `- Name — <genres>, found via <venue or source>` so a human can confirm or reject them.
 Do not add acts you dropped. Change nothing else in `bands.md`.
 
 ## 4. Genres per act (with cache)
 
-Each show gets `genres`: 1–3 slugs **from the Genre-Slugs list in `criteria.md`** — no other slugs, the
+Each show gets `genres`: 1–3 slugs **from the "Genre slugs" list in `criteria.md`** — no other slugs, the
 validator rejects them. Build the list from the acts:
 
 1. Split the title into acts (`Dub Inc + Support` → `Dub Inc`; ignore "Support", "DJs", "& Friends").
@@ -151,8 +151,8 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
 ```
 
 `dropped` lists every candidate you rejected after looking at it closely (not every unrelated event on a
-page). This log is public — it is shown on `log.html` — so write it in German, so a reader understands
-the decision.
+page). This log is public — it is shown on `log.html` — so write it in German (the site's language), so
+a reader understands the decision.
 
 ## 7. Validate, commit, push
 
@@ -176,4 +176,4 @@ End with a short summary (this is the routine's log):
 - counts: added / updated / removed / total
 - sources that failed to load
 - candidates you dropped as doubtful (title + why), so the criteria can be refined
-- new artists added to the cache and new lines under Vorschläge
+- new artists added to the cache and new lines under Suggestions

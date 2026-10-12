@@ -1,4 +1,4 @@
 {
-  "note": "Log der Scraper-Läufe, neueste zuerst, max. 60 Einträge. Wird auf log.html angezeigt.",
+  "note": "Log of scraper runs, newest first, max 60 entries. Shown on log.html.",
   "runs": []
 }

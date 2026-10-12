@@ -10,7 +10,7 @@ Usage: python3 scripts/validate_shows.py [--allow-past]
 Exit code 0 = valid, 1 = problems found (printed one per line).
 
 The list of allowed genre slugs is read from scraper/criteria.md, section
-"## Genre-Slugs" (every backticked word in that section).
+"## Genre slugs" (every backticked word in that section).
 """
 import json
 import re
@@ -62,12 +62,12 @@ def load(path):
 
 
 def allowed_genres():
-    """Slugs listed under '## Genre-Slugs' in scraper/criteria.md. Empty set = section missing."""
+    """Slugs listed under '## Genre slugs' in scraper/criteria.md. Empty set = section missing."""
     try:
         text = CRITERIA.read_text(encoding="utf-8")
     except FileNotFoundError:
         return set()
-    m = re.search(r"^## Genre-Slugs\s*$(.*?)(?=^## |\Z)", text, re.M | re.S)
+    m = re.search(r"^## Genre slugs\s*$(.*?)(?=^## |\Z)", text, re.M | re.S)
     if not m:
         return set()
     return {g for g in re.findall(r"`([a-z0-9-]+)`", m.group(1)) if SLUG_RE.match(g)}
@@ -81,7 +81,7 @@ def check_genres(where, genres, allowed):
         if not isinstance(g, str) or not SLUG_RE.match(g):
             errs.append(f"{where}: genre '{g}' must be a lowercase slug like 'roots' or 'lovers-rock'")
         elif allowed and g not in allowed:
-            errs.append(f"{where}: genre '{g}' is not in the Genre-Slugs list of scraper/criteria.md")
+            errs.append(f"{where}: genre '{g}' is not in the 'Genre slugs' list of scraper/criteria.md")
     if len(genres) > MAX_GENRES:
         errs.append(f"{where}: at most {MAX_GENRES} genres")
     if len(set(map(str, genres))) != len(genres):
@@ -301,7 +301,7 @@ def main(argv):
     allowed = allowed_genres()
     errs = []
     if not allowed:
-        errs.append("scraper/criteria.md: section '## Genre-Slugs' with backticked slugs is missing")
+        errs.append("scraper/criteria.md: section '## Genre slugs' with backticked slugs is missing")
 
     venues, e = load(VENUES)
     errs += e

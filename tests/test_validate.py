@@ -82,7 +82,7 @@ class ShowChecks(unittest.TestCase):
         self.assertTrue(any("both" in e for e in self.errs(shows_doc(s))))
 
     def test_genres_from_allowed_list_max_three_no_duplicates(self):
-        self.assertTrue(any("not in the Genre-Slugs" in e for e in self.errs(shows_doc(show(genres=["jazz"])))))
+        self.assertTrue(any("not in the 'Genre slugs'" in e for e in self.errs(shows_doc(show(genres=["jazz"])))))
         self.assertTrue(any("at most 3" in e for e in self.errs(shows_doc(show(genres=["reggae", "dub", "ska", "roots"])))))
         self.assertTrue(any("duplicate genre" in e for e in self.errs(shows_doc(show(genres=["dub", "dub"])))))
         self.assertTrue(any("must be a lowercase slug" in e for e in self.errs(shows_doc(show(genres=["Dub Techno"])))))
@@ -117,7 +117,7 @@ class ArtistChecks(unittest.TestCase):
     def test_genres_required_list_and_allowed(self):
         self.assertTrue(any("'genres' must be a list" in e for e in self.errs({"A": {"genres": "reggae"}})))
         self.assertTrue(any("'genres' must be a list" in e for e in self.errs({"A": {}})))
-        self.assertTrue(any("not in the Genre-Slugs" in e for e in self.errs({"A": {"genres": ["pop"]}})))
+        self.assertTrue(any("not in the 'Genre slugs'" in e for e in self.errs({"A": {"genres": ["pop"]}})))
 
     def test_unknown_field_and_bad_dates_and_source(self):
         self.assertTrue(any("unknown field" in e for e in self.errs({"A": {"genres": [], "tourchecked": "2026-01-01"}})))

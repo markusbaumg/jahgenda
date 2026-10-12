@@ -1,24 +1,24 @@
 {
-  "note": "Quellen des Scrapers. agendas / search_queries / nearby nutzt /scrape-shows bei jedem Lauf; die Venues (Programm-Seiten, Koordinaten) stehen in data/venues.json; festivals nutzt /harvest-bands, um Acts aus Line-ups als Vorschläge in scraper/bands.md einzutragen.",
+  "note": "Scraper sources. agendas / search_queries / nearby are used by /scrape-shows on every run; venues (programme pages, coordinates) live in data/venues.json; festivals are used by /harvest-bands to add acts from line-ups as suggestions to scraper/bands.md.",
   "agendas": [
     {
       "name": "Skalender",
       "url": "https://skalender.net/",
-      "hint": "Ska/Reggae/Dub/Punk-Agenda für die Schweiz, Community-Einträge. Beste Einzelquelle, aber gemischt mit Punk/Rock. On the homepage, events are inside <ul id=\"dateList\">: month headers <li class=\"box monthYear\" id=\"Okt2026\"> (German month abbreviations Okt, Nov, Dez, Jan, Feb, Mrz, Mai, plus year) followed by <li class=\"box postEvent cat-item-3 cat-item-N ...\"> items, each with <a class=\"box Event\" href=\"https://skalender.net/events/<id>/\">, <span class=\"theDay\">DD</span> and <p class=\"theTitle\"><span>City</span><br />Acts</p>. Acts are joined with ' & ' (sometimes 'feat.' or a tour name in guillemets); city names are sometimes lowercase ('zürich') and the same show is occasionally listed twice (e.g. Dub Pistols 21 Oct, Open Season 19 Dec). Genres are the cat-item classes: 4=Ska, 5=Punk, 6=Reggae, 7=Rock, 8=Metal, 9=Latin, 23=Dub, 25=Folk (3=All, ignore); on detail pages the same appear as event-style-ska/reggae/dub classes. Detail pages have <time itemprop=\"startDate\" datetime=\"2026-10-21T19:00\">Mittwoch 21. Oktober 2026</time>, time range '19:00 - 22:30', price <span itemprop=\"price\">43.60 CHF</span> followed by the ticket link (<a target=\"_blank\" href=\"...\">Tickets kaufen</a>, typically petzi.ch, ticketmaster.ch, eventfrog), an 'Event Webseite' link to the venue/organizer page, venue name linking to /venues/<slug>/ and street address + city (Google Maps link), and artist links to /artists/<slug>/ (artist pages list Herkunft and Stile). Text is German."
+      "hint": "Ska/reggae/dub/punk agenda for Switzerland, community entries. Best single source, but mixed with punk/rock. On the homepage, events are inside <ul id=\"dateList\">: month headers <li class=\"box monthYear\" id=\"Okt2026\"> (German month abbreviations Okt, Nov, Dez, Jan, Feb, Mrz, Mai, plus year) followed by <li class=\"box postEvent cat-item-3 cat-item-N ...\"> items, each with <a class=\"box Event\" href=\"https://skalender.net/events/<id>/\">, <span class=\"theDay\">DD</span> and <p class=\"theTitle\"><span>City</span><br />Acts</p>. Acts are joined with ' & ' (sometimes 'feat.' or a tour name in guillemets); city names are sometimes lowercase ('zürich') and the same show is occasionally listed twice (e.g. Dub Pistols 21 Oct, Open Season 19 Dec). Genres are the cat-item classes: 4=Ska, 5=Punk, 6=Reggae, 7=Rock, 8=Metal, 9=Latin, 23=Dub, 25=Folk (3=All, ignore); on detail pages the same appear as event-style-ska/reggae/dub classes. Detail pages have <time itemprop=\"startDate\" datetime=\"2026-10-21T19:00\">Mittwoch 21. Oktober 2026</time>, time range '19:00 - 22:30', price <span itemprop=\"price\">43.60 CHF</span> followed by the ticket link (<a target=\"_blank\" href=\"...\">Tickets kaufen</a>, typically petzi.ch, ticketmaster.ch, eventfrog), an 'Event Webseite' link to the venue/organizer page, venue name linking to /venues/<slug>/ and street address + city (Google Maps link), and artist links to /artists/<slug>/ (artist pages list Herkunft and Stile). Text is German."
     },
     {
       "name": "Petzi",
       "url": "https://www.petzi.ch/en/search/?q=reggae",
-      "hint": "Ticketing der Schweizer Clubs. Keine Genre-Filter, nur Volltextsuche: auch ?q=ska, ?q=dub, ?q=dancehall, ?q=sound%20system abfragen; Treffer sind nach Relevanz sortiert und verrauscht, jede Show auf der Detailseite prüfen. Event tiles are <a href=\"/en/events/{id}-{venue-slug}-{title-slug}/\" class=\"masonry-grid__item ... tile\"> with <time class=\"tile__date\" datetime=\"YYYY-MM-DD\">DD.MM.YYYY</time>, <h2 class=\"tile__title\">Title</h2> and <div class=\"tile__place\">Venue</div>; the <a title=\"More info & get tickets / Title / Venue\"> attribute holds the untruncated title and venue (tile titles are cut with \"...\"). Titles are the organiser's free text: acts separated by \"+\", \"//\", \"&\", \"|\", \"w/\", \"Support:\", with country codes in parentheses or brackets, e.g. \"RAKOON [FR] + TUZI SOUND SYSTEM [FR]\". The detail page has <h1> title, a <h3> with the long English date (\"Friday 23 October 2026\"), <h4>Venue – City</h4>, \"Doors open at: HH:MM\" / \"Event starts at: HH:MM\", a French/German/English description in <p class=\"text_block\">, an \"Organized by\" link (/en/organiser/{n}/), and genre tags in <section class=\"tag-list\"> as <a href=\"/en/search/?q=reggae\" class=\"tag\">Reggae</a> (tags like Concert, Club, Reggae, Hip-Hop; many organisers leave it empty, so also scan the description for reggae/ska/dub/dancehall/sound system). Ticket link is \"/en/events/{id}-{slug}/tickets/\" with \"Price starting at CHF xx.xx\" when Petzi sells tickets; otherwise only a \"See the official website\" link; the Google-calendar link and .ics file contain the full venue street address and start/end times."
+      "hint": "Ticketing of the Swiss clubs. No genre filter, only full-text search: also query ?q=ska, ?q=dub, ?q=dancehall, ?q=sound%20system; hits are relevance-ranked and noisy, verify each show on its detail page. Event tiles are <a href=\"/en/events/{id}-{venue-slug}-{title-slug}/\" class=\"masonry-grid__item ... tile\"> with <time class=\"tile__date\" datetime=\"YYYY-MM-DD\">DD.MM.YYYY</time>, <h2 class=\"tile__title\">Title</h2> and <div class=\"tile__place\">Venue</div>; the <a title=\"More info & get tickets / Title / Venue\"> attribute holds the untruncated title and venue (tile titles are cut with \"...\"). Titles are the organiser's free text: acts separated by \"+\", \"//\", \"&\", \"|\", \"w/\", \"Support:\", with country codes in parentheses or brackets, e.g. \"RAKOON [FR] + TUZI SOUND SYSTEM [FR]\". The detail page has <h1> title, a <h3> with the long English date (\"Friday 23 October 2026\"), <h4>Venue – City</h4>, \"Doors open at: HH:MM\" / \"Event starts at: HH:MM\", a French/German/English description in <p class=\"text_block\">, an \"Organized by\" link (/en/organiser/{n}/), and genre tags in <section class=\"tag-list\"> as <a href=\"/en/search/?q=reggae\" class=\"tag\">Reggae</a> (tags like Concert, Club, Reggae, Hip-Hop; many organisers leave it empty, so also scan the description for reggae/ska/dub/dancehall/sound system). Ticket link is \"/en/events/{id}-{slug}/tickets/\" with \"Price starting at CHF xx.xx\" when Petzi sells tickets; otherwise only a \"See the official website\" link; the Google-calendar link and .ics file contain the full venue street address and start/end times."
     },
     {
       "name": "Eventfrog – Reggae & Ska",
       "url": "https://eventfrog.ch/de/events/ch/reggae-ska-konzerte.html",
-      "hint": "Grösster Schweizer Eventkalender, eigene Kategorie «Reggae & Ska Konzerte in der Schweiz». Dazu die Schwesterkategorie https://eventfrog.ch/de/events/ch/dancehall-partys.html . Listet auch kleine Clubs und Partys."
+      "hint": "Largest Swiss event calendar with its own category 'Reggae & Ska Konzerte in der Schweiz'. Also the sister category https://eventfrog.ch/de/events/ch/dancehall-partys.html . Lists small clubs and parties too."
     }
   ],
   "nearby": {
-    "note": "Grenznahe Orte in den Nachbarländern, die mitgesucht werden (siehe criteria.md → Grenznah). canton = Länderkürzel D, F, I, A, FL.",
+    "note": "Nearby places in the neighbouring countries that are searched as well (see criteria.md → Nearby). canton = country code D, F, I, A, FL.",
     "search_queries": [
       "reggae konzert konstanz OR lörrach OR freiburg OR friedrichshafen OR lindau {monat} {jahr}",
       "reggae concert annemasse OR thonon OR mulhouse OR annecy OR pontarlier {monat} {jahr}",
@@ -32,39 +32,39 @@
       "where": "Köln (DE)",
       "url": "https://summerjam.de/en/",
       "wikipedia": "https://de.wikipedia.org/wiki/Summerjam",
-      "hint": "Line-ups pro Jahr: https://summerjam.de/en/artists-2027/ (Jahr austauschen)."
+      "hint": "Line-ups per year: https://summerjam.de/en/artists-2027/ (swap the year)."
     },
     {
       "name": "Reeds Festival",
       "where": "Pfäffikon ZH",
       "url": "https://www.reeds-festival.ch/",
       "wikipedia": "",
-      "hint": "Grösstes Reggae-Festival der Schweiz. Line-up: https://www.reeds-festival.ch/line-up ; ältere Jahre via /gallery-2025 etc."
+      "hint": "Largest reggae festival in Switzerland. Line-up: https://www.reeds-festival.ch/line-up ; earlier years via /gallery-2025 etc."
     },
     {
       "name": "Lakesplash",
       "where": "Twann BE",
       "url": "https://lakesplash.ch/",
       "wikipedia": "",
-      "hint": "Ältestes Reggae-Openair der Schweiz. Acts: https://lakesplash.ch/portfolio_category/band/ ; frühere Jahre: https://lakesplash.ch/history/"
+      "hint": "Oldest reggae open air in Switzerland. Acts: https://lakesplash.ch/portfolio_category/band/ ; earlier years: https://lakesplash.ch/history/"
     },
     {
       "name": "Plein-les-Watts",
       "where": "Lancy GE",
       "url": "https://www.pleinleswatts.ch/",
       "wikipedia": "",
-      "hint": "Reggae-Festival von Genf, Juli."
+      "hint": "Geneva's reggae festival, July."
     },
     {
       "name": "Afro-Pfingsten",
       "where": "Winterthur ZH",
       "url": "https://www.afro-pfingsten.ch/",
       "wikipedia": "",
-      "hint": "Bucht jedes Jahr Reggae/Dub (z. B. Mad Professor)."
+      "hint": "Books reggae/dub every year (e.g. Mad Professor)."
     },
     {
       "name": "Chiemsee Reggae Summer",
-      "where": "Übersee am Chiemsee (DE), 2026, nächste 2028",
+      "where": "Übersee am Chiemsee (DE), 2026, next 2028",
       "url": "https://www.chiemsee-reggae.de/",
       "wikipedia": "https://de.wikipedia.org/wiki/Chiemsee_Reggae_Summer",
       "hint": "Line-up: https://www.chiemsee-reggae.de/programm.html"
@@ -74,35 +74,35 @@
       "where": "Benicàssim (ES)",
       "url": "https://rototomsunsplash.com/en/",
       "wikipedia": "https://en.wikipedia.org/wiki/Rototom_Sunsplash",
-      "hint": "Acts aller Jahre: https://rototomsunsplash.com/en/rototom/our-story/music-archive/"
+      "hint": "Acts of all years: https://rototomsunsplash.com/en/rototom/our-story/music-archive/"
     },
     {
       "name": "Reggae Jam",
       "where": "Bersenbrück (DE)",
       "url": "https://reggaejam.de/de/",
       "wikipedia": "https://de.wikipedia.org/wiki/Reggae_Jam",
-      "hint": "Line-up: https://reggaejam.de/de/artists/ (nur aktuelle Ausgabe; Wikipedia für ältere)."
+      "hint": "Line-up: https://reggaejam.de/de/artists/ (current edition only; Wikipedia for older ones)."
     },
     {
       "name": "Ruhr Reggae Summer",
       "where": "Mülheim an der Ruhr (DE)",
       "url": "https://www.ruhr-reggae-summer.de/mhx/",
       "wikipedia": "https://de.wikipedia.org/wiki/Ruhr_Reggae_Summer",
-      "hint": "Running Order: https://www.ruhr-reggae-summer.de/mhx/festivalposter-running-order/"
+      "hint": "Running order: https://www.ruhr-reggae-summer.de/mhx/festivalposter-running-order/"
     },
     {
       "name": "No Logo Festival",
       "where": "Pont-sur-l'Ognon (FR)",
       "url": "https://www.nologofestival.fr/",
       "wikipedia": "",
-      "hint": "Grösstes Reggae-Festival Frankreichs, 1 h von Basel."
+      "hint": "Largest reggae festival in France, 1 h from Basel."
     },
     {
       "name": "Mighty Sounds",
       "where": "Tábor (CZ), Ska/Punk",
       "url": "https://www.mightysounds.cz/en/",
       "wikipedia": "https://en.wikipedia.org/wiki/Mighty_Sounds",
-      "hint": "Nur Ska/Reggae-Acts: https://www.mightysounds.cz/en/rocnik/2027?genre=cat-ska (Jahr austauschen)."
+      "hint": "Ska/reggae acts only: https://www.mightysounds.cz/en/rocnik/2027?genre=cat-ska (swap the year)."
     }
   ],
   "search_queries": [

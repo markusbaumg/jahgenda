@@ -1,43 +1,47 @@
-# Was zählt als Reggae?
+# What counts as reggae?
 
-Diese Datei ist der Teil des Scraper-Prompts, der entscheidet, welche Konzerte in die Agenda kommen.
-Sie wird vom Scraper bei jedem Lauf gelesen. Einfach hier anpassen, commiten, fertig.
+This file is the part of the scraper prompt that decides which shows make it into the agenda.
+The scraper reads it on every run. Edit it, commit, done — no code involved.
 
-## Rein kommt
+## Included
 
-Ein Konzert, eine Party oder eine Session, bei der **mindestens ein Act** klar in einem dieser Genres zuhause ist:
+A concert, party or session where **at least one act** clearly belongs to one of these genres:
 
-- Reggae (Roots, Modern Roots, Lovers Rock, Reggae Revival)
-- Dub, Dub Techno nur wenn klar aus dem Reggae-Sound-System-Umfeld
-- Ska, Rocksteady, Early Reggae, 2-Tone
-- Ska-Punk / Third-Wave-Ska, solange Ska den Sound klar prägt (Bläser, Offbeat) – z. B. im Stil von Ska-P, The Mighty Mighty Bosstones, Talco
+- Reggae (roots, modern roots, lovers rock, reggae revival)
+- Dub — dub techno only when it clearly comes from the reggae sound-system scene
+- Ska, rocksteady, early reggae, 2-tone
+- Ska-punk / third-wave ska, as long as ska clearly shapes the sound (horns, offbeat) — think Ska-P,
+  The Mighty Mighty Bosstones, Talco
 - Dancehall
-- Soundsystem-Nächte und Soundclashes
+- Sound-system nights and sound clashes
 - Nyabinghi
 
-Auch rein kommen:
+Also included:
 
-- Reggae-Festivals und Reggae-Bühnen an grösseren Festivals (als ein Eintrag pro Tag)
-- DJ-Nächte, wenn Reggae / Dancehall / Ska der Hauptfokus ist (z. B. «Roots Night», «Selecta Night»)
-- Tribute-Abende zu Reggae-Künstlern
+- Reggae festivals and reggae stages at bigger festivals (one entry per day)
+- DJ nights where reggae / dancehall / ska is the main focus (e.g. "Roots Night", "Selecta Night")
+- Tribute nights to reggae artists
 
-## Bleibt draussen
+## Excluded
 
-- Mainstream-Clubnächte, bei denen Dancehall nur ein Genre unter vielen ist («Hip-Hop, R&B, Dancehall, Afrobeats»)
-- Afrobeats, Amapiano, Reggaeton, Latin ohne klaren Reggae-Bezug
-- Punk-, Hardcore- oder Rockbands, bei denen Ska nur ein gelegentliches Stilmittel ist (ein, zwei Songs mit Bläsern machen noch keine Ska-Band)
-- Workshops, Vorträge, Filme ohne Live-Musik oder DJ
-- Veranstaltungen ausserhalb der Schweiz – ausser an den grenznahen Orten unten
+- Mainstream club nights where dancehall is just one genre among many ("hip-hop, R&B, dancehall, afrobeats")
+- Afrobeats, amapiano, reggaeton, latin without a clear reggae connection
+- Punk, hardcore or rock bands that use ska only occasionally (one or two songs with horns do not make
+  a ska band)
+- Workshops, talks, films without live music or a DJ
+- Events outside Switzerland — except in the nearby places listed below
 
-## Im Zweifel
+## When in doubt
 
-- Künstler mit einem bekannten Reggae-Katalog zählen, auch wenn das aktuelle Album breiter ist.
-- Bei unbekannten Acts: kurz nachschlagen (Bandcamp, Website, Veranstaltertext). Steht dort Reggae, Dub, Ska oder Dancehall als Hauptgenre → rein. Sonst → draussen.
-- Lieber einen grenzwertigen Eintrag weglassen als drei falsche aufnehmen.
+- Artists with a well-known reggae catalogue count, even if the current album is broader.
+- Unknown acts: look them up briefly (Bandcamp, website, promoter text). If reggae, dub, ska or
+  dancehall is stated as the main genre → in. Otherwise → out.
+- Better to leave out one borderline entry than to include three wrong ones.
 
-## Grenznah
+## Nearby
 
-Diese Orte in den Nachbarländern kommen auch rein (Länderkürzel als «Kanton»: `D`, `F`, `I`, `A`, `FL`):
+These places in the neighbouring countries are included too (country code instead of a canton:
+`D`, `F`, `I`, `A`, `FL`):
 
 - **D:** Konstanz, Singen, Friedrichshafen, Lindau, Lörrach, Weil am Rhein, Freiburg im Breisgau
 - **F:** Annemasse, Thonon-les-Bains, Évian, Annecy, Saint-Louis, Mulhouse, Pontarlier
@@ -45,19 +49,19 @@ Diese Orte in den Nachbarländern kommen auch rein (Länderkürzel als «Kanton�
 - **A:** Bregenz, Dornbirn, Feldkirch
 - **FL:** Vaduz, Schaan
 
-Alles andere ausserhalb der Schweiz bleibt draussen.
+Everything else outside Switzerland stays out.
 
-## Genre-Slugs
+## Genre slugs
 
-Nur diese Schlagwörter sind für `genres` erlaubt (der Validator prüft das). Links der Slug, rechts, was darauf abgebildet wird:
+Only these tags are allowed in `genres` (the validator checks this). Left the slug, right what maps to it:
 
-- `reggae` – Reggae allgemein, Modern Roots, Reggae Revival, Lovers Rock, Mundart-Reggae
-- `roots` – Roots Reggae, Nyabinghi-geprägter Roots, Rastafari-Reggae
-- `dub` – Dub, Dub Techno aus dem Soundsystem-Umfeld, Steppers
-- `soundsystem` – Soundsystem-Sessions, Soundclashes, Selecta-Nächte
-- `dancehall` – Dancehall, Ragga, Bashment
-- `ska` – Ska, 2-Tone, Third-Wave-Ska, Early Reggae
-- `ska-punk` – Ska-Punk, Ska-Core
-- `rocksteady` – Rocksteady
-- `nyabinghi` – Nyabinghi-Trommeln
-- `festival` – Festival oder Festivaltag mit mehreren Acts
+- `reggae` – reggae in general, modern roots, reggae revival, lovers rock, Swiss-German reggae
+- `roots` – roots reggae, Nyabinghi-flavoured roots, Rastafari reggae
+- `dub` – dub, dub techno from the sound-system scene, steppers
+- `soundsystem` – sound-system sessions, sound clashes, selecta nights
+- `dancehall` – dancehall, ragga, bashment
+- `ska` – ska, 2-tone, third-wave ska, early reggae
+- `ska-punk` – ska-punk, ska-core
+- `rocksteady` – rocksteady
+- `nyabinghi` – Nyabinghi drumming
+- `festival` – festival or festival day with several acts

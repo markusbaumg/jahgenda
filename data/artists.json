@@ -1,4 +1,4 @@
 {
-  "note": "Genre-Cache pro Act (Wikipedia / Band-Website), plus tour_checked-Buchhaltung für die Watchlist-Suche. Welche Bands gesucht werden, steht NICHT hier, sondern in scraper/bands.md. Handkorrekturen: \"source\": \"manual\" setzen, dann fasst der Scraper den Eintrag nie mehr an.",
+  "note": "Genre cache per act (Wikipedia / band website) plus tour_checked bookkeeping for the watchlist search. Which bands are searched is NOT defined here but in scraper/bands.md. Hand corrections: set \"source\": \"manual\" and the scraper will never touch that entry again.",
   "artists": {}
 }

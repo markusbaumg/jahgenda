@@ -1,5 +1,5 @@
 {
-  "note": "Venue-Datenbank: Koordinaten, Kanton und Programm-URL pro Venue. scrape=true: der Scraper liest das Programm dieser Venue bei jedem Lauf. Jede Show in shows.json muss hier eine Venue haben – die Koordinaten der Show kommen von hier. Neue Venues trägt der Scraper mit Koordinaten (Google Maps / OpenStreetMap) ein; wenn die Adresse unbekannt ist, reicht die Stadtmitte.",
+  "note": "Venue database: coordinates, canton and programme URL per venue. scrape=true: the scraper reads this venue's programme on every run. Every show in shows.json must have its venue here — the show's coordinates come from here. The scraper adds new venues with coordinates (Google Maps / OpenStreetMap); if the address is unknown, the city centre is fine.",
   "venues": {
     "Bierhübeli": {
       "city": "Bern",
@@ -8,7 +8,7 @@
       "lon": 7.4378,
       "url": "https://bierhuebeli.ch/",
       "scrape": true,
-      "hint": "Genre-Tags im Programm; Tourneeacts (z. B. Dub Inc). Abgesagte Shows sind markiert – nicht aufnehmen."
+      "hint": "Genre tags in the programme; touring acts (e.g. Dub Inc). Cancelled shows are marked — do not include them."
     },
     "Bogen F": {
       "city": "Zürich",
@@ -26,7 +26,7 @@
       "lon": 7.6239,
       "url": "https://mokka.ch/",
       "scrape": true,
-      "hint": "Regelmässig Reggae/Dub/Soundsystem-Sessions."
+      "hint": "Regular reggae/dub/sound-system sessions."
     },
     "Cave Club": {
       "city": "Zürich",
@@ -53,7 +53,7 @@
       "lon": 7.0544,
       "url": "https://www.ebull.ch/fr",
       "scrape": true,
-      "hint": "Ska-Fest, Soundsystem-Reihen (Kalabray)."
+      "hint": "Ska fest, sound-system series (Kalabray)."
     },
     "Exil": {
       "city": "Zürich",
@@ -80,7 +80,7 @@
       "lon": 8.7077,
       "url": "https://www.gaswerk.ch/",
       "scrape": true,
-      "hint": "Genre-Tags; regelmässig Ska-Punk."
+      "hint": "Genre tags; regular ska-punk."
     },
     "Grabenhalle": {
       "city": "St. Gallen",
@@ -98,7 +98,7 @@
       "lon": 7.4399,
       "url": "https://isc-club.ch/",
       "scrape": true,
-      "hint": "Dancehall-Nächte (Soul Rebel Sound)."
+      "hint": "Dancehall nights (Soul Rebel Sound)."
     },
     "Kammgarn": {
       "city": "Schaffhausen",
@@ -107,7 +107,7 @@
       "lon": 8.6361,
       "url": "https://kammgarn.ch/",
       "scrape": true,
-      "hint": "Genre-Tags im Programm; bucht regelmässig Reggae/Ska."
+      "hint": "Genre tags in the programme; books reggae/ska regularly."
     },
     "Kaserne": {
       "city": "Basel",
@@ -134,7 +134,7 @@
       "lon": 8.7181,
       "url": "https://www.kraftfeld.ch/de/programm.html",
       "scrape": true,
-      "hint": "Heimspiel von Subsanity Soundsystem (Reggae Dub & Steppers)."
+      "hint": "Home turf of Subsanity Soundsystem (reggae dub & steppers)."
     },
     "KUFA": {
       "city": "Lyss",
@@ -152,7 +152,7 @@
       "lon": 7.5282,
       "url": "https://kofmehl.net/",
       "scrape": true,
-      "hint": "Keine Genre-Tags, nach Act-Namen entscheiden."
+      "hint": "No genre tags; decide by act names."
     },
     "L'Usine": {
       "city": "Genève",
@@ -170,7 +170,7 @@
       "lon": 6.1424,
       "url": "https://www.chatnoir.ch/live/",
       "scrape": true,
-      "hint": "Genre-Tags; viele Dancehall-DJ-Nächte."
+      "hint": "Genre tags; many dancehall DJ nights."
     },
     "Le Romandie": {
       "city": "Lausanne",
@@ -188,7 +188,7 @@
       "lon": 8.5183,
       "url": "https://www.moods.ch/en/program",
       "scrape": true,
-      "hint": "Monatliche «K.O.S Crew Dancehall Mood» und Reggae/Dancehall-Partys."
+      "hint": "Monthly \"K.O.S Crew Dancehall Mood\" and reggae/dancehall parties."
     },
     "Parterre One": {
       "city": "Basel",
@@ -197,7 +197,7 @@
       "lon": 7.5912,
       "url": "https://www.parterre-one.ch/kalender/",
       "scrape": true,
-      "hint": "Monatliche Reggae/Dancehall-Soundsystem-Nacht; Kalender mit «mehr laden»."
+      "hint": "Monthly reggae/dancehall sound-system night; calendar with \"load more\"."
     },
     "Reitschule": {
       "city": "Bern",
@@ -242,7 +242,7 @@
       "lon": 7.4385,
       "url": "https://www.souslepont-roessli.ch/",
       "scrape": false,
-      "hint": "Raum der Reitschule Bern."
+      "hint": "Room of the Reitschule Bern."
     },
     "Salzhaus": {
       "city": "Winterthur",
@@ -269,7 +269,7 @@
       "lon": 8.299,
       "url": "https://www.sedel.ch/club",
       "scrape": true,
-      "hint": "Keine Genre-Tags, nach Act-Namen entscheiden."
+      "hint": "No genre tags; decide by act names."
     },
     "Sommercasino": {
       "city": "Basel",
@@ -278,7 +278,7 @@
       "lon": 7.5986,
       "url": "https://sommercasino.ch/Programm/",
       "scrape": true,
-      "hint": "Soundsystem-Reihe «Wake the Town»."
+      "hint": "Sound-system series \"Wake the Town\"."
     },
     "Werkstatt": {
       "city": "Chur",

@@ -7,7 +7,7 @@ description: Collect acts from the line-ups of the big reggae and ska festivals 
 
 Goal: a list of acts that tour Europe and are likely to play Switzerland, so `/scrape-shows` can search for
 them by name. The result of this run is a commit on `main` that changes `data/artists.json` (genres) and
-`scraper/bands.md` (new names under **Vorschläge**), plus a GitHub issue listing the new suggestions.
+`scraper/bands.md` (new names under **Suggestions**), plus a GitHub issue listing the new suggestions.
 
 Work from the repository root. Today's date is what `date +%F` prints.
 
@@ -16,8 +16,8 @@ Work from the repository root. Today's date is what `date +%F` prints.
 1. `scraper/criteria.md` — what counts. Apply it to every act; festival line-ups also contain hip-hop,
    afrobeats and pop acts that stay out.
 2. `scraper/sources.json` → `festivals`: name, website, Wikipedia page.
-3. `scraper/bands.md` — the hand-curated list. Acts already under **Dabei**, **Nicht dabei** or
-   **Vorschläge** are known; do not suggest them again. Match case-insensitively, ignoring text after ` — `.
+3. `scraper/bands.md` — the hand-curated list. Acts already under **Included**, **Excluded** or
+   **Suggestions** are known; do not suggest them again. Match case-insensitively, ignoring text after ` — `.
 4. `data/artists.json` — the existing genre data. Never remove anything; only add or enrich.
 
 ## 2. Collect line-ups
@@ -37,7 +37,7 @@ For each new act (not yet in `data/artists.json`, compare case-insensitively):
 
 1. Apply `criteria.md`. Acts that stay out are simply not added — do not add them with empty genres.
 2. Find its genres: Wikipedia page (any language) first, then the act's website or Bandcamp. Map them with
-   the **Genre-Slugs** table in `criteria.md` — only those slugs are allowed — max 3, most specific first.
+   the **Genre slugs** table in `criteria.md` — only those slugs are allowed — max 3, most specific first.
    Use the Wikipedia title / band-site spelling as the key, without trailing punctuation or guest suffixes
    (`feat. …`, `& …`); compare existing keys case-insensitively ignoring punctuation (`DUB INC.` = `Dub Inc`).
 3. Add the entry:
@@ -47,7 +47,7 @@ For each new act (not yet in `data/artists.json`, compare case-insensitively):
    Research budget: at most 60 new acts per run. If there are more, take the ones that appear at the most
    festivals first and stop; the next run continues.
 
-4. Append the act to `scraper/bands.md` under **Vorschläge**, one line:
+4. Append the act to `scraper/bands.md` under **Suggestions**, one line:
    `- Alborosie — reggae, roots · Summerjam 2026, Rototom 2025`
    Keep the rest of the file byte-for-byte unchanged; the humans own it.
 
@@ -79,7 +79,7 @@ Then, if you added at least one suggestion, open a GitHub issue so the humans ge
 gh issue create --title "Band-Vorschläge <today>: <n> neue Acts" --label bands \
   --body "<list: one line per act with genres and festivals>
 
-Bitte in scraper/bands.md nach **Dabei** oder **Nicht dabei** verschieben."
+Bitte in scraper/bands.md nach **Included** oder **Excluded** verschieben."
 ```
 
 If `gh` is unavailable or not authenticated, skip the issue and say so in the report.
