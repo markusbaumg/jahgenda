@@ -143,14 +143,12 @@
     homeCity = near && near.km < 60 ? near.p.city : "";
   }
   // SBB timetable from the user's town to the show's town, arriving an hour before the show
-  // (20:00 when no time is known).
+  // (20:00 when no time is known). Same contract as lib.js sbbUrl (pinned by tests/lib.test.mjs).
   function sbbUrl(s) {
     if (!homeCity || homeCity === s.city) return "";
     const [h, m] = (s.time || "20:00").split(":").map(Number);
-    const arrive = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h, m);
-    arrive.setMinutes(arrive.getMinutes() - 60);
-    const two = (n) => String(n).padStart(2, "0");
-    const time = `${two(arrive.getHours())}:${two(arrive.getMinutes())}`;
+    const arrive = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h, m - 60);
+    const time = `${pad2(arrive.getHours())}:${pad2(arrive.getMinutes())}`;
     return `https://www.sbb.ch/de?von=${encodeURIComponent(homeCity)}&nach=${encodeURIComponent(s.city)}&date=${s.date}&time=${encodeURIComponent(time)}&moment=ARRIVAL`;
   }
   function sbbLink(s) {
