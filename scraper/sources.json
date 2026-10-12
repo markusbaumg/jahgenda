@@ -1,0 +1,185 @@
+{
+  "note": "Quellen des Scrapers. agendas/venues/search_queries nutzt /scrape-shows bei jedem Lauf. festivals nutzt /harvest-bands, um aus Line-ups eine Band-Liste (data/artists.json) aufzubauen, nach der /scrape-shows gezielt Schweizer Daten sucht.",
+  "agendas": [
+    {
+      "name": "Skalander",
+      "url": "https://www.skalander.ch/",
+      "hint": "Ska/Reggae-Agenda für die Schweiz. Beste Einzelquelle."
+    },
+    {
+      "name": "Petzi",
+      "url": "https://www.petzi.ch/",
+      "hint": "Ticketing für Clubs und Festivals der Schweiz, nach Genre filtern."
+    }
+  ],
+  "venues": [
+    {
+      "name": "Schüür",
+      "city": "Luzern",
+      "canton": "LU",
+      "url": "https://www.schuur.ch/",
+      "lat": 47.0466,
+      "lon": 8.3112
+    },
+    {
+      "name": "Dachstock",
+      "city": "Bern",
+      "canton": "BE",
+      "url": "https://www.dachstock.ch/",
+      "lat": 46.9496,
+      "lon": 7.4385
+    },
+    {
+      "name": "Reitschule",
+      "city": "Bern",
+      "canton": "BE",
+      "url": "https://www.reitschule.ch/",
+      "lat": 46.9496,
+      "lon": 7.4385
+    },
+    {
+      "name": "Kaserne",
+      "city": "Basel",
+      "canton": "BS",
+      "url": "https://www.kaserne-basel.ch/",
+      "lat": 47.5627,
+      "lon": 7.5925
+    },
+    {
+      "name": "Bogen F",
+      "city": "Zürich",
+      "canton": "ZH",
+      "url": "https://www.bogenf.ch/",
+      "lat": 47.3866,
+      "lon": 8.5215
+    },
+    {
+      "name": "Exil",
+      "city": "Zürich",
+      "canton": "ZH",
+      "url": "https://www.exil.cl/",
+      "lat": 47.3889,
+      "lon": 8.5195
+    },
+    {
+      "name": "Grabenhalle",
+      "city": "St. Gallen",
+      "canton": "SG",
+      "url": "https://www.grabenhalle.ch/",
+      "lat": 47.4262,
+      "lon": 9.3772
+    },
+    {
+      "name": "Salzhaus",
+      "city": "Winterthur",
+      "canton": "ZH",
+      "url": "https://www.salzhaus.ch/",
+      "lat": 47.4985,
+      "lon": 8.7232
+    },
+    {
+      "name": "L'Usine",
+      "city": "Genève",
+      "canton": "GE",
+      "url": "https://www.usine.ch/",
+      "lat": 46.2058,
+      "lon": 6.1404
+    },
+    {
+      "name": "Fri-Son",
+      "city": "Fribourg",
+      "canton": "FR",
+      "url": "https://www.fri-son.ch/",
+      "lat": 46.7978,
+      "lon": 7.1418
+    },
+    {
+      "name": "Le Romandie",
+      "city": "Lausanne",
+      "canton": "VD",
+      "url": "https://www.leromandie.ch/",
+      "lat": 46.5207,
+      "lon": 6.6288
+    },
+    {
+      "name": "Werkstatt",
+      "city": "Chur",
+      "canton": "GR",
+      "url": "https://www.werkstattchur.ch/",
+      "lat": 46.8526,
+      "lon": 9.5297
+    },
+    {
+      "name": "KiFF",
+      "city": "Aarau",
+      "canton": "AG",
+      "url": "https://www.kiff.ch/",
+      "lat": 47.3937,
+      "lon": 8.0505
+    }
+  ],
+  "search_queries": [
+    "reggae konzert schweiz {monat} {jahr}",
+    "dub soundsystem schweiz {monat} {jahr}",
+    "ska konzert schweiz {monat} {jahr}",
+    "dancehall party schweiz {monat} {jahr}",
+    "reggae concert suisse {monat} {jahr}",
+    "reggae festival schweiz {jahr}"
+  ],
+  "festivals": [
+    {
+      "name": "Summerjam",
+      "where": "Köln (DE)",
+      "url": "https://www.summerjam.de/",
+      "wikipedia": "https://de.wikipedia.org/wiki/Summerjam"
+    },
+    {
+      "name": "Reeds Festival",
+      "where": "Pfäffikon ZH",
+      "url": "https://www.reeds.ch/",
+      "wikipedia": ""
+    },
+    {
+      "name": "Lakesplash",
+      "where": "Twann BE",
+      "url": "https://www.lakesplash.ch/",
+      "wikipedia": ""
+    },
+    {
+      "name": "Chiemsee Reggae Summer",
+      "where": "Übersee (DE), bis 2016",
+      "url": "",
+      "wikipedia": "https://de.wikipedia.org/wiki/Chiemsee_Reggae_Summer"
+    },
+    {
+      "name": "Rototom Sunsplash",
+      "where": "Benicàssim (ES)",
+      "url": "https://rototomsunsplash.com/",
+      "wikipedia": "https://en.wikipedia.org/wiki/Rototom_Sunsplash"
+    },
+    {
+      "name": "Reggae Jam",
+      "where": "Bersenbrück (DE)",
+      "url": "https://www.reggaejam.de/",
+      "wikipedia": "https://de.wikipedia.org/wiki/Reggae_Jam"
+    },
+    {
+      "name": "Ruhr Reggae Summer",
+      "where": "Mülheim (DE)",
+      "url": "https://www.ruhrreggaesummer.de/",
+      "wikipedia": ""
+    },
+    {
+      "name": "Garance Reggae Festival",
+      "where": "Bagnols-sur-Cèze (FR)",
+      "url": "https://www.garancereggaefestival.com/",
+      "wikipedia": "https://fr.wikipedia.org/wiki/Garance_Reggae_Festival"
+    },
+    {
+      "name": "Mighty Sounds",
+      "where": "Tábor (CZ), Ska/Punk",
+      "url": "https://www.mightysounds.cz/",
+      "wikipedia": ""
+    }
+  ]
+}

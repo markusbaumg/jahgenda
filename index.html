@@ -15,19 +15,24 @@
   <header class="wrap head">
     <h1 class="logo">Jah<span>genda</span></h1>
     <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+    <p class="notice"><strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im Netz gesucht und zusammengetragen. Wirf vor dem Konzert kurz einen Blick auf die Seite des Veranstalters, dort findest du Datum, Zeit und Ort immer topaktuell.</p>
   </header>
 
   <main class="wrap">
-    <form class="filters" role="search" onsubmit="return false">
-      <label class="sr" for="canton">Kanton</label>
-      <select id="canton"><option value="">Alle Kantone</option></select>
-      <label class="sr" for="q">Suche</label>
-      <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off">
+    <div id="stuck-sentinel" aria-hidden="true"></div>
+    <form class="filters" id="filters" role="search" onsubmit="return false">
+      <div class="toolbar">
+        <label class="sr" for="q">Suche</label>
+        <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off">
+        <label class="sr" for="canton">Kanton</label>
+        <select id="canton"><option value="">Alle Kantone</option></select>
+        <button id="locate" type="button" class="icon-btn" title="Distanz von meinem Standort anzeigen" aria-label="Distanz von meinem Standort anzeigen">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        </button>
+      </div>
+      <div id="genres" class="genres" role="group" aria-label="Genre"></div>
     </form>
-    <div class="geo">
-      <button id="locate" type="button">Wie weit ist's bis zum nächsten Riddim?</button>
-      <span id="geo-status" class="geo-status" role="status"></span>
-    </div>
+    <p id="geo-status" class="geo-status" role="status"></p>
 
     <p id="status" class="status" role="status">Lade Konzerte …</p>
     <div id="list"></div>
@@ -35,9 +40,15 @@
 
   <footer class="wrap foot">
     <section class="about" aria-labelledby="about-title">
-      <h2 id="about-title" class="month">Über uns</h2>
-      <p>Wir sind Markus und Seraina. Uns hat gestört, dass Reggae-, Dub- und Ska-Konzerte in der Schweiz über zig Club-Websites verstreut sind. Darum sammeln wir sie hier an einem Ort, damit niemand mehr eine gute Session verpasst.</p>
-      <p class="authors">Gemacht von <strong>Markus</strong> &amp; <strong>Seraina</strong> · <a href="https://github.com/markusbaumg/jahgenda">GitHub</a></p>
+      <h2 id="about-title" class="section-title">Über uns</h2>
+      <div class="about-body">
+        <img class="about-photo" src="img/about.jpg" width="210" height="210" alt="Seraina und Markus, von oben fotografiert, mit zwei Bechern in der Hand" loading="lazy">
+        <div>
+      <p>Wir sind Markus und Seraina. Die Reggae-Szene in der Schweiz schenkt uns seit Jahren wunderbare Abende, schöne Begegnungen und beste Vibes. Mit Jahgenda geben wir der Community etwas zurück: alle Reggae-, Dub- und Ska-Konzerte an einem Ort, frei und für alle. So findet jede und jeder die nächste gute Session, und die Clubs und Soundsystems, die unsere Szene lebendig machen, bekommen volle Tanzflächen.</p>
+      <p>Die Konzerte tragen KI-Agenten für uns zusammen, damit die Agenda immer aktuell ist. Die neuesten Details findest du jeweils auf der Seite des Clubs oder Veranstalters – ein kurzer Blick dorthin lohnt sich vor jedem Konzert.</p>
+      <p class="authors">Gemacht von <strong>Markus</strong> &amp; <strong>Seraina</strong> · <a href="https://github.com/markusbaumg/jahgenda">GitHub</a> · <a href="log.html">Scraper-Log</a></p>
+        </div>
+      </div>
     </section>
     <p id="updated" class="updated"></p>
   </footer>
