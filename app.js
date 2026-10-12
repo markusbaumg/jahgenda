@@ -883,31 +883,39 @@
       venues.get(key).items.push(s);
     }
     const points = [];
-    // Pins: dark Google-Maps-style pin with the Jahgenda logo (stripes + Swiss cross) inside.
-    // "Ich gehe" venues get a gold star badge, the number badge is the count of shows at that venue.
+    // Google-Maps-style pins, filled with the red/gold/green stripes. Default: dark centre dot.
+    // "Ich gehe": a gold star in the centre (like a saved place). Count badge = shows at this venue.
     let pinSeq = 0;
-    const PIN_PATH = "M15 1C8 1 2 7 2 14.5c0 10 13 26 13 26s13-16 13-26C28 7 22 1 15 1z";
+    const PIN_PATH = "M14 1C7 1 1.5 6.5 1.5 13.5c0 9.5 12.5 25 12.5 25s12.5-15.5 12.5-25C26.5 6.5 21 1 14 1z";
+    const STAR = "M14 7.6l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z";
     const pinIcon = (kind, count) => {
       const id = `pin${++pinSeq}`;
-      const inner =
-        kind === "you"
-          ? `<circle cx="15" cy="14.5" r="6" fill="#f3ead8"/><circle cx="15" cy="14.5" r="2.5" fill="#14110e"/>`
-          : `<clipPath id="${id}"><rect x="7" y="6.5" width="16" height="16" rx="3.5"/></clipPath>` +
-            `<g clip-path="url(#${id})"><rect x="7" y="6.5" width="16" height="5.5" fill="#d8342f"/>` +
-            `<rect x="7" y="12" width="16" height="5.5" fill="#f2b632"/><rect x="7" y="17.5" width="16" height="5.5" fill="#1e8f4e"/></g>` +
-            `<rect x="13.5" y="9.5" width="3" height="10" fill="#f3ead8"/><rect x="10" y="13" width="10" height="3" fill="#f3ead8"/>`;
+      const centre =
+        kind === "going"
+          ? `<circle cx="14" cy="13.5" r="7.5" fill="#14110e"/><path d="${STAR}" fill="#f2b632"/>`
+          : `<circle cx="14" cy="13.5" r="5.5" fill="#14110e"/>`;
       return L.divIcon({
         className: "pin-icon" + (kind === "going" ? " going" : ""),
         html:
-          `<svg viewBox="0 0 30 42" width="30" height="42" aria-hidden="true">` +
-          `<path d="${PIN_PATH}" fill="#14110e" stroke="#f3ead8" stroke-width="1.5"/>${inner}</svg>` +
-          (kind === "going" ? `<i>★</i>` : "") +
+          `<svg viewBox="0 0 28 40" width="28" height="40" aria-hidden="true">` +
+          `<clipPath id="${id}"><path d="${PIN_PATH}"/></clipPath>` +
+          `<g clip-path="url(#${id})"><rect x="0" y="0" width="28" height="12" fill="#d8342f"/>` +
+          `<rect x="0" y="12" width="28" height="9" fill="#f2b632"/><rect x="0" y="21" width="28" height="20" fill="#1e8f4e"/></g>` +
+          `<path d="${PIN_PATH}" fill="none" stroke="#14110e" stroke-width="2"/>${centre}</svg>` +
           (count > 1 ? `<b>${count}</b>` : ""),
-        iconSize: [30, 42],
-        iconAnchor: [15, 41],
-        popupAnchor: [0, -36],
+        iconSize: [28, 40],
+        iconAnchor: [14, 39],
+        popupAnchor: [0, -34],
       });
     };
+    // Your own position: Google's blue dot with a soft halo.
+    const youIcon = L.divIcon({
+      className: "you-icon",
+      html: `<span class="halo"></span><span class="dot"></span>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+      popupAnchor: [0, -12],
+    });
     const pinKind = (items) => (items.some((x) => marks[x.id] === "going") ? "going" : "venue");
     for (const { s, items } of venues.values()) {
       L.marker([s.lat, s.lon], { icon: pinIcon(pinKind(items), items.length), riseOnHover: true })
@@ -923,7 +931,7 @@
       points.push([s.lat, s.lon]);
     }
     if (here) {
-      L.marker([here.lat, here.lon], { icon: pinIcon("you", 1), zIndexOffset: 1000 })
+      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000 })
         .bindPopup("Du bist hier")
         .addTo(markerLayer);
       points.push([here.lat, here.lon]);

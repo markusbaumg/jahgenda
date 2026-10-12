@@ -1362,8 +1362,8 @@ body {
 }
 .pin-icon b {
   position: absolute;
-  bottom: 8px;
-  right: -10px;
+  top: -6px;
+  right: -9px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
@@ -1377,29 +1377,15 @@ body {
   border: 2px solid #14110e;
 }
 
-.pin-icon i {
-  position: absolute;
-  top: -7px;
-  right: -9px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #f2b632;
-  color: #14110e;
-  font-size: 0.75rem;
-  font-style: normal;
-  line-height: 18px;
-  text-align: center;
-  border: 2px solid #14110e;
-}
 .pin-mini {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 16px;
   margin-right: 5px;
-  vertical-align: -2px;
-  border-radius: 3px;
-  background: linear-gradient(#d8342f 0 34%, #f2b632 34% 67%, #1e8f4e 67%);
+  vertical-align: -3px;
+  border-radius: 50% 50% 50% 50% / 42% 42% 58% 58%;
+  background: linear-gradient(#d8342f 0 30%, #f2b632 30% 52%, #1e8f4e 52%);
+  border: 1px solid var(--bg);
   box-shadow: 0 0 0 1px var(--line);
 }
 .pin-mini.star {
@@ -1413,7 +1399,32 @@ body {
   width: 16px;
 }
 .pin-mini.you {
-  background: var(--text);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #4285f4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.3);
+}
+.you-icon {
+  background: none;
+  border: 0;
+}
+.you-icon .halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(66, 133, 244, 0.25);
+}
+.you-icon .dot {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #4285f4;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Links: no underlines anywhere; colour change on hover instead. */
