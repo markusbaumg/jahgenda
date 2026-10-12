@@ -81,13 +81,6 @@ body {
 .wordmark {
   white-space: nowrap;
 }
-/* Whole wordmark as an image (img/logo/NN-name-wordmark.svg) — alternative to text + mark. */
-.logo-word {
-  display: block;
-  height: 1.1em;
-  width: auto;
-  max-width: 100%;
-}
 .tag {
   margin: 8px 0 0;
   color: var(--muted);
@@ -307,9 +300,6 @@ body {
 }
 .geo-status a:hover {
   color: var(--gold);
-}
-.geo-more {
-  color: var(--muted);
 }
 .geo-status:empty {
   display: none;
@@ -1187,28 +1177,21 @@ body {
 }
 
 /* Wann: quick picks and month chips (multi-select). */
-.icon-btn.when {
-  position: relative;
-}
+/* Wann button: the active choice sits inside the button as a label (like the Wo button). */
 .icon-btn.when[aria-pressed="true"] {
+  width: auto;
+  flex-basis: auto;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
   color: var(--bg);
   background: var(--gold);
   border-color: var(--gold);
 }
 .icon-btn.when b {
-  position: absolute;
-  top: -8px;
-  right: -2px;
-  height: 18px;
-  padding: 0 6px;
-  border-radius: 999px;
-  font-size: 0.66rem;
-  font-weight: 800;
-  line-height: 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
   white-space: nowrap;
-  color: var(--bg);
-  background: var(--green-text);
-  border: 2px solid var(--bg);
 }
 .icon-btn.when b[hidden] {
   display: none;
@@ -1220,7 +1203,6 @@ body {
   margin-top: 10px;
 }
 .when-months .chip.past,
-.canton-chips .chip.empty,
 .when-months .chip.empty {
   opacity: 0.55;
 }
@@ -1745,38 +1727,6 @@ a {
   }
 }
 
-/* Wann button: the active range sits inside the button instead of overlapping its neighbour */
-.icon-btn.when[aria-pressed="true"] {
-  width: auto;
-  flex-basis: auto;
-  padding: 0 10px;
-  gap: 6px;
-  display: inline-flex;
-}
-.icon-btn.when b {
-  position: static;
-  height: auto;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font-size: 0.78rem;
-  line-height: 1;
-}
-/* Location button: show the nearest town as a small label when the position is known */
-.icon-btn.active.located {
-  width: auto;
-  flex-basis: auto;
-  padding: 0 10px;
-  gap: 6px;
-  display: inline-flex;
-}
-.icon-btn .where {
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
 /* Filter panels: dropdowns hanging from the sticky bar (so they open wherever you are on the page),
    one at a time, with a × in the corner. */
 .filters .panel {
@@ -1872,9 +1822,6 @@ a {
 }
 .canton-chips .chip.abroad {
   border-style: dashed;
-}
-.canton-chips .chip.abroad:first-of-type {
-  margin-left: 0;
 }
 .canton-chips .chip {
   display: inline-flex;

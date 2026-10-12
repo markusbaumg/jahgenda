@@ -158,7 +158,7 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   status, every portal/venue/festival the scraper uses (with scrape flags and parse hints), the search
   queries, the scraper prompt (SKILL.md), criteria.md, bands.md, genres and the run table — read live from
   the data files and the repository. No password: whoever has the link can read it (nothing there is secret).
-- **Quality (false positives/negatives):** `review.html` lists every candidate the scraper looked at and
+- **Quality (false positives/negatives):** `review.html` (reachable from `admin.html` only, like `log.html`) lists every candidate the scraper looked at and
   dropped, with date, venue, source link and reason; «Gehört rein» opens a prefilled GitHub issue. Every
   Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped
   candidates and failed sources, so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
@@ -236,7 +236,7 @@ make harvest      # suggest bands from festival line-ups
 | `tickets`    | no            | Ticket shop link                                                                     |
 | `source_url` | for `scraper` | Page where the show was found                                                        |
 | `lat`, `lon` | no            | Coordinates (from the venue), both or none                                           |
-| `genres`     | no            | Max. 3 slugs from `data/genres.json`                    |
+| `genres`     | no            | Max. 3 slugs from `data/genres.json`                                                 |
 
 `source` is `mock` (sample data, the page shows a notice) or `scraper`.
 
