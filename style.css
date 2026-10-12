@@ -676,6 +676,9 @@ body {
   border-radius: 999px;
   padding: 2px 10px;
 }
+.results .mine:not([hidden]) + .linkish {
+  margin-left: 0; /* keep "Vergangene anzeigen" next to the chip instead of spreading both */
+}
 .results .mine[aria-pressed="true"] {
   color: var(--gold);
   border-color: var(--gold);

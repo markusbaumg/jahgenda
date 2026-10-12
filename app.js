@@ -154,6 +154,7 @@
     return [
       "BEGIN:VEVENT",
       `UID:${s.id}@jahgenda`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g, "")}`,
       when,
       `SUMMARY:${esc(s.title)}`,
       `LOCATION:${esc(`${s.venue}, ${s.city}`)}`,
@@ -403,7 +404,7 @@
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
   function revealFromHash() {
     if (location.hash.startsWith("#mine=")) return showShared();
-    const id = decodeURIComponent(location.hash.slice(1));
+    const id = decodeHashPart(location.hash.slice(1));
     const target = shows.find((s) => s.id === id);
     if (!target) return;
     if (target._past && !showPast) showPast = true;
@@ -476,8 +477,19 @@
   const NEXT_MARK = { "": "interested", interested: "going", going: "" };
   let marks = {};
   try {
-    marks = JSON.parse(localStorage.getItem(MARKS_KEY)) || {};
+    // Only keep well-formed entries; anything else in storage is ignored.
+    const stored = JSON.parse(localStorage.getItem(MARKS_KEY));
+    for (const [id, st] of Object.entries(stored || {}))
+      if (st === "interested" || st === "going") marks[id] = st;
   } catch {}
+  // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
+  const decodeHashPart = (t) => {
+    try {
+      return decodeURIComponent(t);
+    } catch {
+      return t;
+    }
+  };
   let mineOnly = false;
   let shared = null; // { id: state } from a #mine=… link, shown until taken over or closed
   const toggleMine = el("toggle-mine");
@@ -575,7 +587,7 @@
   function showShared() {
     shared = {};
     for (const part of location.hash.slice(6).split(",")) {
-      const [id, st] = part.split(":").map(decodeURIComponent);
+      const [id, st] = part.split(":").map(decodeHashPart);
       if (shows.some((s) => s.id === id))
         shared[id] = st === "g" ? "going" : "interested";
     }
