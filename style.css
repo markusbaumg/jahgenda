@@ -1362,8 +1362,8 @@ body {
 }
 .pin-icon b {
   position: absolute;
-  top: -6px;
-  right: -8px;
+  bottom: 8px;
+  right: -10px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
@@ -1379,8 +1379,8 @@ body {
 
 .pin-icon i {
   position: absolute;
-  top: -8px;
-  left: -8px;
+  top: -7px;
+  right: -9px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -1394,13 +1394,12 @@ body {
 }
 .pin-mini {
   display: inline-block;
-  width: 12px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   margin-right: 5px;
-  vertical-align: -3px;
-  border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
-  background: linear-gradient(#d8342f 0 35%, #f2b632 35% 60%, #1e8f4e 60%);
-  border: 1px solid var(--bg);
+  vertical-align: -2px;
+  border-radius: 3px;
+  background: linear-gradient(#d8342f 0 34%, #f2b632 34% 67%, #1e8f4e 67%);
   box-shadow: 0 0 0 1px var(--line);
 }
 .pin-mini.star {

@@ -120,6 +120,7 @@
   }
 
   const ICONS = {
+    gcal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm3.5 2.5h5v1.6h-3.3v1h3v1.5h-3v1.2h3.4v1.6h-5.1z"/></svg>',
     cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm-1 8v10h12V10H6zm2 2h3v3H8v-3z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0 1.4 4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.6 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 2.9 2.9 1 1 0 0 1 1.4 0zm2.8-2.8a1 1 0 0 1 0-1.4 4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.6 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.8 0l3-3a2 2 0 0 0-2.9-2.9 1 1 0 0 1-1.4 0z"/></svg>',
@@ -180,6 +181,31 @@
   // Build an .ics file for one show.
   const icsFor = (s) => icsWrap(vevent(s));
 
+  // "Add to Google Calendar" link (works in the Google Calendar app and on the web).
+  function gcalUrl(s) {
+    const d = s.date.replace(/-/g, "");
+    let dates;
+    if (s.time) {
+      const [h, m] = s.time.split(":").map(Number);
+      const pad = (n) => String(n).padStart(2, "0");
+      const end = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h + 3, m);
+      dates = `${d}T${pad(h)}${pad(m)}00/${end.getFullYear()}${pad(end.getMonth() + 1)}${pad(end.getDate())}T${pad(end.getHours())}${pad(end.getMinutes())}00`;
+    } else {
+      const next = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate() + 1);
+      const pad = (n) => String(n).padStart(2, "0");
+      dates = `${d}/${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}`;
+    }
+    const p = new URLSearchParams({
+      action: "TEMPLATE",
+      text: s.title,
+      dates,
+      ctz: "Europe/Zurich",
+      location: `${s.venue}, ${s.city}`,
+      details: `${safeUrl(s.url) || ""}\n${showUrl(s)}`.trim(),
+    });
+    return `https://calendar.google.com/calendar/render?${p}`;
+  }
+
   function downloadIcs(text, name) {
     const blob = new Blob([text], { type: "text/calendar;charset=utf-8" });
     const a = document.createElement("a");
@@ -228,7 +254,8 @@
             ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
             <div class="actions">
               ${starButton(s)}
-              <button type="button" class="act" data-act="cal" title="In Kalender speichern">${ICONS.cal}<span>Kalender</span></button>
+              <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
+              <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
               <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
               <button type="button" class="act" data-act="link" title="Link kopieren">${ICONS.link}<span>Link</span></button>
             </div>
@@ -856,28 +883,29 @@
       venues.get(key).items.push(s);
     }
     const points = [];
-    // Pins like the logo: red/gold/green stripes with a dark centre. "Ich gehe" venues get a star badge,
-    // the badge number is the count of shows at that venue.
+    // Pins: dark Google-Maps-style pin with the Jahgenda logo (stripes + Swiss cross) inside.
+    // "Ich gehe" venues get a gold star badge, the number badge is the count of shows at that venue.
     let pinSeq = 0;
+    const PIN_PATH = "M15 1C8 1 2 7 2 14.5c0 10 13 26 13 26s13-16 13-26C28 7 22 1 15 1z";
     const pinIcon = (kind, count) => {
       const id = `pin${++pinSeq}`;
-      const stripes =
+      const inner =
         kind === "you"
-          ? `<path d="M14 1C7 1 1.5 6.5 1.5 13.5c0 9.5 12.5 25 12.5 25s12.5-15.5 12.5-25C26.5 6.5 21 1 14 1z" fill="#f3ead8"/>`
-          : `<clipPath id="${id}"><path d="M14 1C7 1 1.5 6.5 1.5 13.5c0 9.5 12.5 25 12.5 25s12.5-15.5 12.5-25C26.5 6.5 21 1 14 1z"/></clipPath>` +
-            `<g clip-path="url(#${id})"><rect x="0" y="0" width="28" height="12" fill="#d8342f"/>` +
-            `<rect x="0" y="12" width="28" height="9" fill="#f2b632"/><rect x="0" y="21" width="28" height="20" fill="#1e8f4e"/></g>`;
+          ? `<circle cx="15" cy="14.5" r="6" fill="#f3ead8"/><circle cx="15" cy="14.5" r="2.5" fill="#14110e"/>`
+          : `<clipPath id="${id}"><rect x="7" y="6.5" width="16" height="16" rx="3.5"/></clipPath>` +
+            `<g clip-path="url(#${id})"><rect x="7" y="6.5" width="16" height="5.5" fill="#d8342f"/>` +
+            `<rect x="7" y="12" width="16" height="5.5" fill="#f2b632"/><rect x="7" y="17.5" width="16" height="5.5" fill="#1e8f4e"/></g>` +
+            `<rect x="13.5" y="9.5" width="3" height="10" fill="#f3ead8"/><rect x="10" y="13" width="10" height="3" fill="#f3ead8"/>`;
       return L.divIcon({
         className: "pin-icon" + (kind === "going" ? " going" : ""),
         html:
-          `<svg viewBox="0 0 28 40" width="28" height="40" aria-hidden="true">${stripes}` +
-          `<path d="M14 1C7 1 1.5 6.5 1.5 13.5c0 9.5 12.5 25 12.5 25s12.5-15.5 12.5-25C26.5 6.5 21 1 14 1z" fill="none" stroke="#14110e" stroke-width="2"/>` +
-          `<circle cx="14" cy="13.5" r="5" fill="#14110e"/><circle cx="14" cy="13.5" r="2.2" fill="#f3ead8"/></svg>` +
+          `<svg viewBox="0 0 30 42" width="30" height="42" aria-hidden="true">` +
+          `<path d="${PIN_PATH}" fill="#14110e" stroke="#f3ead8" stroke-width="1.5"/>${inner}</svg>` +
           (kind === "going" ? `<i>★</i>` : "") +
           (count > 1 ? `<b>${count}</b>` : ""),
-        iconSize: [28, 40],
-        iconAnchor: [14, 39],
-        popupAnchor: [0, -34],
+        iconSize: [30, 42],
+        iconAnchor: [15, 41],
+        popupAnchor: [0, -36],
       });
     };
     const pinKind = (items) => (items.some((x) => marks[x.id] === "going") ? "going" : "venue");
