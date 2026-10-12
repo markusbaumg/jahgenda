@@ -2397,3 +2397,14 @@ a {
     margin-top: 2px;
   }
 }
+
+.cal-subscribe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+}
+.cal-subscribe svg {
+  width: 13px;
+  height: 13px;
+}
