@@ -207,6 +207,22 @@ oder mit Auto-Reload: `npx live-server`
 
 Die Distanz-Funktion fragt den Browser nach dem Standort. Er wird nur im Browser verwendet und nirgends gespeichert oder verschickt.
 
+## Meine Shows
+
+Der Stern bei jeder Show hat zwei Stufen: einmal tippen = **Interessiert** (goldener Rand), nochmals = **Ich gehe**
+(grüner Rand), ein drittes Mal löscht die Markierung. Sobald etwas markiert ist, erscheint der Chip «★ Meine Shows»
+mit Zähler; er filtert die Liste auf die markierten Shows (vergangene bleiben markiert, werden aber wie üblich
+ausgeblendet). In dieser Ansicht gibt es:
+
+- **Kalender exportieren (.ics)** – eine Datei mit allen markierten Shows («Ich gehe» als bestätigt, «Interessiert» als vorläufig).
+- **Liste teilen** – kopiert einen Link der Form `…/#mine=<id>:g,<id>:i` (g = Ich gehe, i = Interessiert), daneben
+  ein WhatsApp-Knopf mit demselben Link. Wer ihn öffnet, sieht einen Hinweis «Geteilte Liste von einem Freund» mit
+  den Shows und kann sie mit **Alle übernehmen** als «Interessiert» in die eigene Liste holen (eigene «Ich gehe» bleiben)
+  oder die Ansicht schliessen. Eigene Markierungen werden nie stillschweigend überschrieben.
+
+Die Markierungen liegen nur im Browser (`localStorage`, Schlüssel `jahgenda.marks`) – kein Konto, kein Server,
+nichts wird übertragen. Ohne `localStorage` funktioniert alles, die Markierungen gelten dann bis zum nächsten Laden.
+
 ## Roadmap
 
 Siehe [Issues](https://github.com/markusbaumg/jahgenda/issues).
