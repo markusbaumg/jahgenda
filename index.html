@@ -35,7 +35,7 @@
     <main class="wrap">
       <div id="stuck-sentinel" aria-hidden="true"></div>
       <form class="filters" id="filters" role="search" onsubmit="return false">
-        <a class="mini-brand" href="#top" aria-label="Nach oben"
+        <a class="mini-brand" href="#top" aria-label="Nach oben" title="Nach oben"
           ><img src="img/logo/jahgenda.svg" alt="" width="20" height="20" /><span class="wordmark"
             >Jah<span>genda</span></span
           ></a
@@ -49,10 +49,16 @@
                 d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"
               />
             </svg>
-            <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off" />
+            <input
+              id="q"
+              type="search"
+              placeholder="Band, Club, Ort …"
+              autocomplete="off"
+              title="Nach Band, Club oder Ort suchen"
+            />
           </div>
           <label class="sr" for="canton">Kanton</label>
-          <select id="canton">
+          <select id="canton" title="Nach Kanton filtern">
             <option value="">Alle Kantone</option>
           </select>
           <button
@@ -74,7 +80,7 @@
             id="toggle-mine"
             class="icon-btn mine"
             aria-pressed="false"
-            title="Meine Shows"
+            title="Nur meine Shows anzeigen"
             aria-label="Meine Shows anzeigen"
             hidden
           >
@@ -93,6 +99,7 @@
             class="scroll-btn left"
             data-dir="-1"
             aria-label="Genres nach links scrollen"
+            title="Genres nach links scrollen"
             hidden
           >
             &lsaquo;
@@ -103,6 +110,7 @@
             class="scroll-btn right"
             data-dir="1"
             aria-label="Genres nach rechts scrollen"
+            title="Genres nach rechts scrollen"
             hidden
           >
             &rsaquo;
@@ -114,12 +122,26 @@
 
       <p id="results" class="results" aria-live="polite">
         <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
-          <button type="button" data-view="list" aria-pressed="true">Liste</button>
-          <button type="button" data-view="calendar" aria-pressed="false">Kalender</button>
-          <button type="button" data-view="map" aria-pressed="false">Karte</button>
+          <button type="button" data-view="list" aria-pressed="true" title="Als Liste anzeigen">Liste</button>
+          <button type="button" data-view="calendar" aria-pressed="false" title="Als Kalender anzeigen">
+            Kalender
+          </button>
+          <button type="button" data-view="map" aria-pressed="false" title="Auf der Karte anzeigen">
+            Karte
+          </button>
         </span>
-        <button type="button" id="clear-filters" class="linkish clear" hidden>✕ Filter zurücksetzen</button>
-        <button type="button" id="toggle-past" class="linkish" hidden>Vergangene anzeigen</button>
+        <button
+          type="button"
+          id="clear-filters"
+          class="linkish clear"
+          title="Alle Filter zurücksetzen"
+          hidden
+        >
+          ✕ Filter zurücksetzen
+        </button>
+        <button type="button" id="toggle-past" class="linkish" title="Vergangene Konzerte anzeigen" hidden>
+          Vergangene anzeigen
+        </button>
       </p>
       <div id="mine-panel" class="mine-panel" hidden></div>
       <div id="views">
@@ -170,11 +192,19 @@
         <div class="wrap foot-bar-inner">
           <p class="updated"><span id="results-text"></span><span id="updated"></span></p>
           <p class="foot-links">
+            <<<<<<< HEAD
             <a href="https://github.com/markusbaumg/jahgenda">GitHub</a
             ><span class="mini-tag" id="mini-tag" aria-hidden="true"></span> ·
             <a href="log.html">Scraper-Log</a> ·
             <a href="https://github.com/users/markusbaumg/projects/2">Roadmap</a> ·
             <a href="mailto:info@jahgenda.ch" title="Schreib uns eine E-Mail">info@jahgenda.ch</a>
+            =======
+            <a href="https://github.com/markusbaumg/jahgenda" title="Quellcode auf GitHub öffnen">GitHub</a> ·
+            <a href="log.html" title="Scraper-Log öffnen: was die KI-Agenten gemacht haben">Scraper-Log</a> ·
+            <a href="https://github.com/users/markusbaumg/projects/2" title="Roadmap auf GitHub öffnen"
+              >Roadmap</a
+            >
+            >>>>>>> worktree-agent-aff736e1e21c84ecb
           </p>
         </div>
       </div>
@@ -185,7 +215,14 @@
         <img src="img/logo/jahgenda.svg" alt="" width="40" height="40" />
       </div>
       <div class="install-body"></div>
-      <button type="button" class="install-close" aria-label="Schliessen">&times;</button>
+      <button
+        type="button"
+        class="install-close"
+        aria-label="Schliessen"
+        title="Hinweis schliessen (30 Tage nicht mehr fragen)"
+      >
+        &times;
+      </button>
     </aside>
 
     <script src="store.js"></script>

@@ -44,7 +44,7 @@
     const t = document.createElement("div");
     t.className = "toast";
     t.setAttribute("role", "status");
-    t.innerHTML = `Neue Version von Jahgenda <button type="button">Aktualisieren</button>`;
+    t.innerHTML = `Neue Version von Jahgenda <button type="button" title="Seite neu laden und die neue Version verwenden">Aktualisieren</button>`;
     t.querySelector("button").addEventListener("click", () => {
       if (reg.waiting) reg.waiting.postMessage("skipWaiting");
       t.remove();
@@ -84,7 +84,7 @@
   banner.addEventListener("click", (e) => {
     if (e.target.closest(".install-never")) dismiss(true);
   });
-  const NEVER = `<button type="button" class="install-never">Nie mehr fragen</button>`;
+  const NEVER = `<button type="button" class="install-never" title="Diesen Hinweis nie mehr anzeigen">Nie mehr fragen</button>`;
 
   // Android / desktop Chrome & Edge: the browser tells us when it can install.
   window.addEventListener("beforeinstallprompt", (e) => {
@@ -92,7 +92,7 @@
     deferredPrompt = e;
     show(
       `<strong>Jahgenda als App</strong><span>Aufs Handy holen: eigenes Icon, Vollbild, geht auch offline.</span>` +
-        `<span class="install-actions"><button type="button" class="install-btn">Installieren</button>${NEVER}</span>`,
+        `<span class="install-actions"><button type="button" class="install-btn" title="Jahgenda als App installieren">Installieren</button>${NEVER}</span>`,
     );
     body.querySelector(".install-btn").addEventListener("click", async () => {
       deferredPrompt.prompt();

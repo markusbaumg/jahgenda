@@ -131,7 +131,7 @@
   const venueLink = (s) => {
     const u = venueSites[venueKey(s.venue)];
     return u
-      ? `<a class="venue-link" href="${escape(u)}" target="_blank" rel="noopener" title="Website von ${escape(s.venue)}">${escape(s.venue)}</a>`
+      ? `<a class="venue-link" href="${escape(u)}" target="_blank" rel="noopener" title="Website von ${escape(s.venue)} öffnen">${escape(s.venue)}</a>`
       : escape(s.venue);
   };
 
@@ -251,7 +251,7 @@
     const dow = d.getDay();
     const url = safeUrl(s.url);
     const title = url
-      ? `<a href="${escape(url)}" target="_blank" rel="noopener">${escape(s.title)}</a>`
+      ? `<a href="${escape(url)}" target="_blank" rel="noopener" title="Konzertseite beim Veranstalter öffnen">${escape(s.title)}</a>`
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
     const tickets = safeUrl(s.tickets);
@@ -308,6 +308,7 @@
     const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
     togglePast.hidden = past === 0;
     togglePast.textContent = showPast ? "Vergangene ausblenden" : `Vergangene anzeigen (${past})`;
+    togglePast.title = showPast ? "Vergangene Konzerte ausblenden" : "Vergangene Konzerte anzeigen";
     updateMine();
     lastVisible = visible;
     if (!visible.length) {
@@ -317,7 +318,7 @@
       views.hidden = true;
       resultsText.textContent = "";
       status.innerHTML = shows.some((s) => !s._past)
-        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset">Filter zurücksetzen</button>`
+        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`
         : `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
       return;
     }
@@ -437,7 +438,7 @@
       for (const s of shows) for (const g of s.genres) counts.set(g, (counts.get(g) || 0) + 1);
       const rank = (g) => (genreOrder.includes(g) ? genreOrder.indexOf(g) : genreOrder.length);
       genreBar.innerHTML =
-        `<button type="button" class="chip" data-genre="" aria-pressed="true">Alle</button>` +
+        `<button type="button" class="chip" data-genre="" aria-pressed="true" title="Alle Genres anzeigen">Alle</button>` +
         [...counts]
           .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
           .map(
@@ -558,7 +559,7 @@
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
             `<span class="geo-pin">📍</span> Am nächsten bei dir: ` +
-            `<a href="#${n.s._short}"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
+            `<a href="#${n.s._short}" title="Zur Show in der Liste springen"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
             `<span class="dist">${formatKm(n.km)}</span>` +
             (near.length > 1
               ? ` <span class="geo-more">· danach ${near
@@ -587,6 +588,12 @@
     going: "Ich gehe",
   };
   const NEXT_MARK = { "": "interested", interested: "going", going: "" };
+  // Tooltip of the star button: what the next click does.
+  const MARK_TITLE = {
+    "": "Als «Interessiert» merken",
+    interested: "Als «Ich gehe» markieren",
+    going: "Markierung entfernen",
+  };
   let marks = {};
   // Only keep well-formed entries; anything else in storage is ignored.
   for (const [id, st] of Object.entries(store.get(store.KEYS.MARKS, {}) || {}))
@@ -612,7 +619,7 @@
   const markClass = (s) =>
     `${marks[s.id] ? ` ${marks[s.id]}` : ""}${shared && shared[s.id] ? " shared-row" : ""}`;
   const starButton = (s) =>
-    `<button type="button" class="act star" data-act="mark" title="Markieren: Interessiert → Ich gehe">${ICONS.star}<span>${MARK_LABEL[marks[s.id] || ""]}</span></button>`;
+    `<button type="button" class="act star" data-act="mark" title="${MARK_TITLE[marks[s.id] || ""]}">${ICONS.star}<span>${MARK_LABEL[marks[s.id] || ""]}</span></button>`;
   const dayShort = (s) =>
     `${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
   const mineUrl = () =>
@@ -623,14 +630,15 @@
 
   minePanel.innerHTML =
     `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle übernehmen».</span>` +
-    `<button type="button" class="act" data-mine="ics">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
-    `<button type="button" class="act" data-mine="share">${ICONS.link}<span>Liste teilen</span></button>` +
-    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener">${ICONS.wa}<span>WhatsApp</span></a>`;
+    `<button type="button" class="act" data-mine="ics" title="Meine Shows als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
+    `<button type="button" class="act" data-mine="share" title="Link zu meiner Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
+    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Meine Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
 
   function updateMine() {
     const n = markedShows().length;
     toggleMine.hidden = n === 0;
     toggleMine.setAttribute("aria-pressed", String(mineOnly));
+    toggleMine.title = mineOnly ? "Wieder alle Shows anzeigen" : "Nur meine Shows anzeigen";
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !mineOnly || n === 0;
     if (!minePanel.hidden)
@@ -650,6 +658,7 @@
     row.classList.toggle("interested", next === "interested");
     row.classList.toggle("going", next === "going");
     row.querySelector(".star span").textContent = MARK_LABEL[next];
+    row.querySelector(".star").title = MARK_TITLE[next];
     updateMine();
   }
   list.addEventListener("click", (e) => {
@@ -795,7 +804,7 @@
       const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Konzert" : "Konzerte"}` : ""}`;
       cells.push(`
         <div class="${cls.join(" ")}" data-day="${key}">
-          <button type="button" class="cal-num" aria-label="${escape(label)}">${d.getDate()}</button>
+          <button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
             .map((s) => `<i style="background:${genreColor(s)}"></i>`)
@@ -803,7 +812,7 @@
           <div class="cal-pills">${items
             .map(
               (s) =>
-                `<button type="button" class="pill" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)}">${escape(s.title)}</button>`,
+                `<button type="button" class="pill" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)} – zur Show in der Liste springen">${escape(s.title)}</button>`,
             )
             .join("")}</div>
         </div>`);
@@ -812,10 +821,10 @@
     const selected = byDay.get(calDay) || [];
     calendarEl.innerHTML = `
       <div class="cal-head">
-        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat">&lsaquo;</button>
+        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat">&lsaquo;</button>
         <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
-        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat">&rsaquo;</button>
-        <button type="button" class="linkish cal-today" data-cal="0">Heute</button>
+        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat">&rsaquo;</button>
+        <button type="button" class="linkish cal-today" data-cal="0" title="Zum aktuellen Monat springen">Heute</button>
       </div>
       <div class="cal-grid">
         ${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w) => `<span class="cal-dow">${w}</span>`).join("")}
@@ -903,12 +912,17 @@
     }
     if (!map) {
       mapEl.innerHTML = "";
-      map = L.map(mapEl, { scrollWheelZoom: false });
+      map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
+      // Leaflet's own controls get German tooltips.
+      L.control.zoom({ zoomInTitle: "Hineinzoomen", zoomOutTitle: "Herauszoomen" }).addTo(map);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         className: "map-tiles",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
       }).addTo(map);
+      for (const a of mapEl.querySelectorAll(".leaflet-control-attribution a"))
+        if (/leafletjs/.test(a.href)) a.title = "Leaflet-Website öffnen";
       markerLayer = L.layerGroup().addTo(map);
       // Leaflet stops clicks inside popups from bubbling up to the page, so the
       // show links are handled on the popup element itself (bound once per popup).
@@ -916,6 +930,8 @@
         const popup = e.popup.getElement();
         if (!popup || popup.dataset.bound) return;
         popup.dataset.bound = "1";
+        const close = popup.querySelector(".leaflet-popup-close-button");
+        if (close) close.title = "Schliessen";
         popup.addEventListener("click", (ev) => {
           const a = ev.target.closest("a[data-id]");
           if (!a) return;
@@ -971,12 +987,16 @@
     });
     const pinKind = (items) => (items.some((x) => marks[x.id] === "going") ? "going" : "venue");
     for (const { s, items } of venues.values()) {
-      L.marker([s.lat, s.lon], { icon: pinIcon(pinKind(items), items.length), riseOnHover: true })
+      L.marker([s.lat, s.lon], {
+        icon: pinIcon(pinKind(items), items.length),
+        riseOnHover: true,
+        title: `${s.venue}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`,
+      })
         .bindPopup(
           `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
             .map(
               (x) =>
-                `<li><a href="#${x._short}" data-id="${escape(x.id)}"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+                `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
             )
             .join("")}</ul>`,
         )
@@ -984,7 +1004,7 @@
       points.push([s.lat, s.lon]);
     }
     if (here) {
-      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000 })
+      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000, title: "Dein Standort" })
         .bindPopup("Du bist hier")
         .addTo(markerLayer);
       points.push([here.lat, here.lon]);
