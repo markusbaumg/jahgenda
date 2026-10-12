@@ -1012,6 +1012,12 @@ body {
 }
 .updated {
   margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+#results-text:not(:empty)::after {
+  content: " ·";
 }
 
 /* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared banner --- */
