@@ -289,6 +289,7 @@
   }
 
   function render() {
+    if (status.classList.contains("loading")) return; // data not in yet: the skeleton stays, init() renders
     const canton = cantonSelect.value;
     const q = search.value.trim().toLowerCase();
 
@@ -1052,8 +1053,9 @@
       delete note.dataset.closing;
       note.open = false;
     };
+    if (reducedMotion.matches) return finish(); // 0 ms transitions fire no transitionend
     noteBody.addEventListener("transitionend", finish, { once: true });
-    setTimeout(finish, 450); // reduced motion: 0 ms transitions fire no transitionend
+    setTimeout(finish, 450); // safety net should the transition be interrupted
   }
   note.querySelector("summary").addEventListener("click", (e) => {
     if (!note.open) return; // opening: let the browser do it, then animate in (toggle event)
@@ -1069,6 +1071,15 @@
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeNote();
   });
+  // The card floats above the list; once its row scrolls under the stuck bar it closes instead of
+  // overlapping the bar.
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (note.open && note.getBoundingClientRect().top < filters.getBoundingClientRect().bottom) closeNote();
+    },
+    { passive: true },
+  );
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
