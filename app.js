@@ -66,6 +66,7 @@
   let showPast = false;
   let pastCount = 0;
   const cantonSelect = el("canton");
+  let radiusKm = 0; // 0 = no distance filter; only applies once the position is known
   const search = el("q");
   const genreBar = el("genres");
   let activeGenre = "";
@@ -274,12 +275,15 @@
             ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(genreLabel[g] || g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
             <div class="actions">
               ${starButton(s)}
-              <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
-              <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
-              <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
-              ${url ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" title="Event-Seite des Veranstalters öffnen">${ICONS.event}<span>Event</span></a>` : ""}
-              ${tickets ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>` : ""}
-              <button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>
+              <span class="act-group" title="In den Kalender">
+                <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
+                <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
+              </span>
+              ${url || tickets ? `<span class="act-group">${url ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" title="Offizielle Event-Seite des Veranstalters öffnen">${ICONS.event}<span>Event</span></a>` : ""}${tickets ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>` : ""}</span>` : ""}
+              <span class="act-group">
+                <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
+                <button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>
+              </span>
             </div>
           </div>
       </li>`;
@@ -292,6 +296,7 @@
     if (shared && !shared[s.id]) return false;
     if (mineOnly && !marks[s.id]) return false;
     if (canton && s.canton !== canton) return false;
+    if (radiusKm && here && typeof s.lat === "number" && distanceKm(here, s) > radiusKm) return false;
     if (activeGenre && !s.genres.includes(activeGenre)) return false;
     if (!q) return true;
     return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
@@ -306,7 +311,9 @@
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter(isVisible);
 
-    const filtered = Boolean(canton || activeGenre || q || mineOnly || shared || rangeActive());
+    const filtered = Boolean(
+      canton || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
+    );
     el("clear-filters").hidden = !filtered;
     updateMine();
     updateWhen();
@@ -376,8 +383,7 @@
     .then((d) => {
       const list = (d && d.slogans) || [];
       if (!list.length) return;
-      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
-      const line = list[dayOfYear % list.length];
+      const line = list[Math.floor(Math.random() * list.length)];
       const tag = el("tagline");
       if (tag) tag.textContent = line;
       const mini = el("mini-tag");
@@ -433,6 +439,18 @@
         "beforeend",
         used.map((c) => `<option value="${escape(c)}">${escape(regionName(c))}</option>`).join(""),
       );
+      // Canton chips (with counts) inside the Wo panel; the hidden select stays the single source of truth.
+      const perCanton = new Map();
+      for (const s of shows) perCanton.set(s.canton, (perCanton.get(s.canton) || 0) + 1);
+      el("canton-chips").innerHTML =
+        `<button type="button" class="chip" data-canton="" aria-pressed="true" title="Alle Kantone anzeigen">Alle Kantone</button>` +
+        used
+          .map(
+            (c) =>
+              `<button type="button" class="chip" data-canton="${escape(c)}" aria-pressed="false" title="Nur ${escape(regionName(c))} anzeigen (${perCanton.get(c)})"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(regionName(c))}<small>${perCanton.get(c)}</small></button>`,
+          )
+          .join("");
+      updateWhere();
 
       // Genre chips: one toggle per genre that occurs at least once, in the order of data/genres.json
       // (unknown slugs go last, alphabetically).
@@ -467,6 +485,7 @@
     const c = e.target.closest(".canton[data-canton]");
     if (!c) return;
     cantonSelect.value = cantonSelect.value === c.dataset.canton ? "" : c.dataset.canton;
+    updateWhere();
     renderAndKeepInView();
   });
 
@@ -493,6 +512,8 @@
 
   function resetFilters() {
     cantonSelect.value = "";
+    radiusKm = 0;
+    updateWhere();
     search.value = "";
     activeGenre = "";
     mineOnly = false;
@@ -534,6 +555,52 @@
   }
   window.addEventListener("hashchange", revealFromHash);
 
+  // --- Wo: canton chips + own position (+ radius) in one panel behind the pin button ---
+  const toggleWhere = el("toggle-where");
+  const wherePanel = el("where-panel");
+  let whereOpen = false;
+  let nearestCity = "";
+  function setWhereOpen(open) {
+    whereOpen = open;
+    wherePanel.hidden = !open;
+    toggleWhere.setAttribute("aria-expanded", String(open));
+    if (open && typeof whenOpen !== "undefined" && whenOpen) el("toggle-when").click();
+  }
+  function updateWhere() {
+    const canton = cantonSelect.value;
+    const badge = toggleWhere.querySelector("b");
+    let label = canton || "";
+    if (here && radiusKm) label = `${label ? label + " · " : ""}≤ ${radiusKm} km`;
+    else if (here && !canton) label = nearestCity ? `bei ${nearestCity}` : "Standort";
+    badge.textContent = label;
+    badge.hidden = !label;
+    toggleWhere.setAttribute("aria-pressed", String(Boolean(canton || (here && radiusKm))));
+    toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kanton wählen oder meinen Standort verwenden";
+    for (const c of el("canton-chips").querySelectorAll(".chip"))
+      c.setAttribute("aria-pressed", String(c.dataset.canton === canton));
+    el("where-radius").hidden = !here;
+    for (const r of el("where-radius").querySelectorAll(".chip"))
+      r.setAttribute("aria-pressed", String(Number(r.dataset.radius) === radiusKm));
+  }
+  toggleWhere.addEventListener("click", () => setWhereOpen(!whereOpen));
+  el("canton-chips").addEventListener("click", (e) => {
+    const c = e.target.closest(".chip[data-canton]");
+    if (!c) return;
+    cantonSelect.value = c.dataset.canton;
+    updateWhere();
+    renderAndKeepInView();
+  });
+  el("where-radius").addEventListener("click", (e) => {
+    const r = e.target.closest(".chip[data-radius]");
+    if (!r) return;
+    radiusKm = Number(r.dataset.radius);
+    updateWhere();
+    renderAndKeepInView();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && whereOpen) setWhereOpen(false);
+  });
+
   const locateBtn = el("locate");
   const geoStatus = el("geo-status");
 
@@ -554,6 +621,8 @@
           .map((s) => ({ s, km: distanceKm(here, s) }))
           .sort((a, b) => a.km - b.km)
           .slice(0, 3);
+        nearestCity = near.length ? near[0].s.city : "";
+        updateWhere();
         if (near.length) {
           const n = near[0];
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;

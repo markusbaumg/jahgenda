@@ -1823,3 +1823,124 @@ a {
     height: 18px;
   }
 }
+
+/* Action groups: calendar | event/tickets | share, separated by thin rules */
+.act-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 8px;
+  margin-left: 6px;
+  border-left: 1px solid var(--line);
+}
+.actions > .act-group:first-of-type {
+  border-left: 0;
+  padding-left: 0;
+  margin-left: 0;
+}
+.actions > .act + .act-group {
+  border-left: 1px solid var(--line);
+  padding-left: 8px;
+  margin-left: 6px;
+}
+/* Wann button: the active range sits inside the button instead of overlapping its neighbour */
+.icon-btn.when[aria-pressed="true"] {
+  width: auto;
+  flex-basis: auto;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
+}
+.icon-btn.when b {
+  position: static;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+/* Location button: show the nearest town as a small label when the position is known */
+.icon-btn.active.located {
+  width: auto;
+  flex-basis: auto;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
+}
+.icon-btn .where {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Wo panel: own position, radius, canton chips */
+.where-panel {
+  margin: 0 0 12px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.where-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.where-locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.where-locate.active {
+  color: var(--bg);
+  background: var(--gold);
+}
+.where-radius {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 4px;
+}
+.where-panel .geo-status {
+  margin: 10px 0 4px;
+}
+.canton-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.canton-chips .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.canton-chips .chip img {
+  width: 14px;
+  height: 16px;
+  object-fit: contain;
+}
+.icon-btn.where:has(b:not([hidden])) {
+  width: auto;
+  flex-basis: auto;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
+}
+.icon-btn.where[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.icon-btn.where b {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.icon-btn.where b[hidden] {
+  display: none;
+}
