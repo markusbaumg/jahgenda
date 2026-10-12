@@ -62,6 +62,22 @@ design/                                Logo variants, festival spec, other desig
 Makefile                               Everything you can run: `make` shows the help.
 ```
 
+### Filters
+
+Search (band, club, town), one genre chip (order and labels from `data/genres.json`, with counts), and two
+dropdown panels hanging from the sticky toolbar — only one is open at a time, closed with ×, Escape, the
+button or a tap outside:
+
+- **Wo** — cantons are multi-select chips with counts (Swiss cantons A–Z, neighbouring countries D/F/I/A/FL
+  at the end); the canton badge in a row toggles the same filter. **Mein Standort** asks the browser for the
+  position (also asked once on start; never stored or sent anywhere) and enables a radius (10/25/50 km),
+  distances in every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to
+  the show's town, arrival one hour before the show — `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen»
+  placeholder while the position is unknown.
+- **Wann** — Heute / Wochenende / 7 Tage, or any set of months picked on a clickable month histogram (bars
+  = number of shows after the other filters; past months dimmed and switching past shows on). The badge in
+  the toolbar names the active choice; nothing is stored across visits.
+
 ### Views
 
 The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list, next to
