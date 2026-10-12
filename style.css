@@ -1945,6 +1945,9 @@ a {
   gap: 6px;
   display: inline-flex;
 }
+.icon-btn.where.located {
+  color: var(--gold);
+}
 .icon-btn.where[aria-pressed="true"] {
   color: var(--bg);
   background: var(--gold);

@@ -736,7 +736,6 @@
 
   // --- Wo: canton chips (multi-select) + own position (+ radius) behind the pin button ---
   const toggleWhere = el("toggle-where");
-  let nearestCity = "";
   function toggleCanton(code) {
     if (cantons.has(code)) cantons.delete(code);
     else cantons.add(code);
@@ -748,7 +747,6 @@
     if (codes.length > 3) parts.push(`${codes.length} Kantone`);
     else if (codes.length) parts.push(codes.join(" · "));
     if (here && radiusKm) parts.push(`≤ ${radiusKm} km`);
-    else if (here && !codes.length) parts.push(nearestCity ? `bei ${nearestCity}` : "Standort");
     return parts.join(" · ");
   }
   function updateWhere() {
@@ -756,6 +754,8 @@
     const badge = toggleWhere.querySelector("b");
     badge.textContent = label;
     badge.hidden = !label;
+    // The badge only names real filters; a known position just lights the pin up.
+    toggleWhere.classList.toggle("located", Boolean(here));
     toggleWhere.setAttribute("aria-pressed", String(Boolean(cantons.size || (here && radiusKm))));
     toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kantone wählen oder meinen Standort verwenden";
     for (const c of el("canton-chips").querySelectorAll(".chip"))
@@ -813,7 +813,6 @@
           .map((s) => ({ s, km: distanceKm(here, s) }))
           .sort((a, b) => a.km - b.km)
           .slice(0, 1);
-        nearestCity = near.length ? near[0].s.city : "";
         updateWhere();
         if (near.length) {
           const n = near[0];
