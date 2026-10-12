@@ -137,6 +137,8 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
 
 - **Heartbeat:** every run overwrites `data/status.json` (`ok`, `at`, counts, error) and prepends an entry to
   `data/runs.json`; the scraper commits even when nothing changed, and commits `ok: false` on failure.
+  `scripts/validate_shows.py` checks the shape of `status.json` like that of the other data files, so a
+  malformed heartbeat cannot be committed and silently blind the watchdog.
 - **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine) and executes
   `scripts/check_freshness.py`: if the newest timestamp is older than 36 h, the last run reported failure, or
   shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner

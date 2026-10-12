@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate data/shows.json, data/venues.json, data/artists.json and data/runs.json.
+"""Validate data/shows.json, data/venues.json, data/artists.json, data/runs.json and data/status.json.
 
 Runs in CI before every deploy and at the end of every scraper run, so a bad
 scraper result can never reach the live page. No third-party dependencies.
@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SHOWS = ROOT / "data" / "shows.json"
 ARTISTS = ROOT / "data" / "artists.json"
 RUNS = ROOT / "data" / "runs.json"
+STATUS = ROOT / "data" / "status.json"
 VENUES = ROOT / "data" / "venues.json"
 GENRES = ROOT / "data" / "genres.json"
 
@@ -80,6 +81,9 @@ SHOW_OPTIONAL = {
 ARTIST_FIELDS = {"genres", "source", "checked", "festivals", "tour_checked"}
 VENUE_REQUIRED = {"city": str, "canton": str, "lat": (int, float), "lon": (int, float)}
 VENUE_OPTIONAL = {"url": str, "scrape": bool, "hint": str}
+SKILLS = ("scrape-shows", "harvest-bands")
+STATUS_FIELDS = {"ok", "skill", "at", "runner", "counts", "failed_sources", "error"}
+COUNT_KEYS = {"added", "updated", "removed", "total"}
 
 
 def load(path):
@@ -354,6 +358,45 @@ def check_runs(data):
     return errs
 
 
+def check_status(data):
+    """data/status.json, the heartbeat every skill run overwrites and the watchdog reads
+    (scripts/check_freshness.py). None = file absent, which is fine until the first run."""
+    if data is None:
+        return []
+    if not isinstance(data, dict):
+        return ["status.json: must be an object"]
+    errs = []
+    if not isinstance(data.get("ok"), bool):
+        errs.append("status.json: 'ok' must be true or false")
+    if data.get("skill") not in SKILLS:
+        errs.append("status.json: 'skill' must be scrape-shows or harvest-bands")
+    try:
+        if datetime.fromisoformat(str(data.get("at")).replace("Z", "+00:00")).tzinfo is None:
+            errs.append("status.json: 'at' needs a UTC offset (TZ=Europe/Zurich date -Iseconds)")
+    except ValueError:
+        errs.append("status.json: 'at' must be an ISO 8601 timestamp")
+    if "runner" in data and not isinstance(data["runner"], str):
+        errs.append("status.json: 'runner' must be a string")
+    counts = data.get("counts", {})
+    if not isinstance(counts, dict):
+        errs.append("status.json: 'counts' must be an object of integers")
+    else:
+        for key, value in counts.items():
+            if key not in COUNT_KEYS:
+                errs.append(f"status.json: unknown count '{key}'")
+            elif not isinstance(value, int) or isinstance(value, bool):
+                errs.append(f"status.json: count '{key}' must be an integer")
+    fs = data.get("failed_sources", 0)
+    if not isinstance(fs, int) or isinstance(fs, bool):
+        errs.append("status.json: 'failed_sources' must be an integer")
+    if data.get("error") is not None and not isinstance(data["error"], str):
+        errs.append("status.json: 'error' must be a string or null")
+    for key in data:
+        if key not in STATUS_FIELDS:
+            errs.append(f"status.json: unknown field '{key}'")
+    return errs
+
+
 def main(argv):
     allow_past = "--allow-past" in argv
     allowed = allowed_genres()
@@ -376,6 +419,9 @@ def main(argv):
     runs, e = load(RUNS)
     errs += e
     errs += check_runs(runs)
+    status, e = load(STATUS) if STATUS.exists() else (None, [])  # absent until the first run
+    errs += e
+    errs += check_status(status)
 
     for msg in errs:
         print(f"ERROR {msg}")
@@ -384,7 +430,8 @@ def main(argv):
         return 1
     print(
         f"ok: {len(shows['shows'])} shows, {len(venues['venues'])} venues, "
-        f"{len(artists['artists'])} artists, {len(runs['runs'])} runs, {len(allowed)} genre slugs"
+        f"{len(artists['artists'])} artists, {len(runs['runs'])} runs, {len(allowed)} genre slugs, "
+        f"status.json {'ok' if status else 'absent'}"
     )
     return 0
 

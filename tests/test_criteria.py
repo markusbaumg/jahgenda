@@ -146,6 +146,57 @@ class Keys(unittest.TestCase):
         self.assertEqual(V.venue_key(123), "123")
 
 
+class StatusChecks(unittest.TestCase):
+    """data/status.json, the heartbeat: the exact shape the skills write and the watchdog reads."""
+
+    GOOD = {
+        "ok": True,
+        "skill": "scrape-shows",
+        "at": "2026-10-13T06:14:22+02:00",
+        "runner": "cloud",
+        "counts": {"added": 3, "updated": 1, "removed": 2, "total": 41},
+        "failed_sources": 1,
+        "error": None,
+    }
+
+    def one(self, fragment, **over):
+        errs = V.check_status({**self.GOOD, **over})
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn(fragment, errs[0])
+
+    def test_skill_examples_pass(self):
+        self.assertEqual(V.check_status(self.GOOD), [])
+        harvest = {
+            "ok": True,
+            "skill": "harvest-bands",
+            "at": "2026-11-01T05:10:00+01:00",
+            "runner": "cloud",
+            "counts": {"added": 12, "total": 57},
+            "error": None,
+        }
+        self.assertEqual(V.check_status(harvest), [])
+        self.assertEqual(V.check_status({**self.GOOD, "ok": False, "error": "WebFetch ENOTFOUND"}), [])
+        self.assertEqual(V.check_status({**self.GOOD, "at": "2026-10-13T04:14:22Z"}), [])
+
+    def test_absent_file_is_fine_but_shape_is_not_negotiable(self):
+        self.assertEqual(V.check_status(None), [])
+        self.assertEqual(V.check_status([]), ["status.json: must be an object"])
+
+    def test_each_wrong_type_gives_one_specific_message(self):
+        self.one("'ok' must be true or false", ok="true")
+        self.one("'skill' must be", skill="scraper")
+        self.one("'at' must be an ISO 8601 timestamp", at=1760336062)
+        self.one("'at' needs a UTC offset", at="2026-10-13T06:14:22")
+        self.one("'runner' must be a string", runner=1)
+        self.one("'counts' must be an object", counts=[3, 1, 2, 41])
+        self.one("count 'added' must be an integer", counts={"added": "3"})
+        self.one("count 'total' must be an integer", counts={"total": True})
+        self.one("unknown count 'kept'", counts={"kept": 3})
+        self.one("'failed_sources' must be an integer", failed_sources=["Exil"])
+        self.one("'error' must be a string or null", error=403)
+        self.one("unknown field 'message'", message="x")
+
+
 class RunDetails(unittest.TestCase):
     def test_counters_must_be_integers_not_bools_and_lists_must_be_lists(self):
         base = {"skill": "harvest-bands", "at": "2026-11-01T05:10:00+01:00"}

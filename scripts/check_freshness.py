@@ -123,7 +123,7 @@ def assess(now, max_age):
             reason = status.get("error") or status.get("message") or "no reason given"
             problems.append(f"last run reported failure: {reason}")
     else:
-        info.append("status.json: missing (scraper skill does not write it yet)")
+        info.append("status.json: missing (no run has written the heartbeat yet)")
 
     if isinstance(shows, dict) and "__error__" not in shows:
         n = len(shows.get("shows") or [])
