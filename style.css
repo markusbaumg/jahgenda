@@ -1479,3 +1479,43 @@ a {
 .act.tickets {
   color: var(--green-text);
 }
+
+/* Row actions only on hover / focus (always on touch screens); a marked star stays visible. */
+@media (hover: hover) {
+  .show .actions {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .show:hover .actions,
+  .show:focus-within .actions {
+    opacity: 1;
+  }
+  .show.interested .actions .star,
+  .show.going .actions .star {
+    opacity: 1;
+  }
+  .show .actions .star {
+    transition: opacity 0.15s;
+  }
+}
+.foot-row {
+  align-items: center;
+  min-height: 30px;
+}
+.foot-row .tags {
+  align-items: center;
+}
+.foot-row .actions {
+  align-items: center;
+  margin-left: auto;
+}
+.act {
+  line-height: 1;
+  height: 26px;
+}
+.tag-chip {
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+}
