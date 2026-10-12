@@ -1339,6 +1339,20 @@ body {
 .filters.stuck .mini-brand {
   display: inline-flex;
 }
+.mini-tag {
+  display: none;
+  float: right;
+  margin-top: 2px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 55%;
+}
+.filters.stuck .mini-tag {
+  display: inline-block;
+}
 
 /* Map: tiles toned down to sit on the dark page; legend under the map. */
 .map .leaflet-tile-pane {

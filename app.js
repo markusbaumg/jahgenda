@@ -2,6 +2,7 @@
   const DATA_URL = "data/shows.json";
   const VENUES_URL = "data/venues.json";
   const GENRES_URL = "data/genres.json";
+  const SLOGANS_URL = "data/slogans.json";
   let genreOrder = []; // slugs in display order (from data/genres.json)
   let genreLabel = {}; // slug → label
   let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
@@ -363,6 +364,21 @@
       )
       .join("");
   }
+
+  // Tagline: one of the slogans (same lines as on the stickers), rotating by day.
+  fetch(SLOGANS_URL, { cache: "no-cache" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      const list = (d && d.slogans) || [];
+      if (!list.length) return;
+      const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
+      const line = list[dayOfYear % list.length];
+      const tag = el("tagline");
+      if (tag) tag.textContent = line;
+      const mini = el("mini-tag");
+      if (mini) mini.textContent = line;
+    })
+    .catch(() => {});
 
   async function init() {
     try {
