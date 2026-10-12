@@ -25,6 +25,7 @@ Usage: python3 scripts/check_venues.py [--max-distance M] [--only NAME ...] [--j
   --only NAME        check only the venues named (repeatable, case-insensitive)
   --json FILE        also write the raw Nominatim hits (up to 3 per query) to FILE
 Exit code 0 = everything OK/CITY, 1 = at least one CHECK or lookup error.
+If Nominatim keeps answering 429/503 (rate limit) the run stops early - wait a few minutes.
 """
 import argparse
 import json
@@ -45,6 +46,12 @@ MIN_INTERVAL = 1.05  # seconds between requests (Nominatim policy: max 1/s)
 COUNTRIES = "ch,de,fr,it,at,li"  # Switzerland plus the neighbours (criteria.md: grenznah)
 CITY_CENTRE_MARK = "Koordinaten: Stadtmitte"
 CITY_RADIUS_M = 1500
+BACKOFFS = (10, 30, 60)  # seconds to wait after HTTP 429/503 before retrying
+
+
+class RateLimited(Exception):
+    """Nominatim kept answering 429/503 through all retries - the whole run stops, retrying
+    the remaining venues would only prolong the block."""
 
 # Nominatim names some cities in another language than venues.json does.
 CITY_ALIASES = {
@@ -78,14 +85,16 @@ def nominatim(query, limit=3):
     params = {"q": query, "format": "json", "limit": str(limit), "countrycodes": COUNTRIES}
     url = NOMINATIM + "?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept-Language": "de,fr,en"})
-    for attempt, backoff in enumerate((10, 30, 60), start=1):
+    for backoff in BACKOFFS + (None,):
         _last_request = time.monotonic()
         try:
             with urllib.request.urlopen(req, timeout=30) as resp:
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
-            if e.code not in (429, 503) or attempt == 3:
+            if e.code not in (429, 503):
                 raise
+            if backoff is None:
+                raise RateLimited(f"HTTP {e.code} after {len(BACKOFFS)} retries") from e
             print(f"  (Nominatim {e.code}, waiting {backoff}s)", file=sys.stderr)
             time.sleep(backoff)
 
@@ -149,7 +158,7 @@ def main(argv):
     header = f"{'name':{width}} | {'stored':15} | {'nominatim':15} | {'distance_m':>10} | status"
     print(header)
     print("-" * len(header))
-    for name, v in venues.items():
+    for checked, (name, v) in enumerate(venues.items()):
         stored = fmt_point(v["lat"], v["lon"])
         city_centre = CITY_CENTRE_MARK in (v.get("hint") or "")
         try:
@@ -158,6 +167,11 @@ def main(argv):
                 hits, city_only = nominatim(query), True
             else:
                 hits, query, city_only = lookup(name, v["city"])
+        except RateLimited as e:
+            print(f"{name:{width}} | {stored:15} | {'-':15} | {'-':>10} | ERROR {e}")
+            print(f"\nNominatim is rate-limiting this machine ({e}) - stopped, {len(venues) - checked} venue(s) "
+                  "not checked. Wait a few minutes and run again.", file=sys.stderr)
+            return 1
         except (urllib.error.URLError, TimeoutError, ValueError) as e:
             print(f"{name:{width}} | {stored:15} | {'-':15} | {'-':>10} | ERROR {e}")
             problems += 1
