@@ -2444,3 +2444,9 @@ a:hover {
 .actions .act:hover {
   color: var(--gold);
 }
+
+/* Breathing room between the filter block and the view switch */
+.results {
+  margin-top: 22px;
+  margin-bottom: 6px;
+}
