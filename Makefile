@@ -26,7 +26,7 @@ validate: ## Validate data/*.json (past shows allowed, as in CI)
 validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 	python3 scripts/validate_shows.py
 
-test: ## Unit tests for validator, formatter and watchdog
+test: ## Unit tests for validator, formatter, watchdog and venue check
 	python3 -m unittest discover -s tests -v
 
 lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
