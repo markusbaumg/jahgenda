@@ -94,20 +94,14 @@
     const rad = (x) => (x * Math.PI) / 180;
     const dLat = rad(b.lat - a.lat);
     const dLon = rad(b.lon - a.lon);
-    const h =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
     return 2 * 6371 * Math.asin(Math.sqrt(h));
   }
 
-  const formatKm = (km) =>
-    km < 1
-      ? "gleich ums Eck"
-      : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+  const formatKm = (km) => (km < 1 ? "gleich ums Eck" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`);
 
   function distanceLabel(s) {
-    if (!here || typeof s.lat !== "number" || typeof s.lon !== "number")
-      return "";
+    if (!here || typeof s.lat !== "number" || typeof s.lon !== "number") return "";
     return ` · <span class="dist">${formatKm(distanceKm(here, s))}</span>`;
   }
 
@@ -128,8 +122,7 @@
     return h.toString(36);
   }
   // Resolve a hash token to a show: short hash first, full id as fallback (old links keep working).
-  const findShow = (token) =>
-    shows.find((s) => s._short === token) || shows.find((s) => s.id === token);
+  const findShow = (token) => shows.find((s) => s._short === token) || shows.find((s) => s.id === token);
 
   const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
 
@@ -141,21 +134,11 @@
   function vevent(s, status) {
     const d = s.date.replace(/-/g, "");
     const esc = (t) =>
-      String(t)
-        .replace(/\\/g, "\\\\")
-        .replace(/;/g, "\\;")
-        .replace(/,/g, "\\,")
-        .replace(/\n/g, "\\n");
+      String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
     let when;
     if (s.time) {
       const [h, m] = s.time.split(":").map(Number);
-      const end = new Date(
-        s._day.getFullYear(),
-        s._day.getMonth(),
-        s._day.getDate(),
-        h + 3,
-        m,
-      );
+      const end = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h + 3, m);
       const pad = (n) => String(n).padStart(2, "0");
       const stamp = (x) =>
         `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
@@ -178,14 +161,7 @@
   }
 
   const icsWrap = (events) =>
-    [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Jahgenda//DE",
-      ...events,
-      "END:VCALENDAR",
-      "",
-    ].join("\r\n");
+    ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Jahgenda//DE", ...events, "END:VCALENDAR", ""].join("\r\n");
 
   // Build an .ics file for one show.
   const icsFor = (s) => icsWrap(vevent(s));
@@ -256,14 +232,7 @@
       if (canton && s.canton !== canton) return false;
       if (activeGenre && !s.genres.includes(activeGenre)) return false;
       if (!q) return true;
-      return [
-        s.title,
-        s.venue,
-        s.city,
-        regionName(s.canton),
-        ...s.genres,
-        ...s.acts,
-      ]
+      return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
         .join(" ")
         .toLowerCase()
         .includes(q);
@@ -271,13 +240,9 @@
 
     const filtered = Boolean(canton || activeGenre || q || mineOnly);
     el("clear-filters").hidden = !filtered;
-    const past = mineOnly
-      ? markedShows().filter((s) => s._past).length
-      : pastCount;
+    const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
     togglePast.hidden = past === 0;
-    togglePast.textContent = showPast
-      ? "Vergangene ausblenden"
-      : `Vergangene anzeigen (${past})`;
+    togglePast.textContent = showPast ? "Vergangene ausblenden" : `Vergangene anzeigen (${past})`;
     updateMine();
     if (!visible.length) {
       list.innerHTML = "";
@@ -291,8 +256,7 @@
     const first = visible[0]._day;
     const last = visible[visible.length - 1]._day;
     const span =
-      first.getMonth() === last.getMonth() &&
-      first.getFullYear() === last.getFullYear()
+      first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
         ? monthFmt.format(first)
         : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
     resultsText.textContent = `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}`;
@@ -327,35 +291,22 @@
         .map((s) => ({
           ...s,
           _day: parseDay(s.date),
-          genres: Array.isArray(s.genres)
-            ? s.genres.map((g) => String(g).toLowerCase())
-            : [],
+          genres: Array.isArray(s.genres) ? s.genres.map((g) => String(g).toLowerCase()) : [],
           acts: Array.isArray(s.acts) ? s.acts.map(String).filter(Boolean) : [],
         }))
         .map((s) => ({ ...s, _past: s._day < today, _short: shortId(s.id) }))
-        .sort(
-          (a, b) =>
-            a._day - b._day || (a.time || "").localeCompare(b.time || ""),
-        );
+        .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
 
       pastCount = shows.filter((s) => s._past).length;
-      const used = [
-        ...new Set(shows.map((s) => s.canton).filter(Boolean)),
-      ].sort();
+      const used = [...new Set(shows.map((s) => s.canton).filter(Boolean))].sort();
       cantonSelect.insertAdjacentHTML(
         "beforeend",
-        used
-          .map(
-            (c) =>
-              `<option value="${escape(c)}">${escape(regionName(c))}</option>`,
-          )
-          .join(""),
+        used.map((c) => `<option value="${escape(c)}">${escape(regionName(c))}</option>`).join(""),
       );
 
       // Genre chips: one toggle per genre that occurs at least once, most common first.
       const counts = new Map();
-      for (const s of shows)
-        for (const g of s.genres) counts.set(g, (counts.get(g) || 0) + 1);
+      for (const s of shows) for (const g of s.genres) counts.set(g, (counts.get(g) || 0) + 1);
       genreBar.innerHTML =
         `<button type="button" class="chip" data-genre="" aria-pressed="true">Alle</button>` +
         [...counts]
@@ -369,8 +320,7 @@
 
       if (data.updated) {
         const note = data.source === "mock" ? " · Beispieldaten" : "";
-        el("updated").textContent =
-          `Stand: ${stampFmt.format(new Date(data.updated))}${note}`;
+        el("updated").textContent = `Stand: ${stampFmt.format(new Date(data.updated))}${note}`;
       }
       render();
       revealFromHash();
@@ -384,8 +334,7 @@
   list.addEventListener("click", (e) => {
     const c = e.target.closest(".canton[data-canton]");
     if (!c) return;
-    cantonSelect.value =
-      cantonSelect.value === c.dataset.canton ? "" : c.dataset.canton;
+    cantonSelect.value = cantonSelect.value === c.dataset.canton ? "" : c.dataset.canton;
     renderAndKeepInView();
   });
 
@@ -482,15 +431,13 @@
                   .join(", ")}</span>`
               : "");
         } else {
-          geoStatus.textContent =
-            "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
+          geoStatus.textContent = "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
         }
         render();
       },
       () => {
         locateBtn.disabled = false;
-        geoStatus.textContent =
-          "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+        geoStatus.textContent = "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
@@ -557,8 +504,7 @@
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !mineOnly || n === 0;
     if (!minePanel.hidden)
-      el("mine-wa").href =
-        `https://wa.me/?text=${encodeURIComponent(`Meine Reggae-Shows: ${mineUrl()}`)}`;
+      el("mine-wa").href = `https://wa.me/?text=${encodeURIComponent(`Meine Reggae-Shows: ${mineUrl()}`)}`;
   }
 
   function cycleMark(s, row) {
@@ -594,11 +540,7 @@
     if (!btn) return;
     if (btn.dataset.mine === "ics")
       downloadIcs(
-        icsWrap(
-          markedShows().flatMap((s) =>
-            vevent(s, marks[s.id] === "going" ? "CONFIRMED" : "TENTATIVE"),
-          ),
-        ),
+        icsWrap(markedShows().flatMap((s) => vevent(s, marks[s.id] === "going" ? "CONFIRMED" : "TENTATIVE"))),
         "meine-shows.ics",
       );
     if (btn.dataset.mine === "share") {
@@ -649,8 +591,7 @@
     const btn = e.target.closest("[data-shared]");
     if (!btn) return;
     if (btn.dataset.shared === "take") {
-      for (const id in shared)
-        if (marks[id] !== "going") marks[id] = "interested";
+      for (const id in shared) if (marks[id] !== "going") marks[id] = "interested";
       saveMarks();
       mineOnly = true;
     }
@@ -665,30 +606,22 @@
 
   // Month headings stick below the filter bar, so expose its real height to CSS.
   const setBarHeight = () =>
-    document.documentElement.style.setProperty(
-      "--bar-h",
-      `${filters.offsetHeight}px`,
-    );
+    document.documentElement.style.setProperty("--bar-h", `${filters.offsetHeight}px`);
   setBarHeight();
-  if ("ResizeObserver" in window)
-    new ResizeObserver(setBarHeight).observe(filters);
+  if ("ResizeObserver" in window) new ResizeObserver(setBarHeight).observe(filters);
 
   // Show a divider under the filter bar only once it is actually stuck.
   if ("IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) =>
-      filters.classList.toggle("stuck", !entry.isIntersecting),
-    ).observe(el("stuck-sentinel"));
+    new IntersectionObserver(([entry]) => filters.classList.toggle("stuck", !entry.isIntersecting)).observe(
+      el("stuck-sentinel"),
+    );
   }
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
   function renderAndKeepInView() {
     render();
-    const listTop =
-      list.getBoundingClientRect().top +
-      window.scrollY -
-      filters.offsetHeight -
-      8;
+    const listTop = list.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
     if (window.scrollY > listTop) window.scrollTo({ top: listTop });
   }
 
@@ -696,8 +629,7 @@
   const genreWrap = genreBar.parentElement;
   function updateChipArrows() {
     const canLeft = genreBar.scrollLeft > 2;
-    const canRight =
-      genreBar.scrollLeft + genreBar.clientWidth < genreBar.scrollWidth - 2;
+    const canRight = genreBar.scrollLeft + genreBar.clientWidth < genreBar.scrollWidth - 2;
     genreWrap.classList.toggle("can-left", canLeft);
     genreWrap.classList.toggle("can-right", canRight);
     genreWrap.querySelector(".scroll-btn.left").hidden = !canLeft;

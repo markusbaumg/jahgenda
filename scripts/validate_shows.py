@@ -12,6 +12,7 @@ Exit code 0 = valid, 1 = problems found (printed one per line).
 The list of allowed genre slugs is read from scraper/criteria.md, section
 "## Genre slugs" (every backticked word in that section).
 """
+
 import json
 import re
 import sys
@@ -26,8 +27,32 @@ VENUES = ROOT / "data" / "venues.json"
 CRITERIA = ROOT / "scraper" / "criteria.md"
 
 CANTONS = {
-    "AG", "AI", "AR", "BE", "BL", "BS", "FR", "GE", "GL", "GR", "JU", "LU", "NE",
-    "NW", "OW", "SG", "SH", "SO", "SZ", "TG", "TI", "UR", "VD", "VS", "ZG", "ZH",
+    "AG",
+    "AI",
+    "AR",
+    "BE",
+    "BL",
+    "BS",
+    "FR",
+    "GE",
+    "GL",
+    "GR",
+    "JU",
+    "LU",
+    "NE",
+    "NW",
+    "OW",
+    "SG",
+    "SH",
+    "SO",
+    "SZ",
+    "TG",
+    "TI",
+    "UR",
+    "VD",
+    "VS",
+    "ZG",
+    "ZH",
 }
 # Neighbouring countries for shows just across the border (vehicle codes, no clash with cantons).
 ABROAD = {"D", "F", "I", "A", "FL"}
@@ -44,8 +69,14 @@ MAX_GENRES = 3
 
 SHOW_REQUIRED = {"id": str, "date": str, "title": str, "venue": str, "city": str, "canton": str}
 SHOW_OPTIONAL = {
-    "time": str, "url": str, "tickets": str, "source_url": str, "lat": (int, float), "lon": (int, float),
-    "genres": list, "acts": list,
+    "time": str,
+    "url": str,
+    "tickets": str,
+    "source_url": str,
+    "lat": (int, float),
+    "lon": (int, float),
+    "genres": list,
+    "acts": list,
 }
 ARTIST_FIELDS = {"genres", "source", "checked", "festivals", "tour_checked"}
 VENUE_REQUIRED = {"city": str, "canton": str, "lat": (int, float), "lon": (int, float)}
@@ -126,7 +157,10 @@ def check_show(s, i, allow_past, today, allowed):
     if s.get("time") and not TIME_RE.match(s["time"]):
         errs.append(f"{where}: time must be HH:MM")
     if s["canton"] not in REGIONS:
-        errs.append(f"{where}: unknown canton '{s['canton']}' (cantons, or D/F/I/A/FL for shows just across the border)")
+        errs.append(
+            f"{where}: unknown canton '{s['canton']}' "
+            "(cantons, or D/F/I/A/FL for shows just across the border)"
+        )
     for key in ("url", "tickets", "source_url"):
         if s.get(key) and not URL_RE.match(s[key]):
             errs.append(f"{where}: {key} must start with http(s)://")
@@ -166,7 +200,9 @@ def check_venues(data):
         for key, typ in VENUE_REQUIRED.items():
             if key not in v:
                 errs.append(f"{where}: missing '{key}'")
-            elif not isinstance(v[key], typ) or isinstance(v[key], bool) or (typ is str and not v[key].strip()):
+            elif (
+                not isinstance(v[key], typ) or isinstance(v[key], bool) or (typ is str and not v[key].strip())
+            ):
                 errs.append(f"{where}: '{key}' has wrong type")
         for key, typ in VENUE_OPTIONAL.items():
             if key in v and not isinstance(v[key], typ):
@@ -215,14 +251,25 @@ def check_shows(data, allow_past, allowed, venue_keys=None):
             # Same night, same venue, same (or no) start time: almost certainly the same show twice.
             slot = (s["date"], re.sub(r"\W+", "", s["venue"].lower()), s.get("time") or "")
             if slot in seen_slots:
-                errs.append(f"shows[{i}] ({sid}): same date, venue and time as {seen_slots[slot]} — merge them")
+                errs.append(
+                    f"shows[{i}] ({sid}): same date, venue and time as {seen_slots[slot]} — merge them"
+                )
             else:
                 seen_slots[slot] = sid
         if source == "scraper" and not s.get("source_url"):
-            errs.append(f"shows[{i}] ({sid}): scraped shows need a 'source_url' pointing to where it was found")
-        if source == "scraper" and venue_keys is not None and isinstance(s.get("venue"), str) \
-                and venue_key(s["venue"]) not in venue_keys:
-            errs.append(f"shows[{i}] ({sid}): venue '{s['venue']}' is not in data/venues.json — add it with coordinates")
+            errs.append(
+                f"shows[{i}] ({sid}): scraped shows need a 'source_url' pointing to where it was found"
+            )
+        if (
+            source == "scraper"
+            and venue_keys is not None
+            and isinstance(s.get("venue"), str)
+            and venue_key(s["venue"]) not in venue_keys
+        ):
+            errs.append(
+                f"shows[{i}] ({sid}): venue '{s['venue']}' is not in data/venues.json — "
+                "add it with coordinates"
+            )
     return errs
 
 
@@ -254,7 +301,9 @@ def check_artists(data, allowed):
         src = a.get("source", "")
         if src and src != "manual" and not URL_RE.match(str(src)):
             errs.append(f"{where}: source must be a URL or 'manual'")
-        if "festivals" in a and not (isinstance(a["festivals"], list) and all(isinstance(f, str) for f in a["festivals"])):
+        if "festivals" in a and not (
+            isinstance(a["festivals"], list) and all(isinstance(f, str) for f in a["festivals"])
+        ):
             errs.append(f"{where}: 'festivals' must be a list of names")
         for k in ("checked", "tour_checked"):
             if k in a:
@@ -291,7 +340,9 @@ def check_runs(data):
             if key in r and not isinstance(r[key], list):
                 errs.append(f"{where}: '{key}' must be a list")
         for j, d in enumerate(r.get("dropped") or []):
-            if not (isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)):
+            if not (
+                isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)
+            ):
                 errs.append(f"{where}.dropped[{j}]: needs 'title' and 'why'")
     return errs
 
@@ -325,8 +376,8 @@ def main(argv):
         print(f"{len(errs)} problem(s) found")
         return 1
     print(
-        f"ok: {len(shows['shows'])} shows, {len(venues['venues'])} venues, {len(artists['artists'])} artists, "
-        f"{len(runs['runs'])} runs, {len(allowed)} genre slugs"
+        f"ok: {len(shows['shows'])} shows, {len(venues['venues'])} venues, "
+        f"{len(artists['artists'])} artists, {len(runs['runs'])} runs, {len(allowed)} genre slugs"
     )
     return 0
 

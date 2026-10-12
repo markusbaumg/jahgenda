@@ -1,9 +1,8 @@
 """Tests for scripts/validate_shows.py and scripts/format_data.py. Run: make test"""
+
 import copy
 import importlib.util
 import json
-import sys
-import tempfile
 import unittest
 from datetime import date, timedelta
 from pathlib import Path
@@ -28,9 +27,18 @@ ALLOWED = {"reggae", "dub", "ska", "roots"}
 
 def show(**over):
     base = {
-        "id": f"{TOMORROW}-dub-inc-bern", "date": TOMORROW, "time": "20:30", "title": "Dub Inc",
-        "venue": "Dachstock", "city": "Bern", "canton": "BE", "url": "https://x.ch/e",
-        "source_url": "https://x.ch/programm", "lat": 46.95, "lon": 7.44, "genres": ["reggae", "dub"],
+        "id": f"{TOMORROW}-dub-inc-bern",
+        "date": TOMORROW,
+        "time": "20:30",
+        "title": "Dub Inc",
+        "venue": "Dachstock",
+        "city": "Bern",
+        "canton": "BE",
+        "url": "https://x.ch/e",
+        "source_url": "https://x.ch/programm",
+        "lat": 46.95,
+        "lon": 7.44,
+        "genres": ["reggae", "dub"],
     }
     base.update(over)
     return base
@@ -82,10 +90,20 @@ class ShowChecks(unittest.TestCase):
         self.assertTrue(any("both" in e for e in self.errs(shows_doc(s))))
 
     def test_genres_from_allowed_list_max_three_no_duplicates(self):
-        self.assertTrue(any("not in the 'Genre slugs'" in e for e in self.errs(shows_doc(show(genres=["jazz"])))))
-        self.assertTrue(any("at most 3" in e for e in self.errs(shows_doc(show(genres=["reggae", "dub", "ska", "roots"])))))
-        self.assertTrue(any("duplicate genre" in e for e in self.errs(shows_doc(show(genres=["dub", "dub"])))))
-        self.assertTrue(any("must be a lowercase slug" in e for e in self.errs(shows_doc(show(genres=["Dub Techno"])))))
+        self.assertTrue(
+            any("not in the 'Genre slugs'" in e for e in self.errs(shows_doc(show(genres=["jazz"]))))
+        )
+        self.assertTrue(
+            any(
+                "at most 3" in e for e in self.errs(shows_doc(show(genres=["reggae", "dub", "ska", "roots"])))
+            )
+        )
+        self.assertTrue(
+            any("duplicate genre" in e for e in self.errs(shows_doc(show(genres=["dub", "dub"]))))
+        )
+        self.assertTrue(
+            any("must be a lowercase slug" in e for e in self.errs(shows_doc(show(genres=["Dub Techno"]))))
+        )
 
     def test_duplicate_id_and_same_slot(self):
         a, b = show(), show(id=f"{TOMORROW}-dub-inc-support-bern", title="Dub Inc + Support")
@@ -94,11 +112,16 @@ class ShowChecks(unittest.TestCase):
         errs = self.errs(shows_doc(a, b))
         self.assertTrue(any("same date, venue and time" in e for e in errs))
         # two events in one venue on one night with different times are fine
-        self.assertEqual(self.errs(shows_doc(a, show(id=f"{TOMORROW}-afterparty-bern", time="23:00", title="Afterparty"))), [])
+        self.assertEqual(
+            self.errs(shows_doc(a, show(id=f"{TOMORROW}-afterparty-bern", time="23:00", title="Afterparty"))),
+            [],
+        )
 
     def test_tickets_url(self):
         self.assertEqual(self.errs(shows_doc(show(tickets="https://petzi.ch/e/1"))), [])
-        self.assertTrue(any("tickets must start" in e for e in self.errs(shows_doc(show(tickets="petzi.ch")))))
+        self.assertTrue(
+            any("tickets must start" in e for e in self.errs(shows_doc(show(tickets="petzi.ch"))))
+        )
 
     def test_acts_must_be_strings(self):
         self.assertTrue(any("'acts'" in e for e in self.errs(shows_doc(show(acts=[1])))))
@@ -115,7 +138,12 @@ class ArtistChecks(unittest.TestCase):
         return V.check_artists({"artists": artists}, ALLOWED)
 
     def test_valid(self):
-        self.assertEqual(self.errs({"Dub Inc": {"genres": ["reggae"], "source": "https://w.org/x", "checked": "2026-10-12"}}), [])
+        self.assertEqual(
+            self.errs(
+                {"Dub Inc": {"genres": ["reggae"], "source": "https://w.org/x", "checked": "2026-10-12"}}
+            ),
+            [],
+        )
         self.assertEqual(self.errs({"Dub Inc": {"genres": ["reggae"], "source": "manual"}}), [])
 
     def test_genres_required_list_and_allowed(self):
@@ -124,9 +152,13 @@ class ArtistChecks(unittest.TestCase):
         self.assertTrue(any("not in the 'Genre slugs'" in e for e in self.errs({"A": {"genres": ["pop"]}})))
 
     def test_unknown_field_and_bad_dates_and_source(self):
-        self.assertTrue(any("unknown field" in e for e in self.errs({"A": {"genres": [], "tourchecked": "2026-01-01"}})))
+        self.assertTrue(
+            any("unknown field" in e for e in self.errs({"A": {"genres": [], "tourchecked": "2026-01-01"}}))
+        )
         self.assertTrue(any("'checked'" in e for e in self.errs({"A": {"genres": [], "checked": "gestern"}})))
-        self.assertTrue(any("source must be" in e for e in self.errs({"A": {"genres": [], "source": "wikipedia"}})))
+        self.assertTrue(
+            any("source must be" in e for e in self.errs({"A": {"genres": [], "source": "wikipedia"}}))
+        )
 
     def test_near_duplicate_names(self):
         errs = self.errs({"Dub Inc": {"genres": []}, "DUB INC.": {"genres": []}})
@@ -139,15 +171,28 @@ class ArtistChecks(unittest.TestCase):
 
 class VenueChecks(unittest.TestCase):
     def test_venues_and_show_lookup(self):
-        errs, keys = V.check_venues({"venues": {"Dachstock": {"city": "Bern", "canton": "BE", "lat": 46.95, "lon": 7.44, "scrape": True}}})
+        errs, keys = V.check_venues(
+            {
+                "venues": {
+                    "Dachstock": {"city": "Bern", "canton": "BE", "lat": 46.95, "lon": 7.44, "scrape": True}
+                }
+            }
+        )
         self.assertEqual(errs, [])
         self.assertIn("dachstock", keys)
         # show at a known venue (spelling differs only in case/punctuation) passes, unknown venue fails
         self.assertEqual(V.check_shows(shows_doc(show(venue="DACHSTOCK")), False, ALLOWED, keys), [])
-        self.assertTrue(any("not in data/venues.json" in e for e in V.check_shows(shows_doc(show(venue="Nowhere")), False, ALLOWED, keys)))
+        self.assertTrue(
+            any(
+                "not in data/venues.json" in e
+                for e in V.check_shows(shows_doc(show(venue="Nowhere")), False, ALLOWED, keys)
+            )
+        )
 
     def test_venue_errors(self):
-        errs, _ = V.check_venues({"venues": {"A": {"city": "X", "canton": "XX", "lat": 1, "lon": 1, "foo": 1}, "a": None}})
+        errs, _ = V.check_venues(
+            {"venues": {"A": {"city": "X", "canton": "XX", "lat": 1, "lon": 1, "foo": 1}, "a": None}}
+        )
         self.assertTrue(any("unknown canton" in e for e in errs))
         self.assertTrue(any("outside" in e for e in errs))
         self.assertTrue(any("unknown field" in e for e in errs))
@@ -157,8 +202,19 @@ class VenueChecks(unittest.TestCase):
 
 class RunChecks(unittest.TestCase):
     def test_runs(self):
-        ok = {"runs": [{"skill": "scrape-shows", "at": "2026-10-13T06:00:00+02:00", "added": 1, "total": 1,
-                        "dropped": [{"title": "X", "why": "Y"}], "failed_sources": [], "notes": []}]}
+        ok = {
+            "runs": [
+                {
+                    "skill": "scrape-shows",
+                    "at": "2026-10-13T06:00:00+02:00",
+                    "added": 1,
+                    "total": 1,
+                    "dropped": [{"title": "X", "why": "Y"}],
+                    "failed_sources": [],
+                    "notes": [],
+                }
+            ]
+        }
         self.assertEqual(V.check_runs(ok), [])
         bad = {"runs": [{"skill": "other", "at": "x", "added": "1", "dropped": [{"title": 1}]}]}
         self.assertGreaterEqual(len(V.check_runs(bad)), 4)
@@ -183,14 +239,19 @@ class RepoData(unittest.TestCase):
 
 class Formatter(unittest.TestCase):
     def test_shows_sorted_and_one_per_line(self):
-        doc = shows_doc(show(date="2027-01-02", id="2027-01-02-b-bern", title="B"), show(date="2027-01-01", id="2027-01-01-a-bern", title="A"))
+        doc = shows_doc(
+            show(date="2027-01-02", id="2027-01-02-b-bern", title="B"),
+            show(date="2027-01-01", id="2027-01-01-a-bern", title="A"),
+        )
         out = F.format_shows(doc)
         self.assertLess(out.index('"2027-01-01-a-bern"'), out.index('"2027-01-02-b-bern"'))
         self.assertEqual(out.count("\n    {"), 2)
         self.assertEqual(json.loads(out)["source"], "scraper")
 
     def test_artists_sorted_case_insensitive(self):
-        out = F.format_artists({"artists": {"b": {"genres": []}, "A": {"checked": "2026-01-01", "genres": []}}})
+        out = F.format_artists(
+            {"artists": {"b": {"genres": []}, "A": {"checked": "2026-01-01", "genres": []}}}
+        )
         data = json.loads(out)
         self.assertEqual(list(data["artists"]), ["A", "b"])
         self.assertEqual(list(data["artists"]["A"]), ["genres", "checked"])

@@ -2,48 +2,32 @@
 <html lang="de-CH">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Jahgenda · Reggae-Konzerte in der Schweiz</title>
-    <meta
-      name="description"
-      content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz."
-    />
+    <meta name="description" content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz." />
     <meta name="theme-color" content="#14110e" />
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Jahgenda" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="stripe" aria-hidden="true">
-      <span></span><span></span><span></span>
-    </div>
+    <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
 
     <header class="wrap head" id="top">
       <h1 class="logo">
-        <img
-          class="logo-mark"
-          src="img/logo/jahgenda.svg"
-          alt=""
-          width="48"
-          height="48"
-        />Jah<span>genda</span>
+        <img class="logo-mark" src="img/logo/jahgenda.svg" alt="" width="48" height="48" />Jah<span
+          >genda</span
+        >
       </h1>
       <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
       <p class="notice">
-        <strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im
-        Netz gesucht und zusammengetragen. Wirf vor dem Konzert kurz einen Blick
-        auf die Seite des Veranstalters, dort findest du Datum, Zeit und Ort
-        immer topaktuell.
+        <strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im Netz gesucht und
+        zusammengetragen. Wirf vor dem Konzert kurz einen Blick auf die Seite des Veranstalters, dort findest
+        du Datum, Zeit und Ort immer topaktuell.
       </p>
     </header>
 
@@ -51,12 +35,7 @@
       <div id="stuck-sentinel" aria-hidden="true"></div>
       <form class="filters" id="filters" role="search" onsubmit="return false">
         <a class="mini-brand" href="#top" aria-label="Nach oben"
-          ><img
-            src="img/logo/jahgenda.svg"
-            alt=""
-            width="20"
-            height="20"
-          />Jah<span>genda</span></a
+          ><img src="img/logo/jahgenda.svg" alt="" width="20" height="20" />Jah<span>genda</span></a
         >
         <div class="toolbar">
           <label class="sr" for="q">Suche</label>
@@ -67,12 +46,7 @@
                 d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"
               />
             </svg>
-            <input
-              id="q"
-              type="search"
-              placeholder="Band, Club, Ort …"
-              autocomplete="off"
-            />
+            <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off" />
           </div>
           <label class="sr" for="canton">Kanton</label>
           <select id="canton">
@@ -133,22 +107,12 @@
         </div>
       </form>
       <p id="geo-status" class="geo-status" role="status"></p>
-      <div
-        id="shared"
-        class="shared"
-        role="region"
-        aria-label="Geteilte Liste"
-        hidden
-      ></div>
+      <div id="shared" class="shared" role="region" aria-label="Geteilte Liste" hidden></div>
 
       <p id="results" class="results" aria-live="polite">
         <span id="results-text"></span>
-        <button type="button" id="clear-filters" class="linkish clear" hidden>
-          ✕ Filter zurücksetzen
-        </button>
-        <button type="button" id="toggle-past" class="linkish" hidden>
-          Vergangene anzeigen
-        </button>
+        <button type="button" id="clear-filters" class="linkish clear" hidden>✕ Filter zurücksetzen</button>
+        <button type="button" id="toggle-past" class="linkish" hidden>Vergangene anzeigen</button>
       </p>
       <div id="mine-panel" class="mine-panel" hidden></div>
       <div id="list"></div>
@@ -171,19 +135,16 @@
           />
           <div>
             <p>
-              Wir sind Kusi und Seraina. Die Reggae-Szene in der Schweiz schenkt
-              uns seit Jahren wunderbare Abende, schöne Begegnungen und beste
-              Vibes. Mit Jahgenda geben wir der Community etwas zurück: alle
-              Reggae-, Dub- und Ska-Konzerte an einem Ort, frei und für alle. So
-              findet jede und jeder die nächste gute Session, und die Clubs und
-              Soundsystems, die unsere Szene lebendig machen, bekommen volle
-              Tanzflächen.
+              Wir sind Kusi und Seraina. Die Reggae-Szene in der Schweiz schenkt uns seit Jahren wunderbare
+              Abende, schöne Begegnungen und beste Vibes. Mit Jahgenda geben wir der Community etwas zurück:
+              alle Reggae-, Dub- und Ska-Konzerte an einem Ort, frei und für alle. So findet jede und jeder
+              die nächste gute Session, und die Clubs und Soundsystems, die unsere Szene lebendig machen,
+              bekommen volle Tanzflächen.
             </p>
             <p>
-              Die Konzerte tragen KI-Agenten für uns zusammen, damit die Agenda
-              immer aktuell ist. Die neuesten Details findest du jeweils auf der
-              Seite des Clubs oder Veranstalters – ein kurzer Blick dorthin
-              lohnt sich vor jedem Konzert.
+              Die Konzerte tragen KI-Agenten für uns zusammen, damit die Agenda immer aktuell ist. Die
+              neuesten Details findest du jeweils auf der Seite des Clubs oder Veranstalters – ein kurzer
+              Blick dorthin lohnt sich vor jedem Konzert.
             </p>
             <p class="authors">
               Gemacht von <strong>Kusi</strong> &amp; <strong>Seraina</strong> ·
@@ -201,15 +162,11 @@
         <img src="img/logo/jahgenda.svg" alt="" width="40" height="40" />
       </div>
       <div class="install-body"></div>
-      <button type="button" class="install-close" aria-label="Schliessen">
-        &times;
-      </button>
+      <button type="button" class="install-close" aria-label="Schliessen">&times;</button>
     </aside>
 
     <script src="app.js"></script>
     <script src="pwa.js"></script>
-    <div class="stripe bottom" aria-hidden="true">
-      <span></span><span></span><span></span>
-    </div>
+    <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
   </body>
 </html>

@@ -1,13 +1,20 @@
-name: Validate data
+# Runs on every push and pull request: `make ci` = lint (node, ruff, prettier) + validate + test + data format.
+# Same as `make check` locally. The deploy (pages.yml) validates the data once more before uploading.
+name: CI
 
 on:
   pull_request:
   push:
-    branches-ignore: [main]
 
 jobs:
-  validate:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 scripts/validate_shows.py --allow-past
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install ruff
+        run: pip install --quiet ruff
+      - name: make ci
+        run: make ci

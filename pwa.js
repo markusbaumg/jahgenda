@@ -4,8 +4,7 @@
   const DISMISS_KEY = "jahgenda.install.dismissed"; // timestamp of the last "×", or "forever"
   const DISMISS_DAYS = 30;
   const standalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true;
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
   const store = {
     get(k) {
@@ -34,14 +33,12 @@
           if (!sw) return;
           sw.addEventListener("statechange", () => {
             // A new worker is installed while an old one controls the page → offer a reload.
-            if (sw.state === "installed" && navigator.serviceWorker.controller)
-              showUpdateToast(reg);
+            if (sw.state === "installed" && navigator.serviceWorker.controller) showUpdateToast(reg);
           });
         });
         // Check for a new version each time the app comes back to the foreground.
         document.addEventListener("visibilitychange", () => {
-          if (document.visibilityState === "visible")
-            reg.update().catch(() => {});
+          if (document.visibilityState === "visible") reg.update().catch(() => {});
         });
       } catch (err) {
         console.warn("Service worker not registered:", err);
@@ -72,16 +69,11 @@
 
   const dismissed = store.get(DISMISS_KEY);
   if (dismissed === "forever") return;
-  if (
-    Number(dismissed) &&
-    Date.now() - Number(dismissed) < DISMISS_DAYS * 86400e3
-  )
-    return;
+  if (Number(dismissed) && Date.now() - Number(dismissed) < DISMISS_DAYS * 86400e3) return;
 
   const ua = navigator.userAgent;
   const isIOS =
-    /iPhone|iPad|iPod/.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|Chrome/.test(ua);
   let deferredPrompt = null;
 

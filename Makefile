@@ -6,7 +6,7 @@ PORT ?= 8000
 WEB_FILES := index.html log.html style.css app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check ci
 
 help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -26,19 +26,23 @@ validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 test: ## Unit tests for validator and formatter
 	python3 -m unittest discover -s tests -v
 
-lint: ## Syntax and format check (JS, Python, HTML/CSS via prettier)
-	node --check app.js
-	python3 -m py_compile $(PY_FILES)
+lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
+	node --check app.js pwa.js sw.js
+	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
 	npx --yes prettier@3.3.3 --check $(WEB_FILES)
 
-fmt: ## Format code (prettier for HTML/CSS/JS) and normalise data
+fmt: ## Format code (prettier for HTML/CSS/JS, ruff if installed) and normalise data
 	npx --yes prettier@3.3.3 --write $(WEB_FILES)
+	@if ruff --version >/dev/null 2>&1; then ruff format scripts tests && ruff check --fix scripts tests; fi
 	$(MAKE) fmt-data
 
 fmt-data: ## Bring data/*.json into canonical form (sorting, indentation)
 	python3 scripts/format_data.py
 
 check: lint validate test ## Run everything (before every commit)
+	python3 scripts/format_data.py --check
+
+ci: check ## What GitHub Actions runs (validate.yml)
 
 scrape: ## Scrape shows now (Claude Code, runs on the subscription)
 	claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"

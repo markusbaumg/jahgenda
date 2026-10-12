@@ -1,0 +1,15 @@
+# Configuration only – the project has no Python dependencies (stdlib only).
+# `make lint` uses ruff when installed (pip install ruff), otherwise python3 -m py_compile.
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+src = ["scripts", "tests"]
+
+[tool.ruff.lint]
+# Explicit instead of defaults so a ruff update does not bring new rules unannounced:
+# syntax/logic (E4, E7, E9, F), long lines (E501), whitespace (W), import order (I).
+select = ["E4", "E7", "E9", "F", "E501", "W", "I"]
+
+[tool.ruff.format]
+quote-style = "double"

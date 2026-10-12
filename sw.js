@@ -25,9 +25,7 @@ const SHELL = [
   "img/icons/icon-512.png",
 ];
 const CANTONS =
-  "AG AI AR BE BL BS FR GE GL GR JU LU NE NW OW SG SH SO SZ TG TI UR VD VS ZG ZH D F I A FL".split(
-    " ",
-  );
+  "AG AI AR BE BL BS FR GE GL GR JU LU NE NW OW SG SH SO SZ TG TI UR VD VS ZG ZH D F I A FL".split(" ");
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -66,11 +64,7 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  if (
-    url.origin === location.origin &&
-    url.pathname.includes("/data/") &&
-    url.pathname.endsWith(".json")
-  ) {
+  if (url.origin === location.origin && url.pathname.includes("/data/") && url.pathname.endsWith(".json")) {
     event.respondWith(networkFirst(req, DATA_CACHE));
     return;
   }
