@@ -28,6 +28,14 @@
       "scrape": true,
       "hint": "Agenda is paginated (?page=1..3) and server-rendered: cards with 'DD. Monat YYYY', title, room and 'HH:MM–HH:MM Uhr', no genres; third-party concerts (e.g. David Rodigan 19.12.2026) may only appear on Ticketcorner/eventworld. Reggae relevance: medium — occasional promoter-booked reggae/dancehall selectors; own programme is comics, talks, games."
     },
+    "Alte Kaserne Zürich": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3768,
+      "lon": 8.529,
+      "scrape": false,
+      "hint": "Kanonengasse 16 (Kasernenareal), not the Alte Kaserne in Winterthur. Third-party concerts only (Eventfrog); no own programme to scrape."
+    },
     "Altes Kino": {
       "city": "Mels",
       "canton": "SG",
