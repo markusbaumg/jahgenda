@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html style.css app.js design/logos.html
+WEB_FILES := index.html log.html style.css app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
 .PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall
@@ -50,6 +50,9 @@ deploy: check ## Prüfen, committen (falls nötig) und pushen → GitHub Pages d
 	@git diff --quiet && git diff --cached --quiet || git commit -am "Update site"
 	git push origin main
 	@echo "→ https://markusbaumg.github.io/jahgenda/  (Status: make status)"
+
+icons: ## Render PWA icons (img/icons/*.png) from img/logo/jahgenda.svg
+	scripts/make_icons.sh
 
 cron-install: ## Local fallback: run the scraper daily at 06:10 on this Mac (launchd)
 	mkdir -p ~/Library/Logs/jahgenda ~/Library/LaunchAgents

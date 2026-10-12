@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jahgenda · Reggae-Konzerte in der Schweiz</title>
+    <meta
+      name="description"
+      content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz."
+    />
+    <meta name="theme-color" content="#14110e" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'><rect width='3' height='1' fill='%23d8342f'/><rect y='1' width='3' height='1' fill='%23f2b632'/><rect y='2' width='3' height='1' fill='%231e8f4e'/></svg>"
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Jahgenda" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="stripe" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+
+    <header class="wrap head" id="top">
+      <h1 class="logo">Jah<span>genda</span></h1>
+      <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+      <p class="notice">
+        <strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im
+        Netz gesucht und zusammengetragen. Wirf vor dem Konzert kurz einen Blick
+        auf die Seite des Veranstalters, dort findest du Datum, Zeit und Ort
+        immer topaktuell.
+      </p>
+    </header>
+
+    <main class="wrap">
+      <div id="stuck-sentinel" aria-hidden="true"></div>
+      <form class="filters" id="filters" role="search" onsubmit="return false">
+        <a class="mini-brand" href="#top" aria-label="Nach oben"
+          >Jah<span>genda</span></a
+        >
+        <div class="toolbar">
+          <label class="sr" for="q">Suche</label>
+          <div class="search">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"
+              />
+            </svg>
+            <input
+              id="q"
+              type="search"
+              placeholder="Band, Club, Ort …"
+              autocomplete="off"
+            />
+          </div>
+          <label class="sr" for="canton">Kanton</label>
+          <select id="canton">
+            <option value="">Alle Kantone</option>
+          </select>
+          <button
+            id="locate"
+            type="button"
+            class="icon-btn"
+            title="Distanz von meinem Standort anzeigen"
+            aria-label="Distanz von meinem Standort anzeigen"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="genres-wrap">
+          <button
+            type="button"
+            class="scroll-btn left"
+            data-dir="-1"
+            aria-label="Genres nach links scrollen"
+            hidden
+          >
+            &lsaquo;
+          </button>
+          <div id="genres" class="genres" role="group" aria-label="Genre"></div>
+          <button
+            type="button"
+            class="scroll-btn right"
+            data-dir="1"
+            aria-label="Genres nach rechts scrollen"
+            hidden
+          >
+            &rsaquo;
+          </button>
+        </div>
+      </form>
+      <p id="geo-status" class="geo-status" role="status"></p>
+
+      <p id="results" class="results" aria-live="polite">
+        <span id="results-text"></span>
+        <button type="button" id="clear-filters" class="linkish clear" hidden>
+          ✕ Filter zurücksetzen
+        </button>
+        <button type="button" id="toggle-past" class="linkish" hidden>
+          Vergangene anzeigen
+        </button>
+      </p>
+      <div id="list"></div>
+      <div id="status" class="status" role="status">
+        <p>Lade Konzerte …</p>
+      </div>
+    </main>
+
+    <footer class="wrap foot">
+      <section class="about" aria-labelledby="about-title">
+        <h2 id="about-title" class="section-title">Über uns</h2>
+        <div class="about-body">
+          <img
+            class="about-photo"
+            src="img/about.jpg"
+            width="210"
+            height="210"
+            alt="Seraina und Kusi, von oben fotografiert, mit zwei Bechern in der Hand"
+            loading="lazy"
+          />
+          <div>
+            <p>
+              Wir sind Kusi und Seraina. Die Reggae-Szene in der Schweiz schenkt
+              uns seit Jahren wunderbare Abende, schöne Begegnungen und beste
+              Vibes. Mit Jahgenda geben wir der Community etwas zurück: alle
+              Reggae-, Dub- und Ska-Konzerte an einem Ort, frei und für alle. So
+              findet jede und jeder die nächste gute Session, und die Clubs und
+              Soundsystems, die unsere Szene lebendig machen, bekommen volle
+              Tanzflächen.
+            </p>
+            <p>
+              Die Konzerte tragen KI-Agenten für uns zusammen, damit die Agenda
+              immer aktuell ist. Die neuesten Details findest du jeweils auf der
+              Seite des Clubs oder Veranstalters – ein kurzer Blick dorthin
+              lohnt sich vor jedem Konzert.
+            </p>
+            <p class="authors">
+              Gemacht von <strong>Kusi</strong> &amp; <strong>Seraina</strong> ·
+              <a href="https://github.com/markusbaumg/jahgenda">GitHub</a> ·
+              <a href="log.html">Scraper-Log</a>
+            </p>
+          </div>
+        </div>
+      </section>
+      <p id="updated" class="updated"></p>
+    </footer>
+
+    <aside id="install" class="install" hidden>
+      <div class="install-icon">
+        <img src="img/logo/jahgenda.svg" alt="" width="40" height="40" />
+      </div>
+      <div class="install-body"></div>
+      <button type="button" class="install-close" aria-label="Schliessen">
+        &times;
+      </button>
+    </aside>
+
+    <script src="app.js"></script>
+    <script>Object.defineProperty(navigator,"userAgent",{get:()=>"Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"});try{localStorage.removeItem("jahgenda.install.dismissed")}catch{}</script><script src="pwa.js"></script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Jahgenda logo #10: Swiss cross on red/gold/green stripes -->
+  <defs><clipPath id="r"><rect width="64" height="64" rx="12"/></clipPath></defs>
+  <g clip-path="url(#r)">
+    <rect width="64" height="22" fill="#d8342f"/>
+    <rect y="21" width="64" height="22" fill="#f2b632"/>
+    <rect y="43" width="64" height="21" fill="#1e8f4e"/>
+  </g>
+  <rect x="26" y="12" width="12" height="40" fill="#f3ead8"/>
+  <rect x="12" y="26" width="40" height="12" fill="#f3ead8"/>
+</svg>

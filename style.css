@@ -425,8 +425,11 @@ body {
   top: var(--bar-h, 64px);
   z-index: 2;
   background: var(--bg);
-  padding-top: 10px;
-  margin-top: 18px;
+  padding-top: 14px;
+  margin-top: 40px;
+}
+#list section:first-child .month {
+  margin-top: 20px;
 }
 .status:empty {
   display: none;
@@ -695,4 +698,138 @@ body {
 }
 .filters.stuck .mini-brand {
   display: inline-block;
+}
+
+/* Install banner (PWA) and update toast */
+.install {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 20;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 14px 10px 14px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  transform: translateY(20px);
+  opacity: 0;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
+}
+.install.show {
+  transform: none;
+  opacity: 1;
+}
+.install[hidden] {
+  display: none;
+}
+.install-icon img {
+  display: block;
+  border-radius: 9px;
+  margin-top: 2px;
+}
+.install-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+.install-body strong {
+  display: block;
+  width: 100%;
+  line-height: 1.25;
+  margin-bottom: 2px;
+}
+.install-body span {
+  color: var(--muted);
+}
+.install-body svg {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  color: var(--text);
+}
+.install-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 8px;
+}
+.install-never {
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.install-never:hover {
+  color: var(--text);
+}
+.install-btn {
+  font: inherit;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--gold);
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.install-close {
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0 6px;
+  margin-top: -2px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.install-close:hover {
+  color: var(--text);
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 21;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.toast button {
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--green);
+  border: 0;
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
 }

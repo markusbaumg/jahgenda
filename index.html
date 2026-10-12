@@ -2,17 +2,25 @@
 <html lang="de-CH">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>Jahgenda · Reggae-Konzerte in der Schweiz</title>
     <meta
       name="description"
       content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz."
     />
     <meta name="theme-color" content="#14110e" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'><rect width='3' height='1' fill='%23d8342f'/><rect y='1' width='3' height='1' fill='%23f2b632'/><rect y='2' width='3' height='1' fill='%231e8f4e'/></svg>"
+    <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
     />
+    <meta name="apple-mobile-web-app-title" content="Jahgenda" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -21,7 +29,15 @@
     </div>
 
     <header class="wrap head" id="top">
-      <h1 class="logo">Jah<span>genda</span></h1>
+      <h1 class="logo">
+        <img
+          class="logo-mark"
+          src="img/logo/jahgenda.svg"
+          alt=""
+          width="48"
+          height="48"
+        />Jah<span>genda</span>
+      </h1>
       <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
       <p class="notice">
         <strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im
@@ -35,7 +51,12 @@
       <div id="stuck-sentinel" aria-hidden="true"></div>
       <form class="filters" id="filters" role="search" onsubmit="return false">
         <a class="mini-brand" href="#top" aria-label="Nach oben"
-          >Jah<span>genda</span></a
+          ><img
+            src="img/logo/jahgenda.svg"
+            alt=""
+            width="20"
+            height="20"
+          />Jah<span>genda</span></a
         >
         <div class="toolbar">
           <label class="sr" for="q">Suche</label>
@@ -150,6 +171,17 @@
       <p id="updated" class="updated"></p>
     </footer>
 
+    <aside id="install" class="install" hidden>
+      <div class="install-icon">
+        <img src="img/logo/jahgenda.svg" alt="" width="40" height="40" />
+      </div>
+      <div class="install-body"></div>
+      <button type="button" class="install-close" aria-label="Schliessen">
+        &times;
+      </button>
+    </aside>
+
     <script src="app.js"></script>
+    <script src="pwa.js"></script>
   </body>
 </html>
