@@ -1061,7 +1061,13 @@
     if (on) filtersForm.setAttribute("aria-labelledby", "list-title");
     else filtersForm.removeAttribute("aria-labelledby");
     document.title = on ? `${shared ? "Geteilte Liste" : "Meine Shows"} · Jahgenda` : BASE_TITLE;
-    if (!on) return;
+    if (!on) {
+      // Leaving the mode by any exit (✕, Esc, ★, last mark gone, reset): a #m= link that «Liste teilen» or a
+      // friend put into the address bar goes too. Not on the first render, which precedes revealFromHash().
+      if (was && SHARED_HASH.test(location.hash))
+        history.replaceState(null, "", location.pathname + location.search);
+      return;
+    }
     if (!was && openPanel) setPanel(null); // fold Wo/Wann away; their settings survive
     const l = listShows();
     const n = l.length;
@@ -1074,8 +1080,7 @@
     mineOnly = false;
     shared = null;
     sharedBy = "";
-    if (SHARED_HASH.test(location.hash)) history.replaceState(null, "", location.pathname + location.search);
-    renderAndKeepInView();
+    renderAndKeepInView(); // → syncListMode strips a #m= hash
     (toggleMine.hidden ? search : toggleMine).focus({ preventScroll: true });
   }
   listHead.addEventListener("click", (e) => {
