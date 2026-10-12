@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html review.html style.css store.js app.js pwa.js sw.js design/logos.html
+WEB_FILES := index.html log.html review.html style.css store.js lib.js app.js pwa.js sw.js design/logos.html tests/lib.test.mjs
 PY_FILES  := scripts/*.py tests/*.py
 # A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
 # once prettier@3.3.3 has been fetched once (so make check also works on a train).
@@ -26,13 +26,14 @@ validate: ## Validate data/*.json (past shows allowed, as in CI)
 validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 	python3 scripts/validate_shows.py
 
-test: ## Unit tests for validator, formatter, watchdog and venue check
+test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contract) and node (lib.js)
 	python3 -m unittest discover -s tests -v
+	node --test tests/
 
 lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
 	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
-	node --check store.js app.js pwa.js sw.js
+	node --check store.js lib.js app.js pwa.js sw.js
 	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
 	$(PRETTIER) --check $(WEB_FILES)
 

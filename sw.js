@@ -18,6 +18,7 @@ const SHELL = [
   "review.html",
   "style.css",
   "store.js",
+  "lib.js",
   "app.js",
   "pwa.js",
   "manifest.webmanifest",
