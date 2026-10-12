@@ -53,10 +53,10 @@ smoke: ## Load both pages in headless Chrome and fail on uncaught JS errors
 ci: check ## What GitHub Actions runs (validate.yml)
 
 scrape: ## Scrape shows now (Claude Code, runs on the subscription)
-	claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
+	JAHGENDA_RUNNER=$${JAHGENDA_RUNNER:-local} claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
 
 harvest: ## Suggest bands from festival line-ups (Claude Code)
-	claude -p "/harvest-bands" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
+	JAHGENDA_RUNNER=$${JAHGENDA_RUNNER:-local} claude -p "/harvest-bands" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
 
 deploy: check ## Check, commit (if needed) and push → GitHub Pages deploys
 	@git diff --quiet && git diff --cached --quiet || git commit -am "Update site"
