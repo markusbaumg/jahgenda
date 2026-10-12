@@ -63,9 +63,8 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
 - **Scraper proof:** a local run (`claude -p "/scrape-shows"`, branch `scrape-test`, worktree
   `../reggae-scrape-test`) found 29 real shows with sources, coordinates and genres — the skill works; the
   cloud run only lacks network access.
-- **Data rules:** genres only from `data/genres.json` (display order = filter order) (reggae, roots, dub,
-  soundsystem, dancehall, ska, ska-punk, rocksteady, nyabinghi, festival); Seraina's core list is reggae, ska,
-  rocksteady, ska-punk, dub — dancehall is included, open question whether it stays. Nearby places abroad
+- **Data rules:** genres only from `data/genres.json` (its order = filter order); Seraina's core list is
+  reggae, ska, rocksteady, ska-punk, dub — dancehall is included, open question whether it stays. Nearby places abroad
   (criteria.md → Nearby) use country codes D/F/I/A/FL as `canton`. Every show needs `source_url` and a venue in
   `data/venues.json`. Optional `tickets` link. Festivals: spec in `design/festival-spec.md` (end_date + days).
 - **UI decisions:** dark warm theme, red #d8342f / gold #f2b632 / green #1e8f4e; logo #10 (Swiss cross on

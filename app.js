@@ -87,6 +87,18 @@
     const [y, m, d] = s.split("-").map(Number);
     return new Date(y, m - 1, d);
   };
+  const pad2 = (n) => String(n).padStart(2, "0");
+  // Calendar export helpers (.ics and Google Calendar): local-time stamp YYYYMMDDTHHMM00 and the
+  // [start, end] of a timed show - shows have no end time in the data, so they last three hours
+  // (wall-clock hours, which is what a floating-time calendar entry expects).
+  const SHOW_HOURS = 3;
+  const localStamp = (x) =>
+    `${x.getFullYear()}${pad2(x.getMonth() + 1)}${pad2(x.getDate())}T${pad2(x.getHours())}${pad2(x.getMinutes())}00`;
+  const showSpan = (s) => {
+    const [h, m] = s.time.split(":").map(Number);
+    const [y, mo, d] = [s._day.getFullYear(), s._day.getMonth(), s._day.getDate()];
+    return [new Date(y, mo, d, h, m), new Date(y, mo, d, h + SHOW_HOURS, m)];
+  };
 
   const todayStart = () => {
     const now = new Date();
@@ -198,19 +210,20 @@
 
   // One VEVENT for a show (floating local time, so it lands at the right hour in Switzerland).
   function vevent(s, status) {
-    const d = s.date.replace(/-/g, "");
+    // RFC 5545 text escaping; a bare CR would end the content line, so it is dropped.
     const esc = (t) =>
-      String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+      String(t)
+        .replace(/\r/g, "")
+        .replace(/\\/g, "\\\\")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,")
+        .replace(/\n/g, "\\n");
     let when;
     if (s.time) {
-      const [h, m] = s.time.split(":").map(Number);
-      const end = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h + 3, m);
-      const pad = (n) => String(n).padStart(2, "0");
-      const stamp = (x) =>
-        `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
-      when = `DTSTART:${d}T${pad(h)}${pad(m)}00\r\nDTEND:${stamp(end)}`;
+      const [start, end] = showSpan(s);
+      when = `DTSTART:${localStamp(start)}\r\nDTEND:${localStamp(end)}`;
     } else {
-      when = `DTSTART;VALUE=DATE:${d}`;
+      when = `DTSTART;VALUE=DATE:${s.date.replace(/-/g, "")}`;
     }
     return [
       "BEGIN:VEVENT",
@@ -219,7 +232,7 @@
       when,
       `SUMMARY:${esc(s.title)}`,
       `LOCATION:${esc(`${s.venue}, ${s.city}`)}`,
-      `DESCRIPTION:${esc(`${safeUrl(s.url) || ""}\n${showUrl(s)}`)}`,
+      `DESCRIPTION:${esc(`${safeUrl(s.url) || ""}\n${showUrl(s)}`.trim())}`,
       `URL:${showUrl(s)}`,
       ...(status ? [`STATUS:${status}`] : []),
       "END:VEVENT",
@@ -234,17 +247,13 @@
 
   // "Add to Google Calendar" link (works in the Google Calendar app and on the web).
   function gcalUrl(s) {
-    const d = s.date.replace(/-/g, "");
     let dates;
     if (s.time) {
-      const [h, m] = s.time.split(":").map(Number);
-      const pad = (n) => String(n).padStart(2, "0");
-      const end = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h + 3, m);
-      dates = `${d}T${pad(h)}${pad(m)}00/${end.getFullYear()}${pad(end.getMonth() + 1)}${pad(end.getDate())}T${pad(end.getHours())}${pad(end.getMinutes())}00`;
+      const [start, end] = showSpan(s);
+      dates = `${localStamp(start)}/${localStamp(end)}`;
     } else {
       const next = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate() + 1);
-      const pad = (n) => String(n).padStart(2, "0");
-      dates = `${d}/${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}`;
+      dates = `${s.date.replace(/-/g, "")}/${localStamp(next).slice(0, 8)}`;
     }
     const p = new URLSearchParams({
       action: "TEMPLATE",
@@ -874,10 +883,9 @@
     }
   };
   let mineOnly = false;
-  let shared = null; // { id: state } from a #mine=… link, shown until taken over or closed
+  let shared = null; // { id: state } from a #m=… link: the list is filtered to those shows
   const toggleMine = el("toggle-mine");
   const minePanel = el("mine-panel");
-  const sharedBox = el("shared");
 
   function saveMarks() {
     store.set(store.KEYS.MARKS, marks);
@@ -896,7 +904,7 @@
       .join(",");
 
   minePanel.innerHTML =
-    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle übernehmen».</span>` +
+    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» – der Link zeigt genau diese Shows.</span>` +
     `<button type="button" class="act" data-mine="ics" title="Meine Shows als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
     `<button type="button" class="act" data-mine="share" title="Link zu meiner Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
     `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Meine Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
@@ -975,7 +983,6 @@
       showPast = true;
       pastAuto = false;
     }
-    sharedBox.hidden = true;
     render();
   }
 
@@ -1166,7 +1173,6 @@
 
   // Kalender: a Monday-first month grid. On narrow screens the cells only show dots
   // and the shows of the selected day are listed below the grid (see style.css).
-  const pad2 = (n) => String(n).padStart(2, "0");
   const dayKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   const longDayFmt = new Intl.DateTimeFormat("de-CH", {
     weekday: "long",

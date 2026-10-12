@@ -30,9 +30,12 @@
         console.warn("Service worker not registered:", err);
       }
     });
+    // Reload only after the user pressed "Aktualisieren": clients.claim() in the freshly installed
+    // worker also fires controllerchange on the very first visit, which must not reload the page.
+    let wantReload = false;
     let reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (reloading) return;
+      if (!wantReload || reloading) return;
       reloading = true;
       location.reload();
     });
@@ -44,6 +47,7 @@
     t.setAttribute("role", "status");
     t.innerHTML = `Neue Version von Jahgenda <button type="button" title="Seite neu laden und die neue Version verwenden">Aktualisieren</button>`;
     t.querySelector("button").addEventListener("click", () => {
+      wantReload = true;
       if (reg.waiting) reg.waiting.postMessage("skipWaiting");
       t.remove();
     });

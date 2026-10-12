@@ -3,8 +3,11 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html review.html admin.html style.css store.js app.js pwa.js callout.js sw.js design/logos.html
+WEB_FILES := index.html log.html review.html admin.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs
 PY_FILES  := scripts/*.py tests/*.py
+# A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
+# once prettier@3.3.3 has been fetched once (so make check also works on a train).
+PRETTIER  := $(shell command -v prettier 2>/dev/null || echo npx --yes --prefer-offline prettier@3.3.3)
 
 .PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke quality-review ics
 
@@ -23,17 +26,19 @@ validate: ## Validate data/*.json (past shows allowed, as in CI)
 validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 	python3 scripts/validate_shows.py
 
-test: ## Unit tests for validator and formatter
+test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contract) and node (lib.js)
 	python3 -m unittest discover -s tests -v
+	node --test tests/
 
 lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
-	node --check store.js app.js pwa.js callout.js sw.js
+	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
+	node --check store.js lib.js app.js pwa.js callout.js sw.js
 	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
-	npx --yes prettier@3.3.3 --check $(WEB_FILES)
+	$(PRETTIER) --check $(WEB_FILES)
 
 fmt: ## Format code (prettier for HTML/CSS/JS, ruff if installed) and normalise data
-	npx --yes prettier@3.3.3 --write $(WEB_FILES)
+	$(PRETTIER) --write $(WEB_FILES)
 	@if ruff --version >/dev/null 2>&1; then ruff format scripts tests && ruff check --fix scripts tests; fi
 	$(MAKE) fmt-data
 
@@ -49,10 +54,10 @@ smoke: ## Load both pages in headless Chrome and fail on uncaught JS errors
 ci: check ## What GitHub Actions runs (validate.yml)
 
 scrape: ## Scrape shows now (Claude Code, runs on the subscription)
-	claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
+	JAHGENDA_RUNNER=$${JAHGENDA_RUNNER:-local} claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
 
 harvest: ## Suggest bands from festival line-ups (Claude Code)
-	claude -p "/harvest-bands" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
+	JAHGENDA_RUNNER=$${JAHGENDA_RUNNER:-local} claude -p "/harvest-bands" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
 
 deploy: check ## Check, commit (if needed) and push → GitHub Pages deploys
 	@git diff --quiet && git diff --cached --quiet || git commit -am "Update site"
@@ -94,4 +99,4 @@ status: ## Show the last deploys and the last scraper run
 	@python3 -c "import json; r=json.load(open('data/runs.json'))['runs']; print('Last scraper run:', r[0]['at'] if r else 'none yet', '-', (r[0].get('total','?') if r else ''), 'shows')"
 
 clean: ## Remove temporary files
-	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .pytest_cache
+	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .ruff_cache

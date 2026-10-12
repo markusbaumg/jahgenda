@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate data/shows.json, data/venues.json, data/artists.json and data/runs.json.
+"""Validate data/shows.json, data/venues.json, data/artists.json, data/runs.json and data/status.json.
 
 Runs in CI before every deploy and at the end of every scraper run, so a bad
 scraper result can never reach the live page. No third-party dependencies.
@@ -22,8 +22,10 @@ ROOT = Path(__file__).resolve().parent.parent
 SHOWS = ROOT / "data" / "shows.json"
 ARTISTS = ROOT / "data" / "artists.json"
 RUNS = ROOT / "data" / "runs.json"
+STATUS = ROOT / "data" / "status.json"
 VENUES = ROOT / "data" / "venues.json"
 GENRES = ROOT / "data" / "genres.json"
+SLOGANS = ROOT / "data" / "slogans.json"
 
 CANTONS = {
     "AG",
@@ -80,6 +82,10 @@ SHOW_OPTIONAL = {
 ARTIST_FIELDS = {"genres", "source", "checked", "festivals", "tour_checked"}
 VENUE_REQUIRED = {"city": str, "canton": str, "lat": (int, float), "lon": (int, float)}
 VENUE_OPTIONAL = {"url": str, "scrape": bool, "hint": str}
+SKILLS = ("scrape-shows", "harvest-bands")
+STATUS_FIELDS = {"ok", "skill", "at", "runner", "counts", "failed_sources", "error"}
+COUNT_KEYS = {"added", "updated", "removed", "total"}
+GENRE_FIELDS = {"slug", "label", "maps"}
 
 
 def load(path):
@@ -98,6 +104,58 @@ def allowed_genres():
         return {g["slug"] for g in data["genres"] if SLUG_RE.match(str(g.get("slug", "")))}
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return set()
+
+
+def check_genres_file(data):
+    """data/genres.json: the single source for slugs, labels and chip order - so every entry needs a
+    unique slug and a label, and nothing else goes unnoticed (allowed_genres() only skims the slugs)."""
+    if not isinstance(data, dict) or not isinstance(data.get("genres"), list):
+        return ["genres.json: must be an object with a 'genres' list"]
+    errs, seen = [], set()
+    for i, g in enumerate(data["genres"]):
+        where = f"genres[{i}]"
+        if not isinstance(g, dict):
+            errs.append(f"{where}: not an object")
+            continue
+        slug = g.get("slug")
+        if not isinstance(slug, str) or not SLUG_RE.match(slug):
+            errs.append(f"{where}: 'slug' must be a lowercase slug like 'roots' or 'ska-punk'")
+        elif slug in seen:
+            errs.append(f"{where}: duplicate slug '{slug}'")
+        else:
+            seen.add(slug)
+        if not isinstance(g.get("label"), str) or not g["label"].strip():
+            errs.append(f"{where}: 'label' must be a non-empty string")
+        if "maps" in g and not isinstance(g["maps"], str):
+            errs.append(f"{where}: 'maps' must be a string")
+        for key in g:
+            if key not in GENRE_FIELDS:
+                errs.append(f"{where}: unknown field '{key}'")
+    for key in data:
+        if key not in ("note", "genres"):
+            errs.append(f"genres.json: unknown field '{key}'")
+    return errs
+
+
+def check_slogans(data):
+    """data/slogans.json: {"slogans": [non-empty strings]} - anything else makes the page silently
+    keep its static tagline."""
+    if not isinstance(data, dict) or not isinstance(data.get("slogans"), list):
+        return ["slogans.json: must be an object with a 'slogans' list"]
+    errs, seen = [], set()
+    for i, line in enumerate(data["slogans"]):
+        if not isinstance(line, str) or not line.strip():
+            errs.append(f"slogans[{i}]: must be a non-empty string")
+        elif line.strip() in seen:
+            errs.append(f"slogans[{i}]: duplicate '{line}'")
+        else:
+            seen.add(line.strip())
+    if not data["slogans"]:
+        errs.append("slogans.json: 'slogans' is empty")
+    for key in data:
+        if key not in ("note", "slogans"):
+            errs.append(f"slogans.json: unknown field '{key}'")
+    return errs
 
 
 def check_genres(where, genres, allowed):
@@ -173,8 +231,13 @@ def check_show(s, i, allow_past, today, allowed):
     return errs
 
 
-def venue_key(name):
+def norm_key(name):
+    """Normalised form for near-duplicate detection (venues, artists, same-slot shows):
+    lowercase ASCII letters and digits only. app.js venueKey applies the same rule."""
     return re.sub(r"[^a-z0-9]+", "", str(name).lower())
+
+
+venue_key = artist_key = norm_key
 
 
 def check_venues(data):
@@ -245,7 +308,7 @@ def check_shows(data, allow_past, allowed, venue_keys=None):
             seen_ids[sid] = i
         if isinstance(s.get("date"), str) and isinstance(s.get("venue"), str):
             # Same night, same venue, same (or no) start time: almost certainly the same show twice.
-            slot = (s["date"], re.sub(r"\W+", "", s["venue"].lower()), s.get("time") or "")
+            slot = (s["date"], venue_key(s["venue"]), s.get("time") or "")
             if slot in seen_slots:
                 errs.append(
                     f"shows[{i}] ({sid}): same date, venue and time as {seen_slots[slot]} — merge them"
@@ -267,11 +330,6 @@ def check_shows(data, allow_past, allowed, venue_keys=None):
                 "add it with coordinates"
             )
     return errs
-
-
-def artist_key(name):
-    """Normalised form used to detect near-duplicate artist names (DUB INC / Dub Inc. / dub inc)."""
-    return re.sub(r"[^a-z0-9]+", "", name.lower())
 
 
 def check_artists(data, allowed):
@@ -354,12 +412,57 @@ def check_runs(data):
     return errs
 
 
+def check_status(data):
+    """data/status.json, the heartbeat every skill run overwrites and the watchdog reads
+    (scripts/check_freshness.py). None = file absent, which is fine until the first run."""
+    if data is None:
+        return []
+    if not isinstance(data, dict):
+        return ["status.json: must be an object"]
+    errs = []
+    if not isinstance(data.get("ok"), bool):
+        errs.append("status.json: 'ok' must be true or false")
+    if data.get("skill") not in SKILLS:
+        errs.append("status.json: 'skill' must be scrape-shows or harvest-bands")
+    try:
+        if datetime.fromisoformat(str(data.get("at")).replace("Z", "+00:00")).tzinfo is None:
+            errs.append("status.json: 'at' needs a UTC offset (TZ=Europe/Zurich date -Iseconds)")
+    except ValueError:
+        errs.append("status.json: 'at' must be an ISO 8601 timestamp")
+    if "runner" in data and not isinstance(data["runner"], str):
+        errs.append("status.json: 'runner' must be a string")
+    counts = data.get("counts", {})
+    if not isinstance(counts, dict):
+        errs.append("status.json: 'counts' must be an object of integers")
+    else:
+        for key, value in counts.items():
+            if key not in COUNT_KEYS:
+                errs.append(f"status.json: unknown count '{key}'")
+            elif not isinstance(value, int) or isinstance(value, bool):
+                errs.append(f"status.json: count '{key}' must be an integer")
+    fs = data.get("failed_sources", 0)
+    if not isinstance(fs, int) or isinstance(fs, bool):
+        errs.append("status.json: 'failed_sources' must be an integer")
+    if data.get("error") is not None and not isinstance(data["error"], str):
+        errs.append("status.json: 'error' must be a string or null")
+    for key in data:
+        if key not in STATUS_FIELDS:
+            errs.append(f"status.json: unknown field '{key}'")
+    return errs
+
+
 def main(argv):
     allow_past = "--allow-past" in argv
     allowed = allowed_genres()
     errs = []
     if not allowed:
         errs.append("data/genres.json: missing or malformed (no genre slugs)")
+    else:
+        genres, e = load(GENRES)
+        errs += e or check_genres_file(genres)
+    if SLOGANS.exists():  # optional: without it the page keeps its static tagline
+        slogans, e = load(SLOGANS)
+        errs += e or check_slogans(slogans)
 
     venues, e = load(VENUES)
     errs += e
@@ -376,6 +479,9 @@ def main(argv):
     runs, e = load(RUNS)
     errs += e
     errs += check_runs(runs)
+    status, e = load(STATUS) if STATUS.exists() else (None, [])  # absent until the first run
+    errs += e
+    errs += check_status(status)
 
     for msg in errs:
         print(f"ERROR {msg}")
@@ -384,7 +490,8 @@ def main(argv):
         return 1
     print(
         f"ok: {len(shows['shows'])} shows, {len(venues['venues'])} venues, "
-        f"{len(artists['artists'])} artists, {len(runs['runs'])} runs, {len(allowed)} genre slugs"
+        f"{len(artists['artists'])} artists, {len(runs['runs'])} runs, {len(allowed)} genre slugs, "
+        f"status.json {'ok' if status else 'absent'}"
     )
     return 0
 

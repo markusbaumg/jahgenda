@@ -113,7 +113,8 @@ def assess(now, max_age):
 
     if isinstance(status, dict) and "__error__" not in status:
         ok = status.get("ok")
-        counts = status.get("counts") or {}
+        # status.json is written by a prompt, not by code: never trust its shape.
+        counts = status.get("counts") if isinstance(status.get("counts"), dict) else {}
         info.append(
             f"status.json: ok={ok} runner={status.get('runner', '?')} skill={status.get('skill', '?')} "
             f"total={counts.get('total', '?')} +{counts.get('added', 0)} "
@@ -123,7 +124,7 @@ def assess(now, max_age):
             reason = status.get("error") or status.get("message") or "no reason given"
             problems.append(f"last run reported failure: {reason}")
     else:
-        info.append("status.json: missing (scraper skill does not write it yet)")
+        info.append("status.json: missing (no run has written the heartbeat yet)")
 
     if isinstance(shows, dict) and "__error__" not in shows:
         n = len(shows.get("shows") or [])
@@ -163,10 +164,12 @@ def gh(method, path, body=None):
 
 
 def open_issue():
+    """The open scraper-failed issue, None when there is none - or False when GitHub could not
+    be asked, which must not be mistaken for "none" (that would open a duplicate issue)."""
     code, issues = gh("GET", f"/repos/{REPO}/issues?labels={LABEL}&state=open&per_page=5")
     if code != 200:
         print(f"WARN cannot list issues: HTTP {code} {issues}")
-        return None
+        return False
     issues = [i for i in issues if "pull_request" not in i]
     return issues[0] if issues else None
 
@@ -195,6 +198,9 @@ def report(healthy, lines, now):
         else ""
     )
     issue = open_issue()
+    if issue is False:
+        print("WARN cannot sync the issue, skipping the GitHub update (the run still fails when unhealthy)")
+        return
     if not healthy:
         body = f"{MENTION} the watchdog found the scraper unhealthy at {stamp}:\n\n{bullets}{links}"
         if issue:
@@ -232,7 +238,12 @@ def report(healthy, lines, now):
 def main(argv):
     max_h = 36.0
     if "--max-age-hours" in argv:
-        max_h = float(argv[argv.index("--max-age-hours") + 1])
+        i = argv.index("--max-age-hours") + 1
+        try:
+            max_h = float(argv[i])
+        except (IndexError, ValueError):
+            print("usage: check_freshness.py [--max-age-hours N]")
+            return 2
     now = datetime.now(timezone.utc)
     healthy, lines = assess(now, timedelta(hours=max_h))
     print(("HEALTHY" if healthy else "UNHEALTHY") + f" (checked {fmt(now)})")

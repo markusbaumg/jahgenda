@@ -2,15 +2,18 @@
 __pycache__/
 .venv-stickers/
 *.pyc
-.pytest_cache/
 .ruff_cache/
 
-# Node (prettier / live-server laufen via npx, nichts wird installiert)
+# Node (prettier / live-server run via npx, nothing is installed)
 node_modules/
 
-# macOS / Editoren
+# macOS / editors
 .DS_Store
 .claude/worktrees/
 .idea/
 .vscode/
 jahgenda*.ics
+
+# Workflow scratch pages and Claude Code session locks
+/_*.html
+.claude/scheduled_tasks.lock

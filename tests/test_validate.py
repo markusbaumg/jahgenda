@@ -1,7 +1,9 @@
 """Tests for scripts/validate_shows.py and scripts/format_data.py. Run: make test"""
 
+import contextlib
 import copy
 import importlib.util
+import io
 import json
 import unittest
 from datetime import date, timedelta
@@ -217,7 +219,15 @@ class RunChecks(unittest.TestCase):
         }
         self.assertEqual(V.check_runs(ok), [])
         bad = {"runs": [{"skill": "other", "at": "x", "added": "1", "dropped": [{"title": 1}]}]}
-        self.assertGreaterEqual(len(V.check_runs(bad)), 4)
+        errs = V.check_runs(bad)
+        self.assertEqual(len(errs), 4, errs)
+        for fragment in (
+            "'skill' must be",
+            "'at' must be",
+            "'added' must be an integer",
+            "needs 'title' and 'why'",
+        ):
+            self.assertTrue(any(fragment in e for e in errs), (fragment, errs))
         self.assertTrue(V.check_runs({"runs": [{}] * 61}))
 
 
@@ -231,10 +241,12 @@ class GenreSlugs(unittest.TestCase):
 
 class RepoData(unittest.TestCase):
     def test_repo_data_validates(self):
-        self.assertEqual(V.main(["--allow-past"]), 0)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(V.main(["--allow-past"]), 0)
 
     def test_repo_data_is_formatted(self):
-        self.assertEqual(F.main(["--check"]), 0)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(F.main(["--check"]), 0)
 
 
 class Formatter(unittest.TestCase):

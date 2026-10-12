@@ -129,19 +129,23 @@ def best_hit(hits, city):
 
 
 def lookup(name, city):
-    """Venue-specific queries first, then the city alone. Returns (hits, query, is_city_only)."""
-    found, query = [], ""
+    """Venue-specific queries first, then the city alone. Returns (hits, query, is_city_only),
+    where query is the one that produced the hits (for the --json audit file)."""
+    found, hit_query = [], ""
     queries = [f"{name}, {city}", f"{name} {city}, {city}"]
     for prefix in ("Café ", "Cafe ", "Bar ", "Le ", "La ", "L'", "Der ", "Die ", "Das "):
         if name.startswith(prefix) and len(name) > len(prefix) + 2:
             # OSM often drops the article: "Chat noir", "Mokka"
             queries.append(f"{name[len(prefix) :]}, {city}")
     for query in queries:
-        found += [h for h in nominatim(query) if h not in found]
+        hits = nominatim(query)
+        if hits:
+            hit_query = query
+        found += [h for h in hits if h not in found]
         if any(in_city(h, city) for h in found):
             return found, query, False
     if found:
-        return found, query, False
+        return found, hit_query, False
     query = f"{city}, Schweiz"
     return nominatim(query), query, True
 

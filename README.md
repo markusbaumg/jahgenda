@@ -32,6 +32,7 @@ Made by Kusi & Seraina.
 ```
 index.html / style.css / app.js        The page. No build step, no framework.
 store.js                               Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
+lib.js                                 Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
 log.html                               Public scraper log (renders data/runs.json).
 data/shows.json                        The shows. Written by the scraper.
@@ -39,26 +40,33 @@ data/venues.json                       Venue database: coordinates, canton, prog
 data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
 data/artists.json                      Genre cache per act (Wikipedia / band website).
 data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
-scraper/criteria.md                    What counts as reggae? Nearby places abroad. Allowed genre slugs.
+data/slogans.json                      Taglines (header, sticky bar, stickers).
+data/status.json                       Heartbeat of the last run (ok, at, counts). Written by every skill run.
+scraper/criteria.md                    What counts as reggae? Nearby places abroad.
 scraper/bands.md                       Which bands are in, which are out, suggestions to review. Hand-curated.
 scraper/sources.json                   Agenda sites, festivals, nearby regions, search queries.
 .claude/skills/scrape-shows/           The scraper itself: a Claude Code skill (a prompt), not code.
 .claude/skills/harvest-bands/          Collects acts from festival line-ups as suggestions for bands.md.
 scripts/validate_shows.py              Validates data/*.json. Runs in CI and at the end of every scraper run.
 scripts/format_data.py                 Canonical formatting of data/*.json (small diffs).
+scripts/check_freshness.py             Watchdog: data stale or last run failed → GitHub issue `scraper-failed`.
+scripts/check_venues.py                Re-checks venue coordinates against OpenStreetMap (make venues-check).
+scripts/smoke.sh                       Loads the pages in headless Chrome, fails on JS errors (make check).
 scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahgenda.svg.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
-tests/                                 Unit tests (python3 -m unittest).
+tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
 design/                                Logo variants, festival spec, other design documents.
 .github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
-.github/workflows/validate.yml         Validates on branches and pull requests.
+.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) on every push and PR.
+.github/workflows/watchdog.yml         Daily freshness check → issue + badge.
 Makefile                               Everything you can run: `make` shows the help.
 ```
 
 ### Views
 
-The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch next to the result count; the
-browser remembers the choice). The calendar is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
+The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list, next to
+«Filter zurücksetzen»; the browser remembers the choice; the result count is in the footer bar next to the
+data stamp). The calendar is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
 on the phone it becomes a compact grid with dots and the list of the tapped day below. The map loads Leaflet
 1.9.4 and OpenStreetMap tiles on first open only, shows one marker per venue (popup with the shows there),
 your own location on request, and shows without coordinates below under "Ohne Standort". A tap on a show in
@@ -78,7 +86,7 @@ the result and commits it.
                          │ clones the repo
                          ▼
             ┌──────────────────────────┐     scraper/bands.md      (who is in? – beats everything)
-            │ skill scrape-shows       │ ◄── scraper/criteria.md   (what counts? genre slugs)
+            │ skill scrape-shows       │ ◄── scraper/criteria.md   (what counts? nearby?)
             │  1 read sources          │ ◄── scraper/sources.json  (where to look?)
             │  2 bands + criteria      │ ◄── data/venues.json      (venues, coordinates)
             │  3 look up genres        │ ◄── data/artists.json     (genre cache)
@@ -137,6 +145,8 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
 
 - **Heartbeat:** every run overwrites `data/status.json` (`ok`, `at`, counts, error) and prepends an entry to
   `data/runs.json`; the scraper commits even when nothing changed, and commits `ok: false` on failure.
+  `scripts/validate_shows.py` checks the shape of `status.json` like that of the other data files, so a
+  malformed heartbeat cannot be committed and silently blind the watchdog.
 - **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine) and executes
   `scripts/check_freshness.py`: if the newest timestamp is older than 36 h, the last run reported failure, or
   shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
@@ -268,11 +278,12 @@ icons (`make icons` re-renders those). All ten variants live in `img/logo/NN-nam
 
 ### Contributing (for Seraina and everyone else)
 
-You can shape the agenda without touching code – three text files:
+You can shape the agenda without touching code – four text files:
 
-1. `scraper/criteria.md` – what counts as reggae, which places abroad count, allowed genre slugs.
+1. `scraper/criteria.md` – what counts as reggae, which places abroad count.
 2. `scraper/bands.md` – move a band to _Included_ or _Excluded_; review the _Suggestions_ the harvester adds.
 3. `data/venues.json` – add a venue (name, city, canton, coordinates, programme URL).
+4. `data/genres.json` – allowed genre slugs, labels and filter order.
 
 Edit on GitHub, commit to `main`, done. The next scraper run picks it up; the validator stops anything
 that would break the page.
@@ -285,15 +296,15 @@ stored or sent anywhere. The same goes for the "Meine Shows" marks (localStorage
 ## Meine Shows (personal list)
 
 The star on every show has two levels: tap once = **Interessiert** (gold border), again = **Ich gehe**
-(green border), a third tap clears it. As soon as something is marked, the chip "★ Meine Shows" with a
-counter appears; it filters the list to the marked shows (past ones stay marked but are hidden as usual).
+(green border), a third tap clears it. As soon as something is marked, a star button with a counter appears
+in the toolbar; it filters the list to the marked shows (past ones stay marked but are hidden as usual).
 In that view:
 
 - **Kalender exportieren (.ics)** – one file with all marked shows ("Ich gehe" as confirmed, "Interessiert" as tentative).
-- **Liste teilen** – copies a link of the form `…/#mine=<id>:g,<id>:i` (g = going, i = interested), plus a
-  WhatsApp button with the same link. Whoever opens it sees a banner "Geteilte Liste von einem Freund" with the
-  shows and can take them over as "Interessiert" with **Alle übernehmen** (own "Ich gehe" marks are kept) or
-  close the banner. Own marks are never overwritten silently.
+- **Liste teilen** – copies a link of the form `…/#m=<short>g,<short>i` (short per-show hashes, g = going,
+  i = interested; old `#mine=<id>:g,…` links still resolve), plus a WhatsApp button with the same link.
+  Whoever opens it sees only those shows, with the friend's "Ich gehe" marks as a chip "geht hin";
+  nothing is written into their own list. «Filter zurücksetzen» leaves the shared view.
 
 Marks live only in the browser (`localStorage`, key `jahgenda.marks`) – no account, no server, nothing is
 transmitted. Without `localStorage` everything still works; marks then last until the next reload.
