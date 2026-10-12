@@ -413,13 +413,29 @@
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         locateBtn.disabled = false;
         locateBtn.classList.add("active");
-        const nearest = shows
-          .filter((s) => typeof s.lat === "number")
+        // Closest upcoming show (never a past one), as a link into the list.
+        const near = shows
+          .filter((s) => !s._past && typeof s.lat === "number")
           .map((s) => ({ s, km: distanceKm(here, s) }))
-          .sort((a, b) => a.km - b.km)[0];
-        geoStatus.textContent = nearest
-          ? `Nächste Show von dir aus: ${nearest.s.title} in ${nearest.s.city}, ${formatKm(nearest.km)}. Irie!`
-          : "";
+          .sort((a, b) => a.km - b.km)
+          .slice(0, 3);
+        if (near.length) {
+          const n = near[0];
+          const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
+          geoStatus.innerHTML =
+            `<span class="geo-pin">📍</span> Am nächsten bei dir: ` +
+            `<a href="#${encodeURIComponent(n.s.id)}"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
+            `<span class="dist">${formatKm(n.km)}</span>` +
+            (near.length > 1
+              ? ` <span class="geo-more">· danach ${near
+                  .slice(1)
+                  .map((x) => `${escape(x.s.city)} (${formatKm(x.km)})`)
+                  .join(", ")}</span>`
+              : "");
+        } else {
+          geoStatus.textContent =
+            "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
+        }
         render();
       },
       () => {
