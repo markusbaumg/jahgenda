@@ -92,6 +92,23 @@
               />
             </svg>
           </button>
+          <button
+            type="button"
+            id="toggle-mine"
+            class="icon-btn mine"
+            aria-pressed="false"
+            title="Meine Shows"
+            aria-label="Meine Shows anzeigen"
+            hidden
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="m12 2 3 6.6 7 .8-5.2 4.9 1.4 7.1L12 17.8 5.8 21.4l1.4-7.1L2 9.4l7-.8z"
+              />
+            </svg>
+            <b>0</b>
+          </button>
         </div>
         <div class="genres-wrap">
           <button
@@ -128,15 +145,6 @@
         <span id="results-text"></span>
         <button type="button" id="clear-filters" class="linkish clear" hidden>
           ✕ Filter zurücksetzen
-        </button>
-        <button
-          type="button"
-          id="toggle-mine"
-          class="linkish mine"
-          aria-pressed="false"
-          hidden
-        >
-          ★ Meine Shows <b>0</b>
         </button>
         <button type="button" id="toggle-past" class="linkish" hidden>
           Vergangene anzeigen

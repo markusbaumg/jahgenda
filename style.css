@@ -705,26 +705,32 @@ body {
 .show.shared-row {
   background: rgba(242, 182, 50, 0.07);
 }
-.results .mine {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 2px 10px;
+.icon-btn.mine {
+  position: relative;
 }
-.results .mine:not([hidden]) + .linkish {
-  margin-left: 0; /* keep "Vergangene anzeigen" next to the chip instead of spreading both */
+.icon-btn.mine[hidden] {
+  display: none;
 }
-.results .mine[aria-pressed="true"] {
-  color: var(--gold);
-  border-color: var(--gold);
-  font-weight: 700;
-}
-.results .mine b {
-  display: inline-block;
-  padding: 0 6px;
-  border-radius: 999px;
-  font-size: 0.75rem;
+.icon-btn.mine[aria-pressed="true"] {
   color: var(--bg);
   background: var(--gold);
+  border-color: var(--gold);
+}
+.icon-btn.mine b {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  color: var(--bg);
+  background: var(--green-text);
+  border: 2px solid var(--bg);
 }
 .mine-panel,
 .shared {
