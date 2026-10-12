@@ -1,5 +1,14 @@
-.DS_Store
+# Python
 __pycache__/
+*.pyc
 .pytest_cache/
+.ruff_cache/
+
+# Node (prettier / live-server laufen via npx, nichts wird installiert)
 node_modules/
+
+# macOS / Editoren
+.DS_Store
 .claude/worktrees/
+.idea/
+.vscode/

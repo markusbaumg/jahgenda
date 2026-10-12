@@ -213,13 +213,7 @@ body {
   mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
 }
 .genres-wrap.can-left.can-right .genres {
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 40px,
-    #000 calc(100% - 40px),
-    transparent
-  );
+  mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
 }
 .scroll-btn {
   position: absolute;
