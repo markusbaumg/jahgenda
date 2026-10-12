@@ -9,7 +9,7 @@
       "removed": 12,
       "total": 29,
       "failed_sources": [
-        "https://www.skalander.ch/ (DNS: Host nicht auffindbar, auch ohne www)",
+        "https://www.skalander.ch/ (alte URL – inzwischen auf https://skalender.net/ korrigiert)",
         "https://www.petzi.ch/ (lädt, aber Genre-Filter per URL nicht anwendbar – nur generische Liste der nächsten 5 Tage)",
         "https://rotefabrik.ch/programm (Seite liefert keine Events; Kabaka Pyramid via Songkick-Venue-Seite bestätigt)",
         "https://www.dubtopia.ch/ (DNS)",
