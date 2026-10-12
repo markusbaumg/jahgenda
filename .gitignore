@@ -14,3 +14,7 @@ node_modules/
 .idea/
 .vscode/
 jahgenda*.ics
+
+# Workflow scratch pages and Claude Code session locks
+/_*.html
+.claude/scheduled_tasks.lock
