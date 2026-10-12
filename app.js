@@ -783,10 +783,9 @@
     }
   };
   let mineOnly = false;
-  let shared = null; // { id: state } from a #mine=… link, shown until taken over or closed
+  let shared = null; // { id: state } from a #m=… link: the list is filtered to those shows
   const toggleMine = el("toggle-mine");
   const minePanel = el("mine-panel");
-  const sharedBox = el("shared");
 
   function saveMarks() {
     store.set(store.KEYS.MARKS, marks);
@@ -805,7 +804,7 @@
       .join(",");
 
   minePanel.innerHTML =
-    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle übernehmen».</span>` +
+    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» – der Link zeigt genau diese Shows.</span>` +
     `<button type="button" class="act" data-mine="ics" title="Meine Shows als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
     `<button type="button" class="act" data-mine="share" title="Link zu meiner Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
     `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Meine Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
@@ -884,7 +883,6 @@
       showPast = true;
       pastAuto = false;
     }
-    sharedBox.hidden = true;
     render();
   }
 

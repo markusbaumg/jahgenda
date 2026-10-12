@@ -1023,7 +1023,7 @@ body {
   content: " ·";
 }
 
-/* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared banner --- */
+/* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared rows --- */
 .act.star svg path {
   fill: none;
   stroke: currentColor;
@@ -1335,8 +1335,7 @@ body {
     margin-left: 0;
   }
 }
-.mine-panel,
-.shared {
+.mine-panel {
   margin: 12px 0 0;
   padding: 10px 12px;
   font-size: 0.85rem;
@@ -1355,28 +1354,14 @@ body {
 .mine-panel[hidden] {
   display: none;
 }
-.mine-panel .act,
-.shared .act {
+.mine-panel .act {
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 4px 10px;
 }
-.mine-panel .act span,
-.shared .act span {
+.mine-panel .act span {
   display: inline;
-}
-.shared {
-  border-left-color: var(--green);
-}
-.shared ul {
-  margin: 6px 0 10px;
-  padding: 0 0 0 18px;
-}
-.shared a,
-.shared strong {
-  color: var(--text);
-  font-weight: 600;
 }
 
 .sr {

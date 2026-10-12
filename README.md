@@ -281,15 +281,15 @@ stored or sent anywhere. The same goes for the "Meine Shows" marks (localStorage
 ## Meine Shows (personal list)
 
 The star on every show has two levels: tap once = **Interessiert** (gold border), again = **Ich gehe**
-(green border), a third tap clears it. As soon as something is marked, the chip "★ Meine Shows" with a
-counter appears; it filters the list to the marked shows (past ones stay marked but are hidden as usual).
+(green border), a third tap clears it. As soon as something is marked, a star button with a counter appears
+in the toolbar; it filters the list to the marked shows (past ones stay marked but are hidden as usual).
 In that view:
 
 - **Kalender exportieren (.ics)** – one file with all marked shows ("Ich gehe" as confirmed, "Interessiert" as tentative).
-- **Liste teilen** – copies a link of the form `…/#mine=<id>:g,<id>:i` (g = going, i = interested), plus a
-  WhatsApp button with the same link. Whoever opens it sees a banner "Geteilte Liste von einem Freund" with the
-  shows and can take them over as "Interessiert" with **Alle übernehmen** (own "Ich gehe" marks are kept) or
-  close the banner. Own marks are never overwritten silently.
+- **Liste teilen** – copies a link of the form `…/#m=<short>g,<short>i` (short per-show hashes, g = going,
+  i = interested; old `#mine=<id>:g,…` links still resolve), plus a WhatsApp button with the same link.
+  Whoever opens it sees only those shows, with the friend's "Ich gehe" marks as a chip "geht hin";
+  nothing is written into their own list. «Filter zurücksetzen» leaves the shared view.
 
 Marks live only in the browser (`localStorage`, key `jahgenda.marks`) – no account, no server, nothing is
 transmitted. Without `localStorage` everything still works; marks then last until the next reload.
