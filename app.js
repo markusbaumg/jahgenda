@@ -145,6 +145,7 @@
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0 1.4 4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.6 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 2.9 2.9 1 1 0 0 1 1.4 0zm2.8-2.8a1 1 0 0 1 0-1.4 4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.6 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.8 0l3-3a2 2 0 0 0-2.9-2.9 1 1 0 0 1-1.4 0z"/></svg>',
     star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.6 6 21l1.3-6.8-5-4.7 6.8-.8z"/></svg>',
+    more: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>',
   };
 
   // Short, stable hash per show for links: FNV-1a over the id, base36 (6-7 chars), e.g. #k3f9zq.
@@ -254,7 +255,6 @@
       ? `<a href="${escape(url)}" target="_blank" rel="noopener" title="Konzertseite beim Veranstalter öffnen">${escape(s.title)}</a>`
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
-    const tickets = safeUrl(s.tickets);
     return `
       <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <time class="date" datetime="${escape(s.date)}">
@@ -274,21 +274,32 @@
         <div class="foot-row">
             ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(genreLabel[g] || g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
             <div class="actions">
-              ${starButton(s)}
-              <span class="act-group" title="In den Kalender">
-                <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
-                <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
-              </span>
-              ${url || tickets ? `<span class="act-group">${url ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" title="Offizielle Event-Seite des Veranstalters öffnen">${ICONS.event}<span>Event</span></a>` : ""}${tickets ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>` : ""}</span>` : ""}
-              <span class="act-group">
-                <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
-                <button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>
-              </span>
+              ${actionsHtml(s)}
+              <button type="button" class="act more" data-act="more" aria-haspopup="dialog" aria-expanded="false" title="Aktionen zu dieser Show">${ICONS.more}<span>Mehr</span></button>
             </div>
           </div>
       </li>`;
   }
 
+  // The per-show actions, shared by the row (short labels) and the action sheet (long labels).
+  // Links carry their href, buttons carry data-act – both are handled by runAction().
+  function actionsHtml(s, long = false) {
+    const url = safeUrl(s.url);
+    const tickets = safeUrl(s.tickets);
+    return [
+      starButton(s),
+      `<button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender${long ? " (.ics)" : ""}</span></button>`,
+      `<a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google${long ? " Kalender" : ""}</span></a>`,
+      url
+        ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" title="Event-Seite des Veranstalters öffnen">${ICONS.event}<span>Event${long ? "-Seite" : ""}</span></a>`
+        : "",
+      tickets
+        ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>`
+        : "",
+      `<a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`,
+      `<button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>`,
+    ].join("");
+  }
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these).
   function matchesFilters(s) {
     const canton = cantonSelect.value;
@@ -489,15 +500,14 @@
     renderAndKeepInView();
   });
 
-  // Per-show actions (calendar / copy link); WhatsApp is a plain link.
-  // Bound on the views wrapper, because the calendar and the map reuse the show rows.
-  views.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-act]");
-    if (!btn) return;
-    const s = shows.find((x) => x.id === btn.closest(".show").dataset.id);
-    if (!s) return;
-    if (btn.dataset.act === "cal") downloadIcs(icsFor(s), `${s.id}.ics`);
-    if (btn.dataset.act === "link") {
+  // Per-show button actions (mark / calendar / copy link / open the action sheet); the other
+  // actions are plain links. One handler for the row buttons and for the action sheet.
+  async function runAction(btn, s, row) {
+    const act = btn.dataset.act;
+    if (act === "mark") cycleMark(s, row);
+    if (act === "cal") downloadIcs(icsFor(s), `${s.id}.ics`);
+    if (act === "more") openSheet(btn, s, row);
+    if (act === "link") {
       history.replaceState(null, "", `#${s._short}`);
       const label = btn.querySelector("span");
       try {
@@ -508,7 +518,104 @@
       }
       setTimeout(() => (label.textContent = "Link teilen"), 1500);
     }
+  }
+  // Bound on the views wrapper, because the calendar and the map reuse the show rows.
+  views.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const row = btn.closest(".show");
+    const s = shows.find((x) => x.id === row.dataset.id);
+    if (s) runAction(btn, s, row);
   });
+
+  // --- Action sheet: on phones and touch screens the row actions collapse into "⋯ Mehr" (+ the star), which
+  // opens this sheet – a bottom sheet on phones, a popover under the button on wider touch screens. It holds
+  // the same buttons and links as the row (actionsHtml) and delegates to runAction(); nothing is duplicated.
+  const sheet = document.createElement("div");
+  sheet.className = "sheet";
+  sheet.hidden = true;
+  sheet.innerHTML =
+    `<div class="sheet-backdrop" data-close></div>` +
+    `<div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">` +
+    `<div class="sheet-head"><h2 class="sheet-title" id="sheet-title"></h2>` +
+    `<button type="button" class="sheet-close" data-close title="Schliessen" aria-label="Schliessen">&times;</button></div>` +
+    `<div class="sheet-actions"></div></div>`;
+  document.body.appendChild(sheet);
+  const sheetPanel = sheet.querySelector(".sheet-panel");
+  const sheetTitle = sheet.querySelector(".sheet-title");
+  const sheetActions = sheet.querySelector(".sheet-actions");
+  const phoneMq = matchMedia("(max-width: 600px)");
+  let sheetShow = null; // the show the open sheet belongs to
+  let sheetRow = null; // its row in the list (for the star state)
+  let sheetTrigger = null; // the "⋯" button that opened it (gets the focus back)
+
+  function openSheet(btn, s, row) {
+    closeSheet();
+    sheetShow = s;
+    sheetRow = row;
+    sheetTrigger = btn;
+    sheetTitle.textContent = s.title;
+    sheetActions.innerHTML = actionsHtml(s, true);
+    syncSheetMark();
+    btn.setAttribute("aria-expanded", "true");
+    sheet.classList.toggle("popover", !phoneMq.matches);
+    sheet.hidden = false;
+    if (!phoneMq.matches) {
+      // Popover: under the button, right-aligned with it; above it when there is no room below.
+      const r = btn.getBoundingClientRect();
+      const h = sheetPanel.offsetHeight;
+      const top = r.bottom + 6 + h > innerHeight ? r.top - 6 - h : r.bottom + 6;
+      sheetPanel.style.top = `${Math.max(8, top)}px`;
+      sheetPanel.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+    }
+    sheetActions.querySelector(".act").focus();
+  }
+  // The sheet's star mirrors the row's state (label and colour).
+  function syncSheetMark() {
+    const st = marks[sheetShow.id] || "";
+    sheetPanel.classList.toggle("interested", st === "interested");
+    sheetPanel.classList.toggle("going", st === "going");
+    sheetActions.querySelector(".star span").textContent = MARK_LABEL[st];
+  }
+  function closeSheet() {
+    if (sheet.hidden) return;
+    sheet.hidden = true;
+    sheetTrigger.setAttribute("aria-expanded", "false");
+    if (sheetTrigger.isConnected) sheetTrigger.focus();
+    sheetShow = sheetRow = sheetTrigger = null;
+  }
+  sheet.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-close]")) return closeSheet();
+    const act = e.target.closest(".act");
+    if (!act) return;
+    if (!act.dataset.act) return closeSheet(); // a plain link (Google, Event, Tickets, WhatsApp) opens in a new tab
+    await runAction(act, sheetShow, sheetRow);
+    if (act.dataset.act === "mark") {
+      // "Meine Shows" re-renders the list when the last mark goes; then the row (and the sheet) is gone.
+      if (sheetRow.isConnected) syncSheetMark();
+      else closeSheet();
+    } else if (act.dataset.act === "link")
+      setTimeout(closeSheet, 1200); // let "Kopiert" be seen
+    else closeSheet();
+  });
+  // Focus stays in the sheet while it is open; Esc closes it.
+  sheet.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+    const f = [...sheetPanel.querySelectorAll("button, a[href]")];
+    const edge = e.shiftKey ? f[0] : f[f.length - 1];
+    if (document.activeElement === edge) {
+      e.preventDefault();
+      (e.shiftKey ? f[f.length - 1] : f[0]).focus();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !sheet.hidden) closeSheet();
+  });
+  // A popover is anchored to the button; a resize or layout switch invalidates its position.
+  addEventListener("resize", () => {
+    if (sheet.classList.contains("popover")) closeSheet();
+  });
+  phoneMq.addEventListener("change", closeSheet);
 
   function resetFilters() {
     cantonSelect.value = "";
@@ -730,13 +837,6 @@
     row.querySelector(".star").title = MARK_TITLE[next];
     updateMine();
   }
-  list.addEventListener("click", (e) => {
-    const btn = e.target.closest('[data-act="mark"]');
-    if (!btn) return;
-    const row = btn.closest(".show");
-    const s = shows.find((x) => x.id === row.dataset.id);
-    if (s) cycleMark(s, row);
-  });
 
   toggleMine.addEventListener("click", () => {
     mineOnly = !mineOnly;
