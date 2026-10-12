@@ -33,9 +33,9 @@
       "canton": "ZH",
       "lat": 47.3777,
       "lon": 8.5264,
-      "url": "https://www.caveclub.ch/",
+      "url": "https://zuri.net/de/zurich/clubs/cave-club-19221.htm",
       "scrape": false,
-      "hint": ""
+      "hint": "Langstrasse 81, 8004 Zürich (Koordinaten = Hausnummer, Nominatim). Keine eigene Website – caveclub.ch existiert nicht; Reggae/Dancehall-Nächte («Friday Bash») nur in Veranstalter-Listings (zuri.net, guidle), darum scrape=false."
     },
     "Dachstock": {
       "city": "Bern",
@@ -61,8 +61,8 @@
       "lat": 47.3882,
       "lon": 8.5196,
       "url": "https://exil.club/",
-      "scrape": true,
-      "hint": "Events are on the homepage grouped under lowercase German month headings (\"november 2026\", \"märz 2027\"); each row is \"DD.MM.YY Wochentag\" (e.g. \"21.10.26 Mittwoch\") plus the title and a type label \"live\" or \"dj\", with status markers \"Sold Out\" or \"(abgesagt)\" in or after the title; the title is just the headline act (support acts only on the detail page), and the row links to https://exil.club/events/{slug}. Detail pages give \"DD.MM.YYYY Wochentag\", \"Einlass: HH:MM Uhr\", \"Start: HH:MM Uhr\", support acts, price (\"tickets: 42.-\"), a description in German, genre tags as icon images whose alt text is the genre name (e.g. alt \"World\", \"Electronic\", \"Rock\"; Dancehall/Afrobeat/Reggaeton exist as tags), and a ticket link (seen: ticketmaster.ch; the venue's Montags series and some shows may differ). Note the venue sometimes hosts shows at other locations (title contains \"im Plaza\", \"im Dynamo\", \"(Kaufleuten)\"), so the location should be taken from the title/detail page. To triage cheaply, scan titles for known reggae/dub/ska acts and only open detail pages for candidates, checking the genre alt text for Dancehall/World. Blockiert oft automatische Abrufe (403) – dann überspringen und Exil-Shows via Skalender/Petzi/Eventfrog übernehmen."
+      "scrape": false,
+      "hint": "Bot-Schutz: curl -sL bekommt 403 («Verifying your connection», JavaScript nötig), darum scrape=false; nur per WebFetch/Browser lesbar, falls das durchkommt. Events are on the homepage grouped under lowercase German month headings (\"november 2026\", \"märz 2027\"); each row is \"DD.MM.YY Wochentag\" (e.g. \"21.10.26 Mittwoch\") plus the title and a type label \"live\" or \"dj\", with status markers \"Sold Out\" or \"(abgesagt)\" in or after the title; the title is just the headline act (support acts only on the detail page), and the row links to https://exil.club/events/{slug}. Detail pages give \"DD.MM.YYYY Wochentag\", \"Einlass: HH:MM Uhr\", \"Start: HH:MM Uhr\", support acts, price (\"tickets: 42.-\"), a description in German, genre tags as icon images whose alt text is the genre name (e.g. alt \"World\", \"Electronic\", \"Rock\"; Dancehall/Afrobeat/Reggaeton exist as tags), and a ticket link (seen: ticketmaster.ch; the venue's Montags series and some shows may differ). Note the venue sometimes hosts shows at other locations (title contains \"im Plaza\", \"im Dynamo\", \"(Kaufleuten)\"), so the location should be taken from the title/detail page. To triage cheaply, scan titles for known reggae/dub/ska acts and only open detail pages for candidates, checking the genre alt text for Dancehall/World. Blockiert oft automatische Abrufe (403) – dann überspringen und Exil-Shows via Skalender/Petzi/Eventfrog übernehmen."
     },
     "Fri-Son": {
       "city": "Fribourg",
@@ -142,8 +142,8 @@
       "lat": 47.0807,
       "lon": 7.2944,
       "url": "https://kufa.ch/",
-      "scrape": false,
-      "hint": ""
+      "scrape": true,
+      "hint": "Kulturfabrik Lyss, Werdtstrasse 17. Programm auf der Startseite (/programm/ leitet dorthin um), server-gerendert mit Datum und Uhrzeit pro Event. Selten Reggae – nur bei Treffern aufnehmen."
     },
     "Kulturfabrik Kofmehl": {
       "city": "Solothurn",
@@ -152,7 +152,7 @@
       "lon": 7.5282,
       "url": "https://kofmehl.net/",
       "scrape": true,
-      "hint": "No genre tags; decide by act names."
+      "hint": "Programm auf der Startseite (/programm/ leitet dorthin um): div.events__date + div.events__title. Keine Genre-Tags, nach Act-Namen entscheiden."
     },
     "L'Usine": {
       "city": "Genève",
@@ -195,9 +195,9 @@
       "canton": "BS",
       "lat": 47.5638,
       "lon": 7.5912,
-      "url": "https://www.parterre-one.ch/kalender/",
+      "url": "https://www.parterre-one.ch/events/",
       "scrape": true,
-      "hint": "Monthly reggae/dancehall sound-system night; calendar with \"load more\"."
+      "hint": "/kalender/ leitet auf die Startseite um – die Liste liegt auf /events/ (The Events Calendar, <time datetime=\"YYYY-MM-DD\"> pro Event), iCal: https://www.parterre-one.ch/events/?ical=1. Monatliche Reggae/Dancehall-Soundsystem-Nacht; Kalender mit «mehr laden»."
     },
     "Reitschule": {
       "city": "Bern",
@@ -213,9 +213,9 @@
       "canton": "VD",
       "lat": 46.472,
       "lon": 6.8522,
-      "url": "https://rockingchair.ch/",
-      "scrape": false,
-      "hint": ""
+      "url": "https://www.rocking-chair.ch/categorie/reggae-dub/",
+      "scrape": true,
+      "hint": "RKC, Avenue de Gilamont 60, Vevey. Achtung: rockingchair.ch (ohne Bindestrich) ist ein Folk-Club in Neerach. Die Kategorie-Seite «reggae & dub» listet nur die Reggae-Shows (server-gerendert: div.event mit Titel und Datum DD.MM.YYYY); das ganze Programm steht auf der Startseite (div.event.futur)."
     },
     "Rote Fabrik": {
       "city": "Zürich",
@@ -224,7 +224,7 @@
       "lon": 8.5359,
       "url": "https://rotefabrik.ch/programm",
       "scrape": false,
-      "hint": ""
+      "hint": "Programm wird per JavaScript geladen (curl -sL liefert nur das Seitengerüst), darum scrape=false. Koordinaten: Seestrasse 395 (OSM Rote Fabrik)."
     },
     "Royal": {
       "city": "Baden",
@@ -232,17 +232,17 @@
       "lat": 47.4782,
       "lon": 8.3087,
       "url": "https://www.royalbaden.ch/",
-      "scrape": false,
-      "hint": ""
+      "scrape": true,
+      "hint": "Programm auf der Startseite, server-gerendert («Fr 16.10.26 — Act»); Haselstrasse/Bahnhofplatz, OSM «Royal Baden». Selten Reggae – nur bei Treffern aufnehmen."
     },
     "Rössli": {
       "city": "Bern",
       "canton": "BE",
-      "lat": 46.9496,
-      "lon": 7.4385,
+      "lat": 46.9527,
+      "lon": 7.4407,
       "url": "https://www.souslepont-roessli.ch/",
       "scrape": false,
-      "hint": "Room of the Reitschule Bern."
+      "hint": "Bar & Bühne der Reitschule Bern, Neubrückstrasse 8 (OSM: Rössli, 46.9527/7.4407). Das Programm steht auf der Reitschule-Programmseite (Venue «Reitschule», scrape=true), darum hier scrape=false – sonst Doppeleinträge."
     },
     "Salzhaus": {
       "city": "Winterthur",
@@ -294,9 +294,9 @@
       "canton": "ZH",
       "lat": 47.3841,
       "lon": 8.5329,
-      "url": "https://www.x-tra.ch/",
-      "scrape": false,
-      "hint": ""
+      "url": "https://www.x-tra.ch/de/programm/",
+      "scrape": true,
+      "hint": "Limmatstrasse 118. Programm auf /de/programm/ (server-gerendert, Datum + Uhrzeit pro Event). Selten Reggae – nur bei Treffern aufnehmen."
     }
   }
 }

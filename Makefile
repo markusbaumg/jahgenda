@@ -6,7 +6,7 @@ PORT ?= 8000
 WEB_FILES := index.html log.html style.css app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check
 
 help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -64,6 +64,9 @@ cron-install: ## Local fallback: run the scraper daily at 06:10 on this Mac (lau
 cron-uninstall: ## Remove the local launchd job
 	launchctl unload ~/Library/LaunchAgents/ch.jahgenda.scrape.plist 2>/dev/null || true
 	rm -f ~/Library/LaunchAgents/ch.jahgenda.scrape.plist
+
+venues-check: ## Re-check every venue's coordinates against OpenStreetMap (Nominatim)
+	python3 scripts/check_venues.py
 
 watchdog: ## Freshness check (same as the GitHub watchdog), without touching GitHub
 	DRY_RUN=1 python3 scripts/check_freshness.py --max-age-hours 36

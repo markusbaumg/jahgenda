@@ -157,7 +157,7 @@ make harvest      # suggest bands from festival line-ups
 | change what counts as reggae                  | `scraper/criteria.md`                      |
 | include or exclude a band for good            | `scraper/bands.md`                         |
 | add an agenda site or a festival              | `scraper/sources.json`                     |
-| add a venue / fix coordinates / crawl it      | `data/venues.json`                         |
+| add a venue / fix coordinates / crawl it      | `data/venues.json` (`make venues-check` verifies coordinates) |
 | correct a wrong genre for an act              | `data/artists.json` (`"source": "manual"`) |
 | change how the scraper works                  | `.claude/skills/scrape-shows/SKILL.md`     |
 | add a check for the data                      | `scripts/validate_shows.py` + `tests/`     |
