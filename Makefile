@@ -3,16 +3,16 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html review.html mischpult.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs
+WEB_FILES := index.html log.html review.html mischpult.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs e2e/*.js e2e/tests/*.js
 PY_FILES  := scripts/*.py tests/*.py
 # A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
 # once prettier@3.3.3 has been fetched once (so make check also works on a train).
 PRETTIER  := $(shell command -v prettier 2>/dev/null || echo npx --yes --prefer-offline prettier@3.3.3)
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke quality-review ics
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke e2e quality-review ics
 
 help: ## This help
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
 
 serve: ## View the page locally (http://localhost:$(PORT))
 	python3 -m http.server $(PORT)
@@ -50,6 +50,9 @@ check: lint validate test smoke ## Run everything (before every commit)
 
 smoke: ## Load both pages in headless Chrome and fail on uncaught JS errors
 	scripts/smoke.sh
+
+e2e: ## End-to-end tests in a real browser (Playwright, e2e/): desktop Chrome + iPhone; not part of check
+	cd e2e && (test -f package-lock.json && npm ci || npm install) && npx playwright install chromium && npx playwright test
 
 ci: check ## What GitHub Actions runs (validate.yml)
 

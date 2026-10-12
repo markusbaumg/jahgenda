@@ -84,7 +84,10 @@ class AppShell(unittest.TestCase):
 
     def test_makefile_knows_the_shell_files(self):
         web = makefile_var("WEB_FILES")
-        self.assertEqual([f for f in web if not (ROOT / f).is_file()], [], "WEB_FILES lists missing files")
+        # Plain entries must exist; a glob (e2e/*.js) must match at least one file, or prettier gets the
+        # literal pattern and fails.
+        missing = [f for f in web if not (ROOT / f).is_file() and not (("*" in f) and list(ROOT.glob(f)))]
+        self.assertEqual(missing, [], "WEB_FILES lists missing files")
         m = re.search(r"^\tnode --check (.+)$", MAKEFILE, re.M)
         self.assertTrue(m, "node --check line not found in the lint target")
         checked = set(m.group(1).split())
