@@ -1,3 +1,2 @@
 User-agent: *
-Disallow: /admin.html
-Disallow: /review.html
+Disallow:

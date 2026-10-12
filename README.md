@@ -154,11 +154,12 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   locally without touching GitHub.
 - **Where to look:** the badge, the `scraper-failed` issue, `log.html`, and the routine's own run log at
   https://claude.ai/code/routines.
-- **Admin section (hidden, not linked, `noindex`):** https://markusbaumg.github.io/jahgenda/admin.html shows
-  status, every portal/venue/festival the scraper uses (with scrape flags and parse hints), the search
-  queries, the scraper prompt (SKILL.md), criteria.md, bands.md, genres and the run table — read live from
-  the data files and the repository. No password: whoever has the link can read it (nothing there is secret).
-- **Quality (false positives/negatives):** `review.html` (reachable from `admin.html` only, like `log.html`) lists every candidate the scraper looked at and
+- **Mischpult (the owners' control panel, hidden):** https://markusbaumg.github.io/jahgenda/mischpult.html shows
+  sources, venues, prompt, rules, runs and links to the log and the review page. It is not linked from any public
+  page, carries `noindex`, and is deliberately _not_ listed in `robots.txt` (a `Disallow` line would advertise the
+  URL to scanners). The name is Swiss German for «mixing desk» — we avoid `admin`, the first path every automated
+  scanner tries. Rename = move the file and update Makefile `WEB_FILES`, `scripts/smoke.sh`, this section and CLAUDE.md.
+- **Quality (false positives/negatives):** `review.html` (reachable from `mischpult.html` only, like `log.html`) lists every candidate the scraper looked at and
   dropped, with date, venue, source link and reason; «Gehört rein» opens a prefilled GitHub issue. Every
   Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped
   candidates and failed sources, so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.

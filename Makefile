@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html review.html admin.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs
+WEB_FILES := index.html log.html review.html mischpult.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs
 PY_FILES  := scripts/*.py tests/*.py
 # A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
 # once prettier@3.3.3 has been fetched once (so make check also works on a train).

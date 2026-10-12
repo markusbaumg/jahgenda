@@ -66,7 +66,7 @@ if [ -z "$(errors selfcheck)" ]; then
 fi
 
 fail=0
-for page in index.html log.html review.html admin.html; do
+for page in index.html log.html review.html mischpult.html; do
   load "http://127.0.0.1:$PORT/$page" "$page"
   if ! grep -q '</html>' "$PROFILE/$page.dom"; then
     echo "smoke: $page did not finish loading within the time limit"
