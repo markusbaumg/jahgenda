@@ -163,10 +163,12 @@ def gh(method, path, body=None):
 
 
 def open_issue():
+    """The open scraper-failed issue, None when there is none - or False when GitHub could not
+    be asked, which must not be mistaken for "none" (that would open a duplicate issue)."""
     code, issues = gh("GET", f"/repos/{REPO}/issues?labels={LABEL}&state=open&per_page=5")
     if code != 200:
         print(f"WARN cannot list issues: HTTP {code} {issues}")
-        return None
+        return False
     issues = [i for i in issues if "pull_request" not in i]
     return issues[0] if issues else None
 
@@ -195,6 +197,9 @@ def report(healthy, lines, now):
         else ""
     )
     issue = open_issue()
+    if issue is False:
+        print("WARN cannot sync the issue, skipping the GitHub update (the run still fails when unhealthy)")
+        return
     if not healthy:
         body = f"{MENTION} the watchdog found the scraper unhealthy at {stamp}:\n\n{bullets}{links}"
         if issue:
