@@ -27,6 +27,7 @@ test: ## Unit tests for validator and formatter
 	python3 -m unittest discover -s tests -v
 
 lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
+	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
 	node --check store.js app.js pwa.js sw.js
 	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
 	npx --yes prettier@3.3.3 --check $(WEB_FILES)
