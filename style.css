@@ -2152,3 +2152,106 @@ a {
   max-width: 100%;
   row-gap: 4px;
 }
+
+/* "Kalender abonnieren" sticker + popover */
+.sub-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--bg);
+  background: var(--gold);
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transform: rotate(-2deg);
+  box-shadow:
+    0 2px 0 var(--red),
+    0 4px 0 var(--green);
+}
+.sub-sticker:hover {
+  transform: rotate(0deg) scale(1.03);
+}
+.sub-sticker svg {
+  width: 14px;
+  height: 14px;
+}
+.results .sub-sticker.bar {
+  grid-column: 1;
+  justify-self: start;
+}
+.sub-pop {
+  position: absolute;
+  z-index: 25;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  padding: 16px 16px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--gold);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+.sub-pop strong {
+  display: block;
+  margin-right: 28px;
+}
+.sub-pop p {
+  margin: 6px 0 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.sub-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.sub-region {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.sub-region select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-left: 6px;
+}
+.sub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sub-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--gold);
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.sub-btn.ghost {
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--line);
+}
+.sub-url {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  word-break: break-all;
+  user-select: all;
+}

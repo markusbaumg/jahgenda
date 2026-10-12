@@ -136,6 +136,7 @@
   };
 
   const ICONS = {
+    rss: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.2 15.6a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM4 9.5a10.5 10.5 0 0 1 10.5 10.5h-3A7.5 7.5 0 0 0 4 12.5v-3zM4 3.5A16.5 16.5 0 0 1 20.5 20h-3A13.5 13.5 0 0 0 4 6.5v-3z"/></svg>',
     event:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3zM5 5h6v2H5v12h12v-6h2v8H3V5h2z"/></svg>',
     ticket:
@@ -1205,6 +1206,7 @@
         <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
         <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat">&rsaquo;</button>
         <button type="button" class="linkish cal-today" data-cal="0" title="Zum aktuellen Monat springen">Heute</button>
+        <button type="button" class="sub-sticker" data-subscribe title="Alle Shows als Kalender abonnieren – aktualisiert sich von selbst">${ICONS.rss} Kalender abonnieren</button>
       </div>
       <div class="cal-grid">
         ${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w) => `<span class="cal-dow">${w}</span>`).join("")}
@@ -1401,6 +1403,75 @@
         ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
         : "");
   }
+
+  // --- Kalender abonnieren: popover with the feed links (webcal for Apple/Outlook, Google, copy) ---
+  const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
+  function feedUrl(region) {
+    return FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
+  }
+  function openSubscribe(anchor) {
+    let pop = document.getElementById("subscribe-pop");
+    if (pop) {
+      pop.remove();
+      return;
+    }
+    pop = document.createElement("div");
+    pop.id = "subscribe-pop";
+    pop.className = "sub-pop";
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-label", "Kalender abonnieren");
+    const regions = [...new Set(shows.filter((s) => !s._past).map((s) => s.canton))].sort();
+    pop.innerHTML =
+      `<button type="button" class="install-close sub-close" title="Schliessen" aria-label="Schliessen">&times;</button>` +
+      `<strong>Alle Shows in deinem Kalender</strong>` +
+      `<p>Einmal abonnieren, danach aktualisiert sich der Kalender von selbst (täglich, wenn der Scraper läuft).</p>` +
+      `<label class="sub-region">Nur <select id="sub-region" title="Kanton für den Kalender wählen"><option value="">ganze Schweiz</option>${regions.map((r) => `<option value="${escape(r)}">${escape(regionName(r))}</option>`).join("")}</select></label>` +
+      `<div class="sub-actions">` +
+      `<a class="sub-btn" data-kind="webcal" href="${feedUrl("").replace("https://", "webcal://")}" title="In Apple Kalender / Outlook abonnieren">Apple / Outlook</a>` +
+      `<a class="sub-btn" data-kind="google" href="https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl(""))}" target="_blank" rel="noopener" title="In Google Kalender abonnieren">Google Kalender</a>` +
+      `<button type="button" class="sub-btn ghost" data-kind="copy" title="Feed-Adresse kopieren (für jede Kalender-App)">Adresse kopieren</button>` +
+      `</div><code class="sub-url">${escape(feedUrl(""))}</code>`;
+    document.body.appendChild(pop);
+    const r = anchor.getBoundingClientRect();
+    const narrow = window.innerWidth < 600;
+    pop.style.top = `${r.bottom + window.scrollY + 8}px`;
+    if (narrow) {
+      pop.style.left = "12px";
+      pop.style.right = "12px";
+    } else {
+      pop.style.left = `${Math.max(12, Math.min(r.left + window.scrollX, window.innerWidth - 372))}px`;
+    }
+    const update = () => {
+      const region = pop.querySelector("#sub-region").value;
+      pop.querySelector('[data-kind="webcal"]').href = feedUrl(region).replace("https://", "webcal://");
+      pop.querySelector('[data-kind="google"]').href =
+        `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl(region))}`;
+      pop.querySelector(".sub-url").textContent = feedUrl(region);
+    };
+    pop.querySelector("#sub-region").addEventListener("change", update);
+    pop.querySelector(".sub-close").addEventListener("click", () => pop.remove());
+    pop.querySelector('[data-kind="copy"]').addEventListener("click", async (e) => {
+      try {
+        await navigator.clipboard.writeText(feedUrl(pop.querySelector("#sub-region").value));
+        e.target.textContent = "Kopiert";
+      } catch {
+        e.target.textContent = "Adresse unten markieren";
+      }
+      setTimeout(() => (e.target.textContent = "Adresse kopieren"), 1500);
+    });
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        pop.remove();
+        document.removeEventListener("keydown", onKey);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    pop.querySelector(".sub-close").focus();
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-subscribe]");
+    if (b) openSubscribe(b);
+  });
 
   // --- Scrolling ---
   const filters = el("filters");
