@@ -1798,3 +1798,28 @@ a {
 .chip[aria-pressed="true"] small {
   opacity: 0.75;
 }
+
+/* View switch icons (Lucide, MIT) */
+.seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.seg .ico {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+@media (max-width: 420px) {
+  .seg button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .seg .ico {
+    width: 18px;
+    height: 18px;
+  }
+}
