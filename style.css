@@ -334,6 +334,32 @@ body {
   color: var(--gold);
   white-space: nowrap;
 }
+/* Placeholder for the distance while the position is unknown: only on hover, one click asks for it. */
+.geo-ask {
+  padding: 0;
+  font: inherit;
+  font-size: 0.85em;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 1px dotted var(--muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.show:hover .geo-ask,
+.geo-ask:focus-visible {
+  opacity: 1;
+}
+.geo-ask:hover {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+@media (hover: none) {
+  .geo-ask {
+    opacity: 0.7;
+  }
+}
 /* SBB timetable: a small red badge next to the distance, revealed on hover (always on touch screens). */
 .sbb {
   display: inline-grid;

@@ -147,7 +147,12 @@
     return `<a class="sbb" href="${url}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show" aria-label="SBB-Fahrplan nach ${escape(s.city)}">SBB</a>`;
   }
   function distanceLabel(s) {
-    if (!here || typeof s.lat !== "number" || typeof s.lon !== "number") return "";
+    if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
+    // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
+    if (!here)
+      return geoDeclined
+        ? ""
+        : ` · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button>`;
     return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
@@ -512,6 +517,7 @@
       }
       render();
       revealFromHash();
+      autoLocate();
     } catch (err) {
       console.error(err);
       status.innerHTML = `<p class="state-icon">${STATE_ICONS.offline}</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
@@ -776,12 +782,18 @@
 
   if (!("geolocation" in navigator)) locateBtn.hidden = true;
 
-  locateBtn.addEventListener("click", () => {
+  // Ask the browser for the position. Used by the Wo button, by the placeholder in every row and –
+  // once per visit, when the browser already allows it or has never been asked – right on start.
+  // The position is only used in this browser tab; it is never stored or sent anywhere.
+  let locating = false;
+  function locate() {
+    if (locating || !("geolocation" in navigator)) return;
+    locating = true;
     geoStatus.textContent = "Suche dich …";
     locateBtn.disabled = true;
-    // The position is only used in this browser tab; it is never stored or sent anywhere.
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        locating = false;
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         updateHomeCity();
         locateBtn.disabled = false;
@@ -807,12 +819,33 @@
         render();
       },
       () => {
+        locating = false;
         locateBtn.disabled = false;
         geoStatus.textContent = "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+        geoDeclined = true;
+        render();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
+  }
+  let geoDeclined = false; // no placeholder in the rows once the browser said no
+  locateBtn.addEventListener("click", locate);
+  list.addEventListener("click", (e) => {
+    if (e.target.closest(".geo-ask")) locate();
   });
+  // On start: silently when permission was granted before; with the browser's own question when it
+  // has never been asked; never when it was denied (the browser would not ask again anyway).
+  function autoLocate() {
+    if (!("geolocation" in navigator) || !shows.length) return;
+    if (!navigator.permissions || !navigator.permissions.query) return locate();
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((p) => {
+        if (p.state !== "denied") locate();
+        else geoDeclined = true;
+      })
+      .catch(() => locate());
+  }
 
   // --- Meine Shows: mark shows as "Interessiert" / "Ich gehe", filter to them, share the list. ---
   // Marks live only in this browser (localStorage); without it they last for the page view.
