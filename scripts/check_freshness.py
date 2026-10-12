@@ -113,7 +113,8 @@ def assess(now, max_age):
 
     if isinstance(status, dict) and "__error__" not in status:
         ok = status.get("ok")
-        counts = status.get("counts") or {}
+        # status.json is written by a prompt, not by code: never trust its shape.
+        counts = status.get("counts") if isinstance(status.get("counts"), dict) else {}
         info.append(
             f"status.json: ok={ok} runner={status.get('runner', '?')} skill={status.get('skill', '?')} "
             f"total={counts.get('total', '?')} +{counts.get('added', 0)} "
@@ -237,7 +238,12 @@ def report(healthy, lines, now):
 def main(argv):
     max_h = 36.0
     if "--max-age-hours" in argv:
-        max_h = float(argv[argv.index("--max-age-hours") + 1])
+        i = argv.index("--max-age-hours") + 1
+        try:
+            max_h = float(argv[i])
+        except (IndexError, ValueError):
+            print("usage: check_freshness.py [--max-age-hours N]")
+            return 2
     now = datetime.now(timezone.utc)
     healthy, lines = assess(now, timedelta(hours=max_h))
     print(("HEALTHY" if healthy else "UNHEALTHY") + f" (checked {fmt(now)})")
