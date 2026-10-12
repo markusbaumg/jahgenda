@@ -441,8 +441,8 @@
         [...counts]
           .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
           .map(
-            ([g]) =>
-              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(genreLabel[g] || g)}</button>`,
+            ([g, n]) =>
+              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false" title="Nur ${escape(genreLabel[g] || g)} anzeigen (${n})">${escape(genreLabel[g] || g)}<small>${n}</small></button>`,
           )
           .join("");
       updateChipArrows();
