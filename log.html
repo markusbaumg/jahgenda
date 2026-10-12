@@ -89,7 +89,7 @@
         >
       </h1>
       <p class="tag">Scraper-Log: was die KI-Agenten gemacht haben</p>
-      <a class="back" href="./">← zur Agenda</a>
+      <a class="back" href="./" title="Zurück zur Agenda">← zur Agenda</a>
     </header>
 
     <main class="wrap">
@@ -103,8 +103,12 @@
 
     <footer class="wrap foot">
       <p class="updated">
-        <a href="https://github.com/markusbaumg/jahgenda">GitHub</a> ·
-        <a href="https://github.com/markusbaumg/jahgenda/commits/main/data">Alle Änderungen an den Daten</a>
+        <a href="https://github.com/markusbaumg/jahgenda" title="Quellcode auf GitHub öffnen">GitHub</a> ·
+        <a
+          href="https://github.com/markusbaumg/jahgenda/commits/main/data"
+          title="Änderungsverlauf der Daten auf GitHub öffnen"
+          >Alle Änderungen an den Daten</a
+        >
       </p>
     </footer>
 
@@ -135,7 +139,7 @@
 
         const list = (title, items, render) =>
           items && items.length
-            ? `<details open><summary>${title} (${items.length})</summary><ul>${items.map(render).join("")}</ul></details>`
+            ? `<details open><summary title="Auf- oder zuklappen">${title} (${items.length})</summary><ul>${items.map(render).join("")}</ul></details>`
             : "";
 
         fetch("data/runs.json", { cache: "no-cache" })
