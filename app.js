@@ -260,7 +260,7 @@
       <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <time class="date" datetime="${escape(s.date)}">
           <span class="dow">${dowFmt.format(d).replace(".", "")}</span>
-          <span class="day">${String(d.getDate()).padStart(2, "0")}</span>
+          <span class="day">${String(d.getDate()).padStart(2, "0")}<i class="dot">.</i></span>
         </time>
         <div>
           <h3 class="title">${title}</h3>

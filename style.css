@@ -2427,3 +2427,11 @@ a:hover {
 .foot-links a {
   color: var(--muted);
 }
+
+/* German date: "Mi 21." — the period is set lighter so the number stays the anchor */
+.date .day .dot {
+  font-style: normal;
+  font-size: 0.7em;
+  color: var(--muted);
+  margin-left: 1px;
+}
