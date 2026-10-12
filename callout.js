@@ -55,6 +55,8 @@
       `<span class="callout-actions">${actions}` +
       `<button type="button" class="callout-never" data-callout-action="never" title="Diesen Hinweis nie mehr anzeigen">Nie mehr zeigen</button></span>`;
     h.hidden = false;
+    // The callout floats over the page end: tell CSS how much room the footer bar needs below it.
+    document.documentElement.style.setProperty("--callout-h", `${h.offsetHeight + 12}px`);
     requestAnimationFrame(() => h.classList.add("show"));
   }
 
@@ -64,6 +66,7 @@
     if (how === "forever") store.set(key(id), "forever");
     else if (how === "snooze") store.set(key(id), Date.now());
     host.classList.remove("show");
+    document.documentElement.style.removeProperty("--callout-h");
     current = null;
     setTimeout(() => {
       host.hidden = true;
@@ -92,6 +95,7 @@
         current = null;
         host.classList.remove("show");
         host.hidden = true;
+        document.documentElement.style.removeProperty("--callout-h");
       }
       queue.unshift(c);
       next();

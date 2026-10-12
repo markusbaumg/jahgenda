@@ -42,6 +42,8 @@
   }
 
   function showUpdateToast(reg) {
+    // One thing at the bottom edge at a time: a visible callout (install nudge …) makes way.
+    if (window.jahCallout) window.jahCallout.hide();
     const t = document.createElement("div");
     t.className = "toast";
     t.setAttribute("role", "status");
@@ -57,8 +59,9 @@
   // ---- Install nudge (via the shared callout) ---------------------------------------------------
   if (standalone) return; // already installed: nothing to suggest
   const ua = navigator.userAgent;
-  const isIOS =
-    /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  // iPadOS 13+ reports itself as a Mac with touch; its Share button sits top right, not in a bottom bar.
+  const isIPad = /iPad/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isIOS = /iPhone|iPod/.test(ua) || isIPad;
   const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|Chrome/.test(ua);
   let deferredPrompt = null;
   const callout = () => window.jahCallout;
@@ -95,9 +98,9 @@
       if (deferredPrompt) return;
       callout().show({
         id: "install",
-        title: "Jahgenda als App aufs iPhone",
+        title: `Jahgenda als App aufs ${isIPad ? "iPad" : "iPhone"}`,
         text:
-          `Tippe unten auf <b>Teilen</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg> ` +
+          `Tippe ${isIPad ? "oben rechts" : "unten"} auf <b>Teilen</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg> ` +
           `und dann auf <b>«Zum Home-Bildschirm»</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3z"/></svg>.`,
         actions: [],
       });
