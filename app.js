@@ -1081,20 +1081,23 @@
     togglePast.checked = showPast;
     if (openPanel !== "when") return;
 
-    // One chip per month over the whole span, counted with every filter except the time applied.
+    // Histogram: one clickable bar per month over the whole span, counted with every filter except the time.
     const counts = new Map();
     for (const s of shows)
       if (matchesFilters(s)) counts.set(monthKey(s._day), (counts.get(monthKey(s._day)) || 0) + 1);
     const thisMonth = monthStart(todayStart());
+    const max = Math.max(1, ...counts.values());
     whenMonths.innerHTML = monthList
       .map((d) => {
         const k = monthKey(d);
         const n = counts.get(k) || 0;
-        const cls = ["chip"];
+        const cls = ["bar"];
         if (!n) cls.push("empty");
         if (d < thisMonth) cls.push("past");
-        const title = `${monthFmt.format(d)}: ${n === 1 ? "1 Konzert" : `${n} Konzerte`}${d < thisMonth ? " (vergangen)" : ""}`;
-        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}">${monthLabel(d)}<small>${n}</small></button>`;
+        if (months.size && !months.has(k)) cls.push("dim");
+        if (monthKey(d) === monthKey(thisMonth)) cls.push("today");
+        const title = `${monthFmt.format(d)}: ${n === 1 ? "1 Konzert" : `${n} Konzerte`}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
+        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}" style="--h:${Math.round((n / max) * 100)}%"><b>${n || ""}</b><i></i><span>${monthLabel(d)}</span></button>`;
       })
       .join("");
     for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
