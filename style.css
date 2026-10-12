@@ -1614,8 +1614,9 @@ body {
 }
 
 /* Map: tiles toned down to sit on the dark page; legend under the map. */
+/* Dark map from the free OSM tiles: invert + desaturate (no third-party tile service, no API key). */
 .map .leaflet-tile-pane {
-  filter: none;
+  filter: invert(100%) hue-rotate(180deg) brightness(0.78) contrast(0.92) saturate(0.3);
 }
 .map {
   background: #0d0b09;
