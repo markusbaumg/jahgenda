@@ -31,6 +31,7 @@ Made by Kusi & Seraina.
 index.html / style.css / app.js        The page. No build step, no framework.
 pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
 log.html                               Public scraper log (renders data/runs.json).
+img/fonts/jahdisplay.woff2             Display face (Anton subset, OFL): wordmark, day numbers, month heads.
 data/shows.json                        The shows. Written by the scraper.
 data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag.
 data/artists.json                      Genre cache per act (Wikipedia / band website).

@@ -1,22 +1,119 @@
+/* ---------- Design tokens (design/ui-revamp.md §2, «Soundsystem Swiss») ----------
+ * Saturated --red/--gold/--green are fills and rules; words always use the *-text variant.
+ * Red = time pressure, gold = selection and attention, green = commitment and proximity.
+ */
 :root {
+  color-scheme: dark;
+  /* surfaces */
   --bg: #14110e;
-  --surface: #1d1915;
-  --line: #2e2822;
+  --surface: #221c17;
+  --surface-2: #2a2219;
+  --line: #4d4036;
+  --line-soft: #2e2822;
+  /* text */
   --text: #f3ead8;
-  --muted: #a39682;
+  --muted: #bcae98;
+  --faint: #7d7060;
+  /* brand fills (plates, rules, stripes, chip backgrounds) */
   --red: #d8342f;
   --gold: #f2b632;
   --green: #1e8f4e;
-  --green-text: #3fbf73;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
+  /* brand text variants (all >= 4.5:1 on --bg / --surface) */
+  --red-text: #ff7a6e;
+  --gold-text: #f2b632;
+  --green-text: #4fd08a;
+  --on-gold: #14110e;
+  --on-red: #fff5ec;
+  --on-green: #0f2a1a;
+  /* tints (14 % of the fill over --bg) */
+  --red-tint: rgba(216, 52, 47, 0.14);
+  --gold-tint: rgba(242, 182, 50, 0.14);
+  --green-tint: rgba(30, 143, 78, 0.14);
+  /* atmosphere */
+  --sun: radial-gradient(60vw 40vh at 0% 0%, rgba(242, 182, 50, 0.1), transparent 70%);
+  --grain-opacity: 0.035;
+
+  /* typography (16 px base; nothing in the agenda below --fs-1) */
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "JahDisplay", "JahDisplay Fallback", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial,
     sans-serif;
+  --fs-0: 0.78rem;
+  --fs-1: 0.8125rem;
+  --fs-2: 0.875rem;
+  --fs-3: 0.9375rem;
+  --fs-4: 1rem;
+  --fs-5: 1.125rem;
+  --fs-d1: 1.5rem;
+  --fs-d2: 2.1rem;
+  --fs-d3: clamp(2.4rem, 8vw, 3.6rem);
+  --lh-tight: 1.1;
+  --lh-body: 1.4;
+  --track-caps: 0.1em;
+
+  /* spacing, layout, radii, shadows */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --wrap: 760px;
+  --gutter: 16px;
+  --date-w: 48px;
+  --side-w: 44px;
+  --tap: 44px;
+  --bar-top: 48px;
+  --bar-chips: 36px;
+  --bar-h: calc(var(--bar-top) + var(--bar-chips)); /* app.js overrides with the measured height */
+  --month-h: 32px;
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 12px;
+  --r-pill: 999px;
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --sh-2: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --sh-bar: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --ring: 0 0 0 3px var(--gold), 0 0 0 6px var(--bg);
+
+  /* motion: one reggae bar at 75 bpm = 800 ms, every duration is a subdivision */
+  --t-1: 100ms;
+  --t-2: 200ms;
+  --t-3: 400ms;
+  --t-4: 800ms;
+  --ease-tape: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-skank: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --stagger: 24ms;
+
+  font-family: var(--font-body);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-1: 0ms;
+    --t-2: 0ms;
+    --t-3: 0ms;
+    --t-4: 0ms;
+  }
+}
+
+/* Display face: Anton, self-hosted Latin subset (img/fonts, ~9 KB, OFL). Weight range 400–900 so no
+ * browser ever synthesises a bold; the size-adjusted local fallback keeps the layout stable while it loads. */
+@font-face {
+  font-family: "JahDisplay";
+  src: url("img/fonts/jahdisplay.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-00FF, U+2013-2014, U+2022, U+2026;
+}
+@font-face {
+  font-family: "JahDisplay Fallback";
+  src: local("Impact"), local("Arial Narrow Bold"), local("ArialNarrow-Bold");
+  font-weight: 400 900;
+  size-adjust: 95%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
 }
 
 * {
@@ -29,10 +126,63 @@ html {
   scroll-padding-top: calc(var(--bar-h, 64px) + 40px);
 }
 body {
+  position: relative;
+  isolation: isolate;
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.4;
+  line-height: var(--lh-body);
+}
+/* Atmosphere: a warm sun glow from the top left corner, plus a screen-print grain tile on sharp screens.
+ * Both are fixed, behind the content (z-index -1 inside body's own stacking context), never animated. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+body::before {
+  background: var(--sun);
+}
+body::after {
+  display: none;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23g)'/></svg>")
+    0 0 / 160px 160px repeat;
+  opacity: var(--grain-opacity);
+}
+@media (min-resolution: 1.5dppx) {
+  body::after {
+    display: block;
+  }
+}
+
+/* Tricolor rule: the three stripe colours as structure (month heads, section titles, stuck bar, cards). */
+.rule-tri,
+.month,
+.section-title,
+.filters.stuck {
+  border-bottom: 3px solid;
+  border-image: linear-gradient(90deg, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%) 1;
+}
+
+/* One focus ring for every interactive element: gold double ring, visible on any surface. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.seg button:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--gold); /* .seg clips overflow */
+}
+
+/* Tabular numerals wherever a date or time appears. */
+.date,
+.meta time,
+.dist,
+.cal-num,
+.popup-shows time {
+  font-variant-numeric: tabular-nums;
 }
 
 .stripe {
@@ -63,44 +213,83 @@ body {
 }
 
 .head {
-  padding-top: 40px;
-  padding-bottom: 24px;
+  padding-top: var(--s-6);
+  padding-bottom: var(--s-5);
 }
+/* Lockup: mark + JAHGENDA in the display face, «Jah» cream / «genda» gold, one unbreakable word.
+ * Both words are .logo-word spans with gap 0, so no flex gap can split them; the mark sits on the type
+ * baseline (an image's flex baseline is its bottom edge) at cap height × 1.15 ≈ 1em. */
 .logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   margin: 0;
-  font-size: clamp(2.4rem, 8vw, 3.6rem);
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-size: var(--fs-d3);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.01em;
   line-height: 1;
+  text-transform: uppercase;
   color: var(--text);
 }
-.logo .wordmark span {
-  color: var(--gold);
-}
 .wordmark {
+  display: inline-flex;
+  gap: 0;
   white-space: nowrap;
 }
-/* Whole wordmark as an image (img/logo/NN-name-wordmark.svg) — alternative to text + mark. */
 .logo-word {
-  display: block;
-  height: 1.1em;
-  width: auto;
-  max-width: 100%;
+  display: inline-block;
 }
+.logo-word.genda {
+  color: var(--gold-text);
+}
+.logo-mark {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  border-radius: 0.2em;
+}
+/* Tagline, one line: REGGAE · DUB · SKA — SCHWEIZ with three tiny tricolor dots as separators. */
 .tag {
-  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--s-1);
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
   color: var(--muted);
+}
+.tri-dots {
+  display: inline-flex;
+  gap: 3px;
+  margin: 0 var(--s-1);
+}
+.tri-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.tri-dots i:nth-child(2) {
+  background: var(--gold);
+}
+.tri-dots i:nth-child(3) {
+  background: var(--green);
 }
 .notice {
   margin: 20px 0 0;
   padding: 10px 12px;
-  font-size: 0.85rem;
+  font-size: var(--fs-2);
   color: var(--muted);
   background: var(--surface);
-  border-radius: 8px;
+  border-radius: var(--r-2);
 }
 .notice strong {
-  color: var(--gold);
+  color: var(--gold-text);
 }
 .notice a {
   color: var(--green-text);
@@ -112,15 +301,14 @@ body {
   z-index: 3;
   margin-bottom: 8px;
   padding: 10px 0 0;
-  background: var(--bg);
-  border-bottom: 1px solid transparent;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  background:
+    var(--sun) fixed no-repeat,
+    var(--bg);
+  border-bottom: 3px solid transparent; /* same height as the stuck .rule-tri edge: no shift */
+  transition: box-shadow var(--t-2) var(--ease-tape);
 }
 .filters.stuck {
-  border-bottom-color: var(--line);
-  box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--sh-bar);
 }
 
 .toolbar {
@@ -193,15 +381,9 @@ body {
   cursor: progress;
 }
 .icon-btn.active {
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
   border-color: var(--gold);
-}
-.toolbar input:focus,
-.toolbar select:focus,
-.icon-btn:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 1px;
 }
 
 /* Genre chips: one scrollable row, no wrapping; arrows appear when there is more to see. */
@@ -254,9 +436,6 @@ body {
   color: var(--gold);
   border-color: var(--gold);
 }
-.scroll-btn:focus-visible {
-  outline: 2px solid var(--gold);
-}
 .scroll-btn[hidden] {
   display: none;
 }
@@ -283,12 +462,8 @@ body {
   color: var(--text);
   border-color: var(--muted);
 }
-.chip:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
-}
 .chip[aria-pressed="true"] {
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
   border-color: var(--gold);
   font-weight: 700;
@@ -330,7 +505,7 @@ body {
 }
 
 .dist {
-  color: var(--gold);
+  color: var(--green-text);
   white-space: nowrap;
 }
 
@@ -402,13 +577,9 @@ body {
   color: var(--text);
 }
 .seg button[aria-pressed="true"] {
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
   font-weight: 700;
-}
-.seg button:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: -2px;
 }
 #views[hidden],
 #list[hidden],
@@ -452,12 +623,6 @@ body {
   color: var(--gold);
   border-color: var(--gold);
 }
-.cal-nav:focus-visible,
-.cal-num:focus-visible,
-.pill:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 1px;
-}
 .cal-today {
   margin-left: auto;
   font-size: 0.85rem;
@@ -482,7 +647,7 @@ body {
   color: var(--muted);
 }
 .cal-dow:nth-child(n + 5) {
-  color: var(--red);
+  color: var(--red-text);
 }
 .cal-cell {
   display: flex;
@@ -518,10 +683,10 @@ body {
   color: var(--muted);
 }
 .cal-cell.weekend:not(.past) .cal-num {
-  color: var(--red);
+  color: var(--red-text);
 }
 .cal-cell.today .cal-num {
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
 }
 .cal-dots {
@@ -713,7 +878,7 @@ body {
   margin-top: 16px;
   font: inherit;
   font-weight: 700;
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
   border: 0;
   border-radius: 999px;
@@ -722,10 +887,6 @@ body {
 }
 .status button.primary:hover {
   filter: brightness(1.08);
-}
-.status button.primary:focus-visible {
-  outline: 2px solid var(--text);
-  outline-offset: 2px;
 }
 
 .show.past {
@@ -740,26 +901,42 @@ body {
   position: sticky;
   top: var(--bar-h, 64px);
   z-index: 2;
-  background: var(--bg);
-  padding-top: 14px;
-  margin-top: 40px;
+  background:
+    var(--sun) fixed no-repeat,
+    var(--bg);
+  padding-top: var(--s-3);
+  margin-top: var(--s-6);
 }
 #list section:first-child .month {
-  margin-top: 20px;
+  margin-top: var(--s-4);
 }
 .status:empty {
   display: none;
 }
 
+/* Month head: the loudest element in the list. OKTOBER in the display face, the year small and muted,
+ * both sitting on the tricolor rule (see .rule-tri above). */
 .month {
-  margin: 28px 0 4px;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  margin: var(--s-6) 0 var(--s-1);
+  padding-bottom: var(--s-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+  line-height: var(--lh-tight);
   text-transform: uppercase;
-  color: var(--gold);
-  border-bottom: 2px solid var(--line);
-  padding-bottom: 6px;
+  color: var(--gold-text);
+}
+.month .year {
+  font-family: var(--font-body);
+  font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: var(--track-caps);
+  color: var(--muted);
 }
 
 .shows {
@@ -773,7 +950,7 @@ body {
   gap: 4px 14px;
   align-items: start;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--line-soft);
   scroll-margin-top: calc(var(--bar-h, 64px) + 48px);
 }
 .show.highlight {
@@ -827,9 +1004,6 @@ body {
   color: var(--gold);
   background: rgba(242, 182, 50, 0.08);
 }
-.act:focus-visible {
-  outline: 2px solid var(--gold);
-}
 .act svg {
   width: 14px;
   height: 14px;
@@ -840,21 +1014,24 @@ body {
 }
 .date .dow {
   display: block;
-  font-size: 0.7rem;
+  font-size: var(--fs-1);
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-caps);
   color: var(--muted);
   text-transform: uppercase;
 }
 .date .day {
   display: block;
-  margin-top: 4px;
-  font-size: 1.6rem;
-  font-weight: 800;
+  margin-top: var(--s-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-d2);
+  font-weight: 400;
+  font-synthesis: none;
+  line-height: 0.9;
   font-variant-numeric: tabular-nums;
 }
 .show.weekend .date .dow {
-  color: var(--red);
+  color: var(--red-text);
 }
 
 .title {
@@ -899,9 +1076,6 @@ body {
 .canton:hover {
   background: rgba(242, 182, 50, 0.1);
   color: var(--text);
-}
-.canton:focus-visible {
-  outline: 2px solid var(--gold);
 }
 .canton img {
   width: 22px;
@@ -958,15 +1132,30 @@ body {
 .foot-links a:hover {
   color: var(--gold);
 }
+/* Section title on the tricolor rule, with the cross mark stamped behind it (96 px, 12 %). */
 .section-title {
+  position: relative;
+  isolation: isolate;
   margin: 0;
-  font-size: 0.8rem;
+  padding-bottom: var(--s-2);
+  font-size: var(--fs-1);
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
-  color: var(--gold);
-  border-bottom: 2px solid var(--line);
-  padding-bottom: 6px;
+  color: var(--gold-text);
+}
+.section-title::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 96px;
+  height: 96px;
+  background: url("img/logo/jahgenda.svg") center / contain no-repeat;
+  opacity: 0.12;
+  pointer-events: none;
 }
 .about-body {
   display: flex;
@@ -1054,7 +1243,7 @@ body {
   display: none;
 }
 .icon-btn.mine[aria-pressed="true"] {
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
   border-color: var(--gold);
 }
@@ -1066,8 +1255,10 @@ body {
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--fs-1);
+  font-weight: 400;
+  font-synthesis: none;
   line-height: 18px;
   text-align: center;
   color: var(--bg);
@@ -1133,29 +1324,36 @@ body {
     gap: 10px;
   }
   .date .day {
-    font-size: 1.35rem;
+    font-size: 1.7rem;
   }
   .act span {
     display: none;
   }
 }
 
-/* Collapsed one-line brand that appears in the sticky bar while scrolling. */
+/* Collapsed one-line brand that appears in the sticky bar while scrolling (same lockup, small). */
 .mini-brand {
   display: none;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: var(--s-2);
+  font-family: var(--font-display);
   font-size: 1.1rem;
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.02em;
   line-height: 1;
+  text-transform: uppercase;
   color: var(--text);
   text-decoration: none;
-  margin-bottom: 8px;
 }
-.mini-brand .wordmark span {
-  color: var(--gold);
+.mini-brand img {
+  width: 1em;
+  height: 1em;
+  border-radius: 4px;
 }
 .filters.stuck .mini-brand {
-  display: inline-block;
+  display: inline-flex;
 }
 
 /* Install banner (PWA) and update toast */
@@ -1242,7 +1440,7 @@ body {
 .install-btn {
   font: inherit;
   font-weight: 700;
-  color: var(--bg);
+  color: var(--on-gold);
   background: var(--gold);
   border: 0;
   border-radius: 999px;
@@ -1284,7 +1482,7 @@ body {
 .toast button {
   font: inherit;
   font-weight: 700;
-  color: var(--text);
+  color: var(--on-green);
   background: var(--green);
   border: 0;
   border-radius: 999px;
@@ -1310,32 +1508,6 @@ body {
 /* Tricolor stripe at the bottom too */
 .stripe.bottom {
   margin-top: 0;
-}
-
-/* Logo mark (img/logo/jahgenda.svg) next to the wordmark, in the big header and the collapsed bar. */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.2em;
-}
-.logo-mark {
-  width: 0.92em;
-  height: 0.92em;
-  flex: 0 0 auto;
-  border-radius: 0.18em;
-}
-.mini-brand {
-  display: none;
-  align-items: center;
-  gap: 6px;
-}
-.mini-brand img {
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-}
-.filters.stuck .mini-brand {
-  display: inline-flex;
 }
 
 /* Map: tiles toned down to sit on the dark page; legend under the map. */
@@ -1439,13 +1611,6 @@ a {
   text-decoration: none;
   border-bottom: 0;
 }
-.foot {
-  background: #1b1713;
-}
-.foot .section-title {
-  border-bottom-color: #2a241e;
-}
-
 .tag-chip.going {
   color: var(--bg);
   background: var(--green-text);
@@ -1462,4 +1627,19 @@ a {
 }
 .act.tickets {
   color: var(--green-text);
+}
+
+/* Reduced motion: colour states stay, nothing moves (the duration tokens are already 0 ms). */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  .genres {
+    scroll-behavior: auto;
+  }
+  .show.highlight {
+    animation: none;
+    background: var(--gold-tint);
+  }
+  .install {
+    transition: none;
+  }
 }

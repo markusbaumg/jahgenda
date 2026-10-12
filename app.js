@@ -73,6 +73,7 @@
     month: "long",
     year: "numeric",
   });
+  const monthNameFmt = new Intl.DateTimeFormat("de-CH", { month: "long" });
   const dowFmt = new Intl.DateTimeFormat("de-CH", { weekday: "short" });
   const stampFmt = new Intl.DateTimeFormat("de-CH", {
     dateStyle: "medium",
@@ -251,6 +252,11 @@
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
     const tickets = safeUrl(s.tickets);
+    // Genres are muted words at the end of the meta line; the active genre chip is not repeated.
+    const genreWords = s.genres
+      .filter((g) => g !== activeGenre)
+      .map((g) => ` · <span class="genre">${escape(g)}</span>`)
+      .join("");
     return `
       <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <time class="date" datetime="${escape(s.date)}">
@@ -264,11 +270,11 @@
               ? `<p class="acts">${s.acts.map((a) => `<span>${escape(a)}</span>`).join("")}</p>`
               : ""
           }
-          <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}</p>
+          <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}${genreWords}</p>
         </div>
         <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
-            ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
+            ${shared && shared[s.id] === "going" ? `<div class="tags"><span class="tag-chip going">geht hin</span></div>` : ""}
             <div class="actions">
               ${starButton(s)}
               <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
@@ -354,9 +360,9 @@
 
     list.innerHTML = [...groups]
       .map(
-        ([month, items]) => `
+        ([, items]) => `
         <section>
-          <h2 class="month">${escape(month)}</h2>
+          <h2 class="month">${escape(monthNameFmt.format(items[0]._day))} <span class="year">${items[0]._day.getFullYear()}</span></h2>
           <ul class="shows">${items.map(renderShow).join("")}</ul>
         </section>`,
       )

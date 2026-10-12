@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Jahgenda" />
+    <link rel="preload" href="img/fonts/jahdisplay.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -21,10 +22,16 @@
       <h1 class="logo">
         <img class="logo-mark" src="img/logo/jahgenda.svg" alt="" width="48" height="48" /><span
           class="wordmark"
-          >Jah<span>genda</span></span
+          ><span class="logo-word">Jah</span><span class="logo-word genda">genda</span></span
         >
       </h1>
-      <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+      <p class="tag">
+        Reggae<span class="tri-dots" aria-hidden="true"><i></i><i></i><i></i></span>Dub<span
+          class="tri-dots"
+          aria-hidden="true"
+          ><i></i><i></i><i></i></span
+        >Ska <span>— Schweiz</span>
+      </p>
       <p class="notice">
         <strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im Netz gesucht und
         zusammengetragen. Wirf vor dem Konzert kurz einen Blick auf die Seite des Veranstalters, dort findest
@@ -37,7 +44,7 @@
       <form class="filters" id="filters" role="search" onsubmit="return false">
         <a class="mini-brand" href="#top" aria-label="Nach oben"
           ><img src="img/logo/jahgenda.svg" alt="" width="20" height="20" /><span class="wordmark"
-            >Jah<span>genda</span></span
+            ><span class="logo-word">Jah</span><span class="logo-word genda">genda</span></span
           ></a
         >
         <div class="toolbar">

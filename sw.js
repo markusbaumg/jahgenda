@@ -21,6 +21,7 @@ const SHELL = [
   "manifest.webmanifest",
   "img/about.jpg",
   "img/logo/jahgenda.svg",
+  "img/fonts/jahdisplay.woff2",
   "img/icons/icon-192.png",
   "img/icons/icon-512.png",
 ];
