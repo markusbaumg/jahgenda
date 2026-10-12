@@ -279,7 +279,7 @@ def check_venues(data):
     return errs, keys
 
 
-# A show's coordinates may differ from its venue's by this much (≈ 2 km) before it counts as a different place.
+# A show may sit this far (lat+lon degrees, ≈ 2 km) from its venue before it counts as another place.
 VENUE_DRIFT = 0.03
 
 

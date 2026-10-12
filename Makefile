@@ -5,6 +5,8 @@ SHELL := /bin/bash
 PORT ?= 8000
 WEB_FILES := index.html log.html review.html mischpult.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs
 PY_FILES  := scripts/*.py tests/*.py
+# ruff on PATH, else via uvx (same version as CI); without both, lint fails loudly instead of skipping
+RUFF := $(shell command -v ruff >/dev/null 2>&1 && echo ruff || (command -v uvx >/dev/null 2>&1 && echo "uvx ruff") || echo "python3 -m ruff")
 # A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
 # once prettier@3.3.3 has been fetched once (so make check also works on a train).
 PRETTIER  := $(shell command -v prettier 2>/dev/null || echo npx --yes --prefer-offline prettier@3.3.3)
@@ -30,16 +32,16 @@ test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contra
 	python3 -m unittest discover -s tests -v
 	node --test tests/*.test.mjs
 
-lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
+lint: ## Syntax and format check (JS via node, Python via ruff – PATH or uvx –, HTML/CSS via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
 	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
 	node --check store.js lib.js app.js pwa.js callout.js sw.js
-	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
+	@$(RUFF) check scripts tests && $(RUFF) format --check scripts tests
 	$(PRETTIER) --check $(WEB_FILES)
 
-fmt: ## Format code (prettier for HTML/CSS/JS, ruff if installed) and normalise data
+fmt: ## Format code (prettier for HTML/CSS/JS, ruff for Python) and normalise data
 	$(PRETTIER) --write $(WEB_FILES)
-	@if ruff --version >/dev/null 2>&1; then ruff format scripts tests && ruff check --fix scripts tests; fi
+	$(RUFF) format scripts tests && $(RUFF) check --fix scripts tests
 	$(MAKE) fmt-data
 
 fmt-data: ## Bring data/*.json into canonical form (sorting, indentation)
