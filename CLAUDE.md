@@ -12,6 +12,8 @@ Lies zuerst `README.md` – dort steht der Aufbau.
   «Vorschläge» in `bands.md` anhängen.
 - **Skills gehören:** `data/shows.json`, `data/artists.json`, `data/runs.json`.
   Menschen dürfen sie korrigieren; Skills respektieren Handkorrekturen (siehe SKILL.md).
+- **Geteilt:** `data/venues.json` – Menschen pflegen Venues (Koordinaten, Programm-URL, `scrape`-Flag),
+  Skills ergänzen neue Venues, die sie antreffen, ändern aber keine bestehenden.
 
 ## Eiserne Regeln für Skills
 
@@ -21,13 +23,16 @@ Lies zuerst `README.md` – dort steht der Aufbau.
 4. **Jeder Lauf hinterlässt eine Spur:** ein Eintrag in `data/runs.json` (was gefunden, was verworfen und warum,
    welche Quellen nicht geladen werden konnten). Das ist das öffentliche Log – es wird auf `log.html` angezeigt.
 5. **Nur `data/*` und `scraper/bands.md` (Vorschläge) committen.** Alles andere ist tabu.
+   Vor dem Commit immer `python3 scripts/format_data.py` (kanonische Form, kleine Diffs).
 6. **Im Zweifel weglassen.** Lieber eine Show zu wenig als eine erfundene oder falsche.
 
 ## Befehle
 
 ```sh
-python3 scripts/validate_shows.py     # Daten prüfen
-python3 -m http.server 8000           # Seite lokal ansehen
+make              # Hilfe: alle Targets
+make check        # lint + validate + test – muss vor jedem Commit grün sein
+make serve        # Seite lokal ansehen (http://localhost:8000)
+make scrape       # Scraper jetzt laufen lassen (Claude Code, Abo)
 ```
 
 Skills: `/scrape-shows` (Konzerte aktualisieren), `/harvest-bands` (Bands aus Festival-Line-ups vorschlagen).

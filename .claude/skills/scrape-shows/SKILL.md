@@ -6,8 +6,8 @@ description: Research upcoming reggae, dub and ska shows in Switzerland (and jus
 # Scrape shows
 
 You update the concert data of Jahgenda. The result of this run is one commit on `main` that changes
-`data/shows.json`, `data/artists.json`, `data/runs.json` and — only new lines under **Vorschläge** —
-`scraper/bands.md`. Nothing else in the repo is touched.
+`data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only), `data/runs.json` and — only
+new lines under **Vorschläge** — `scraper/bands.md`. Nothing else in the repo is touched.
 
 Work from the repository root. Today's date is what `date +%F` prints — use it, do not guess.
 
@@ -19,15 +19,19 @@ Work from the repository root. Today's date is what `date +%F` prints — use it
    counts, an act under **Nicht dabei** never does. Read the setting line
    `Vorschläge automatisch berücksichtigen: ja|nein` — it decides whether acts under **Vorschläge** are part
    of the watchlist (step 2.4). Match names case-insensitively, ignoring punctuation and anything after ` — `.
-3. `scraper/sources.json` — agenda pages, venues (with canton + coordinates + parsing hints), nearby regions
-   and search queries. (`festivals` is used by `/harvest-bands`, not here.)
-4. `data/shows.json` — the current state.
+3. `scraper/sources.json` — agenda pages, nearby regions and search queries (`festivals` is used by
+   `/harvest-bands`, not here).
+4. `data/venues.json` — the venue database: city, canton, coordinates, programme `url`, `scrape` flag and a
+   parsing `hint` per venue. Venues with `"scrape": true` are crawled in step 2.2. **Every show's `venue`
+   must exist here** (the validator checks, matching case-insensitively and ignoring punctuation) and the
+   show's `lat`/`lon` are copied from here.
+5. `data/shows.json` — the current state.
    - If `"source"` is `"mock"`: ignore every existing show. Mock entries are examples, not data; the list is
      built from scratch.
    - Otherwise keep every existing *future* show that has a `source_url`, unless you find clear evidence that
      it was cancelled or moved, or step 3 says it is out. Existing `id`s stay stable. An existing show
      without `source_url` is dropped (it can never validate).
-5. `data/artists.json` — the genre cache. Look here before researching an act. Entries with
+6. `data/artists.json` — the genre cache. Look here before researching an act. Entries with
    `"source": "manual"` were written by a human: use them, never change them.
 
 ## 2. Collect candidates
@@ -39,9 +43,9 @@ take the next 6 months, not everything.
 1. **Agendas** (`agendas`): open each one, read its `hint` (it says which page and how the events are
    written), collect everything that could match `criteria.md`, in Switzerland or in the nearby regions,
    from today up to 6 months ahead.
-2. **Venues** (`venues`): open each venue's programme page (`url`; `hint` says where the events are and how
-   they are tagged) and pick matching events. Use the venue's `name`, `canton`, `lat`, `lon` from
-   sources.json for the entry.
+2. **Venues** (`data/venues.json`, those with `"scrape": true`): open each venue's programme page (`url`;
+   `hint` says where the events are and how they are tagged) and pick matching events. Use the venue's
+   name as the key is written, plus its `city`, `canton`, `lat`, `lon` for the entry.
 3. **Web search** (`search_queries`): run each distinct query once per month for the current and the next
    two months. `{monat}` is the month name in the language of the query, `{jahr}` the year; a query without
    `{monat}` runs once. Open at most 3 promising results per query.
@@ -61,10 +65,12 @@ Rules while collecting:
 - Dates: `YYYY-MM-DD` local date. If only a weekday and day are given, resolve them against the page's
   month/year context. If you cannot pin the date, drop the candidate.
 - Time: `HH:MM` (24h), door or start time if shown; otherwise omit.
-- Venue not in sources.json: look up its city and canton; find coordinates (venue website, Wikipedia, or
-  OpenStreetMap). If you cannot find coordinates, leave `lat`/`lon` out — never guess. Use the venue name as
-  the venue itself writes it; if a venue has several rooms that are listed in sources.json (e.g. Dachstock
-  in the Reitschule), use the room's entry.
+- Venue not in `data/venues.json`: add it — `city`, `canton`, `lat`, `lon` (venue website address →
+  OpenStreetMap/Nominatim or Google Maps; if the exact spot cannot be found, use the city centre and write
+  `"hint": "Koordinaten: Stadtmitte"`), `url` of its programme page if known, `"scrape": false`. Use the
+  venue name as the venue itself writes it; if a venue has several rooms that are listed in venues.json
+  (e.g. Dachstock in the Reitschule), use the room's entry. Never invent coordinates for a specific street
+  address — city centre is the honest fallback.
 - Across the border: only the places listed in `criteria.md` → «Grenznah» count. `canton` is then the
   country code `D`, `F`, `I`, `A` or `FL`. Everything else outside Switzerland is dropped.
 
@@ -126,7 +132,8 @@ Only these fields are allowed per artist: `genres, source, checked, festivals, t
 Allowed fields per show — nothing else:
 `id, date, time, title, acts, venue, city, canton, url, source_url, lat, lon, genres`.
 
-Write `data/shows.json` with 2-space indentation and `data/artists.json` with the artists sorted by key.
+Write the files, then run `python3 scripts/format_data.py` — it sorts shows, artists and venues and fixes
+the layout, so you need not care about formatting.
 
 ## 6. Log the run
 
@@ -152,8 +159,8 @@ the decision.
 Run exactly this, as one command, so nothing is committed when validation fails:
 
 ```sh
-python3 scripts/validate_shows.py \
-  && git add data/shows.json data/artists.json data/runs.json scraper/bands.md \
+python3 scripts/format_data.py && python3 scripts/validate_shows.py \
+  && git add data/shows.json data/artists.json data/venues.json data/runs.json scraper/bands.md \
   && git commit -m "Update shows: +<added> ~<updated> -<removed> (<total> total)" \
   && git push origin main
 ```

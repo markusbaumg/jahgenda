@@ -67,7 +67,7 @@ Write `data/artists.json` with 2-space indentation, artists sorted by key. Keep 
 Run exactly this, as one command, so nothing is committed when validation fails:
 
 ```sh
-python3 scripts/validate_shows.py \
+python3 scripts/format_data.py && python3 scripts/validate_shows.py \
   && git add data/artists.json data/runs.json scraper/bands.md \
   && git commit -m "Harvest bands: +<added> new, <total> total" \
   && git push origin main
