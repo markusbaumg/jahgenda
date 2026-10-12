@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jahgenda · Reggae-Konzerte in der Schweiz</title>
+  <meta name="description" content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz.">
+  <meta name="theme-color" content="#14110e">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3'><rect width='3' height='1' fill='%23d8342f'/><rect y='1' width='3' height='1' fill='%23f2b632'/><rect y='2' width='3' height='1' fill='%231e8f4e'/></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <header class="wrap head">
+    <h1 class="logo">Jah<span>genda</span></h1>
+    <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+  </header>
+
+  <main class="wrap">
+    <form class="filters" role="search" onsubmit="return false">
+      <label class="sr" for="canton">Kanton</label>
+      <select id="canton"><option value="">Alle Kantone</option></select>
+      <label class="sr" for="q">Suche</label>
+      <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off">
+    </form>
+
+    <p id="status" class="status" role="status">Lade Konzerte …</p>
+    <div id="list"></div>
+  </main>
+
+  <footer class="wrap foot">
+    <span id="updated"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "updated": "2026-10-12T12:00:00+02:00",
+  "source": "mock",
+  "shows": [
+    { "id": "2026-10-03-rootsnight-luzern", "date": "2026-10-03", "time": "21:00", "title": "Roots Night Vol. 12", "venue": "Schüür", "city": "Luzern", "canton": "LU", "url": "" },
+    { "id": "2026-10-16-dub-collective-bern", "date": "2026-10-16", "time": "20:30", "title": "Alpine Dub Collective + Support", "venue": "Dachstock", "city": "Bern", "canton": "BE", "url": "" },
+    { "id": "2026-10-17-soundclash-basel", "date": "2026-10-17", "time": "22:00", "title": "Rhein Soundclash", "venue": "Kaserne", "city": "Basel", "canton": "BS", "url": "" },
+    { "id": "2026-10-24-lion-steppers-zuerich", "date": "2026-10-24", "time": "21:00", "title": "Lion Steppers", "venue": "Bogen F", "city": "Zürich", "canton": "ZH", "url": "" },
+    { "id": "2026-10-31-irie-halloween-stgallen", "date": "2026-10-31", "time": "22:00", "title": "Irie Halloween Dance", "venue": "Grabenhalle", "city": "St. Gallen", "canton": "SG", "url": "" },
+    { "id": "2026-11-05-jah-riders-winterthur", "date": "2026-11-05", "time": "20:00", "title": "Jah Riders Band", "venue": "Salzhaus", "city": "Winterthur", "canton": "ZH", "url": "" },
+    { "id": "2026-11-14-lagos-to-kingston-geneve", "date": "2026-11-14", "time": "21:30", "title": "Lagos to Kingston Session", "venue": "L'Usine", "city": "Genève", "canton": "GE", "url": "" },
+    { "id": "2026-11-21-skank-attack-fribourg", "date": "2026-11-21", "time": "21:00", "title": "Skank Attack + Rocksteady DJs", "venue": "Fri-Son", "city": "Fribourg", "canton": "FR", "url": "" },
+    { "id": "2026-11-28-dubplate-lausanne", "date": "2026-11-28", "time": "23:00", "title": "Dubplate Special", "venue": "Le Romandie", "city": "Lausanne", "canton": "VD", "url": "" },
+    { "id": "2026-12-05-nyabinghi-chur", "date": "2026-12-05", "time": "20:30", "title": "Nyabinghi Drums & Friends", "venue": "Werkstatt", "city": "Chur", "canton": "GR", "url": "" },
+    { "id": "2026-12-12-reggae-xmas-bern", "date": "2026-12-12", "time": "21:00", "title": "Reggae X-Mas Bash", "venue": "Reitschule", "city": "Bern", "canton": "BE", "url": "" },
+    { "id": "2027-01-16-one-love-aarau", "date": "2027-01-16", "time": "21:00", "title": "One Love Selecta Night", "venue": "KiFF", "city": "Aarau", "canton": "AG", "url": "" },
+    { "id": "2027-02-06-bob-birthday-zuerich", "date": "2027-02-06", "time": "20:00", "title": "Tribute Night: Catch a Fire", "venue": "Exil", "city": "Zürich", "canton": "ZH", "url": "" }
+  ]
+}
