@@ -1,6 +1,24 @@
 {
   "note": "Venue database: coordinates, canton and programme URL per venue. scrape=true: the scraper reads this venue's programme on every run. Every show in shows.json must have its venue here — the show's coordinates come from here. The scraper adds new venues with coordinates (Google Maps / OpenStreetMap); if the address is unknown, the city centre is fine.",
   "venues": {
+    "Alte Kaserne": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.37684,
+      "lon": 8.52904,
+      "url": "https://www.altekaserne.ch/",
+      "scrape": false,
+      "hint": "Kanonengasse 16, Kreis 4; Tickets via Eventfrog."
+    },
+    "Bad Bonn": {
+      "city": "Düdingen",
+      "canton": "FR",
+      "lat": 46.86158,
+      "lon": 7.18013,
+      "url": "https://club.badbonn.ch/",
+      "scrape": false,
+      "hint": "Konzertclub im Sensebezirk; Tickets via Petzi."
+    },
     "Bierhübeli": {
       "city": "Bern",
       "canton": "BE",
@@ -9,6 +27,15 @@
       "url": "https://bierhuebeli.ch/",
       "scrape": true,
       "hint": "Genre tags in the programme; touring acts (e.g. Dub Inc). Cancelled shows are marked — do not include them."
+    },
+    "Bikini Test": {
+      "city": "La Chaux-de-Fonds",
+      "canton": "NE",
+      "lat": 47.11307,
+      "lon": 6.8456,
+      "url": "https://www.bikinitest.ch/",
+      "scrape": false,
+      "hint": "Rue Joux-Perret 3; Genre-Tags auf Petzi (Dub, Reggae)."
     },
     "Bogen F": {
       "city": "Zürich",
@@ -37,6 +64,24 @@
       "scrape": false,
       "hint": "Langstrasse 81, 8004 Zürich (Koordinaten = Hausnummer, Nominatim). Keine eigene Website – caveclub.ch existiert nicht; Reggae/Dancehall-Nächte («Friday Bash») nur in Veranstalter-Listings (zuri.net, guidle), darum scrape=false."
     },
+    "Château Rouge": {
+      "city": "Annemasse",
+      "canton": "F",
+      "lat": 46.18857,
+      "lon": 6.23643,
+      "url": "https://www.chateau-rouge.net/",
+      "scrape": false,
+      "hint": "1 route de Bonneville; Genre-Angabe pro Spectacle, eigene Billetterie (legilog)."
+    },
+    "Coupole": {
+      "city": "Biel/Bienne",
+      "canton": "BE",
+      "lat": 47.13595,
+      "lon": 7.25002,
+      "url": "https://ajz.ch/de-ch/chessu/programm/",
+      "scrape": false,
+      "hint": "AJZ Biel (Chessu), Grosser Saal/Kleiner Saal; Programm auf ajz.ch, Tickets via Petzi."
+    },
     "Dachstock": {
       "city": "Bern",
       "canton": "BE",
@@ -45,6 +90,15 @@
       "url": "https://www.dachstock.ch/events",
       "scrape": true,
       "hint": "Prefer the iCal feed: each VEVENT has DTSTART in UTC (e.g. 20261205T213000Z, convert to Europe/Zurich), SUMMARY as \"Event/Series name – Act1, Act2, ...\" (acts after an en dash, comma separated, truncated at ~70 chars so check the event page for the full line-up), CATEGORIES with type plus genre tags (e.g. \"Party,Drum and Bass\", \"Konzert,Rock,Dubstep,EDM\"; some events like Dubtopia carry no CATEGORIES at all), LOCATION naming the room (Dachstock, Rössli, Sous le Pont, Grosse Halle at Reitschule, Neubrückstrasse 8, 3012 Bern) and URL to the detail page (/events/DD-MM-YYYY-slug). On the HTML /events page the list is in German: \"FR, 16.10.2026 - 23:00\" then the title, then one act per line each followed by its home town, then type/genre tags, then \"Tickets\" linking to https://www.petzi.ch/events/<id>/tickets (or \"Sold Out\"/\"Anmeldung Erforderlich\"). Genre tags are free text set by the venue and often missing for the dub night, so treat any event titled \"Dubtopia\" (series page /series/dubtopia) as dub/soundsystem regardless of tags. Raum der Reitschule; iCal: https://dachstock.ch/events.ics"
+    },
+    "Dynamo": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.38331,
+      "lon": 8.53934,
+      "url": "https://www.dynamo.ch/veranstaltungen",
+      "scrape": false,
+      "hint": "Jugendkulturhaus Dynamo, Wasserwerkstrasse 21 (Säle Werk21/Dynamo); Limmat Sessions."
     },
     "Ebullition": {
       "city": "Bulle",
@@ -82,6 +136,14 @@
       "scrape": true,
       "hint": "Genre tags; regular ska-punk."
     },
+    "Gaswerk Eventbar": {
+      "city": "Seewen",
+      "canton": "SZ",
+      "lat": 47.02992,
+      "lon": 8.62863,
+      "scrape": false,
+      "hint": "Bahnhofstrasse 180b, Seewen SZ (nicht Gaswerk Winterthur); Tickets via Eventfrog."
+    },
     "Grabenhalle": {
       "city": "St. Gallen",
       "canton": "SG",
@@ -91,6 +153,14 @@
       "scrape": true,
       "hint": "Events on /programm/ are listed chronologically under German month headings (Oktober 2026, November 2026, ...). Each entry has a date block in German in the form 'DO 15 OKT 21:00 – 23:30' (weekday abbreviation, day, abbreviated German month, start/end times; year only from the month heading), a title (artist name with country in parentheses, e.g. 'Elijah Salomon (CH)', multiple acts separated by ' / '), and a subtitle line that holds the tour name or support act (e.g. 'Essenz Tour', 'Support: Velvet Wasted (A)', or series names like 'Ein kleines Konzert # 240', 'Bullaugenkonzert', 'cineclub sg', 'Hallenbeiz'). Genres are NOT shown in the list or single-event HTML; they are only in the description text (e.g. 'Mundart-Reggae und Dancehall') and in the REST API taxonomy event_type_2. The ticket link is in the expanded details under 'EINTRITT & TICKET' as 'Tickets gibt's hier' pointing to eventfrog.ch, petzi.ch or ticketino.com (the eventfrog URL path often contains the genre, e.g. /konzerte/reggae-ska/); free shows (Hallenbeiz, cineclub, Ein kleines Konzert) have no ticket link. Single event pages are https://www.grabenhalle.ch/events/<slug>/ with doors/start/end as 'Türöffnung / Beginn / Schluss' and price as 'CHF 20.- bis 40.-'."
     },
+    "Hacienda": {
+      "city": "Sierre",
+      "canton": "VS",
+      "lat": 46.29225,
+      "lon": 7.53232,
+      "scrape": false,
+      "hint": "Koordinaten: Stadtmitte. Hacienda Sonic, Sierre; Konzerte der Association Artsonic via Petzi."
+    },
     "ISC Club": {
       "city": "Bern",
       "canton": "BE",
@@ -99,6 +169,23 @@
       "url": "https://isc-club.ch/",
       "scrape": true,
       "hint": "Dancehall nights (Soul Rebel Sound)."
+    },
+    "Jazzhaus Freiburg": {
+      "city": "Freiburg im Breisgau",
+      "canton": "D",
+      "lat": 47.99476,
+      "lon": 7.84056,
+      "url": "https://www.jazzhaus.de/programm/",
+      "scrape": false,
+      "hint": "Schnewlinstraße 1; Monatsseiten /programm/YYYY/M.html mit #ska/#reggae-Tags, Tickets via Reservix."
+    },
+    "Jazzkantine": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0533,
+      "lon": 8.30597,
+      "scrape": false,
+      "hint": "Jazzkantine zum Graben, Grabenstrasse 8; Club im UG, Tickets via Eventfrog."
     },
     "Kammgarn": {
       "city": "Schaffhausen",
@@ -145,6 +232,14 @@
       "scrape": true,
       "hint": "Kulturfabrik Lyss, Werdtstrasse 17. Programm auf der Startseite (/programm/ leitet dorthin um), server-gerendert mit Datum und Uhrzeit pro Event. Selten Reggae – nur bei Treffern aufnehmen."
     },
+    "Kultur hoch 3": {
+      "city": "Herisau",
+      "canton": "AR",
+      "lat": 47.38274,
+      "lon": 9.27558,
+      "scrape": false,
+      "hint": "Dä 3. Stock, Industriestrasse 28; Tickets via Eventfrog."
+    },
     "Kulturfabrik Kofmehl": {
       "city": "Solothurn",
       "canton": "SO",
@@ -154,6 +249,23 @@
       "scrape": true,
       "hint": "Programm auf der Startseite (/programm/ leitet dorthin um): div.events__date + div.events__title. Keine Genre-Tags, nach Act-Namen entscheiden."
     },
+    "Kulturhaus Fruchthof": {
+      "city": "Sursee",
+      "canton": "LU",
+      "lat": 47.17038,
+      "lon": 8.09893,
+      "scrape": false,
+      "hint": "Bahnhofplatz 9; Kulturraum Sursee (KRS), Tickets via Eventfrog."
+    },
+    "Kulturrausch": {
+      "city": "Bürglen",
+      "canton": "TG",
+      "lat": 47.54835,
+      "lon": 9.14949,
+      "url": "https://kulturrausch.ch/events/",
+      "scrape": false,
+      "hint": "Industriestrasse 6a, Istighofen (Bürglen TG); Tickets via Eventfrog."
+    },
     "L'Usine": {
       "city": "Genève",
       "canton": "GE",
@@ -162,6 +274,15 @@
       "url": "https://www.usine.ch/agenda",
       "scrape": true,
       "hint": "On /agenda each item is: date in D/M/YY (e.g. \"13/10/26\", \"5/11/26\", \"29/1/27\"), then the organiser/sub-venue (Le Rez, Le Rez-Usine, PTR, Post Tenebras Rock, ZOO, \"PTR x <co-promoter>\"), then the title with acts joined by \" + \" or \" • \" and country in parentheses, sometimes with the genre appended to the title (e.g. \"THE SLACKERS ( US) Ska\", \"Suffocation (US) Death metal\"), then a category tag (concert / dj sets / autre), not a music genre. Language is French. Each item links to /evenements/<slug>; the detail page gives time and full date in French (\"20h le mardi 13 octobre 2026\"), \"Organisé par :\" with the space, a description, and \"Billetterie :\" with a Petzi link (https://www.petzi.ch/events/<id>/). Genre must be inferred from title/description. Note the same show may be listed twice (once by PTR, once by Post Tenebras Rock); dedupe by date+acts. The sub-venues (PTR, Le Rez, Le Zoo) have their own sites, so check for duplicates if those are also sources. Mehrere Räume (PTR, Kalvingrad, Le Zoo)."
+    },
+    "Le Brise Glace": {
+      "city": "Annecy",
+      "canton": "F",
+      "lat": 45.89303,
+      "lon": 6.13565,
+      "url": "https://www.le-brise-glace.com/agenda/",
+      "scrape": false,
+      "hint": "54 bis rue des Marquisats; Genre-Angabe pro Event (z.B. 'Reggae dub'); Club-Abende gratis."
     },
     "Le Chat Noir": {
       "city": "Carouge",
@@ -181,6 +302,24 @@
       "scrape": true,
       "hint": "On /programmation, each event is an <article> under the heading \"Prochaines Dates\" (past ones under \"Dates passées\"); inside, a <time> element (datetime attribute is empty) holds two spans: the French short date \"24 oct. 2026\" (months: janv., févr., mars, avr., mai, juin, juil., août, sept., oct., nov., déc.) and the doors time \"23H00\". The title is the <h3> in upper case, usually \"ACT (COUNTRY) + ACT (COUNTRY) + SUPPORT\" (club nights have free-form names like \"ROMANDUB #2\"), followed by the price (\"25 CHF\", \"Caisse du soir\", \"Prix libre\", \"Complet\", \"Annulé\"). Links go to https://www.leromandie.ch/event/{slug}; presale tickets are links to https://www.petzi.ch/fr/events/{id}-le-romandie-{slug}/ (club nights are door-only, no Petzi link). No genre tags appear in the list; the event detail page has schema.org JSON-LD (name, startDate ISO with timezone, location) and a French description where genre words such as \"roots\", \"dub\", \"steppers\", \"sound system\" appear in the text, so the agent must read the description or recognise acts. Dub-Reihe ROMANDUB."
     },
+    "Le Soleil": {
+      "city": "Saignelégier",
+      "canton": "JU",
+      "lat": 47.25453,
+      "lon": 6.99814,
+      "url": "https://www.cafe-du-soleil.ch/",
+      "scrape": false,
+      "hint": "Café du Soleil – Centre culturel, Saignelégier; Konzerte via Petzi."
+    },
+    "Mahogany Hall": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.94893,
+      "lon": 7.45939,
+      "url": "https://mahogany.ch/",
+      "scrape": false,
+      "hint": "Klösterlistutz 18; Konzertkeller, Tickets via Eventfrog oder Airtable-Reservation."
+    },
     "Moods": {
       "city": "Zürich",
       "canton": "ZH",
@@ -190,6 +329,40 @@
       "scrape": true,
       "hint": "Monthly \"K.O.S Crew Dancehall Mood\" and reggae/dancehall parties."
     },
+    "Mundwerk": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.40898,
+      "lon": 8.55058,
+      "scrape": false,
+      "hint": "Club Mundwerk / Kulturbiotop, Dörflistrasse 76, Oerlikon; Ska Nights via Eventfrog."
+    },
+    "Mühle Hunziken": {
+      "city": "Rubigen",
+      "canton": "BE",
+      "lat": 46.89064,
+      "lon": 7.54217,
+      "url": "https://www.muehlehunziken.ch/programm",
+      "scrape": false,
+      "hint": "Konzertlokal in Rubigen; Programm mit Genre-Angabe pro Show, Tickets via Seetickets."
+    },
+    "Nachtzug": {
+      "city": "Aarau",
+      "canton": "AG",
+      "lat": 47.39271,
+      "lon": 8.04444,
+      "scrape": false,
+      "hint": "Koordinaten: Stadtmitte. Club in Aarau, Dancehall-Partys via Eventfrog."
+    },
+    "Oxil": {
+      "city": "Zofingen",
+      "canton": "AG",
+      "lat": 47.28482,
+      "lon": 7.9437,
+      "url": "https://oxil.ch/",
+      "scrape": false,
+      "hint": "Jugendkulturhaus OXIL, Obere Brühlstrasse 6; regelmässig Ska/Early Reggae, Tickets via Petzi."
+    },
     "Parterre One": {
       "city": "Basel",
       "canton": "BS",
@@ -198,6 +371,15 @@
       "url": "https://www.parterre-one.ch/events/",
       "scrape": true,
       "hint": "/kalender/ leitet auf die Startseite um – die Liste liegt auf /events/ (The Events Calendar, <time datetime=\"YYYY-MM-DD\"> pro Event), iCal: https://www.parterre-one.ch/events/?ical=1. Monatliche Reggae/Dancehall-Soundsystem-Nacht; Kalender mit «mehr laden»."
+    },
+    "Plaza Klub": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.37415,
+      "lon": 8.5248,
+      "url": "https://www.plaza-zurich.ch/",
+      "scrape": false,
+      "hint": "Badenerstrasse 109; Tickets via Eventfrog."
     },
     "Reitschule": {
       "city": "Bern",
@@ -280,6 +462,15 @@
       "scrape": true,
       "hint": "Sound-system series \"Wake the Town\"."
     },
+    "Sous Soul": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.94848,
+      "lon": 7.45595,
+      "url": "https://www.sous-soul.love/events",
+      "scrape": false,
+      "hint": "Junkerngasse 1, Berner Altstadt; Reggae/Ska-DJ-Nächte (Scorchers) und Dub-Konzerte."
+    },
     "Werkstatt": {
       "city": "Chur",
       "canton": "GR",
@@ -297,6 +488,15 @@
       "url": "https://www.x-tra.ch/de/programm/",
       "scrape": true,
       "hint": "Limmatstrasse 118. Programm auf /de/programm/ (server-gerendert, Datum + Uhrzeit pro Event). Selten Reggae – nur bei Treffern aufnehmen."
+    },
+    "Zentralwäscherei": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.38728,
+      "lon": 8.52057,
+      "url": "https://zentralwaescherei.space/",
+      "scrape": false,
+      "hint": "Kulturraum Zentralwäscherei, Neue Hard 12 (Halle); Konzerte via Petzi."
     }
   }
 }
