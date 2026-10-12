@@ -38,6 +38,10 @@ scripts/validate_shows.py            Prüft die JSON-Dateien. Läuft in CI und a
 
 Die Seite lädt beim Öffnen `data/shows.json`, blendet vergangene Shows aus, gruppiert nach Monat und baut Kanton- und Genre-Filter aus den vorhandenen Daten.
 
+### Ansichten
+
+Die gefilterten Konzerte gibt es als **Liste**, **Kalender** oder **Karte** – Umschalter neben der Trefferzahl, die Wahl merkt sich der Browser (`localStorage`). Der Kalender ist ein Monatsraster (Mo–So, ‹ › und «Heute») mit einem farbigen Pill pro Konzert; auf dem Handy wird daraus ein kompaktes Raster mit Punkten und darunter die Liste des angetippten Tages. Die Karte lädt Leaflet 1.9.4 und OpenStreetMap-Kacheln erst beim ersten Öffnen, zeigt einen Marker pro Venue (Popup mit den Shows dort), auf Wunsch den eigenen Standort, und Shows ohne Koordinaten darunter unter «Ohne Standort». Ein Klick auf ein Konzert im Kalender oder in der Karte springt zur Zeile in der Liste.
+
 ## Scraper
 
 Der Scraper ist kein klassisches Programm, sondern eine **Claude-Code-Skill**: `/scrape-shows`. Sie beschreibt Schritt für Schritt, wie der Agent die Quellen abgrast, entscheidet, was Reggae ist, Genres nachschlägt und das Ergebnis validiert und committet.

@@ -359,6 +359,311 @@ body {
   display: none;
 }
 
+/* View switch: Liste | Kalender | Karte */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.seg button {
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 4px 11px;
+  cursor: pointer;
+}
+.seg button + button {
+  border-left: 1px solid var(--line);
+}
+.seg button:hover {
+  color: var(--text);
+}
+.seg button[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--gold);
+  font-weight: 700;
+}
+.seg button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+#views[hidden],
+#list[hidden],
+.calendar[hidden],
+.map-view[hidden] {
+  display: none;
+}
+
+/* Kalender: month grid, Monday first */
+.calendar {
+  margin-top: 18px;
+}
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.cal-title {
+  margin: 0 4px;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.cal-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 0 0 2px;
+  cursor: pointer;
+}
+.cal-nav:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.cal-nav:focus-visible,
+.cal-num:focus-visible,
+.pill:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.cal-today {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.cal-dow {
+  background: var(--bg);
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cal-dow:nth-child(n + 5) {
+  color: var(--red);
+}
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 4px;
+  background: var(--surface);
+}
+.cal-cell.other {
+  background: var(--bg);
+}
+.cal-cell.other .cal-num {
+  opacity: 0.35;
+}
+.cal-num {
+  align-self: flex-start;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.cal-cell.past .cal-num {
+  color: var(--muted);
+}
+.cal-cell.weekend:not(.past) .cal-num {
+  color: var(--red);
+}
+.cal-cell.today .cal-num {
+  color: var(--bg);
+  background: var(--gold);
+}
+.cal-dots {
+  display: none;
+}
+.cal-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pill {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: left;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in srgb, var(--pill) 22%, transparent);
+  border: 0;
+  border-left: 3px solid var(--pill);
+  border-radius: 3px;
+  padding: 2px 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--pill) 42%, transparent);
+}
+.cal-cell.past .pill {
+  opacity: 0.5;
+}
+.cal-day {
+  display: none;
+}
+.cal-empty {
+  margin: 12px 0 0;
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  /* Compact calendar: one square per day with dots, the selected day's shows below. */
+  .cal-cell {
+    aspect-ratio: 1;
+    min-height: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 2px;
+  }
+  .cal-cell .cal-num {
+    align-self: center;
+    width: 28px;
+    height: 28px;
+  }
+  .cal-pills {
+    display: none;
+  }
+  .cal-dots {
+    display: flex;
+    gap: 2px;
+    height: 6px;
+  }
+  .cal-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .cal-cell.selected {
+    box-shadow: inset 0 0 0 2px var(--gold);
+  }
+  .cal-day {
+    display: block;
+  }
+}
+
+/* Karte: Leaflet in the site's colours; the tiles are dimmed with a filter. */
+.map-view {
+  margin-top: 18px;
+}
+.map {
+  height: 70vh;
+  min-height: 320px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  z-index: 0; /* keep Leaflet's panes below the sticky filter bar */
+}
+.map:not(.leaflet-container) {
+  display: grid;
+  place-items: center;
+}
+.map-note {
+  margin: 0;
+  color: var(--muted);
+}
+.map-tiles {
+  filter: brightness(0.75) contrast(1.1) saturate(0.8);
+}
+.map-view .leaflet-container {
+  font: inherit;
+  background: var(--surface);
+}
+.map-view .leaflet-container .leaflet-control-attribution {
+  background: rgba(20, 17, 14, 0.85);
+  color: var(--muted);
+  font-size: 11px;
+}
+.map-view .leaflet-container .leaflet-control-attribution a {
+  color: var(--gold);
+}
+.map-view .leaflet-container .leaflet-bar a {
+  background: var(--surface);
+  color: var(--text);
+  border-bottom-color: var(--line);
+}
+.map-view .leaflet-container .leaflet-bar a:hover {
+  color: var(--gold);
+}
+.map-view .leaflet-container .leaflet-bar a.leaflet-disabled {
+  color: var(--line);
+}
+.map-view .leaflet-popup-content-wrapper,
+.map-view .leaflet-popup-tip {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.6);
+}
+.map-view .leaflet-popup-content {
+  margin: 10px 14px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.map-view .leaflet-container a.leaflet-popup-close-button {
+  color: var(--muted);
+}
+.popup-shows {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.map-view .leaflet-container .popup-shows a {
+  color: var(--text);
+  text-decoration: none;
+}
+.map-view .leaflet-container .popup-shows a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+.popup-shows time {
+  margin-right: 4px;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Empty / loading / error state: a clear box where the list would be. */
 .status {
   margin: 20px 0 8px;

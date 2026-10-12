@@ -39,6 +39,20 @@
     FL: "Liechtenstein",
   };
   const list = el("list");
+  const views = el("views");
+  const calendarEl = el("calendar");
+  const mapView = el("map-view");
+  const viewSwitch = el("view-switch");
+  const VIEWS = ["list", "calendar", "map"];
+  const VIEW_KEY = "jahgenda:view";
+  let view = "list";
+  try {
+    const stored = localStorage.getItem(VIEW_KEY);
+    if (VIEWS.includes(stored)) view = stored;
+  } catch {
+    /* private mode or blocked storage: fall back to the list */
+  }
+  let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
   const resultsText = el("results-text");
   const togglePast = el("toggle-past");
@@ -241,8 +255,12 @@
     togglePast.textContent = showPast
       ? "Vergangene ausblenden"
       : `Vergangene anzeigen (${pastCount})`;
+    lastVisible = visible;
     if (!visible.length) {
       list.innerHTML = "";
+      calendarEl.innerHTML = "";
+      el("map-rest").innerHTML = "";
+      views.hidden = true;
       resultsText.textContent = "";
       status.innerHTML = shows.some((s) => !s._past)
         ? `<p class="emoji">🔍</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset">Filter zurücksetzen</button>`
@@ -250,6 +268,7 @@
       return;
     }
     status.innerHTML = "";
+    views.hidden = false;
     const first = visible[0]._day;
     const last = visible[visible.length - 1]._day;
     const span =
@@ -258,6 +277,20 @@
         ? monthFmt.format(first)
         : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
     resultsText.textContent = `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}`;
+
+    list.hidden = view !== "list";
+    calendarEl.hidden = view !== "calendar";
+    mapView.hidden = view !== "map";
+    if (view === "calendar") {
+      list.innerHTML = "";
+      renderCalendar(visible);
+      return;
+    }
+    if (view === "map") {
+      list.innerHTML = "";
+      renderMap(visible);
+      return;
+    }
 
     const groups = new Map();
     for (const s of visible) {
@@ -343,7 +376,8 @@
   }
 
   // Per-show actions (calendar / copy link); WhatsApp is a plain link.
-  list.addEventListener("click", async (e) => {
+  // Bound on the views wrapper, because the calendar and the map reuse the show rows.
+  views.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-act]");
     if (!btn) return;
     const s = shows.find((x) => x.id === btn.closest(".show").dataset.id);
@@ -389,6 +423,8 @@
     const target = shows.find((s) => s.id === id);
     if (!target) return;
     if (target._past && !showPast) showPast = true;
+    // Rows only exist in the list view; the calendar and the map link here.
+    if (view !== "list") setView("list");
     if (!document.getElementById(id)) resetFilters();
     const row = document.getElementById(id);
     if (!row) return;
@@ -431,6 +467,284 @@
     );
   });
 
+  // --- Views: Liste | Kalender | Karte ---
+  // All three show the same filtered shows (`lastVisible`); render() dispatches to them.
+  function setView(next) {
+    if (!VIEWS.includes(next)) return;
+    view = next;
+    try {
+      localStorage.setItem(VIEW_KEY, view);
+    } catch {
+      /* not remembered, that's fine */
+    }
+    markView();
+    render();
+  }
+  function markView() {
+    for (const b of viewSwitch.querySelectorAll("[data-view]"))
+      b.setAttribute("aria-pressed", String(b.dataset.view === view));
+  }
+  markView();
+  viewSwitch.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-view]");
+    if (btn && btn.dataset.view !== view) setView(btn.dataset.view);
+  });
+
+  // Calendar pills and map popups link to the show's row in the list.
+  function goToShow(id) {
+    history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+    revealFromHash();
+  }
+
+  // Pill / dot colour per show: ska family red, dub & soundsystem green, everything else gold.
+  const GENRE_COLORS = {
+    ska: "var(--red)",
+    "ska-punk": "var(--red)",
+    rocksteady: "var(--red)",
+    dub: "var(--green-text)",
+    soundsystem: "var(--green-text)",
+  };
+  const genreColor = (s) =>
+    GENRE_COLORS[s.genres.find((g) => GENRE_COLORS[g])] || "var(--gold)";
+
+  // Kalender: a Monday-first month grid. On narrow screens the cells only show dots
+  // and the shows of the selected day are listed below the grid (see style.css).
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const dayKey = (d) =>
+    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const longDayFmt = new Intl.DateTimeFormat("de-CH", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  let calMonth = null; // first day of the month on display
+  let calDay = ""; // selected day (YYYY-MM-DD) for the compact layout
+
+  function renderCalendar(visible) {
+    const today = todayStart();
+    const todayKey = dayKey(today);
+    if (!calMonth)
+      calMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const y = calMonth.getFullYear();
+    const m = calMonth.getMonth();
+    const monthKey = `${y}-${pad2(m + 1)}`;
+    const inMonth = (k) => k.startsWith(monthKey);
+
+    const byDay = new Map();
+    for (const s of visible) {
+      if (!byDay.has(s.date)) byDay.set(s.date, []);
+      byDay.get(s.date).push(s);
+    }
+
+    // Selected day: next day with shows from today on, else today, else the first day with shows.
+    if (!inMonth(calDay)) {
+      const withShows = [...byDay.keys()].filter(inMonth).sort();
+      calDay =
+        withShows.find((k) => k >= todayKey) ||
+        (inMonth(todayKey) ? todayKey : withShows[0] || `${monthKey}-01`);
+    }
+
+    const first = new Date(y, m, 1);
+    const last = new Date(y, m + 1, 0);
+    const start = new Date(y, m, 1 - ((first.getDay() + 6) % 7));
+    const end = new Date(y, m, last.getDate() + ((7 - last.getDay()) % 7));
+    const cells = [];
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = dayKey(d);
+      const items = byDay.get(key) || [];
+      const dow = d.getDay();
+      const cls = ["cal-cell"];
+      if (d.getMonth() !== m) cls.push("other");
+      if (key === todayKey) cls.push("today");
+      if (key === calDay) cls.push("selected");
+      if (d < today) cls.push("past");
+      if (dow === 0 || dow === 5 || dow === 6) cls.push("weekend");
+      const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Konzert" : "Konzerte"}` : ""}`;
+      cells.push(`
+        <div class="${cls.join(" ")}" data-day="${key}">
+          <button type="button" class="cal-num" aria-label="${escape(label)}">${d.getDate()}</button>
+          <span class="cal-dots" aria-hidden="true">${items
+            .slice(0, 3)
+            .map((s) => `<i style="background:${genreColor(s)}"></i>`)
+            .join("")}</span>
+          <div class="cal-pills">${items
+            .map(
+              (s) =>
+                `<button type="button" class="pill" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)}">${escape(s.title)}</button>`,
+            )
+            .join("")}</div>
+        </div>`);
+    }
+
+    const selected = byDay.get(calDay) || [];
+    calendarEl.innerHTML = `
+      <div class="cal-head">
+        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat">&lsaquo;</button>
+        <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
+        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat">&rsaquo;</button>
+        <button type="button" class="linkish cal-today" data-cal="0">Heute</button>
+      </div>
+      <div class="cal-grid">
+        ${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w) => `<span class="cal-dow">${w}</span>`).join("")}
+        ${cells.join("")}
+      </div>
+      <section class="cal-day">
+        <h2 class="month">${escape(longDayFmt.format(parseDay(calDay)))}</h2>
+        ${
+          selected.length
+            ? `<ul class="shows">${selected.map(renderShow).join("")}</ul>`
+            : `<p class="cal-empty">Keine Konzerte an diesem Tag.</p>`
+        }
+      </section>`;
+  }
+
+  calendarEl.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+    if (pill) return goToShow(pill.dataset.id);
+    const nav = e.target.closest("[data-cal]");
+    if (nav) {
+      const step = Number(nav.dataset.cal);
+      const t = todayStart();
+      if (step) {
+        calMonth = new Date(
+          calMonth.getFullYear(),
+          calMonth.getMonth() + step,
+          1,
+        );
+      } else {
+        calMonth = new Date(t.getFullYear(), t.getMonth(), 1);
+        calDay = dayKey(t);
+      }
+      renderCalendar(lastVisible);
+      return;
+    }
+    const cell = e.target.closest("[data-day]");
+    if (cell && e.target.closest(".cal-num")) {
+      calDay = cell.dataset.day;
+      renderCalendar(lastVisible);
+    }
+  });
+
+  // Karte: Leaflet + OpenStreetMap, fetched only when the map is first opened.
+  const LEAFLET = "https://unpkg.com/leaflet@1.9.4/dist/leaflet";
+  const mapEl = el("map");
+  const mapRest = el("map-rest");
+  let leafletLoading = null;
+  let map = null;
+  let markerLayer = null;
+
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve();
+    if (leafletLoading) return leafletLoading;
+    leafletLoading = new Promise((resolve, reject) => {
+      // Wait for the stylesheet as well, so the first popup is not unstyled.
+      const cssReady = new Promise((done) => {
+        const css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = `${LEAFLET}.css`;
+        css.crossOrigin = "";
+        css.onload = css.onerror = done;
+        document.head.appendChild(css);
+      });
+      const js = document.createElement("script");
+      js.src = `${LEAFLET}.js`;
+      js.crossOrigin = "";
+      js.onload = () => cssReady.then(resolve);
+      js.onerror = () => {
+        leafletLoading = null;
+        reject(new Error("Leaflet konnte nicht geladen werden"));
+      };
+      document.head.appendChild(js);
+    });
+    return leafletLoading;
+  }
+
+  const shortDate = (d) =>
+    `${dowFmt.format(d).replace(".", "")} ${d.getDate()}.${d.getMonth() + 1}.`;
+
+  function renderMap(visible) {
+    if (!window.L) {
+      mapEl.innerHTML = `<p class="map-note">Karte wird geladen …</p>`;
+      loadLeaflet().then(
+        () => view === "map" && render(),
+        () => {
+          mapEl.innerHTML = `<p class="map-note">Die Karte konnte nicht geladen werden.</p>`;
+        },
+      );
+      return;
+    }
+    if (!map) {
+      mapEl.innerHTML = "";
+      map = L.map(mapEl, { scrollWheelZoom: false });
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        className: "map-tiles",
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',
+      }).addTo(map);
+      markerLayer = L.layerGroup().addTo(map);
+    }
+    markerLayer.clearLayers();
+
+    const hasPos = (s) =>
+      typeof s.lat === "number" && typeof s.lon === "number";
+    // One marker per venue; its popup lists the venue's shows.
+    const venues = new Map();
+    for (const s of visible.filter(hasPos)) {
+      const key = `${s.venue}|${s.city}`;
+      if (!venues.has(key)) venues.set(key, { s, items: [] });
+      venues.get(key).items.push(s);
+    }
+    const points = [];
+    for (const { s, items } of venues.values()) {
+      L.circleMarker([s.lat, s.lon], {
+        radius: 7 + Math.min(items.length, 5) * 1.5,
+        color: "#14110e",
+        weight: 2,
+        fillColor: "#f2b632",
+        fillOpacity: 0.95,
+      })
+        .bindPopup(
+          `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
+            .map(
+              (x) =>
+                `<li><a href="#${encodeURIComponent(x.id)}" data-id="${escape(x.id)}"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+            )
+            .join("")}</ul>`,
+        )
+        .addTo(markerLayer);
+      points.push([s.lat, s.lon]);
+    }
+    if (here) {
+      L.circleMarker([here.lat, here.lon], {
+        radius: 8,
+        color: "#f3ead8",
+        weight: 3,
+        fillColor: "#1e8f4e",
+        fillOpacity: 1,
+      })
+        .bindPopup("Du bist hier")
+        .addTo(markerLayer);
+      points.push([here.lat, here.lon]);
+    }
+    map.invalidateSize();
+    if (points.length)
+      map.fitBounds(points, { padding: [32, 32], maxZoom: 12 });
+    else map.setView([46.8, 8.2], 7);
+
+    const rest = visible.filter((s) => !hasPos(s));
+    mapRest.innerHTML = rest.length
+      ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
+      : "";
+  }
+
+  mapView.addEventListener("click", (e) => {
+    const a = e.target.closest("a[data-id]");
+    if (!a) return;
+    e.preventDefault();
+    goToShow(a.dataset.id);
+  });
+
   // --- Scrolling ---
   const filters = el("filters");
 
@@ -455,8 +769,9 @@
   // jump back to the start of the results so the user doesn't land in empty space.
   function renderAndKeepInView() {
     render();
+    if (views.hidden) return;
     const listTop =
-      list.getBoundingClientRect().top +
+      views.getBoundingClientRect().top +
       window.scrollY -
       filters.offsetHeight -
       8;

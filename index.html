@@ -95,6 +95,17 @@
 
       <p id="results" class="results" aria-live="polite">
         <span id="results-text"></span>
+        <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
+          <button type="button" data-view="list" aria-pressed="true">
+            Liste
+          </button>
+          <button type="button" data-view="calendar" aria-pressed="false">
+            Kalender
+          </button>
+          <button type="button" data-view="map" aria-pressed="false">
+            Karte
+          </button>
+        </span>
         <button type="button" id="clear-filters" class="linkish clear" hidden>
           ✕ Filter zurücksetzen
         </button>
@@ -102,7 +113,14 @@
           Vergangene anzeigen
         </button>
       </p>
-      <div id="list"></div>
+      <div id="views">
+        <div id="list"></div>
+        <div id="calendar" class="calendar" hidden></div>
+        <div id="map-view" class="map-view" hidden>
+          <div id="map" class="map" aria-label="Karte der Konzertorte"></div>
+          <div id="map-rest"></div>
+        </div>
+      </div>
       <div id="status" class="status" role="status">
         <p>Lade Konzerte …</p>
       </div>
