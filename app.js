@@ -37,6 +37,23 @@
   const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "");
 
   let shows = [];
+  let here = null; // { lat, lon } once the visitor shares their location
+
+  // Straight-line distance in km (haversine).
+  function distanceKm(a, b) {
+    const rad = (x) => (x * Math.PI) / 180;
+    const dLat = rad(b.lat - a.lat);
+    const dLon = rad(b.lon - a.lon);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+    return 2 * 6371 * Math.asin(Math.sqrt(h));
+  }
+
+  const formatKm = (km) => (km < 1 ? "gleich ums Eck" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`);
+
+  function distanceLabel(s) {
+    if (!here || typeof s.lat !== "number" || typeof s.lon !== "number") return "";
+    return ` · <span class="dist">${formatKm(distanceKm(here, s))}</span>`;
+  }
 
   function renderShow(s) {
     const d = s._day;
@@ -54,7 +71,7 @@
         </div>
         <div>
           <h3 class="title">${title}</h3>
-          <p class="meta">${time}${escape(s.venue)} · ${escape(s.city)}</p>
+          <p class="meta">${time}${escape(s.venue)} · ${escape(s.city)}${distanceLabel(s)}</p>
         </div>
         <span class="canton" title="${escape(CANTONS[s.canton] || s.canton)}">${escape(s.canton)}</span>
       </li>`;
@@ -122,6 +139,36 @@
       status.textContent = "Konzerte konnten nicht geladen werden.";
     }
   }
+
+  const locateBtn = el("locate");
+  const geoStatus = el("geo-status");
+
+  if (!("geolocation" in navigator)) locateBtn.hidden = true;
+
+  locateBtn.addEventListener("click", () => {
+    geoStatus.textContent = "Suche dich …";
+    locateBtn.disabled = true;
+    // The position is only used in this browser tab; it is never stored or sent anywhere.
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        locateBtn.hidden = true;
+        const nearest = shows
+          .filter((s) => typeof s.lat === "number")
+          .map((s) => ({ s, km: distanceKm(here, s) }))
+          .sort((a, b) => a.km - b.km)[0];
+        geoStatus.textContent = nearest
+          ? `Nächste Show: ${nearest.s.title} in ${nearest.s.city}, ${formatKm(nearest.km)}. Irie!`
+          : "";
+        render();
+      },
+      () => {
+        locateBtn.disabled = false;
+        geoStatus.textContent = "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+    );
+  });
 
   cantonSelect.addEventListener("change", render);
   search.addEventListener("input", render);

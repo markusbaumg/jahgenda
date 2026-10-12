@@ -66,6 +66,25 @@ body {
   outline-offset: 1px;
 }
 
+.geo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 4px; }
+.geo button {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--gold);
+  background: none;
+  border: 1px dashed var(--gold);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.geo button:hover { background: rgba(242, 182, 50, 0.1); }
+.geo button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.geo button[hidden] { display: none; }
+.geo-status { color: var(--muted); font-size: 0.9rem; }
+.geo-status:empty { display: none; }
+
+.dist { color: var(--gold); white-space: nowrap; }
+
 .status { color: var(--muted); }
 .status:empty { display: none; }
 
@@ -124,11 +143,14 @@ body {
 }
 
 .foot {
-  padding-top: 40px;
+  padding-top: 56px;
   padding-bottom: 40px;
   color: var(--muted);
-  font-size: 0.85rem;
 }
+.about p { margin: 12px 0 0; max-width: 60ch; }
+.about .authors { color: var(--text); }
+.about a { color: var(--green-text); }
+.updated { margin: 32px 0 0; font-size: 0.85rem; }
 
 .sr {
   position: absolute; width: 1px; height: 1px;

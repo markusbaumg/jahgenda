@@ -9,7 +9,7 @@ Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz. Eine statische Seite, ge
 ```
 index.html        Seite
 style.css         Design (rot / gold / grün auf dunklem Grund)
-app.js            Lädt data/shows.json, blendet vergangene Shows aus, gruppiert nach Monat, Kanton-Filter + Suche
+app.js            Lädt data/shows.json, blendet vergangene Shows aus, gruppiert nach Monat, Kanton-Filter, Suche, Distanz
 data/shows.json   Konzertdaten (aktuell Mock-Daten)
 ```
 
@@ -30,7 +30,9 @@ Kein Build-Schritt. Jeder Push auf `main` deployt via `.github/workflows/pages.y
       "venue": "Dachstock",
       "city": "Bern",
       "canton": "BE",
-      "url": "https://…"
+      "url": "https://…",
+      "lat": 46.9496,
+      "lon": 7.4385
     }
   ]
 }
@@ -46,8 +48,12 @@ Kein Build-Schritt. Jeder Push auf `main` deployt via `.github/workflows/pages.y
 | `city`   | ja      | Ort                                   |
 | `canton` | ja      | Kantonskürzel, z. B. `ZH`             |
 | `url`    | nein    | Link zum Event / Tickets (`http(s)`)  |
+| `lat`    | nein    | Breitengrad der Venue (für Distanz)   |
+| `lon`    | nein    | Längengrad der Venue (für Distanz)    |
 
 Vergangene Shows werden im Browser ausgeblendet; die JSON-Datei darf sie also enthalten.
+
+Auf Knopfdruck fragt die Seite nach dem Standort und zeigt die Luftlinien-Distanz zu jeder Show. Der Standort bleibt im Browser und wird nirgends gespeichert oder verschickt.
 
 ## Lokal ansehen
 

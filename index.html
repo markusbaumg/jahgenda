@@ -24,13 +24,22 @@
       <label class="sr" for="q">Suche</label>
       <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off">
     </form>
+    <div class="geo">
+      <button id="locate" type="button">Wie weit ist's bis zum nächsten Riddim?</button>
+      <span id="geo-status" class="geo-status" role="status"></span>
+    </div>
 
     <p id="status" class="status" role="status">Lade Konzerte …</p>
     <div id="list"></div>
   </main>
 
   <footer class="wrap foot">
-    <span id="updated"></span>
+    <section class="about" aria-labelledby="about-title">
+      <h2 id="about-title" class="month">Über uns</h2>
+      <p>Wir sind Markus und Seraina. Uns hat gestört, dass Reggae-, Dub- und Ska-Konzerte in der Schweiz über zig Club-Websites verstreut sind. Darum sammeln wir sie hier an einem Ort, damit niemand mehr eine gute Session verpasst.</p>
+      <p class="authors">Gemacht von <strong>Markus</strong> &amp; <strong>Seraina</strong> · <a href="https://github.com/markusbaumg/jahgenda">GitHub</a></p>
+    </section>
+    <p id="updated" class="updated"></p>
   </footer>
 
   <script src="app.js"></script>
