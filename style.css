@@ -676,3 +676,21 @@ body {
     display: none;
   }
 }
+
+/* Collapsed one-line brand that appears in the sticky bar while scrolling. */
+.mini-brand {
+  display: none;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--text);
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+.mini-brand span {
+  color: var(--gold);
+}
+.filters.stuck .mini-brand {
+  display: inline-block;
+}
