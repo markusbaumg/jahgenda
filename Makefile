@@ -5,6 +5,9 @@ SHELL := /bin/bash
 PORT ?= 8000
 WEB_FILES := index.html log.html review.html style.css store.js app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
+# A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
+# once prettier@3.3.3 has been fetched once (so make check also works on a train).
+PRETTIER  := $(shell command -v prettier 2>/dev/null || echo npx --yes --prefer-offline prettier@3.3.3)
 
 .PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke quality-review ics
 
@@ -31,10 +34,10 @@ lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via
 	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
 	node --check store.js app.js pwa.js sw.js
 	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
-	npx --yes prettier@3.3.3 --check $(WEB_FILES)
+	$(PRETTIER) --check $(WEB_FILES)
 
 fmt: ## Format code (prettier for HTML/CSS/JS, ruff if installed) and normalise data
-	npx --yes prettier@3.3.3 --write $(WEB_FILES)
+	$(PRETTIER) --write $(WEB_FILES)
 	@if ruff --version >/dev/null 2>&1; then ruff format scripts tests && ruff check --fix scripts tests; fi
 	$(MAKE) fmt-data
 
