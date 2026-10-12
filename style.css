@@ -1740,7 +1740,7 @@ a {
   border-color: var(--gold);
 }
 .act.tickets {
-  color: var(--green-text);
+  color: inherit;
 }
 
 /* Row actions only on hover / focus (desktop); a marked star stays visible. Phones and touch screens
@@ -2434,4 +2434,13 @@ a:hover {
   font-size: 0.7em;
   color: var(--muted);
   margin-left: 1px;
+}
+
+/* Row actions all share one colour (muted → gold on hover); no accent singles one out */
+.actions .act,
+.actions .act:visited {
+  color: var(--muted);
+}
+.actions .act:hover {
+  color: var(--gold);
 }
