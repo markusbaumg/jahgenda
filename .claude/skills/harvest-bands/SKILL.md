@@ -55,7 +55,8 @@ For acts already in `data/artists.json`: append missing `festivals` entries, lea
 
 ## 4. Log, write, validate, commit
 
-Prepend one entry to `data/runs.json` → `runs` (newest first, max 60):
+Overwrite `data/status.json` (`{"ok": true, "skill": "harvest-bands", "at": "<now with offset>", "runner": "cloud", "counts": {"added": <n>, "total": <total>}, "error": null}`)
+and prepend one entry to `data/runs.json` → `runs` (newest first, max 60):
 
 ```json
 { "skill": "harvest-bands", "at": "2026-11-01T05:10:00+01:00", "added": 12, "total": 57,
@@ -68,7 +69,7 @@ Run exactly this, as one command, so nothing is committed when validation fails:
 
 ```sh
 python3 scripts/format_data.py && python3 scripts/validate_shows.py \
-  && git add data/artists.json data/runs.json scraper/bands.md \
+  && git add data/artists.json data/runs.json data/status.json scraper/bands.md \
   && git commit -m "Harvest bands: +<added> new, <total> total" \
   && git push origin main
 ```

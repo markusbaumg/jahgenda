@@ -9,7 +9,8 @@ You update the concert data of Jahgenda. The result of this run is one commit on
 `data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only), `data/runs.json` and — only
 new lines under **Suggestions** — `scraper/bands.md`. Nothing else in the repo is touched.
 
-Work from the repository root. Today's date is what `date +%F` prints — use it, do not guess.
+Work from the repository root. Today's date is what `TZ=Europe/Zurich date +%F` prints — use it, do not
+guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
 
 ## 1. Load the inputs
 
@@ -156,19 +157,35 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
 page). This log is public — it is shown on `log.html` — so write it in German (the site's language), so
 a reader understands the decision.
 
+Also overwrite `data/status.json` — the heartbeat the watchdog (`.github/workflows/watchdog.yml`) reads:
+
+```json
+{ "ok": true, "skill": "scrape-shows", "at": "2026-10-13T06:14:22+02:00", "runner": "cloud",
+  "counts": { "added": 3, "updated": 1, "removed": 2, "total": 41 }, "failed_sources": 1, "error": null }
+```
+
+`runner` is `$JAHGENDA_RUNNER` if that variable is set, else `cloud`.
+
 ## 7. Validate, commit, push
 
 Run exactly this, as one command, so nothing is committed when validation fails:
 
 ```sh
 python3 scripts/format_data.py && python3 scripts/validate_shows.py \
-  && git add data/shows.json data/artists.json data/venues.json data/runs.json scraper/bands.md \
+  && git add data/shows.json data/artists.json data/venues.json data/runs.json data/status.json scraper/bands.md \
   && git commit -m "Update shows: +<added> ~<updated> -<removed> (<total> total)" \
   && git push origin main
 ```
 
+Commit even when no show changed (message `Scraper run: no changes (<total> total)`) — the heartbeat in
+`status.json` and the `runs.json` entry must move every day, that is how the watchdog knows you ran.
+
 If the validator reports problems, fix the data and run the command again. **Never commit data that does
-not validate.** If you cannot make it pass, leave the repo untouched and end with an explanation.
+not validate.** If you cannot make it pass, or anything else stops the run: revert the data
+(`git checkout -- data/shows.json data/artists.json data/venues.json scraper/bands.md`), write
+`data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with the same
+error in `notes`, validate, and commit + push only those two files — so the failure is visible on
+`log.html` and the watchdog, and the site keeps the last good data.
 If the push is rejected because `main` moved: `git pull --rebase origin main`, then push again (once).
 
 ## 8. Report

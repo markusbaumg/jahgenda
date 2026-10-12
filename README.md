@@ -3,6 +3,9 @@
 **All reggae, dub and ska shows in Switzerland in one place.**
 A static site, kept up to date by AI agents, hosted on GitHub Pages.
 
+[![Deploy](https://github.com/markusbaumg/jahgenda/actions/workflows/pages.yml/badge.svg)](https://github.com/markusbaumg/jahgenda/actions/workflows/pages.yml)
+[![Scraper watchdog](https://github.com/markusbaumg/jahgenda/actions/workflows/watchdog.yml/badge.svg)](https://github.com/markusbaumg/jahgenda/actions/workflows/watchdog.yml)
+
 **Live:** https://markusbaumg.github.io/jahgenda/ · **Board:** https://github.com/users/markusbaumg/projects/2 · **Scraper log:** https://markusbaumg.github.io/jahgenda/log.html
 
 ## What it is
@@ -116,6 +119,18 @@ Create or change them with `/schedule` in Claude Code, or in the web UI.
 
 **Local fallback:** `make cron-install` installs a launchd job that runs `make scrape` on this Mac every day
 at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
+
+### Monitoring: how we know it ran
+
+- **Heartbeat:** every run overwrites `data/status.json` (`ok`, `at`, counts, error) and prepends an entry to
+  `data/runs.json`; the scraper commits even when nothing changed, and commits `ok: false` on failure.
+- **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine) and executes
+  `scripts/check_freshness.py`: if the newest timestamp is older than 36 h, the last run reported failure, or
+  shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
+  and turns the badge above red; when healthy again it closes the issue. `make watchdog` runs the same check
+  locally without touching GitHub.
+- **Where to look:** the badge, the `scraper-failed` issue, `log.html`, and the routine's own run log at
+  https://claude.ai/code/routines. Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
 
 ### When a run fails
 

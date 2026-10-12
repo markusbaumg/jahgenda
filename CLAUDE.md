@@ -10,7 +10,7 @@ layout. The site UI is German; code, docs and config are English.
   `scraper/sources.json`, `index.html`, `style.css`, `app.js`, `pwa.js`, `sw.js`, `README.md`, `CLAUDE.md`.
   Skills never change these files – with one exception: skills may append lines under *Suggestions* in
   `bands.md`.
-- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`. Humans may correct them;
+- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
 - **Shared:** `data/venues.json` – humans maintain venues (coordinates, programme URL, `scrape` flag),
   skills add new venues they encounter but do not change existing ones.
@@ -23,7 +23,8 @@ layout. The site UI is German; code, docs and config are English.
 3. **Before every commit:** `python3 scripts/format_data.py && python3 scripts/validate_shows.py` must
    pass. Otherwise commit nothing.
 4. **Every run leaves a trace:** an entry in `data/runs.json` (what was found, what was dropped and why,
-   which sources could not be loaded). This is the public log shown on `log.html`.
+   which sources could not be loaded) and the heartbeat `data/status.json`. Commit even when nothing
+   changed; on failure commit `status.json` with `"ok": false`. This is what `log.html` and the watchdog show.
 5. **Commit only `data/*` and `scraper/bands.md` (Suggestions).** Everything else is off limits.
 6. **When in doubt, leave it out.** One show too few beats one invented or wrong show.
 7. **Do not work around bot protection.** A blocked source is skipped and logged.

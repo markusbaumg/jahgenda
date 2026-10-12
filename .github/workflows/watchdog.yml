@@ -1,0 +1,27 @@
+name: Scraper watchdog
+
+on:
+  schedule:
+    # 06:17 UTC = 08:17 CEST / 07:17 CET. GitHub cron is UTC only; avoid :00 (high-load, delays).
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: watchdog
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check data freshness and sync the scraper-failed issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAX_AGE_HOURS: "36"
+        run: python3 scripts/check_freshness.py --max-age-hours "$MAX_AGE_HOURS"
