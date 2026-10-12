@@ -28,7 +28,7 @@ validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 
 test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contract) and node (lib.js)
 	python3 -m unittest discover -s tests -v
-	node --test tests/
+	node --test tests/*.test.mjs
 
 lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
