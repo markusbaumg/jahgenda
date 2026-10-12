@@ -15,6 +15,7 @@ const SHELL = [
   "./",
   "index.html",
   "log.html",
+  "review.html",
   "style.css",
   "store.js",
   "app.js",

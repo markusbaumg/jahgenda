@@ -26,7 +26,7 @@ jobs:
         run: python3 scripts/validate_shows.py --allow-past
       - name: Stamp service worker with a hash of the app shell
         run: |
-          BUILD=$(cat index.html log.html style.css store.js app.js pwa.js sw.js manifest.webmanifest img/about.jpg img/logo/jahgenda.svg img/icons/*.png img/cantons/*.svg | sha256sum | cut -c1-10)
+          BUILD=$(cat index.html log.html review.html style.css store.js app.js pwa.js sw.js manifest.webmanifest img/about.jpg img/logo/jahgenda.svg img/icons/*.png img/cantons/*.svg | sha256sum | cut -c1-10)
           sed -i "s/__BUILD__/$BUILD/" sw.js && grep -q "$BUILD" sw.js && echo "build $BUILD"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

@@ -340,6 +340,8 @@ def check_runs(data):
                 isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)
             ):
                 errs.append(f"{where}.dropped[{j}]: needs 'title' and 'why'")
+            elif d.get("url") and not URL_RE.match(str(d["url"])):
+                errs.append(f"{where}.dropped[{j}]: url must start with http(s)://")
         if "sources" in r and not isinstance(r["sources"], list):
             errs.append(f"{where}: 'sources' must be a list")
         for j, src in enumerate(r.get("sources") or []):

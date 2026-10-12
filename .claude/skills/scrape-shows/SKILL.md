@@ -151,7 +151,8 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
   "at": "2026-10-13T06:14:00+02:00",
   "added": 3, "updated": 1, "removed": 2, "total": 41,
   "failed_sources": ["https://www.example.ch/programm (timeout)"],
-  "dropped": [ { "title": "Afro Night @ Plaza", "why": "Afrobeats, kein Reggae-Bezug (criteria.md)" } ],
+  "dropped": [ { "title": "Afro Night @ Plaza", "date": "2026-11-07", "venue": "Plaza", "city": "Zürich",
+                 "url": "https://…/afro-night", "why": "Afrobeats, kein Reggae-Bezug (criteria.md)" } ],
   "notes": ["Exil: Seite blockiert Bots (403), Events via Skalender übernommen"],
   "sources": [
     { "name": "Skalender", "url": "https://skalender.net/", "status": "ok", "found": 41, "kept": 23 },
@@ -169,7 +170,8 @@ seen there, `kept` = how many ended up in shows.json. This is what makes the pub
 sees which sources were covered, which failed and where the shows come from.
 
 `dropped` lists every candidate you rejected after looking at it closely (not every unrelated event on a
-page). This log is public — it is shown on `log.html` — so write it in German (the site's language), so
+page) — always with `date`, `venue`, `city` and the `url` you looked at, so a human can re-check the
+decision on `review.html` and flag false negatives. This log is public — it is shown on `log.html` — so write it in German (the site's language), so
 a reader understands the decision.
 
 Also overwrite `data/status.json` — the heartbeat the watchdog (`.github/workflows/watchdog.yml`) reads:

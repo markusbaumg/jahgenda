@@ -141,7 +141,11 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   and turns the badge above red; when healthy again it closes the issue. `make watchdog` runs the same check
   locally without touching GitHub.
 - **Where to look:** the badge, the `scraper-failed` issue, `log.html`, and the routine's own run log at
-  https://claude.ai/code/routines. Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
+  https://claude.ai/code/routines.
+- **Quality (false positives/negatives):** `review.html` lists every candidate the scraper looked at and
+  dropped, with date, venue, source link and reason; «Gehört rein» opens a prefilled GitHub issue. Every
+  Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped
+  candidates and failed sources, so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
 
 ### When a run fails
 

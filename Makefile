@@ -3,10 +3,10 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html style.css store.js app.js pwa.js sw.js design/logos.html
+WEB_FILES := index.html log.html review.html style.css store.js app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check ci smoke
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check ci smoke quality-review
 
 help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -75,6 +75,9 @@ cron-uninstall: ## Remove the local launchd job
 
 venues-check: ## Re-check every venue's coordinates against OpenStreetMap (Nominatim)
 	python3 scripts/check_venues.py
+
+quality-review: ## Preview the weekly quality-review issue (dropped candidates), without touching GitHub
+	DRY_RUN=1 python3 scripts/quality_review.py --days 7
 
 watchdog: ## Freshness check (same as the GitHub watchdog), without touching GitHub
 	DRY_RUN=1 python3 scripts/check_freshness.py --max-age-hours 36

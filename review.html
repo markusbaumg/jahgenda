@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Aussortiert · Jahgenda</title>
+    <meta
+      name="description"
+      content="Kandidaten, die der Scraper angeschaut und nicht aufgenommen hat – zum Gegenprüfen."
+    />
+    <meta name="theme-color" content="#14110e" />
+    <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .rv {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 6px 14px;
+        align-items: start;
+      }
+      .rv h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+      .rv .meta {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .rv .why {
+        margin: 6px 0 0;
+        color: var(--text);
+        font-size: 0.92rem;
+      }
+      .rv .why b {
+        color: var(--gold);
+        font-weight: 700;
+      }
+      .rv .flag {
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--red-text);
+        background: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 5px 12px;
+        white-space: nowrap;
+      }
+      .rv .flag:hover {
+        border-color: var(--red-text);
+      }
+      .run-head {
+        margin: 28px 0 4px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gold);
+        border-bottom: 2px solid var(--line);
+        padding-bottom: 6px;
+      }
+      .back {
+        display: inline-block;
+        margin-top: 8px;
+        color: var(--green-text);
+      }
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0 0;
+      }
+      .stat {
+        font-size: 0.8rem;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: var(--surface);
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
+    <header class="wrap head">
+      <h1 class="logo">
+        <img class="logo-mark" src="img/logo/jahgenda.svg" alt="" width="48" height="48" /><span
+          class="wordmark"
+          >Jah<span>genda</span></span
+        >
+      </h1>
+      <p class="tag">Aussortiert: was der Scraper angeschaut und nicht aufgenommen hat</p>
+      <a class="back" href="./" title="Zurück zur Agenda">← zur Agenda</a>
+    </header>
+    <main class="wrap">
+      <p class="notice">
+        Hier stehen alle Kandidaten, die der Scraper geprüft und mit Begründung verworfen hat – die Stelle, an
+        der man Fehlentscheide am schnellsten sieht. Hätte etwas rein gehört?
+        <strong>«Gehört rein»</strong> öffnet ein GitHub-Issue mit allen Angaben; die Regeln passen wir dann
+        in <code>scraper/criteria.md</code> oder <code>scraper/bands.md</code> an.
+      </p>
+      <div class="stats" id="stats"></div>
+      <p id="status" class="status" role="status">Lade …</p>
+      <div id="runs"></div>
+    </main>
+    <footer class="foot">
+      <div class="wrap">
+        <p class="updated">
+          <a href="log.html" title="Scraper-Log öffnen">Scraper-Log</a> ·
+          <a
+            href="https://github.com/markusbaumg/jahgenda/issues?q=label%3Aquality"
+            title="Offene Qualitäts-Issues auf GitHub"
+            >Qualitäts-Issues</a
+          >
+        </p>
+      </div>
+    </footer>
+    <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
+    <script>
+      (() => {
+        const escape = (s) =>
+          String(s ?? "").replace(
+            /[&<>"']/g,
+            (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+          );
+        const fmt = new Intl.DateTimeFormat("de-CH", { dateStyle: "medium", timeStyle: "short" });
+        const dfmt = new Intl.DateTimeFormat("de-CH", {
+          weekday: "short",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        const status = document.getElementById("status");
+        const box = document.getElementById("runs");
+        const issueUrl = (d, when) => {
+          const title = `Gehört rein: ${d.title}${d.date ? " (" + d.date + ")" : ""}`;
+          const body = [
+            `**Kandidat:** ${d.title}`,
+            d.date ? `**Datum:** ${d.date}` : "",
+            d.venue ? `**Venue:** ${d.venue}${d.city ? ", " + d.city : ""}` : "",
+            d.url ? `**Quelle:** ${d.url}` : "",
+            `**Scraper-Begründung:** ${d.why}`,
+            `**Lauf:** ${when}`,
+            "",
+            "Warum er rein gehört:",
+            "",
+            "- …",
+          ]
+            .filter(Boolean)
+            .join("\n");
+          return `https://github.com/markusbaumg/jahgenda/issues/new?labels=quality,scraper&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+        };
+        fetch("data/runs.json", { cache: "no-cache" })
+          .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
+          .then((data) => {
+            const runs = (Array.isArray(data.runs) ? data.runs : []).filter((r) => (r.dropped || []).length);
+            const total = runs.reduce((n, r) => n + r.dropped.length, 0);
+            document.getElementById("stats").innerHTML =
+              `<span class="stat">${total} aussortiert</span><span class="stat">${runs.length} Läufe</span>`;
+            if (!runs.length) {
+              status.textContent = "Noch nichts aussortiert.";
+              return;
+            }
+            status.textContent = "";
+            box.innerHTML = runs
+              .map((r) => {
+                let when = r.at;
+                try {
+                  when = fmt.format(new Date(r.at));
+                } catch {}
+                return `<section><h2 class="run-head">Lauf ${escape(when)} · ${r.dropped.length} aussortiert</h2>${r.dropped
+                  .map((d) => {
+                    let day = d.date;
+                    try {
+                      if (d.date) day = dfmt.format(new Date(d.date + "T12:00:00"));
+                    } catch {}
+                    return (
+                      `<article class="rv"><div><h3>${d.url ? `<a href="${escape(d.url)}" target="_blank" rel="noopener" title="Quelle öffnen">${escape(d.title)}</a>` : escape(d.title)}</h3>` +
+                      `<p class="meta">${[day, d.venue, d.city].filter(Boolean).map(escape).join(" · ")}</p>` +
+                      `<p class="why"><b>Grund:</b> ${escape(d.why)}</p></div>` +
+                      `<a class="flag" href="${issueUrl(d, when)}" target="_blank" rel="noopener" title="Diesen Entscheid als falsch melden (GitHub-Issue)">Gehört rein</a></article>`
+                    );
+                  })
+                  .join("")}</section>`;
+              })
+              .join("");
+          })
+          .catch(() => {
+            status.textContent = "Konnte das Log nicht laden.";
+          });
+      })();
+    </script>
+  </body>
+</html>

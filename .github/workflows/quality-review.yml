@@ -1,0 +1,22 @@
+# Weekly: one issue listing what the scraper dropped, so the owners can check for false negatives.
+name: Quality review
+
+on:
+  schedule:
+    - cron: "33 6 * * 1" # Monday 08:33 Zurich (CEST)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open the weekly quality-review issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/quality_review.py --days 7
