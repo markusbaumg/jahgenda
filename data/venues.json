@@ -1,6 +1,105 @@
 {
-  "note": "Venue database: coordinates, canton and programme URL per venue. scrape=true: the scraper reads this venue's programme on every run. Every show in shows.json must have its venue here — the show's coordinates come from here. The scraper adds new venues with coordinates (Google Maps / OpenStreetMap); if the address is unknown, the city centre is fine.",
+  "note": "Venue database: coordinates, canton and programme URL per venue. scrape=true: the scraper reads this venue's programme on every run (venues with high/medium reggae relevance); low-relevance venues keep scrape=false and are covered by the agendas and web search. Every show in shows.json must have its venue here — the show's coordinates come from here. The scraper adds new venues with coordinates (Google Maps / OpenStreetMap); if the address is unknown, the city centre is fine.",
   "venues": {
+    "Albani": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.4985,
+      "lon": 8.7292,
+      "url": "https://www.albani.ch/",
+      "scrape": true,
+      "hint": "Homepage is the programme: each card has weekday + DD.MM without year (e.g. 'Do 11.02'), time 'HH:MM UHR', price, act with country code and a genre tag line (e.g. 'Early Reggae, Ska'); infer the year from month order. Reggae relevance: medium — early reggae/ska bands (Los Billtones) and Friday 'Steibi FM' DJ nights with some dancehall."
+    },
+    "Alhambra": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.2027,
+      "lon": 6.1465,
+      "url": "https://www.alhambra-geneve.ch/programme/",
+      "scrape": false,
+      "hint": "City-owned hall rented to promoters; the programme page's event list is rendered by JavaScript (wp-json exposes no event type), so use ticketing aggregators. Reggae relevance: unknown — no reggae seen."
+    },
+    "Alte Kaserne": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.4978,
+      "lon": 8.7323,
+      "url": "https://altekaserne.ch/veranstaltungen",
+      "scrape": true,
+      "hint": "Agenda is paginated (?page=1..3) and server-rendered: cards with 'DD. Monat YYYY', title, room and 'HH:MM–HH:MM Uhr', no genres; third-party concerts (e.g. David Rodigan 19.12.2026) may only appear on Ticketcorner/eventworld. Reggae relevance: medium — occasional promoter-booked reggae/dancehall selectors; own programme is comics, talks, games."
+    },
+    "Altes Kino": {
+      "city": "Mels",
+      "canton": "SG",
+      "lat": 47.0487,
+      "lon": 9.4271,
+      "url": "https://www.alteskino.ch/veranstaltungen/konzerte/",
+      "scrape": false,
+      "hint": "Server-rendered list under /veranstaltungen/konzerte/: 'Konzert Samstag, 24. Oktober 2026 Artist - «Title» description Details'; the 'Alle' tab mixes in theatre. Reggae relevance: low — Swiss singer-songwriter, folk, a cappella."
+    },
+    "Am Schluss": {
+      "city": "Thun",
+      "canton": "BE",
+      "lat": 46.7585,
+      "lon": 7.6294,
+      "url": "https://www.amschluss.ch/",
+      "scrape": true,
+      "hint": "Free summer festival on the Mühleplatz run by Café Bar Mokka (late July/early August); single server-rendered page with the year in the title and days as 'Freitag 24. Juli ARTIST GENRE', published in spring. Reggae relevance: medium — a reggae night most years (Female Reggae Voices 2026)."
+    },
+    "Amboss Rampe": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3815,
+      "lon": 8.5322,
+      "url": "https://ambossrampe.ch/",
+      "scrape": false,
+      "hint": "Homepage mixes bar, restaurant and event info; the 'Programm' section lists recurring formats ('jeden Freitag') and one-off events with times in prose, weakly structured. Reggae relevance: low — free DJ nights (Schieff Soundsystem, jam sessions), nothing reggae-specific found."
+    },
+    "Atlantis": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.553,
+      "lon": 7.588,
+      "url": "https://atlantis-basel.ch/musik-kultur/",
+      "scrape": false,
+      "hint": "Server-rendered 'Veranstaltungskalender': 'Konzert Di. 13.10 Title Genre' (day.month without year under month headers); detail pages /veranstaltung/<slug>/. Reggae relevance: low — jazz, blues, rock, swing."
+    },
+    "Bad Bonn": {
+      "city": "Düdingen",
+      "canton": "FR",
+      "lat": 46.8616,
+      "lon": 7.1801,
+      "url": "https://club.badbonn.ch/",
+      "scrape": true,
+      "hint": "club.badbonn.ch root is the full programme list (badbonn.ch redirects there): ISO-like dates with artist names, no genre tags, bilingual DE/FR, short page. Reggae relevance: medium — sound-system nights a few times a year (Kalabray); mostly indie/noise/punk."
+    },
+    "Balz Klub": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.554,
+      "lon": 7.587,
+      "url": "https://www.balzklub.ch/programm",
+      "scrape": false,
+      "hint": "ASP.NET site; /programm renders no event text server-side, use Facebook or aggregators. Reggae relevance: low — rock/metal and party club."
+    },
+    "Bar59": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0419,
+      "lon": 8.3109,
+      "url": "https://www.bar59.ch/programm",
+      "scrape": false,
+      "hint": "Programme page is a JS single-page app with an empty HTML shell and an empty /api/events endpoint; use https://weekendly.ch/events/luzern/reggae (server-rendered, dates 'Sa 24 Okt' without year) as the fallback. Reggae relevance: high — known for Caribbean/afro/reggae DJ nights (B59 Royal Night) and free second-room concerts."
+    },
+    "Basso": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.572,
+      "lon": 7.5805,
+      "url": "https://www.bassoverse.space/",
+      "scrape": false,
+      "hint": "Wix homepage lists events as plain text 'd.m.yy Title artist • artist' with detail links /programm/<slug>-dd-mm-yyyy (/programm itself is 404). Reggae relevance: low — mostly electronic, occasional reggae/dancehall selectors (DJ El Fresko)."
+    },
     "Bierhübeli": {
       "city": "Bern",
       "canton": "BE",
@@ -9,6 +108,15 @@
       "url": "https://bierhuebeli.ch/",
       "scrape": true,
       "hint": "Genre tags in the programme; touring acts (e.g. Dub Inc). Cancelled shows are marked — do not include them."
+    },
+    "Bikini Test": {
+      "city": "La Chaux-de-Fonds",
+      "canton": "NE",
+      "lat": 47.1131,
+      "lon": 6.8456,
+      "url": "https://bikinitest.ch/programme",
+      "scrape": true,
+      "hint": "/programme is a tiny server-rendered list: month heading 'octobre 2026', then 'sa 17 octobre' + headliner + support lines; genre tags on the event detail pages and the homepage teaser. Reggae relevance: high — recurring 'Radio Rhum Reggae' sound-system night, Jahneration, Rakoon + Tuzi Sound System."
     },
     "Bogen F": {
       "city": "Zürich",
@@ -19,6 +127,24 @@
       "scrape": true,
       "hint": "Read the homepage: each concert is a block containing <time datetime=\"YYYY-MM-DD HH:MM\"> plus the German text \"Wochentag, DD.MM.YYYY | HH:MM\" and \"Türöffnung HH:MM\" (doors). The headliner is in <h1 itemprop=\"name\"> as \"Band Name <sup>COUNTRY</sup>\" (e.g. \"Bibi Vaplan CH\"); support acts are in <p class=\"supporting-act\">, sometimes just \"& Support\"; co-headliners appear as multiple h1s in the same block; an optional <div class=\"band-reason\"> holds a tour note like \"Releasetour EP & Buch\". The page starts with a \"Neu bestätigt\" (newly confirmed) section that is NOT in date order, followed by the chronological list, so dedupe by detail-page URL (/konzerte/<slug>). Price appears as \"CHF 38\"; ticket links are <a class=\"ticket-button\"> to petzi.ch (https://www.petzi.ch/de/events/<id>-bogen-f-<slug>/tickets/ or https://www.petzi.ch/events/<id>/tickets/), seetickets.com/ch or ticketcorner; a \"SOLD OUT\" label may appear above the date. There are NO genre tags; genre must be inferred from the act name or the German description on the detail page. Selten Reggae; nur bei Treffern aufnehmen."
     },
+    "Cafete": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.953,
+      "lon": 7.4402,
+      "url": "https://cafete.ch/",
+      "scrape": true,
+      "hint": "Reitschule's small club bar; single server-rendered page listing events as 'Sa. 17. Oktober 2026 — 23:00', title, acts and a 'Style: ...' genre line. Reggae relevance: high — long-running 'Jamaican Roots Culture' sound-system series (#52 in Oct 2026) plus bass nights."
+    },
+    "Café Kairo": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9587,
+      "lon": 7.4464,
+      "url": "https://www.cafe-kairo.ch/programm",
+      "scrape": false,
+      "hint": "Server-rendered programme page: entries 'Fr. 06.11.2026 22 Uhr TITLE Artist City – description', all on one page in order. Reggae relevance: low — singer-songwriter and disco DJ nights in the Lorraine quarter."
+    },
     "Café Mokka": {
       "city": "Thun",
       "canton": "BE",
@@ -27,6 +153,24 @@
       "url": "https://mokka.ch/",
       "scrape": true,
       "hint": "Regular reggae/dub/sound-system sessions."
+    },
+    "Camäleon": {
+      "city": "Vaduz",
+      "canton": "FL",
+      "lat": 47.1488,
+      "lon": 9.5167,
+      "url": "https://camaleon.li/aktuelles/",
+      "scrape": true,
+      "hint": "Server-rendered: on /aktuelles/ the 'Events' block lists shows as '11.Oktober 2026 Hippie Death Cult | Deathchant | 11.10.2026' with a 'Mehr erfahren' link, past shows under /galerie-cat/konzerte/. Reggae relevance: medium — youth venue with punk/hardcore/stoner, relevant for ska-punk."
+    },
+    "Case à Chocs": {
+      "city": "Neuchâtel",
+      "canton": "NE",
+      "lat": 46.9894,
+      "lon": 6.9215,
+      "url": "https://case-a-chocs.ch/programme/",
+      "scrape": true,
+      "hint": "/programme/ is server-rendered: 'vendredi 16 octobre 2026 • 23h00', title and a rich genre line (e.g. 'Shatta, baile funk, soul'), so filter on Reggae/Dub/Ska/Dancehall/Shatta. Reggae relevance: medium — main Neuchâtel venue with dancehall-adjacent nights and reggae tours in past seasons."
     },
     "Cave Club": {
       "city": "Zürich",
@@ -37,6 +181,87 @@
       "scrape": false,
       "hint": "Langstrasse 81, 8004 Zürich (Koordinaten = Hausnummer, Nominatim). Keine eigene Website – caveclub.ch existiert nicht; Reggae/Dancehall-Nächte («Friday Bash») nur in Veranstalter-Listings (zuri.net, guidle), darum scrape=false."
     },
+    "Caves du Manoir": {
+      "city": "Martigny",
+      "canton": "VS",
+      "lat": 46.1024,
+      "lon": 7.0721,
+      "url": "https://cavesdumanoir.ch/",
+      "scrape": false,
+      "hint": "Homepage agenda is server-rendered with ISO date and a genre list ('Stoner, Doom, Psychedelic Rock'); past events at /events/. Reggae relevance: low — stoner/psych/rock."
+    },
+    "cheesmeyer": {
+      "city": "Sissach",
+      "canton": "BL",
+      "lat": 47.464,
+      "lon": 7.809,
+      "url": "https://cheesmeyer.ch/",
+      "scrape": false,
+      "hint": "Homepage list 'SA 17.10.26 19:30 Konzert Title description ... mehr' (uppercase weekday, dd.mm.yy). Reggae relevance: low — jazz, Mundart, singer-songwriter."
+    },
+    "Chessu / Coupole": {
+      "city": "Biel/Bienne",
+      "canton": "BE",
+      "lat": 47.136,
+      "lon": 7.2499,
+      "url": "https://ajz.ch/de-ch/chessu/programm/",
+      "scrape": true,
+      "hint": "AJZ Biel programme page, server-rendered: entries start with '31.10 Sa Start: 20:00', then title, promoter, genre line and price; event URLs end in -YYYY-MM-DD/ (French version under /fr-ch/). Reggae relevance: medium — occasional reggae/dancehall shows such as Cali P 31.10.2026; otherwise techno, punk, R&B."
+    },
+    "Chollerhalle": {
+      "city": "Zug",
+      "canton": "ZG",
+      "lat": 47.1815,
+      "lon": 8.4837,
+      "url": "https://chollerhalle.ch/",
+      "scrape": false,
+      "hint": "Server-rendered list on the homepage: title line then date 'FR, 16. OKT 26' (uppercase German month, two-digit year), no genres or times. Reggae relevance: low — Swiss pop, comedy, children's theatre."
+    },
+    "Chrämerhuus": {
+      "city": "Langenthal",
+      "canton": "BE",
+      "lat": 47.2131,
+      "lon": 7.79,
+      "url": "https://chraemerhuus.ch/programm/",
+      "scrape": false,
+      "hint": "Server-rendered programme rows like 'Sa. 07.Nov. 26 22:00 UHR Gaststube Chrämerhuus Musik NAME ... LIVE KONZERT CHF 15'; only rows tagged Musik in the Gaststube or CRMI are the venue's concerts, Stadttheater/Kino rows are other venues. Reggae relevance: low — alternative culture venue with cumbia, indie, slam."
+    },
+    "Château Rouge": {
+      "city": "Annemasse",
+      "canton": "F",
+      "lat": 46.1886,
+      "lon": 6.2364,
+      "url": "https://www.chateau-rouge.net/spectacles-saison/",
+      "scrape": true,
+      "hint": "French scène nationale 2 km from the Geneva border; season list is server-rendered with title, genre line (e.g. 'Reggae dub') and 'Le 5 février' (day + French month, no year; season Sept-June), multi-day as 'Du 10 au 12 février'. Reggae relevance: medium — Sinsémilia/Tryo 'Ensemble', Brain Damage x Sir Jean, Flavia Coelho."
+    },
+    "Chäslager": {
+      "city": "Stans",
+      "canton": "NW",
+      "lat": 46.9578,
+      "lon": 8.3654,
+      "url": "https://chaeslager-kulturhaus.ch/programm/",
+      "scrape": false,
+      "hint": "The /programm/ page is JS-rendered; use the WordPress REST API https://chaeslager-kulturhaus.ch/wp-json/wp/v2/event?per_page=40 (title.rendered, link) and read the event date from the server-rendered detail page /event/<slug>/. Reggae relevance: low — Irish folk, big band, films, improv."
+    },
+    "Conrad Sohm": {
+      "city": "Dornbirn",
+      "canton": "A",
+      "lat": 47.3939,
+      "lon": 9.7664,
+      "url": "https://www.conradsohm.com/",
+      "scrape": false,
+      "hint": "Homepage 'Konzerte und Headline Acts' is a server-rendered list: '13 10 Di BIBIZA' = day, month, weekday, act, year implied. Reggae relevance: low — heavy touring schedule (rock/pop), reggae acts sporadic in past years."
+    },
+    "D! Club": {
+      "city": "Lausanne",
+      "canton": "VD",
+      "lat": 46.5209,
+      "lon": 6.6311,
+      "url": "https://dclub.ch/",
+      "scrape": false,
+      "hint": "Homepage agenda is server-rendered with ISO dates (2026-10-17), title, artists, age limit and a category (Urbain / Électronique / Concert); a monthly PDF exists, includes the smaller 'Bar Club ABC' floor. Reggae relevance: low — urban/electro club, dub only inside bass bills."
+    },
     "Dachstock": {
       "city": "Bern",
       "canton": "BE",
@@ -45,6 +270,60 @@
       "url": "https://www.dachstock.ch/events",
       "scrape": true,
       "hint": "Prefer the iCal feed: each VEVENT has DTSTART in UTC (e.g. 20261205T213000Z, convert to Europe/Zurich), SUMMARY as \"Event/Series name – Act1, Act2, ...\" (acts after an en dash, comma separated, truncated at ~70 chars so check the event page for the full line-up), CATEGORIES with type plus genre tags (e.g. \"Party,Drum and Bass\", \"Konzert,Rock,Dubstep,EDM\"; some events like Dubtopia carry no CATEGORIES at all), LOCATION naming the room (Dachstock, Rössli, Sous le Pont, Grosse Halle at Reitschule, Neubrückstrasse 8, 3012 Bern) and URL to the detail page (/events/DD-MM-YYYY-slug). On the HTML /events page the list is in German: \"FR, 16.10.2026 - 23:00\" then the title, then one act per line each followed by its home town, then type/genre tags, then \"Tickets\" linking to https://www.petzi.ch/events/<id>/tickets (or \"Sold Out\"/\"Anmeldung Erforderlich\"). Genre tags are free text set by the venue and often missing for the dub night, so treat any event titled \"Dubtopia\" (series page /series/dubtopia) as dub/soundsystem regardless of tags. Raum der Reitschule; iCal: https://dachstock.ch/events.ics"
+    },
+    "Dampfzentrale": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9407,
+      "lon": 7.4442,
+      "url": "https://www.dampfzentrale.ch/",
+      "scrape": false,
+      "hint": "Server-rendered homepage with event links /event/slug_date/; the 'Musik' section under Programm filters concerts. Reggae relevance: low — contemporary dance and experimental music."
+    },
+    "Das Viertel": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.542,
+      "lon": 7.5985,
+      "url": "https://www.dasviertel.ch/programmklub",
+      "scrape": true,
+      "hint": "Wix, but event cards are in the HTML: title, genre line, then day + abbreviated month without year (e.g. 'CORUBA SOUNDSYSTEM AFROBEAT / DANCEHALL 09 OKT.'), plus embedded JSON with eventTitle/genre/eventDay; concerts on /programm, club nights on /programmklub. Reggae relevance: medium — dancehall/afrobeat sound-system nights (Coruba); otherwise open-format parties."
+    },
+    "Dezent": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4253,
+      "lon": 9.3737,
+      "url": "https://www.dezent.sg/",
+      "scrape": false,
+      "hint": "Homepage: 'SA 17.10 | time | title | genre list (Afrobeats · R&B)', no year. Reggae relevance: low — weekly afrobeats/hip hop parties, no reggae seen."
+    },
+    "Die Heitere Fahne": {
+      "city": "Wabern",
+      "canton": "BE",
+      "lat": 46.929,
+      "lon": 7.4468,
+      "url": "https://dieheiterefahne.ch/events",
+      "scrape": false,
+      "hint": "Events are embedded as an HTML-escaped JSON blob (keys 'title' and dates like '2026-10-12 00:00:00'), so curl + unescape + regex works where WebFetch misses them. Reggae relevance: low — inclusive cultural centre with record releases and 'Steiler Freitag' parties."
+    },
+    "District 28": {
+      "city": "Siebnen",
+      "canton": "SZ",
+      "lat": 47.1788,
+      "lon": 8.8927,
+      "url": "https://www.district28.ch/",
+      "scrape": false,
+      "hint": "Server-rendered homepage; under 'Events' each entry is '05.09.2026:' then act names, a free-text genre line ('Rock/Psychedelic Grunge') and door/start time. Reggae relevance: low — blues, rock'n'roll, hard rock and metal club."
+    },
+    "Dynamo": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3833,
+      "lon": 8.5393,
+      "url": "https://www.dynamo.ch/events-kurse",
+      "scrape": false,
+      "hint": "Next.js page: curl returns 3.4 MB of HTML whose event data (titles, dates like 'Freitag, 06. November 2026', room Werk 21) sits only in the escaped React payload inside script tags, so grep the raw HTML or parse the payload; WebFetch truncates first. Reggae relevance: high — Biga*Ranx, ska-punk and Swiss rocksteady releases in the Saal and Werk 21."
     },
     "Ebullition": {
       "city": "Bulle",
@@ -55,6 +334,42 @@
       "scrape": true,
       "hint": "Ska fest, sound-system series (Kalabray)."
     },
+    "Eisenwerk": {
+      "city": "Frauenfeld",
+      "canton": "TG",
+      "lat": 47.561,
+      "lon": 8.8939,
+      "url": "https://www.eisenwerk.ch/programm-bilder/",
+      "scrape": true,
+      "hint": "/programm redirects to /programm-bilder/, server-rendered: date 'Mo 19. Okt 2026' then title and category. Reggae relevance: medium — mixed theatre/concert house that books world, reggae and ska acts occasionally."
+    },
+    "Elefantehuus": {
+      "city": "Liestal",
+      "canton": "BL",
+      "lat": 47.482,
+      "lon": 7.735,
+      "url": "https://www.elefantehuus.ch/veranstaltungen",
+      "scrape": false,
+      "hint": "Server-rendered cards: title, 'Elefantehuus Liestal', 'Do., 15. Oktober 2026 20:00 Uhr', eventfrog tickets. Reggae relevance: low — blues/soul/tribute nights, a cappella."
+    },
+    "Elysia": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5518,
+      "lon": 7.5847,
+      "url": "https://www.elysia.ch/",
+      "scrape": false,
+      "hint": "Next.js page with an empty events div; the JSON API https://www.elysia.ch/api/events returns [{slug,title,date 'YYYY-MM-DD',presstext}]. Reggae relevance: low — house/techno club nights."
+    },
+    "ESSE Musicbar": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.5003,
+      "lon": 8.7229,
+      "url": "https://www.esse-musicbar.ch/index.php/veranstaltungen/live-veranstaltiungen",
+      "scrape": false,
+      "hint": "Joomla site, server-rendered: cards with title, genre word (e.g. 'Jazz'), 'Wochentag, DD. Monat YYYY HH:MM', teaser and 'Details'; note the misspelled path 'live-veranstaltiungen'. Reggae relevance: low — jazz-oriented music bar."
+    },
     "Exil": {
       "city": "Zürich",
       "canton": "ZH",
@@ -63,6 +378,42 @@
       "url": "https://exil.club/",
       "scrape": false,
       "hint": "Bot-Schutz: curl -sL bekommt 403 («Verifying your connection», JavaScript nötig), darum scrape=false; nur per WebFetch/Browser lesbar, falls das durchkommt. Events are on the homepage grouped under lowercase German month headings (\"november 2026\", \"märz 2027\"); each row is \"DD.MM.YY Wochentag\" (e.g. \"21.10.26 Mittwoch\") plus the title and a type label \"live\" or \"dj\", with status markers \"Sold Out\" or \"(abgesagt)\" in or after the title; the title is just the headline act (support acts only on the detail page), and the row links to https://exil.club/events/{slug}. Detail pages give \"DD.MM.YYYY Wochentag\", \"Einlass: HH:MM Uhr\", \"Start: HH:MM Uhr\", support acts, price (\"tickets: 42.-\"), a description in German, genre tags as icon images whose alt text is the genre name (e.g. alt \"World\", \"Electronic\", \"Rock\"; Dancehall/Afrobeat/Reggaeton exist as tags), and a ticket link (seen: ticketmaster.ch; the venue's Montags series and some shows may differ). Note the venue sometimes hosts shows at other locations (title contains \"im Plaza\", \"im Dynamo\", \"(Kaufleuten)\"), so the location should be taken from the title/detail page. To triage cheaply, scan titles for known reggae/dub/ska acts and only open detail pages for candidates, checking the genre alt text for Dancehall/World. Blockiert oft automatische Abrufe (403) – dann überspringen und Exil-Shows via Skalender/Petzi/Eventfrog übernehmen."
+    },
+    "fabriggli": {
+      "city": "Buchs SG",
+      "canton": "SG",
+      "lat": 47.163,
+      "lon": 9.4715,
+      "url": "https://www.fabriggli.ch/",
+      "scrape": false,
+      "hint": "Homepage and /programm list events server-side as 'genre blurb Act name SA 31.10.2026 | 20.00 Uhr'; keep Konzert entries only. Reggae relevance: low — Kleintheater mixing theatre, cabaret and concerts (electro-swing, Swiss pop)."
+    },
+    "Festival du Chant du Gros": {
+      "city": "Le Noirmont",
+      "canton": "JU",
+      "lat": 47.2244,
+      "lon": 6.9568,
+      "url": "https://chantdugros.ch/",
+      "scrape": false,
+      "hint": "Homepage currently only has dates/news (next 8-11 Sept 2027); line-up appears in spring at /programmation/ grouped by day, re-check from March. Reggae relevance: medium — past editions booked Dub Inc, Danakil, Tryo."
+    },
+    "flon": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4198,
+      "lon": 9.3674,
+      "url": "https://flon-sg.ch/programm",
+      "scrape": false,
+      "hint": "Jugendkulturraum, tiny server-rendered list: 'SA 24.10.2026 | Title'. Reggae relevance: low — disco, EP releases, culture days."
+    },
+    "Flösserplatz": {
+      "city": "Aarau",
+      "canton": "AG",
+      "lat": 47.3965,
+      "lon": 8.0395,
+      "url": "https://www.floesserplatz.ch/de/programm",
+      "scrape": false,
+      "hint": "Server-rendered list: 'Freitag | 16.10.2026 <Title> <Category>' with categories Festival/Konzert/Party/Podium/Treff/Workshop; skip 'Zigzag Treff' rows. Reggae relevance: low — city youth culture house, punk/hardcore/hip-hop leaning."
     },
     "Fri-Son": {
       "city": "Fribourg",
@@ -73,6 +424,42 @@
       "scrape": true,
       "hint": "On /fr/programme each event is an <article class=\"node--type-event\"> inside a div.views-row, wrapped in an <a href=\"/fr/programme/YYYY/MM/slug\">; the date is a <time datetime=\"...Z\" class=\"datetime\"> element whose text is French (\"Vendredi 23 octobre 2026\"), followed by the doors time in field--name-field-time-doors (\"22:00\"); note the ISO datetime is UTC end-of-day so use the French text date (German on /de/programm) rather than converting the timestamp. Genres are explicit tags in div.genre-wrapper as <span data-href=\"/fr/programme?f[0]=genre:ID\">Reggae</span> (tags seen: Reggae, Roots Reggae, Roots, Dub, Steppa), and a \"For fans of ...\" advice line follows. Titles are uppercase with country codes, e.g. \"DUB ARENA\", \"KIM WILDE (UK)\"; supports/sound systems are only named on the detail page (e.g. \"Redubtion Sound System, Subsanity Sound System\"), where the ticket link is a Petzi URL of the form https://www.petzi.ch/events/NNNNN/ plus prices (Prélocations / Caisse du soir, CHF). Sold-out status appears in the status-wrapper. Genre-Filter auf der Programmseite (Reggae/Roots/Dub/Steppa)."
     },
+    "Galicia Bar": {
+      "city": "Olten",
+      "canton": "SO",
+      "lat": 47.351,
+      "lon": 7.906,
+      "url": "https://www.galiciabar.ch/",
+      "scrape": false,
+      "hint": "Upcoming events are server-rendered on the homepage: '23 Okt. 21:00 23:30 <Act> <genre line>' with event pages /events/<slug>/; the /programm-events/ page is stale. Reggae relevance: low — daily music bar with funk/soul/rock/chanson in the Saal."
+    },
+    "Galvanik": {
+      "city": "Zug",
+      "canton": "ZG",
+      "lat": 47.1815,
+      "lon": 8.4842,
+      "url": "https://galvanik-zug.ch/programm/",
+      "scrape": true,
+      "hint": "Server-rendered list under a year heading: day number, month abbreviation ('14.' '/' 'Okt.'), category (Live/Party/Beizli/Comedy), title and a subtitle with acts; archive at /archiv/ uses the same markup, genre only in the subtitle. Reggae relevance: high — Rising Fyah Sound anniversaries with Cali P, Dub Spencer & Trance Hill, ska-punk."
+    },
+    "Gare de Lion": {
+      "city": "Wil",
+      "canton": "SG",
+      "lat": 47.4613,
+      "lon": 9.0327,
+      "url": "https://garedelion.ch/",
+      "scrape": true,
+      "hint": "Homepage lists events twice: a short list ('Oct | 17 | Title') and a detail list with 'Türöffnung', 'Eintritt', date '17.10.2026', 'Musikstil' genre tag and age. Reggae relevance: medium — Kulturbahnhof with occasional reggae/ska touring acts."
+    },
+    "Gaskessel": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9383,
+      "lon": 7.4424,
+      "url": "https://gaskessel.ch/programm/",
+      "scrape": false,
+      "hint": "Server-rendered programme page, no pagination: entries start with 'Do 15.10.26' then title, line-up, genre words, 'Doors' and prices. Reggae relevance: low — youth centre with techno/makina parties and pop/rap; occasional dancehall parties in past years."
+    },
     "Gaswerk": {
       "city": "Winterthur",
       "canton": "ZH",
@@ -81,6 +468,33 @@
       "url": "https://www.gaswerk.ch/",
       "scrape": true,
       "hint": "Genre tags; regular ska-punk."
+    },
+    "Gaswerk Eventbar": {
+      "city": "Seewen",
+      "canton": "SZ",
+      "lat": 47.0299,
+      "lon": 8.6286,
+      "url": "https://www.gaswerk-eventbar.ch/",
+      "scrape": true,
+      "hint": "Server-rendered WordPress: homepage slider 'Title | SA 17.10.2026' and a 'Die nächsten Events' block with 'DO | 15 | OKT', a free-text genre label and the title; full list at /events/, detail URLs /veranstaltungen/<slug>/. Reggae relevance: medium — Bob Marley tribute (Marley's Ghost 18.02.2027); otherwise hard rock, folk, Swiss pop."
+    },
+    "Gleis21": {
+      "city": "Dietikon",
+      "canton": "ZH",
+      "lat": 47.4062,
+      "lon": 8.4015,
+      "url": "https://gleis21.ch/programm/",
+      "scrape": false,
+      "hint": "Programme page is loaded client-side (curl text ~470 chars); Buchsackerstrasse 21, concerts Thu-Sat; look for a JSON feed or event detail pages. Reggae relevance: unknown — no genre evidence, low priority."
+    },
+    "Gonzo Club": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.378,
+      "lon": 8.5255,
+      "url": "https://gonzoclub.ch/",
+      "scrape": false,
+      "hint": "Tiny server-rendered homepage (Langstrasse 135): entries as 'MITTWOCH, 14. Oktober, 23H / gratis Eintritt', event name, DJs and a genre line ('Hip Hop, Afrobeats, R&B'), no year. Reggae relevance: low — afrobeats/hip hop DJ nights that may include dancehall."
     },
     "Grabenhalle": {
       "city": "St. Gallen",
@@ -91,6 +505,114 @@
       "scrape": true,
       "hint": "Events on /programm/ are listed chronologically under German month headings (Oktober 2026, November 2026, ...). Each entry has a date block in German in the form 'DO 15 OKT 21:00 – 23:30' (weekday abbreviation, day, abbreviated German month, start/end times; year only from the month heading), a title (artist name with country in parentheses, e.g. 'Elijah Salomon (CH)', multiple acts separated by ' / '), and a subtitle line that holds the tour name or support act (e.g. 'Essenz Tour', 'Support: Velvet Wasted (A)', or series names like 'Ein kleines Konzert # 240', 'Bullaugenkonzert', 'cineclub sg', 'Hallenbeiz'). Genres are NOT shown in the list or single-event HTML; they are only in the description text (e.g. 'Mundart-Reggae und Dancehall') and in the REST API taxonomy event_type_2. The ticket link is in the expanded details under 'EINTRITT & TICKET' as 'Tickets gibt's hier' pointing to eventfrog.ch, petzi.ch or ticketino.com (the eventfrog URL path often contains the genre, e.g. /konzerte/reggae-ska/); free shows (Hallenbeiz, cineclub, Ein kleines Konzert) have no ticket link. Single event pages are https://www.grabenhalle.ch/events/<slug>/ with doors/start/end as 'Türöffnung / Beginn / Schluss' and price as 'CHF 20.- bis 40.-'."
     },
+    "Grosse Halle": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.953,
+      "lon": 7.4408,
+      "url": "https://www.grossehalle.ch/",
+      "scrape": false,
+      "hint": "Big Reitschule hall; server-rendered list below a calendar: 'Fr. 23.–Sa. 24. Okt. 2026' + title + genre line ('Konzert / Festival'); check together with Dachstock. Reggae relevance: low — few music events, used for large shows a few times a year."
+    },
+    "Gurtenfestival": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9196,
+      "lon": 7.4397,
+      "url": "https://gurtenfestival.ch/de/",
+      "scrape": false,
+      "hint": "Line-up is rendered client-side (HTML only has early-bird ticket text); check news or ticketing announcements instead. Reggae relevance: low — big July pop/rock festival, reggae acts rare."
+    },
+    "Haberhaus Bühne": {
+      "city": "Schaffhausen",
+      "canton": "SH",
+      "lat": 47.6953,
+      "lon": 8.632,
+      "url": "https://www.haberhaus.ch/",
+      "scrape": false,
+      "hint": "Homepage shows only the next two events: 'donnerstag - 22.10.2026, 20:00 | Title'. Reggae relevance: low — folk/world and storytelling."
+    },
+    "Hacienda": {
+      "city": "Sierre",
+      "canton": "VS",
+      "lat": 46.2907,
+      "lon": 7.5319,
+      "url": "https://hacienda-sierre.ch/events/",
+      "scrape": false,
+      "hint": "/events/ is server-rendered: '16 octobre 2026' + title, sparse programme in the Anciens Abattoirs. Reggae relevance: low — jazz and occasional concerts."
+    },
+    "Hallenstadion": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.4115,
+      "lon": 8.5517,
+      "url": "https://hallenstadion.ch/events/",
+      "scrape": false,
+      "hint": "Server-rendered list: act name, 'DD Mon YYYY HH:MM Uhr', 'Tickets kaufen'; genre filter chips without a reggae category. Reggae relevance: low — arena, only the very biggest reggae-adjacent acts would appear."
+    },
+    "Heitere Open Air": {
+      "city": "Zofingen",
+      "canton": "AG",
+      "lat": 47.2975,
+      "lon": 7.9375,
+      "url": "https://heitere.ch/",
+      "scrape": false,
+      "hint": "Homepage currently only shows the next dates (06.-08.08.2027); line-up appears later, likely via a JS/ticketing widget, check quarterly. Reggae relevance: low — mainstream pop/rock, occasionally a reggae/dancehall act."
+    },
+    "Helsinki": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3859,
+      "lon": 8.5183,
+      "url": "https://www.helsinkiklub.ch/",
+      "scrape": false,
+      "hint": "Single long homepage; entries in chronological order with 'Wochentag DD. Monat' (no year), title + supports, 'Bar 20 Uhr / Show 20:45 Uhr', ticket link and prices, separated by 'zurück zum Start'. Reggae relevance: low — indie/alt club under the Hardbrücke."
+    },
+    "Hirscheneck": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.56,
+      "lon": 7.5955,
+      "url": "https://www.hirscheneck.ch/veranstaltungen",
+      "scrape": true,
+      "hint": "Single server-rendered page: entries 'DD.MM.YYYY Konzert - <genre> <bands> ... Doors: 20:00 / 12-15CHF' with anchors #DD.MM.YYYY; genre is free text after 'Konzert -'. Reggae relevance: medium — DIY collective cellar with ska-punk shows now and then; mostly punk, hardcore, noise."
+    },
+    "Hive": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3854,
+      "lon": 8.5205,
+      "url": "https://www.hiveclub.ch/programm/",
+      "scrape": false,
+      "hint": "Server-rendered list; each item has title, 'DD. Month YYYY um HH:MM' (English month names) and a teaser, no genre tags. Reggae relevance: low — techno/house club."
+    },
+    "Holästei": {
+      "city": "Glarus",
+      "canton": "GL",
+      "lat": 47.0317,
+      "lon": 9.076,
+      "url": "https://www.holaestei.ch/events",
+      "scrape": true,
+      "hint": "Wix site but /events carries event text in HTML: title, 'Fr., 30. Okt.' (no year), location 'Kulturzentrum Holästei', one-line description. Reggae relevance: medium — main Glarus concert venue, reggae/dancehall parties occasionally."
+    },
+    "Horst Klub": {
+      "city": "Kreuzlingen",
+      "canton": "TG",
+      "lat": 47.6472,
+      "lon": 9.1734,
+      "url": "https://www.horstklub.ch/programm",
+      "scrape": false,
+      "hint": "Programme exists only as a monthly flyer image plus Facebook, no HTML event list; open Fri/Sat 20-01, Kirchstrasse 1. Reggae relevance: medium — punk/garage club that also books ska, ska-punk and rocksteady bands."
+    },
+    "industrie45": {
+      "city": "Zug",
+      "canton": "ZG",
+      "lat": 47.1822,
+      "lon": 8.5209,
+      "url": "https://i45.ch/events",
+      "scrape": false,
+      "hint": "Server-rendered: 'Samstag, 31. Oktober 2026, ab 22 Uhr' then title and subtitle, detail URLs /events/YYYY-MM-DD--slug; the HTML contains soft hyphens inside words, no genre tags. Reggae relevance: low — youth centre with hip-hop cyphers, parties, benefit concerts."
+    },
     "ISC Club": {
       "city": "Bern",
       "canton": "BE",
@@ -99,6 +621,24 @@
       "url": "https://isc-club.ch/",
       "scrape": true,
       "hint": "Dancehall nights (Soul Rebel Sound)."
+    },
+    "Jazzkantine": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0533,
+      "lon": 8.306,
+      "url": "https://www.jazzkantine.com/veranstaltungen",
+      "scrape": true,
+      "hint": "Squarespace events page, server-rendered: 'Okt. | 15', title, 'Donnerstag, 15. Oktober 2026', times, description with 'Doors:'/'Konzert:'/'Eintritt:', no genre tags. Reggae relevance: medium — occasional reggae/ska nights (TAWB: Waskabi & Funky Python 14.11.2026); mostly jazz, folk, world."
+    },
+    "KAFF": {
+      "city": "Frauenfeld",
+      "canton": "TG",
+      "lat": 47.5602,
+      "lon": 8.8987,
+      "url": "https://www.kaff.ch/events",
+      "scrape": true,
+      "hint": "Kulturlokal KAFF: use /events (/programm is 404), server-rendered and grouped by month with title, 'Freitag, 11.09.26', price and category tags (Konzert, Party, Tanz). Reggae relevance: medium — youth-run venue with reggae/dancehall party nights from time to time."
     },
     "Kammgarn": {
       "city": "Schaffhausen",
@@ -109,6 +649,24 @@
       "scrape": true,
       "hint": "Genre tags in the programme; books reggae/ska regularly."
     },
+    "Kanzlei Club": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3752,
+      "lon": 8.5243,
+      "url": "https://www.kanzlei.ch/",
+      "scrape": false,
+      "hint": "Homepage 'Programm' section: chronological cards with English weekday + DD.MM + 'ab HH:MM' (no year), flyer, Tickets link and title; details in a popup. Reggae relevance: low — Eastern European pop, parties, theatre sport."
+    },
+    "Kaschemme": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5435,
+      "lon": 7.6212,
+      "url": "https://www.kaschemme.ch/programm",
+      "scrape": true,
+      "hint": "Squarespace summary list, server-rendered: date 'Okt. 17', title, categories (Bass, Konzert, Ska...), text date 'Sa., 17. Okt. 2026'; detail URLs /programm/YYYY/MM/DD/<slug>, category filter /programm?category=Ska or Reggae. Reggae relevance: medium — ska/rocksteady shows (Kalles Kaviar & Canastron); otherwise drum'n'bass, techno, punk."
+    },
     "Kaserne": {
       "city": "Basel",
       "canton": "BS",
@@ -117,6 +675,24 @@
       "url": "https://kaserne-basel.ch/de",
       "scrape": true,
       "hint": "Read the agenda from https://kaserne-basel.ch/de (German; /en gives the same list in English). Events are in chronological order, one <details> card per date; the date is in the add-to-calendar-button attributes startdate=\"2026-11-14\" starttime=\"20:00\" (doors) and the show time is in <span class=\"times\"><time>21:00</time> (Doors <time>20:30</time>)</span>; the card's name=\"…\" attribute holds the act/title (e.g. \"Mad Professor (Ariwa/UK)\"), the subtitle \"Support: Mother Dubber + Nightmanager\" and the genre \"Dub\" are only in the embedded JSON (keys genre:\"…\", subtitle:\"…\", category:\"concert\"), and acts are also combined with \" + \" in the title (e.g. \"Jimi Tenor + TinTin Patrone & Yanik Soland\"). Filter concerts by class \"concert-type\" (and \"black-type\" for some concert nights) and by genre strings such as \"Dub\", \"Reggae / Mundart\", \"Ska\", \"Dancehall\"; dance/theatre/talk cards use dance-type/discourse-type. The ticket link is the <a class=\"external-ticket\"> seetickets.com URL on the card when sales are open, otherwise fall back to the event URL https://kaserne-basel.ch/de/events/<slug>; the room (Reithalle, Rossstall 1/2) is in the location=\"…\" attribute."
+    },
+    "Kasheme": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3835,
+      "lon": 8.5285,
+      "url": "https://kasheme.com/",
+      "scrape": false,
+      "hint": "Homepage 'Program this Week' block: 'Wed 07/10/26' followed by time and set name/genre; a monthly PDF is linked under 'Music Highlights'. Reggae relevance: low — listening bar with DJ/selector sets, occasional 'Ambient & Dub Special', no live reggae."
+    },
+    "Kaufleuten": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3716,
+      "lon": 8.5361,
+      "url": "https://kaufleuten.ch/events/",
+      "scrape": false,
+      "hint": "Server-rendered, grouped by month: 'Wochentag, DD.MM.YYYY', price, title with category after a bullet (e.g. 'Fink • Konzert') and a one-line tagline that sometimes names genres. Reggae relevance: low — dancehall only as one genre among many in urban party nights."
     },
     "KiFF": {
       "city": "Aarau",
@@ -127,6 +703,24 @@
       "scrape": true,
       "hint": "Events are \"Card Card-Event\" blocks in German, grouped by month headings. Each card has a date like \"Di 13. Okt\" (weekday abbrev, day with period, month abbrev, no year) and a time (doors, e.g. \"19:30\"); the year is reliably derived from the event URL slug /programm/YYYY-MM-DD-slug (beware: a few slugs keep an old date after rescheduling, e.g. nenda 2026-03-18 shown as 18 Dez, so prefer the visible date plus month-heading context, and use the slug only for the year). Title is in h2.Card__Title as span.Act__name plus span.Act__country-code (e.g. \"Sara Hebe\" + \"AR\"); the Card__Byline holds \"Support: X (CH)\", \"Special guests: ...\", \"Line-up: ...\" or a tour name in «guillemets». Genre tags are NOT in the list cards but are on the detail page (e.g. \"Reggae, Dancehall, Dub\") along with Doors/Show times, Location (Foyer/Saal/Club), Mindestalter, Vorverkauf/Abendkasse prices; the simplest approach is to fetch the reggae/dub/dancehall/ska filter URLs and then open each detail page. Ticket link is the a.TicketLink in the card pointing to seetickets.com/ch/event/..., ticketcorner.ch or petzi.ch; sold-out events show \"Ausverkauft\" and no link. Genre-Filter: https://www.kiff.ch/programm?f_filters=all&f_genre=reggae (auch dub, dancehall, ska)."
     },
+    "Komplex 457": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3873,
+      "lon": 8.5,
+      "url": "https://komplex-457.ch/Programm",
+      "scrape": false,
+      "hint": "Client-side app (base44/Supabase backend); /Programm and /events return no event HTML, so use Ticketcorner/Petzi or find the JSON endpoint in /assets/index-*.js. Reggae relevance: unknown — large urban/pop shows and club nights, no reggae evidence gathered."
+    },
+    "Konservi": {
+      "city": "Seon",
+      "canton": "AG",
+      "lat": 47.346,
+      "lon": 8.16,
+      "url": "https://www.konservi.ch/",
+      "scrape": false,
+      "hint": "Wix page (~1.7 MB) but the event list is in the HTML: 'Donnerstag 15. Okt. 2026 <Act> <teaser> Lesen'. Reggae relevance: low — blues/rock/world/folk Konzertlokal, world acts occasionally."
+    },
     "Kraftfeld": {
       "city": "Winterthur",
       "canton": "ZH",
@@ -135,6 +729,33 @@
       "url": "https://www.kraftfeld.ch/de/programm.html",
       "scrape": true,
       "hint": "Home turf of Subsanity Soundsystem (reggae dub & steppers)."
+    },
+    "Krempel": {
+      "city": "Buchs SG",
+      "canton": "SG",
+      "lat": 47.1682,
+      "lon": 9.469,
+      "url": "https://www.krempel.ch/events/",
+      "scrape": true,
+      "hint": "The /events/ page is an EventON calendar filled by JavaScript, so use https://www.krempel.ch/wp-json/wp/v2/ajde_events?per_page=40&_fields=title,link (or the RSS feed /events/feed/) and open each server-rendered event page, which shows '2026 21 Nov (Nov 21) 19:30' and band names/genres under 'Event Details'. Reggae relevance: high — history of Grill'n'Reggae, SKA Night (The Toasters), sound-system parties; nothing reggae in the current list."
+    },
+    "Kreuz Nidau": {
+      "city": "Nidau",
+      "canton": "BE",
+      "lat": 47.1257,
+      "lon": 7.2406,
+      "url": "https://kartellculturel.ch/de",
+      "scrape": false,
+      "hint": "Same KartellCulturel homepage as Le Singe; events are prefixed with 'Kreuz Nidau' then 'Do 15.10.26 20H30 Genre Name'. Reggae relevance: low — swing, global sounds, family concerts."
+    },
+    "KreuzKultur": {
+      "city": "Solothurn",
+      "canton": "SO",
+      "lat": 47.2085,
+      "lon": 7.5375,
+      "url": "https://kreuzkultur.ch/home/",
+      "scrape": false,
+      "hint": "Programme on /home/ is server-rendered: '<Title> DO 15 October 2026 ... 20.00 Uhr CHF ...' (English month names). Reggae relevance: low — Kleinkunst, quizzes, small concerts in the Kreuzsaal."
     },
     "KUFA": {
       "city": "Lyss",
@@ -145,6 +766,24 @@
       "scrape": true,
       "hint": "Kulturfabrik Lyss, Werdtstrasse 17. Programm auf der Startseite (/programm/ leitet dorthin um), server-gerendert mit Datum und Uhrzeit pro Event. Selten Reggae – nur bei Treffern aufnehmen."
     },
+    "Kugl": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.419,
+      "lon": 9.365,
+      "url": "https://kugl.ch/",
+      "scrape": false,
+      "hint": "Kultur am Gleis: homepage lists events as '17.10. | SA | Title | genres / age / time | Vorverkauf', no year. Reggae relevance: low — techno/2000s parties and comedy."
+    },
+    "Kult-X": {
+      "city": "Kreuzlingen",
+      "canton": "TG",
+      "lat": 47.6512,
+      "lon": 9.1754,
+      "url": "https://kult-x.ch/",
+      "scrape": false,
+      "hint": "Calendar is JavaScript-rendered (curl shows only navigation and a renovation notice); building under renovation in 2026, programme at interim locations. Reggae relevance: low."
+    },
     "Kulturfabrik Kofmehl": {
       "city": "Solothurn",
       "canton": "SO",
@@ -153,6 +792,78 @@
       "url": "https://kofmehl.net/",
       "scrape": true,
       "hint": "Programm auf der Startseite (/programm/ leitet dorthin um): div.events__date + div.events__title. Keine Genre-Tags, nach Act-Namen entscheiden."
+    },
+    "Kulturfabrik Wetzikon": {
+      "city": "Wetzikon",
+      "canton": "ZH",
+      "lat": 47.3266,
+      "lon": 8.7979,
+      "url": "https://kulti.ch/programm",
+      "scrape": true,
+      "hint": "Drupal site (domain kulti.ch), server-rendered: title, 'DD.MM.YY | HH:MM bis DD.MM.YY | HH:MM', type (Party/Konzert), Eintritt, Veranstaltungsort (Halle/Foyer/Beiz), description. Reggae relevance: unknown — concerts and parties in the Halle, no reggae seen yet."
+    },
+    "Kulturfestival St.Gallen": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4287,
+      "lon": 9.3832,
+      "url": "https://www.kulturfestival.ch/",
+      "scrape": true,
+      "hint": "Summer open-air (late June to mid-July) in the Kulturmuseum courtyard; homepage programme as '(Country) | Artist | Genre | Weekday, DD.MM.YYYY', new line-up in spring. Reggae relevance: medium — world/reggae acts most years (Tiken Jah Fakoly 2026)."
+    },
+    "Kulturhalle Sägegasse": {
+      "city": "Burgdorf",
+      "canton": "BE",
+      "lat": 47.055,
+      "lon": 7.6305,
+      "url": "https://www.saegegasse.ch/",
+      "scrape": false,
+      "hint": "Server-rendered Joomla homepage lists events as 'Samstag 14.11.' (no year) with title and line-up; detail links /programm/event/ID-slug. Reggae relevance: low — ska-punk package shows occasionally (Skaboom); otherwise comedy, parties, drum'n'bass, Mundart rap."
+    },
+    "Kulturhof Schloss Köniz": {
+      "city": "Köniz",
+      "canton": "BE",
+      "lat": 46.9209,
+      "lon": 7.4143,
+      "url": "https://www.kulturhof.ch/",
+      "scrape": false,
+      "hint": "Server-rendered WordPress homepage lists events as '16/10/ 26 20:00 Title – subtitle'; detail pages under /veranstaltung/slug/. Reggae relevance: low — jazz, Mundart pop, DJ nights, theatre."
+    },
+    "Kulturhotel Guggenheim": {
+      "city": "Liestal",
+      "canton": "BL",
+      "lat": 47.4835,
+      "lon": 7.7345,
+      "url": "https://guggenheimliestal.ch/",
+      "scrape": false,
+      "hint": "Homepage mixes an Instagram-style feed ('29.10.26 • 20:00 • im guggenheim') with entries 'Freitag, 23. Oktober 2026 20:00 Uhr Tickets'; some events are co-hosted at Elefantehuus. Reggae relevance: low — pop/rock/Mundart concerts."
+    },
+    "Kulturwerk 118": {
+      "city": "Sursee",
+      "canton": "LU",
+      "lat": 47.1797,
+      "lon": 8.1083,
+      "url": "https://www.kulturwerk118.ch/",
+      "scrape": false,
+      "hint": "Homepage HTML is empty, events are loaded client-side from Firebase; check eventfrog.ch or Instagram for dates. Reggae relevance: unknown — club with bar parties, slam, electro DJs and metal bands."
+    },
+    "Kuppel": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5522,
+      "lon": 7.5853,
+      "url": "https://www.kuppel-basel.ch/programm",
+      "scrape": true,
+      "hint": "Server-rendered <li class=\"event\"> items: 'Fr, 30.01.2026 19:00 Kuppel <title> <support> <genres>' with a comma genre list at the end (e.g. 'Reggae, Ska, Dancehall'); the page includes past events, so filter by date; rooms Kuppel (hall) and Nest (club). Reggae relevance: high — Boundless Vibes Hifi, Digital Steppaz, Schwellheim ska/reggae nights."
+    },
+    "L'Amalgame": {
+      "city": "Yverdon-les-Bains",
+      "canton": "VD",
+      "lat": 46.782,
+      "lon": 6.6491,
+      "url": "https://www.amalgameclub.ch/programme/",
+      "scrape": false,
+      "hint": "/programme/ is server-rendered: 'Ven 16.10.2026', title with country codes and a comma-separated genre line, only a few weeks ahead. Reggae relevance: low — rock, techno, French pop."
     },
     "L'Usine": {
       "city": "Genève",
@@ -163,6 +874,33 @@
       "scrape": true,
       "hint": "On /agenda each item is: date in D/M/YY (e.g. \"13/10/26\", \"5/11/26\", \"29/1/27\"), then the organiser/sub-venue (Le Rez, Le Rez-Usine, PTR, Post Tenebras Rock, ZOO, \"PTR x <co-promoter>\"), then the title with acts joined by \" + \" or \" • \" and country in parentheses, sometimes with the genre appended to the title (e.g. \"THE SLACKERS ( US) Ska\", \"Suffocation (US) Death metal\"), then a category tag (concert / dj sets / autre), not a music genre. Language is French. Each item links to /evenements/<slug>; the detail page gives time and full date in French (\"20h le mardi 13 octobre 2026\"), \"Organisé par :\" with the space, a description, and \"Billetterie :\" with a Petzi link (https://www.petzi.ch/events/<id>/). Genre must be inferred from title/description. Note the same show may be listed twice (once by PTR, once by Post Tenebras Rock); dedupe by date+acts. The sub-venues (PTR, Le Rez, Le Zoo) have their own sites, so check for duplicates if those are also sources. Mehrere Räume (PTR, Kalvingrad, Le Zoo)."
     },
+    "La Fabbrica": {
+      "city": "Losone",
+      "canton": "TI",
+      "lat": 46.1653,
+      "lon": 8.7657,
+      "url": "https://www.lafabbrica.ch/",
+      "scrape": false,
+      "hint": "The website has no event calendar (only course news, /teatro/ is static); events are announced on social media and ticket platforms (accrue.com, tio.ch agenda 'La Fabbrica Losone'), so match it in aggregator listings. Reggae relevance: medium — hosted Dub Spencer & Trance Hill 10.01.2026."
+    },
+    "La Gravière": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.1975,
+      "lon": 6.1299,
+      "url": "https://lagraviere.ch/",
+      "scrape": false,
+      "hint": "Homepage = programme, server-rendered: title, 'jeudi 15 octobre' (no year), then a slash-separated genre list (e.g. 'Afrobeats / Dancehall / Dembow'); event pages under /evenement/. Reggae relevance: low — dancehall only inside afro/urban mixes."
+    },
+    "Lakelive Festival": {
+      "city": "Nidau",
+      "canton": "BE",
+      "lat": 47.1225,
+      "lon": 7.2322,
+      "url": "https://www.lakelive.ch/",
+      "scrape": true,
+      "hint": "Summer festival on the Strandboden (next 28.07.–07.08.2027); server-rendered WordPress site, line-up under 'Tagesprogramm' once announced in spring, dates in the page title. Reggae relevance: unknown — listed by a reggae-festival aggregator, no reggae acts verified."
+    },
     "Le Chat Noir": {
       "city": "Carouge",
       "canton": "GE",
@@ -171,6 +909,33 @@
       "url": "https://www.chatnoir.ch/live/",
       "scrape": true,
       "hint": "Genre tags; many dancehall DJ nights."
+    },
+    "Le Groove": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.2016,
+      "lon": 6.134,
+      "url": "https://legroove.ch/agenda/",
+      "scrape": true,
+      "hint": "/agenda/ is server-rendered: date DD.MM.YYYY + title with little description, genre category only on the event detail page; watch for titles with 'Dub', 'Sound', 'Corner 25', 'Unity Sound'. Reggae relevance: high — home of the Corner 25 reggae/sound-system crew, 'Sound system' category filter."
+    },
+    "Le Port Franc": {
+      "city": "Sion",
+      "canton": "VS",
+      "lat": 46.222,
+      "lon": 7.3684,
+      "url": "https://leportfranc.ch/concerts",
+      "scrape": false,
+      "hint": "/concerts is server-rendered: 'ven 16.10.26' (weekday + DD.MM.YY), title with country and a one-word genre ('nu cumbia', 'black metal'). Reggae relevance: low — main Sion club, no reggae in the current season."
+    },
+    "Le Rez-Usine": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.204,
+      "lon": 6.1363,
+      "url": "https://rez-usine.ch/",
+      "scrape": false,
+      "hint": "Former Kalvingrad room run by Association Kalvingrad (kalvingrad.com redirects here); homepage is a server-rendered 'Concerts à venir' list with DD.MM.YY dates, ranges like 13-14.11.26 and [ANNULÉ]/[REPORTÉ] prefixes, but the same shows are in the L'Usine agenda, so scrape=false to avoid duplicates. Reggae relevance: high — Dubquake Weekender, Kabaka Pyramid, ska bills."
     },
     "Le Romandie": {
       "city": "Lausanne",
@@ -181,6 +946,87 @@
       "scrape": true,
       "hint": "On /programmation, each event is an <article> under the heading \"Prochaines Dates\" (past ones under \"Dates passées\"); inside, a <time> element (datetime attribute is empty) holds two spans: the French short date \"24 oct. 2026\" (months: janv., févr., mars, avr., mai, juin, juil., août, sept., oct., nov., déc.) and the doors time \"23H00\". The title is the <h3> in upper case, usually \"ACT (COUNTRY) + ACT (COUNTRY) + SUPPORT\" (club nights have free-form names like \"ROMANDUB #2\"), followed by the price (\"25 CHF\", \"Caisse du soir\", \"Prix libre\", \"Complet\", \"Annulé\"). Links go to https://www.leromandie.ch/event/{slug}; presale tickets are links to https://www.petzi.ch/fr/events/{id}-le-romandie-{slug}/ (club nights are door-only, no Petzi link). No genre tags appear in the list; the event detail page has schema.org JSON-LD (name, startDate ISO with timezone, location) and a French description where genre words such as \"roots\", \"dub\", \"steppers\", \"sound system\" appear in the text, so the agent must read the description or recognise acts. Dub-Reihe ROMANDUB."
     },
+    "Le Singe": {
+      "city": "Biel/Bienne",
+      "canton": "BE",
+      "lat": 47.1417,
+      "lon": 7.2469,
+      "url": "https://kartellculturel.ch/de",
+      "scrape": false,
+      "hint": "The /de/programm page needs JS; use the KartellCulturel homepage 'Nächste Events' block with rows 'Le Singe Do 15.10.26 20H30 Genre Name' (same source as Kreuz Nidau, filter by the venue prefix); a monthly PDF is linked too. Reggae relevance: low — jazz, cold wave, cumbia, global sounds."
+    },
+    "Les Amis": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9484,
+      "lon": 7.4487,
+      "url": "https://www.lesamis.ch/programm/",
+      "scrape": false,
+      "hint": "Server-rendered WordPress page grouped by month: rows 'Fr 16.10 Title Doors 22:30//Eintritt 10.-'. Reggae relevance: low — stand-up comedy and house DJ nights in a small old-town bar."
+    },
+    "Les Docks": {
+      "city": "Lausanne",
+      "canton": "VD",
+      "lat": 46.5224,
+      "lon": 6.6193,
+      "url": "https://www.docks.ch/programme/",
+      "scrape": true,
+      "hint": "/programme/ is server-rendered: 'DD.MM.YYYY' dates, title with '+ support', flags 'Unique date suisse'/'Complet', no genre tags so genre comes from artist lookup. Reggae relevance: medium — main Lausanne touring hall, has hosted reggae tours in past seasons."
+    },
+    "LongLake Festival": {
+      "city": "Lugano",
+      "canton": "TI",
+      "lat": 46.0022,
+      "lon": 8.9614,
+      "url": "https://www.longlake.ch/roam",
+      "scrape": false,
+      "hint": "longlake.ch is a Nuxt/JS site whose ROAM page HTML has only intro text; use the season PDF ('Scarica il programma') on the homepage or ticino.ch event listings, relevant mid-June to end of July (Boschetto del Parco Ciani). Reggae relevance: high — ROAM 2026 had Tarrus Riley, Cali P and Biomassa Sound."
+    },
+    "MAD Club": {
+      "city": "Lausanne",
+      "canton": "VD",
+      "lat": 46.5216,
+      "lon": 6.6283,
+      "url": "https://www.mad.club/agenda/",
+      "scrape": false,
+      "hint": "Agenda rendered server-side with 'DD.MM.YY' dates and party names, genre only in free text. Reggae relevance: low — multi-floor mainstream club, reggaeton series."
+    },
+    "Madeleine": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0518,
+      "lon": 8.2983,
+      "url": "https://www.lamadeleine.ch/#programm",
+      "scrape": false,
+      "hint": "Server-rendered single page; the programme block lists '16.10.2026 23:00 - 04:00 Uhr', 'Title ab 23:00' and the DJ/act line, live shows prefixed 'Live:', genre words only in titles. Reggae relevance: low — open-format DJ nights, rock/techno/DnB specials, jam nights."
+    },
+    "Mahogany Hall": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9489,
+      "lon": 7.4593,
+      "url": "https://mahogany.ch/konzerte",
+      "scrape": true,
+      "hint": "Server-rendered Drupal list grouped by month header, rows like 'Fr. 16. Name | genre'; event URLs /konzert/YYYY-MM-DD-slug give the exact date, list runs only ~6 weeks ahead. Reggae relevance: medium — local reggae bands (Zion Step) now and then; mostly blues, jazz, soul."
+    },
+    "Marabu": {
+      "city": "Gelterkinden",
+      "canton": "BL",
+      "lat": 47.4652,
+      "lon": 7.853,
+      "url": "https://www.marabu-bl.ch/konzerte",
+      "scrape": false,
+      "hint": "Wix Events widget, concert list not present in the HTML; check the Songkick venue page or eventfrog. Reggae relevance: low — Swiss pop/Mundart concerts and comedy."
+    },
+    "Mehrspur": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3918,
+      "lon": 8.5117,
+      "url": "https://www.mehrspur.ch/",
+      "scrape": false,
+      "hint": "Server-rendered list: 'DD MM DD.MM.YYYY Weekday HH:MM Klub', title and a genre word (Jazz, Pop...). Reggae relevance: low — ZHdK music club, almost entirely jazz/pop/experimental."
+    },
     "Moods": {
       "city": "Zürich",
       "canton": "ZH",
@@ -189,6 +1035,150 @@
       "url": "https://www.moods.ch/en/program",
       "scrape": true,
       "hint": "Monthly \"K.O.S Crew Dancehall Mood\" and reggae/dancehall parties."
+    },
+    "Musigburg": {
+      "city": "Aarburg",
+      "canton": "AG",
+      "lat": 47.3197,
+      "lon": 7.8985,
+      "url": "https://musigburg.ch/",
+      "scrape": false,
+      "hint": "Homepage (= /events/) is a server-rendered WordPress list grouped by month: title, teaser, '12 Okt. 2026 19:00 - 23:40 Musigburg Bahnhofstr. 50, 4663 Aarburg', with category labels per event. Reggae relevance: low — blues, metal, hardstyle, hip hop, Ländler; no reggae category."
+    },
+    "Musikfestwochen": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.4985,
+      "lon": 8.729,
+      "url": "https://musikfestwochen.ch/programm/programm-a-z/",
+      "scrape": true,
+      "hint": "Festival in August (Steinberggasse, Kirchplatz, Albani, Kraftfeld stages); server-rendered A-Z list with act, 'Wochentag D. Monat YYYY, HH:MM', stage and a genre line, published in spring. Reggae relevance: medium — one or two reggae/dancehall acts most years plus sound-system afterhours."
+    },
+    "Mühle Hunziken": {
+      "city": "Rubigen",
+      "canton": "BE",
+      "lat": 46.8906,
+      "lon": 7.5422,
+      "url": "https://www.muehlehunziken.ch/",
+      "scrape": false,
+      "hint": "Server-rendered homepage (~650 KB) with every upcoming show; event links /programm/slug-YYYY-MM-DD carry the date, genre only in the event text. Reggae relevance: low — folk, blues, rock, country; Swiss reggae acts have played here in past years."
+    },
+    "Ned": {
+      "city": "Montreux",
+      "canton": "VD",
+      "lat": 46.4339,
+      "lon": 6.9124,
+      "url": "https://ned.ch/calendier/",
+      "scrape": true,
+      "hint": "Ned Music Club: the calendar page (URL really is /calendier/) is server-rendered with month heading 'OCT / 2026', 'Ve. 02' weekday+day and event name; event pages /evento/<slug> (e.g. /evento/vendredub-9) carry the description with sound-system names. Reggae relevance: high — monthly VENDREDUB roots/dub sound-system night; rest rock/metal/rap."
+    },
+    "Neubad": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0413,
+      "lon": 8.3068,
+      "url": "https://www.neubad.org/veranstaltungen",
+      "scrape": true,
+      "hint": "Server-rendered Drupal list grouped by month ('Oktober 2026'): day line 'Sa. 17. Oktober', time, category (Konzert/Klubnacht), room (Klub/Pool/Bistro), title; filter with ?f[0]=kategorie_der_veranstaltung_:Konzert, no genre tags. Reggae relevance: medium — 'Roots Treatment' roots/dub club nights; 300+ mixed events a year."
+    },
+    "Nevermind Music Fest": {
+      "city": "Bellinzona",
+      "canton": "TI",
+      "lat": 46.1927,
+      "lon": 9.0173,
+      "url": "https://nevermindmusicfest.com/lineup/",
+      "scrape": false,
+      "hint": "Line-up page is poster images and ticket buttons without artist names in the HTML; read the names from press (RSI, tio.ch, laRegione) or the ticket links around March-May, festival runs June-July in the Parco Urbano. Reggae relevance: high — dedicated reggae night in 2026 (Alpha Blondy, Julian Marley)."
+    },
+    "Nordportal": {
+      "city": "Baden",
+      "canton": "AG",
+      "lat": 47.48,
+      "lon": 8.307,
+      "url": "https://www.nordportal.ch/programm/all",
+      "scrape": false,
+      "hint": "Programme is client-rendered (curl returns only 'Loading events...'); needs a headless browser or the JSON endpoint, sub-pages /programm/liveshows and /programm/parties. Reggae relevance: low — large commercial party/live venue, dancehall/afrobeats parties plausible but unverified."
+    },
+    "Nordstern": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5838,
+      "lon": 7.5868,
+      "url": "https://www.nordstern.com/events/",
+      "scrape": false,
+      "hint": "Nuxt app; event titles/dates only inside the JS payload ('2026-10-16T23:00:00', 'Fr, 16.10'), not in HTML markup. Reggae relevance: low — techno/house club."
+    },
+    "Nouveau Monde": {
+      "city": "Fribourg",
+      "canton": "FR",
+      "lat": 46.8021,
+      "lon": 7.1504,
+      "url": "https://www.nouveaumonde.ch/agenda/",
+      "scrape": false,
+      "hint": "/agenda/ is server-rendered with 'DD.MM.YYYY' dates and type abbreviations (crt = concert, fte = fête), no genre so match artists. Reggae relevance: low — Latin, metal, indie."
+    },
+    "OldCapitol": {
+      "city": "Langenthal",
+      "canton": "BE",
+      "lat": 47.211,
+      "lon": 7.7896,
+      "url": "https://oldcapitol.ch/",
+      "scrape": false,
+      "hint": "Homepage HTML contains only tracking scripts, events are injected client-side; use petzi.ch (organiser 'OldCapitol Langenthal') or Songkick as the source. Reggae relevance: low — rock/metal/punk club, occasional ska-punk."
+    },
+    "OpenAir St.Gallen": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4245,
+      "lon": 9.3767,
+      "url": "https://www.openairsg.ch/",
+      "scrape": false,
+      "hint": "Site is script-rendered, curl shows only navigation; line-up page needs a browser or press coverage. Festival site is the Sittertobel valley west of the city (coordinates are the city centre). Reggae relevance: medium — regularly books reggae/dancehall acts in late June."
+    },
+    "OXIL": {
+      "city": "Zofingen",
+      "canton": "AG",
+      "lat": 47.2905,
+      "lon": 7.944,
+      "url": "https://oxil.ch/",
+      "scrape": true,
+      "hint": "Homepage lists upcoming events server-rendered with 'Sa. 17 Okt.' dates (no year), a title line 'OX Kultur präsentiert: <acts>' and a one-line genre description underneath (e.g. 'Ska & Early Reggae'); detail pages at https://oxil.ch/<slug>/. Reggae relevance: high — strong ska/early-reggae line (The Upsessions, Mango Wood, Alex Dynamite & The Pyrolites)."
+    },
+    "Palace": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4262,
+      "lon": 9.3735,
+      "url": "https://www.palace.sg/",
+      "scrape": true,
+      "hint": "No /programm path (404); the homepage lists all upcoming events as 'Freitag, 16. Oktober | Title | Country' without year or genre, filter out the weekly 'Erfreuliche Universität' lectures. Reggae relevance: medium — eclectic programme with occasional dub/bass and world acts."
+    },
+    "Palais Mascotte": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3664,
+      "lon": 8.5467,
+      "url": "https://palais-mascotte.ch/programm",
+      "scrape": false,
+      "hint": "Server-rendered list: 'FR 16.10.26 AB 22:00' followed by DJ names and 'Tickets'; a second block per month repeats entries with series name. Reggae relevance: low — electronic club nights since the relaunch; the old Mascotte concert programme is gone."
+    },
+    "Paléo Festival": {
+      "city": "Nyon",
+      "canton": "VD",
+      "lat": 46.4051,
+      "lon": 6.2121,
+      "url": "https://yeah.paleo.ch/fr/programme",
+      "scrape": true,
+      "hint": "Programme page is heavy (670 KB) but the line-up and genre filter values ('Reggae / Dub', 'Ragga / Dancehall') are in the HTML, acts grouped by day tab ('Dimanche 26 juillet'); next line-up around March/April for the late-July festival on the Plaine de l'Asse. Reggae relevance: medium — 1-3 reggae acts per year, usually on the Sunday."
+    },
+    "Papiersaal": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3582,
+      "lon": 8.5227,
+      "url": "https://www.papiersaal.ch/",
+      "scrape": false,
+      "hint": "Server-rendered list: 'Wochentag, DD. Mon YYYY', act with country code, a genre line (e.g. 'Indie Pop, Alternative Pop'), support and 'Doors : 19h00 / Show : 20h00'; 'Vor »' pagination. Reggae relevance: low — indie pop, folk, 80s parties."
     },
     "Parterre One": {
       "city": "Basel",
@@ -199,6 +1189,78 @@
       "scrape": true,
       "hint": "/kalender/ leitet auf die Startseite um – die Liste liegt auf /events/ (The Events Calendar, <time datetime=\"YYYY-MM-DD\"> pro Event), iCal: https://www.parterre-one.ch/events/?ical=1. Monatliche Reggae/Dancehall-Soundsystem-Nacht; Kalender mit «mehr laden»."
     },
+    "Plaza": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3741,
+      "lon": 8.5246,
+      "url": "https://www.plaza-zurich.ch/",
+      "scrape": false,
+      "hint": "Chronological server-rendered cards with a 'live!' tag for concerts, date as weekday + day + month without year (year is in the ticket URL), genre line after the title, 'Next Page' pagination. Reggae relevance: low — has hosted reggae tours; currently only mixed urban parties with dancehall DJs."
+    },
+    "Plein-les-Watts Festival": {
+      "city": "Lancy",
+      "canton": "GE",
+      "lat": 46.1835,
+      "lon": 6.1149,
+      "url": "https://pleinleswatts.ch/festival-2026/",
+      "scrape": true,
+      "hint": "Line-up page /festival-YYYY/ is server-rendered: day headings 'Jeudi 09/07/2026' then time + artist (country); check for /festival-2027/ from spring, afters at Halle W Vernier. Reggae relevance: high — dedicated reggae festival in July (Burning Spear, Barrington Levy, Israel Vibration in 2026)."
+    },
+    "Pont Rouge": {
+      "city": "Monthey",
+      "canton": "VS",
+      "lat": 46.2505,
+      "lon": 6.9643,
+      "url": "https://www.pontrouge.ch/",
+      "scrape": false,
+      "hint": "Single large (600 KB) server-rendered page with 'SA 17 OCTOBRE 2026' dates in two sections, 'Programme' and 'Hors-programme' (external promoters), no genres. Reggae relevance: low — metal, punk, rock."
+    },
+    "Poolbar Festival": {
+      "city": "Feldkirch",
+      "canton": "A",
+      "lat": 47.2345,
+      "lon": 9.5944,
+      "url": "https://www.poolbar.at/programm",
+      "scrape": true,
+      "hint": "Altes Hallenbad Feldkirch, 10 km from Liechtenstein; programme and news text (artist names, German prose) are in the server-delivered HTML/embedded JSON, dates as 'Fr. 01.08.' or in prose, festival July-August with the line-up from March. Reggae relevance: high — Alborosie and GReeeN in 2026, Patrice in 2025."
+    },
+    "Presswerk Arbon": {
+      "city": "Arbon",
+      "canton": "TG",
+      "lat": 47.5101,
+      "lon": 9.4314,
+      "url": "https://presswerk-arbon.ch/",
+      "scrape": false,
+      "hint": "Homepage shows the next few events in caps: 'FREITAG, 16. OKTOBER' (no year), title, blurb. Reggae relevance: low — event hall mostly rented out (orchestra, dinner events)."
+    },
+    "PTR": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.204,
+      "lon": 6.1363,
+      "url": "https://ptrnet.ch/",
+      "scrape": false,
+      "hint": "Post Tenebras Rock: homepage 'Événements' lists shows with genre tags ('Ska', 'Rocksteady / Ska'), country codes and dates as 'lun 12 octobre' (no year), /programme is 404; shows are also in the L'Usine agenda, so scrape=false and use this site for genre detail only. Reggae relevance: medium — The Slackers + Cosmic Shuffling; mostly rock/punk/metal/hip-hop."
+    },
+    "Quarterdeck": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.579,
+      "lon": 7.5885,
+      "url": "https://www.quarterdeck.ch/events",
+      "scrape": false,
+      "hint": "Wix site, /events is client-rendered with no titles in the HTML; use facebook.com/quarterdeckbasel or aggregators (allevents.in/basel/reggae, stadtkonzerte.ch). Reggae relevance: medium — harbour bar in Holzpark Klybeck with Basel reggae nights (Sugar Daddy, Likkletown), summer-heavy."
+    },
+    "Queerfeministischer Raum": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9529,
+      "lon": 7.4406,
+      "url": "https://qfrbern.ch/",
+      "scrape": false,
+      "hint": "Site is behind a CrowdSec bot challenge for curl and WebFetch; use the Reitschule programme overview (reitschule.ch, room name 'Queerfeministischer Raum') or Petzi instead. Reggae relevance: low — parties and concerts, no known reggae series."
+    },
     "Reitschule": {
       "city": "Bern",
       "canton": "BE",
@@ -207,6 +1269,42 @@
       "url": "http://www.reitschule.ch/reitschule/?programm",
       "scrape": true,
       "hint": "On the umbrella page (?programm) every entry is three consecutive blocks: date line \"Di. 13.10. 18:00\" (German weekday abbreviation, DD.MM., 24h time, NO year – infer the year from the sequence, the list wraps into next year; dummy entries dated \"Sa. 01.01. 00:00\" at the end are placeholders, skip them), then the house (\"Dachstock\", \"Rössli\", \"SousLePont\", \"Cafete\", \"Grosse Halle\", \"Kino\", \"Tojo Theater\", \"Queerfeministischer Raum\"), then the title in CAPS followed by act lines with origin city (\"The Muffin Man Berlin\") and an optional genre line prefixed \"// \" (e.g. \"// Indie Pop Reggae Soul\", \"// Hard Swing Konzert Mundart Third Wave Ska Two Tone\"). No ticket links on the umbrella page. For Dachstock prefer the ICS feed: SUMMARY = \"Title – Act1, Act2\", CATEGORIES = tags incl. genres, URL = event page; tickets on event pages are petzi.ch/events/<id>/tickets. On souslepont-roessli.ch dates read \"Do., 15. Okt. 2026\" (German, with year) and each entry has tag chips and its own event page link; tickets only via the general Petzi organiser page 221. Filter on tags Reggae / Dub / Ska / Dancehall / Soundsystem and on the series name \"Dubtopia\". Programm aller Räume (Rössli, Frauenraum, Sous le Pont). Dachstock-Events unter dem Eintrag Dachstock führen."
+    },
+    "Renée": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5612,
+      "lon": 7.5935,
+      "url": "https://www.renee.ch/",
+      "scrape": false,
+      "hint": "Homepage lists events as 'Th, 15 Oct 23:00' + description line 'DJ: name genre, genre' (English abbreviations, no year). Reggae relevance: low — DJ nights and small live shows, soul/post-punk/art rock."
+    },
+    "Roadhouse": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0498,
+      "lon": 8.3089,
+      "url": "https://www.roadhouse.ch/",
+      "scrape": true,
+      "hint": "Wix site with the events widget rendered into HTML: '14. Okt. 2026, 20:00 – 15. Okt. 2026, 03:00' then title ('Caribbean Night mit DEEJAY THEO', 'LIVE KONZERT · Gunvor'), no genre tags. Reggae relevance: medium — weekly Wednesday Caribbean Night (dancehall/afro DJ); live concerts are blues/rock/covers."
+    },
+    "Rock am Weier": {
+      "city": "Wil",
+      "canton": "SG",
+      "lat": 47.4834,
+      "lon": 9.0194,
+      "url": "https://rockamweier.ch/",
+      "scrape": true,
+      "hint": "Free open-air in mid/late June; homepage shows 'Line-Up YYYY' as a plain list of act names without dates, festival date in the news posts, check in spring. Reggae relevance: medium — Phenomden & the Scrucialists in 2026."
+    },
+    "Rockfact Music Club": {
+      "city": "Münchenstein",
+      "canton": "BL",
+      "lat": 47.5165,
+      "lon": 7.6195,
+      "url": "https://www.rockfact.ch/konzerte",
+      "scrape": false,
+      "hint": "Wix page but dates 'DD.MM.YYYY', 'Doors 19:00' and titles are rendered in HTML text, with eventfrog ticket links per show. Reggae relevance: low — rock, metal, punk, folk; a rare ska show."
     },
     "Rocking Chair": {
       "city": "Vevey",
@@ -226,6 +1324,15 @@
       "scrape": false,
       "hint": "Programm wird per JavaScript geladen (curl -sL liefert nur das Seitengerüst), darum scrape=false. Koordinaten: Seestrasse 395 (OSM Rote Fabrik)."
     },
+    "Rotonda": {
+      "city": "Locarno",
+      "canton": "TI",
+      "lat": 46.1668,
+      "lon": 8.7934,
+      "url": "https://www.locarnofestival.ch/rotonda",
+      "scrape": false,
+      "hint": "Free open-air music village of the Locarno Film Festival (early to mid-August, Piazza Castello), programmed by RSI; the site sits behind a Cloudflare challenge, so use press coverage (rsi.ch, tio.ch, rockit.it) for the line-up published in June. Reggae relevance: medium — ska/reggae-leaning Italian acts most years (Roy Paci & Aretuska 2026)."
+    },
     "Royal": {
       "city": "Baden",
       "canton": "AG",
@@ -244,6 +1351,24 @@
       "scrape": false,
       "hint": "Bar & Bühne der Reitschule Bern, Neubrückstrasse 8 (OSM: Rössli, 46.9527/7.4407). Das Programm steht auf der Reitschule-Programmseite (Venue «Reitschule», scrape=true), darum hier scrape=false – sonst Doppeleinträge."
     },
+    "Rümpeltum": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4356,
+      "lon": 9.3945,
+      "url": "https://rumpeltum.ch/",
+      "scrape": true,
+      "hint": "Volunteer-run autonomous venue (Bachstrasse 36); homepage lists events as 'DD.MM – Title' with category tags (Reggea, Dub, Dancehall, Punk...) and no year, summer break late June to early September. Reggae relevance: high — recurring sound-system nights (Forrest Children Sound System), Dancehall/Dub/Reggae category filters."
+    },
+    "SAL": {
+      "city": "Schaan",
+      "canton": "FL",
+      "lat": 47.1661,
+      "lon": 9.5097,
+      "url": "https://www.sal.li/",
+      "scrape": false,
+      "hint": "Saal am Lindaplatz: the event list is loaded client-side (filter widget renders 'Keine' for curl), /veranstaltungen is 404; rely on ticket platforms or promoters. Reggae relevance: low — Liechtenstein's largest hall, concerts and comedy."
+    },
     "Salzhaus": {
       "city": "Winterthur",
       "canton": "ZH",
@@ -252,6 +1377,51 @@
       "url": "https://www.salzhaus.ch/de/programm",
       "scrape": true,
       "hint": "On /de/programm each event is a div.sh-event-list-item.events containing an a.sh-event-link (href = event detail URL /de/programm/{id}/{slug}) with span.date (German, format \"16. Okt 26\", i.e. DD. Mon YY with German month abbreviations Jan/Feb/Mär/Apr/Mai/Jun/Jul/Aug/Sep/Okt/Nov/Dez), span.title (act name with country code in <sup>, e.g. \"Maggie Reilly <sup>SCT</sup>\"; co-headliners separated by \" | \", festival prefix like \"Afro-Pfingsten: ...\") and span.category (only coarse types: Live, Party, Ü30, Ü16, Spass, Theater, Divers; no music genre tags). Next to it a.sh-event-ticket-link points to seetickets.com/ch/event/.../salzhaus/{id} (occasionally other sellers, e.g. tickets.untzig.ch). Genre must be inferred from the act name and the detail page, whose JSON-LD MusicEvent gives startDate (ISO with +01:00/+02:00), a description mentioning \"Support: ...\" and \"Für Fans von ...\", plus Doors/Show times and prices in the visible text. Event detail text is German."
+    },
+    "Salzhaus Brugg": {
+      "city": "Brugg",
+      "canton": "AG",
+      "lat": 47.4836,
+      "lon": 8.208,
+      "url": "https://salzhaus-brugg.ch/programm/",
+      "scrape": false,
+      "hint": "Server-rendered programme page: 'Samstag 17.10.26' then act name, support, description and ticket link; not to be confused with salzhaus.ch in Winterthur. Reggae relevance: low — jazz, singer-songwriter, rock."
+    },
+    "SAS": {
+      "city": "Delémont",
+      "canton": "JU",
+      "lat": 47.3657,
+      "lon": 7.3446,
+      "url": "https://www.sasdelemont.ch/fr/",
+      "scrape": false,
+      "hint": "Homepage /fr/ lists 4-6 upcoming events server-rendered as 'SAM. 17 10 2026' (weekday, DD MM YYYY with spaces) + title + price, genre sometimes in the subtitle. Reggae relevance: low — youth centre with techno, rock, festivals."
+    },
+    "Schall und Rauch": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5603,
+      "lon": 7.592,
+      "url": "https://www.schallundrauchbar.ch/index.php/musik-programm/oktober-2026-musik-kulturprogramm",
+      "scrape": true,
+      "hint": "Joomla, one server-rendered page per month (slug /index.php/musik-programm/<monat>-YYYY-musik-kulturprogramm) with lines 'DD.MM.YYYY | TITLE | GENRE/SERIES'. Reggae relevance: medium — 'Rum Turntable' nights with Boundless Vibes Hifi; otherwise jazz, live bands, DJs."
+    },
+    "Schützi": {
+      "city": "Olten",
+      "canton": "SO",
+      "lat": 47.354,
+      "lon": 7.9,
+      "url": "https://schuetzi-olten.ch/schuetzi-programm/schuetzi-live",
+      "scrape": false,
+      "hint": "'Schützi Live' page is server-rendered: 'Sonntag, 18. Oktober 2026 Türöffnung: 18:00 Uhr 19:00 Uhr <Title> Tickets > Eventfrog'; external rentals are only on Eventfrog (search 'Kulturzentrum Schützi Olten'). Reggae relevance: low — Swiss pop, comedy, talk shows."
+    },
+    "Schüxenhaus": {
+      "city": "Ins",
+      "canton": "BE",
+      "lat": 47.0086,
+      "lon": 7.116,
+      "url": "https://www.schuexenhaus.ch/",
+      "scrape": false,
+      "hint": "Wix site but event text is in the HTML: '21.11. SA Name doors 20.00 concert 21.00 entry 20.-' (day.month, no year). Reggae relevance: low — small volunteer-run concert club in the Seeland."
     },
     "Schüür": {
       "city": "Luzern",
@@ -271,6 +1441,24 @@
       "scrape": true,
       "hint": "No genre tags; decide by act names."
     },
+    "Senkel": {
+      "city": "Stans",
+      "canton": "NW",
+      "lat": 46.9678,
+      "lon": 8.3679,
+      "url": "https://www.senkel.ch/events-2",
+      "scrape": false,
+      "hint": "Wix events widget rendered into HTML: 'Fr., 16. Okt.' then title, then '16. Okt. 2026, 19:00 – 17. Okt. 2026, 02:00' and a description, no genre tags. Reggae relevance: low — bar/club with darts, quizzes and occasional live bands."
+    },
+    "Sentitreff": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0518,
+      "lon": 8.2973,
+      "url": "https://sentitreff.ch/",
+      "scrape": false,
+      "hint": "Server-rendered WordPress homepage lists dated entries '13.10.2026' then title; the seasonal culture programme is a PDF linked from /kulturprogramm/, low yield. Reggae relevance: low — neighbourhood centre, but Basement Roots play an open-air in the Sentigarten some summers."
+    },
     "Sommercasino": {
       "city": "Basel",
       "canton": "BS",
@@ -279,6 +1467,195 @@
       "url": "https://sommercasino.ch/Programm/",
       "scrape": true,
       "hint": "Sound-system series \"Wake the Town\"."
+    },
+    "Sound of Glarus": {
+      "city": "Glarus",
+      "canton": "GL",
+      "lat": 47.0385,
+      "lon": 9.0679,
+      "url": "https://soundofglarus.ch/",
+      "scrape": false,
+      "hint": "Open-air on the Zaunplatz in late August; line-up on the homepage as 'DONNERSTAG, 27.08.2026' then 'Act (CC) | stage | time', check in spring. Reggae relevance: low — Swiss pop/rock mainstream."
+    },
+    "Spielboden": {
+      "city": "Dornbirn",
+      "canton": "A",
+      "lat": 47.4222,
+      "lon": 9.7383,
+      "url": "https://www.spielboden.at/",
+      "scrape": false,
+      "hint": "Homepage lists events server-side as '17. Oktober Title' (German date without year, chronological); Vorarlberg, 25 km from Liechtenstein. Reggae relevance: low — jazz, singer-songwriters, cabaret."
+    },
+    "Spinnerei": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9688,
+      "lon": 7.4415,
+      "url": "https://kulturspinnerei.ch/events/",
+      "scrape": false,
+      "hint": "WordPress 'The Events Calendar' list ('24. Oktober Title', year in page header); the JSON API /wp-json/tribe/events/v1/events gives structured dates. Reggae relevance: low — rock/indie, day dances, a tropical party now and then."
+    },
+    "Studio Foce": {
+      "city": "Lugano",
+      "canton": "TI",
+      "lat": 46.0054,
+      "lon": 8.9613,
+      "url": "https://www.foce.ch/",
+      "scrape": false,
+      "hint": "foce.ch is a Nuxt single-page app fed by a middleware API behind a Vercel security checkpoint; fall back to the season PDF on luganoeventi.ch and ticino.ch / tio.ch agenda entries mentioning 'Studio Foce'. Reggae relevance: medium — city-run venue with past sound-system nights (Riverside Sound System) and urban residencies."
+    },
+    "Sudhaus": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5633,
+      "lon": 7.601,
+      "url": "https://www.sudhaus.ch/programm",
+      "scrape": false,
+      "hint": "Server-rendered list: 'DD.MM.YYYY 19:00 - 23:00 TITLE', multi-day entries like '16.10.2026 21:00 - Sa 17.10.2026 02:00'; promoter sub-pages under /lokal/events. Reggae relevance: low — rented to many promoters, so reggae shows possible but none currently."
+    },
+    "Supermarket": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.386,
+      "lon": 8.5196,
+      "url": "https://www.supermarket.li/programm",
+      "scrape": false,
+      "hint": "Server-rendered monthly list ('OKTOBER 2026'): rows 'FR 02 23H TITLE: DJ, DJ, ...', no genres. Reggae relevance: low — house/techno club."
+    },
+    "Südpol": {
+      "city": "Kriens",
+      "canton": "LU",
+      "lat": 47.0333,
+      "lon": 8.2969,
+      "url": "https://www.sudpol.ch/programm",
+      "scrape": false,
+      "hint": "Server-rendered (~530 KB), whole year on one page with month headings; each entry: day number, category (Konzert/Club/Theater/Tanz), title, subtitle; ?year=2027 and ?event=<slug>, 'AUSVERKAUFT' prefix, no genre tags. Reggae relevance: low — theatre, dance, jazz, club nights, indie."
+    },
+    "Talhof": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4274,
+      "lon": 9.3781,
+      "url": "https://www.talhof.sg/",
+      "scrape": false,
+      "hint": "Events on the homepage: 'Sa 17.10.2026' then title, 'Türöffnung' and a lowercase genre line (e.g. 'electronic · techno'). Reggae relevance: low — electronic nights, game nights."
+    },
+    "TapTab Musikraum": {
+      "city": "Schaffhausen",
+      "canton": "SH",
+      "lat": 47.6945,
+      "lon": 8.6364,
+      "url": "https://taptab.ch/programm",
+      "scrape": true,
+      "hint": "Server-rendered list on /programm: date 'Sa 17.10.2026' followed by title and short tags; same building as Kammgarn, aggregators sometimes list 'Kammgarn/haberhaus/taptab' together. Reggae relevance: medium — eclectic music room that has hosted sound-system and ska nights."
+    },
+    "Teatro Paravento": {
+      "city": "Locarno",
+      "canton": "TI",
+      "lat": 46.171,
+      "lon": 8.7955,
+      "url": "https://teatro-paravento.ch/programmazione/",
+      "scrape": false,
+      "hint": "Server-rendered monthly calendar: day cells with 'DD/MM/YYYY' and events as '19:00: Title - type', month/year via query parameters; summer concerts are on the /il-bistrot-teatro-paravento/ page in August. Reggae relevance: low — independent theatre whose summer bistrot concerts range 'from reggae and salsa to tango, folk and jazz'."
+    },
+    "THE HALL": {
+      "city": "Dübendorf",
+      "canton": "ZH",
+      "lat": 47.3975,
+      "lon": 8.6035,
+      "url": "https://www.thehall.ch/de/eventkalender",
+      "scrape": false,
+      "hint": "Server-rendered: year heading then rows 'DD. Monat YYYY Act' with status notes (verlegt/ausverkauft/abgesagt); genre filter buttons without a reggae category. Reggae relevance: low — former Samsung Hall, pop/rap/metal."
+    },
+    "Thunfest": {
+      "city": "Thun",
+      "canton": "BE",
+      "lat": 46.758,
+      "lon": 7.628,
+      "url": "https://www.thunfest.ch/",
+      "scrape": false,
+      "hint": "City festival in mid-August (next 13.–15.08.2027); server-rendered one-pager with dates as '13. – 15. August 2027', line-up under 'Programm' in early summer only. Reggae relevance: low — Swiss reggae artist Dodo headlined 2026."
+    },
+    "Treibhaus": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0425,
+      "lon": 8.3192,
+      "url": "https://www.treibhausluzern.ch/programm",
+      "scrape": false,
+      "hint": "Server-rendered: entries 'FR 16 . Oktober 2026', time, room (Klub/Bar/Garten), title, subtitle; Konzert/Party filter links, '[ABGESAGT]' prefix for cancelled shows, no genre tags. Reggae relevance: low — youth culture house that occasionally books ska/reggae."
+    },
+    "Treppenhaus": {
+      "city": "Rorschach",
+      "canton": "SG",
+      "lat": 47.4775,
+      "lon": 9.4954,
+      "url": "https://treppenhaus.ch/",
+      "scrape": true,
+      "hint": "Homepage is the programme grouped by month ('Oktober:'): weekday abbreviation, day number, genre label, act name and country code per entry, year implied; some markup fragments leak into the text. Reggae relevance: medium — genre-tagged weekly live shows incl. dub-leaning acts (TASHEENO); mostly rock, rap, funk."
+    },
+    "Turnhalle im PROGR": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9503,
+      "lon": 7.443,
+      "url": "https://www.bee-flat.ch/",
+      "scrape": false,
+      "hint": "bee-flat's server-rendered homepage lists concerts as 'Mi, 14. Oktober, 20:30 Uhr PROGR Turnhalle' + tagline + artist + country without year; turnhalle.ch is offline and other Turnhalle events are on progr.ch. Reggae relevance: low — jazz, world, indie."
+    },
+    "Undertown": {
+      "city": "Meyrin",
+      "canton": "GE",
+      "lat": 46.2323,
+      "lon": 6.0813,
+      "url": "https://undertown.ch/",
+      "scrape": false,
+      "hint": "Short server-rendered homepage lists next events as 'Concert de X + Y' with '23 Oct' dates (no year) and 21h00; full list on petzi.ch/fr/organiser/21/, no genre tags. Reggae relevance: low — metal/rock bills."
+    },
+    "Usine à Gaz": {
+      "city": "Nyon",
+      "canton": "VD",
+      "lat": 46.3838,
+      "lon": 6.244,
+      "url": "https://usineagaz.ch/toute-la-saison/",
+      "scrape": false,
+      "hint": "/toute-la-saison/ is server-rendered: cards with category (Musique / Clubbing / Cirque), title and date 'DD.MM.YYYY' or 'DD.MM.YY', no fine genre. Reggae relevance: low — occasional dancehall clubbing night."
+    },
+    "Vario Bar": {
+      "city": "Olten",
+      "canton": "SO",
+      "lat": 47.3505,
+      "lon": 7.903,
+      "url": "https://variobar.ch/",
+      "scrape": false,
+      "hint": "Template site whose 'Events' slider returned no data to curl; events are announced on social media. Reggae relevance: low — bar with a basement concert room, parties and concerts."
+    },
+    "Volkshaus": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3747,
+      "lon": 8.5293,
+      "url": "https://www.volkshaus.ch/veranstaltungen",
+      "scrape": true,
+      "hint": "Server-rendered list grouped by month ('OKTOBER 2026'): weekday + DD.MM., event name, type label (KONZERT, COMEDY...), time, room (THEATERSAAL/WEISSER SAAL), 'AUSVERKAUFT' when sold out; no genres, tickets via the promoter. Reggae relevance: medium — big reggae tours (The Wailers 10.07.2027) use the Theatersaal."
+    },
+    "Volkshaus Basel": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5619,
+      "lon": 7.593,
+      "url": "https://volkshaus-basel.ch/programm/",
+      "scrape": false,
+      "hint": "WordPress list: 'DD.MM.YYYY 20:00 UHR Festsaal, Volkshaus Basel' followed by title/description; ranges as 'DD.MM.YYYY-DD.MM.YYYY'. Reggae relevance: low — pop, comedy, parties in the Festsaal."
+    },
+    "Werkk": {
+      "city": "Baden",
+      "canton": "AG",
+      "lat": 47.4805,
+      "lon": 8.306,
+      "url": "https://werkk-baden.ch/agenda/programm/",
+      "scrape": false,
+      "hint": "Server-rendered agenda (/agenda/konzerte/ lists only concerts): 'Sa. 17.' under a month heading, then 'Konzert | <genre tags> <Title> <price> | <time>'; werkk.ch is an unrelated site. Reggae relevance: low — youth culture venue with metal, cumbia, hip hop, occasional urban/dancehall parties."
     },
     "Werkstatt": {
       "city": "Chur",
@@ -289,6 +1666,15 @@
       "scrape": true,
       "hint": "Events are on the homepage inside div.events__event blocks, grouped under German month headers (span.events__month, e.g. \"Oktober\"); each block has a link to https://werkstattchur.ch/event/<slug>/, p.events__subtitle (organiser or tour/series name, e.g. \"Präsentiert vom Folk Club Chur\", \"Soundsystem Tour 2023\"), h3.events__title (act name split into spans) and p.events__date in German without year (\"Mittwoch, 28. Oktober\"), so the year must be inferred from today's date and month order. The event detail page gives the full info: a schema.org MusicEvent JSON-LD block with startDate \"2026-10-28 19:00:00\", doorTime, performer names and offers.url, and the visible text with \"Preis: 30.- / 20.-\" and a \"Tickets\" link that points to eventfrog.ch (ticket link pattern: eventfrog.ch/de/p/konzert/<genre>/<slug>.html, where the Eventfrog URL path contains a genre word like \"folk\"). Genres are not tagged on the site itself; genre must be guessed from the subtitle, description text or the Eventfrog URL. The archive page uses the same classes but dates include the year (\"Mittwoch, 31. Mai 2023\"). Selten Reggae; nur bei Treffern aufnehmen."
     },
+    "Wisa Bar": {
+      "city": "Lenzburg",
+      "canton": "AG",
+      "lat": 47.3885,
+      "lon": 8.177,
+      "url": "https://wisabar.ch/",
+      "scrape": false,
+      "hint": "Homepage lists shows server-rendered: '17.10.2026 <Act> (CH) Location: Club »Mehr Infos...'. Reggae relevance: low — rock/tribute music bar."
+    },
     "X-TRA": {
       "city": "Zürich",
       "canton": "ZH",
@@ -297,6 +1683,42 @@
       "url": "https://www.x-tra.ch/de/programm/",
       "scrape": true,
       "hint": "Limmatstrasse 118. Programm auf /de/programm/ (server-gerendert, Datum + Uhrzeit pro Event). Selten Reggae – nur bei Treffern aufnehmen."
+    },
+    "Z7": {
+      "city": "Pratteln",
+      "canton": "BL",
+      "lat": 47.5273,
+      "lon": 7.6942,
+      "url": "https://z-7.ch/",
+      "scrape": true,
+      "hint": "Konzertfabrik Z7: WordPress homepage lists all upcoming events as /event/<slug>-YYYY/ links with 'Mi. 5. Oktober 2026' dates; site search ?s=reggae is server-rendered, /konzerte and /events are 404. Reggae relevance: medium — mostly rock/metal, but reggae legends (The Wailers) at the Summer Nights open air."
+    },
+    "ZAK": {
+      "city": "Jona",
+      "canton": "SG",
+      "lat": 47.2321,
+      "lon": 8.8343,
+      "url": "https://zak-jona.ch/",
+      "scrape": false,
+      "hint": "Zentrum aktueller Kultur: homepage programme 'DD.MM.YYYY | Title | subtitle (Support: ...)'. Reggae relevance: low — blues nights, metal, Latin night, parties."
+    },
+    "Zentralwäscherei": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.387,
+      "lon": 8.5245,
+      "url": "https://zentralwaescherei.space/",
+      "scrape": false,
+      "hint": "Homepage is a minimal teaser and /programm is 404; programme is published on Instagram, try /events or /kalender before skipping. Reggae relevance: unknown — alternative cultural centre with concerts and parties."
+    },
+    "ZeughausKultur": {
+      "city": "Brig-Glis",
+      "canton": "VS",
+      "lat": 46.3158,
+      "lon": 7.9875,
+      "url": "https://www.zeughauskultur.ch/de/gesamtes-programm",
+      "scrape": false,
+      "hint": "Homepage shows the next 5 events as 'DD.MM.YYYY' + title + type ('Konzert'); full list at /de/gesamtes-programm, German-language. Reggae relevance: low — Upper Valais cultural centre, jazz/pop/readings."
     }
   }
 }

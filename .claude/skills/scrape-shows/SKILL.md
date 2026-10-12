@@ -46,8 +46,11 @@ take the next 6 months, not everything.
 1. **Agendas** (`agendas`): open each one, read its `hint` (it says which page and how the events are
    written), collect everything that could match `criteria.md`, in Switzerland or in the nearby regions,
    from today up to 6 months ahead.
-2. **Venues** (`data/venues.json`, those with `"scrape": true`): open each venue's programme page (`url`;
-   `hint` says where the events are and how they are tagged) and pick matching events. Use the venue's
+2. **Venues** (`data/venues.json`, those with `"scrape": true` — the venues with high or medium reggae
+   relevance, see the `hint`): open each venue's programme page (`url`; `hint` says where the events are and
+   how they are tagged) and pick matching events. If there are more than ~60 such venues, take the ones whose
+   hint says "high" every run and rotate through the "medium" ones (about 20 per run, by name order starting
+   where the previous run's log says it stopped). Use the venue's
    name as the key is written, plus its `city`, `canton`, `lat`, `lon` for the entry.
 3. **Web search** (`search_queries`): run each distinct query once per month for the current and the next
    two months. `{monat}` is the month name in the language of the query, `{jahr}` the year; a query without
