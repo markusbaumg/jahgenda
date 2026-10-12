@@ -79,6 +79,11 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   `design/promo-plan.md` (domain jahgenda.ch is free; stickers; QR), `design/monitoring-plan.md`,
   `design/ui-revamp.md` (when the panel delivers). Promo concept for Seraina as a Claude artifact:
   https://claude.ai/artifact/V4gf752tMY4EaeDRgaaoAD
+- **Tech decision (approved 2026-10-13):** the page migrates to **Svelte 5 + Vite** (components per
+  design/ui-revamp.md, reactive store, vite-plugin-pwa, Vitest + Playwright mobile tests), still a static build
+  on GitHub Pages; everything else (data contract, skills, validator, routines, watchdog) stays. Story #33 —
+  starts right after the revamp (#21–#28) and the mobile gate (#32) are merged. Until then no new big vanilla
+  features beyond what is already in flight.
 - **Working style:** big features are built by background workflows in isolated worktrees
   (`.claude/worktrees/…`, gitignored) with a reviewer, then merged by hand into `main`; `make check` must be
   green before every push; GitHub Pages deploys every push to `main`.
