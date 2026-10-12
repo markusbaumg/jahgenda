@@ -1,4 +1,391 @@
 {
   "note": "Genre cache per act (Wikipedia / band website) plus tour_checked bookkeeping for the watchlist search. Which bands are searched is NOT defined here but in scraper/bands.md. Hand corrections: set \"source\": \"manual\" and the scraper will never touch that entry again.",
-  "artists": {}
+  "artists": {
+    "8°6 Crew": {
+      "genres": [
+        "ska"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/8°6_Crew",
+      "checked": "2026-10-12"
+    },
+    "Akeem Garrison": {
+      "genres": [
+        "roots",
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.grabenhalle.ch/events/elijah-salomon-ch/",
+      "checked": "2026-10-12"
+    },
+    "Alborosie": {
+      "genres": [
+        "reggae",
+        "dancehall",
+        "dub"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Alborosie",
+      "checked": "2026-10-12",
+      "tour_checked": "2026-10-12"
+    },
+    "Ally Cut Sound": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.guidle.com/de/mC4rgS",
+      "checked": "2026-10-12"
+    },
+    "Ami Warning": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Ami_Warning",
+      "checked": "2026-10-12"
+    },
+    "BB House Band": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "Black Phantom Sound": {
+      "genres": [
+        "reggae",
+        "dancehall",
+        "soundsystem"
+      ],
+      "source": "https://www.guidle.com/de/QQ3vmW",
+      "checked": "2026-10-12"
+    },
+    "Breakfast Mood": {
+      "genres": [
+        "reggae",
+        "rocksteady"
+      ],
+      "source": "https://kufa.ch/event/2026-11-14-elijah-salomon/",
+      "checked": "2026-10-12"
+    },
+    "Canastron": {
+      "genres": [
+        "ska",
+        "rocksteady"
+      ],
+      "source": "https://www.royalbaden.ch/events/ska-night-nov26",
+      "checked": "2026-10-12"
+    },
+    "Catharsis Sound System": {
+      "genres": [
+        "roots",
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.leromandie.ch/event/romandub-2",
+      "checked": "2026-10-12"
+    },
+    "De Strangers": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "DJ Flavah Aid": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.guidle.com/de/mC4rgS",
+      "checked": "2026-10-12"
+    },
+    "Dub Inc": {
+      "genres": [
+        "reggae",
+        "dancehall",
+        "dub"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Dub_Inc",
+      "checked": "2026-10-12",
+      "tour_checked": "2026-10-12"
+    },
+    "Dub Pistols": {
+      "genres": [
+        "dub",
+        "ska"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Dub_Pistols",
+      "checked": "2026-10-12"
+    },
+    "Dub Spencer & Trance Hill": {
+      "genres": [
+        "dub"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Dub_Spencer_%26_Trance_Hill",
+      "checked": "2026-10-12"
+    },
+    "Elijah Salomon": {
+      "genres": [
+        "reggae",
+        "dancehall",
+        "dub"
+      ],
+      "source": "https://www.grabenhalle.ch/events/elijah-salomon-ch/",
+      "checked": "2026-10-12"
+    },
+    "Gentleman": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Gentleman_(Musiker)",
+      "checked": "2026-10-12",
+      "tour_checked": "2026-10-12"
+    },
+    "Goulamas'K": {
+      "genres": [
+        "ska"
+      ],
+      "source": "https://www.usine.ch/evenements/goulamask-fr-8deg6-crew-fr-skarface-fr-sixyka-fr-ch",
+      "checked": "2026-10-12"
+    },
+    "Groundation": {
+      "genres": [
+        "roots",
+        "reggae",
+        "dub"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Groundation",
+      "checked": "2026-10-12"
+    },
+    "Kabaka Pyramid": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Kabaka_Pyramid",
+      "checked": "2026-10-12"
+    },
+    "Kalabray Sound System": {
+      "genres": [
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.ebull.ch/fr/event?id=6b2aa987-b999-4c9d-bce4-83416f78a37c",
+      "checked": "2026-10-12"
+    },
+    "Kalles Kaviar": {
+      "genres": [
+        "ska"
+      ],
+      "source": "https://www.royalbaden.ch/events/ska-night-nov26",
+      "checked": "2026-10-12"
+    },
+    "Likkletown Soundsystem": {
+      "genres": [
+        "reggae",
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://mokka.ch/event/likkletown-soundsystem-2/",
+      "checked": "2026-10-12"
+    },
+    "Mad Professor": {
+      "genres": [
+        "dub",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Mad_Professor",
+      "checked": "2026-10-12"
+    },
+    "Mother Dubber": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "Nightmanager": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "O.B.F Sound System": {
+      "genres": [
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.usine.ch/evenements/dubquake-weekender-2026",
+      "checked": "2026-10-12"
+    },
+    "Open Season": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Open_Season_(Band)",
+      "checked": "2026-10-12"
+    },
+    "Redubtion Sound System": {
+      "genres": [
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.fri-son.ch/fr/programme/2026/10/dub-arena",
+      "checked": "2026-10-12"
+    },
+    "Rude Tins": {
+      "genres": [
+        "ska-punk"
+      ],
+      "source": "https://www.bandsintown.com/a/1247567-..::rude-tins::..",
+      "checked": "2026-10-12"
+    },
+    "Savage Dub": {
+      "genres": [
+        "dub"
+      ],
+      "source": "https://www.ebull.ch/fr/event?id=6b2aa987-b999-4c9d-bce4-83416f78a37c",
+      "checked": "2026-10-12"
+    },
+    "Selecta Iray": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.schuur.ch/programm/events/event-details/selecta-iray-16-10-2026-konzerthaus-schuur-luzern",
+      "checked": "2026-10-12"
+    },
+    "Sinsémilia": {
+      "genres": [
+        "ska",
+        "reggae"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Sinsemilia",
+      "checked": "2026-10-12"
+    },
+    "Sixyka": {
+      "genres": [
+        "ska-punk"
+      ],
+      "source": "https://www.usine.ch/evenements/goulamask-fr-8deg6-crew-fr-skarface-fr-sixyka-fr-ch",
+      "checked": "2026-10-12"
+    },
+    "Ska-P": {
+      "genres": [
+        "ska-punk",
+        "ska"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Ska-P",
+      "checked": "2026-10-12",
+      "tour_checked": "2026-10-12"
+    },
+    "SKAme ja nomau machen": {
+      "genres": [
+        "ska"
+      ],
+      "source": "https://www.souslepont-roessli.ch/events/skame-ja-nomau-machen/",
+      "checked": "2026-10-12"
+    },
+    "Skarface": {
+      "genres": [
+        "ska-punk"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Skarface",
+      "checked": "2026-10-12"
+    },
+    "Sondaschule": {
+      "genres": [
+        "ska-punk"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Sondaschule",
+      "checked": "2026-10-12"
+    },
+    "Subsanity Sound System": {
+      "genres": [
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.fri-son.ch/fr/programme/2026/10/dub-arena",
+      "checked": "2026-10-12"
+    },
+    "Talco": {
+      "genres": [
+        "ska-punk"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Talco_(band)",
+      "checked": "2026-10-12",
+      "tour_checked": "2026-10-12"
+    },
+    "The Skatalites": {
+      "genres": [
+        "ska",
+        "rocksteady",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/The_Skatalites",
+      "checked": "2026-10-12",
+      "tour_checked": "2026-10-12"
+    },
+    "The Slackers": {
+      "genres": [
+        "ska",
+        "rocksteady",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/The_Slackers",
+      "checked": "2026-10-12"
+    },
+    "Tobin Taxi": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "Todos Destinos": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "Tryo": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Tryo",
+      "checked": "2026-10-12"
+    },
+    "Two Tone Club": {
+      "genres": [
+        "ska",
+        "rocksteady"
+      ],
+      "source": "https://www.schuur.ch/programm/events/event-details/rude-rebel-ska-fest-16-10-2026-konzerthaus-schuur-luzern",
+      "checked": "2026-10-12"
+    },
+    "Tóke": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-12"
+    },
+    "Vanupié": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Vanupié",
+      "checked": "2026-10-12"
+    },
+    "Wading Birds Sound System": {
+      "genres": [
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.leromandie.ch/event/romandub-2",
+      "checked": "2026-10-12"
+    },
+    "Zaï": {
+      "genres": [
+        "roots",
+        "dub"
+      ],
+      "source": "https://www.leromandie.ch/event/romandub-2",
+      "checked": "2026-10-12"
+    },
+    "Zion Step": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://kufa.ch/event/2027-02-13-zion-step-friends/",
+      "checked": "2026-10-12"
+    }
+  }
 }

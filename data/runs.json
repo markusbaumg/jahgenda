@@ -1,4 +1,85 @@
 {
   "note": "Log of scraper runs, newest first, max 60 entries. Shown on log.html.",
-  "runs": []
+  "runs": [
+    {
+      "skill": "scrape-shows",
+      "at": "2026-10-12T22:55:45+02:00",
+      "added": 29,
+      "updated": 0,
+      "removed": 12,
+      "total": 29,
+      "failed_sources": [
+        "https://www.skalander.ch/ (DNS: Host nicht auffindbar, auch ohne www)",
+        "https://www.petzi.ch/ (lädt, aber Genre-Filter per URL nicht anwendbar – nur generische Liste der nächsten 5 Tage)",
+        "https://rotefabrik.ch/programm (Seite liefert keine Events; Kabaka Pyramid via Songkick-Venue-Seite bestätigt)",
+        "https://www.dubtopia.ch/ (DNS)",
+        "https://ra.co/events/2340105 (403)",
+        "https://www.eventim.de/en/cityd/zuerich-75/konzerte-1/hiphop-rnb-3/ (Timeout)",
+        "https://www.guidle.com/de/1Ap7bc (410 Gone)"
+      ],
+      "dropped": [
+        {
+          "title": "12 Beispiel-Shows (source: mock), z. B. Roots Night Vol. 12 @ Schüür, Alpine Dub Collective @ Dachstock",
+          "why": "Erfundene Platzhalterdaten ohne source_url; auf keiner Venue-Seite und per Websuche nicht auffindbar – entfernt"
+        },
+        {
+          "title": "Dub Inc @ Bierhübeli Bern, 18.03.2027",
+          "why": "Auf bierhuebeli.ch als «Abgesagt» markiert"
+        },
+        {
+          "title": "Friday Bash: Balack Jallow @ Cave Club Zürich, 16.10.2026",
+          "why": "Reggae, Dancehall, Soca, Afrobeats und Amapiano – Dancehall nur ein Genre unter vielen (criteria.md)"
+        },
+        {
+          "title": "Ami Warning «Wellen Tour» @ Rössli Bern 08.04.2027 und @ Exil Zürich 09.04.2027",
+          "why": "Pop-/Soul-Sängerin, Reggae nur ein Tag von vier; Exil beschreibt den Abend als Hip-Hop/Soul – im Zweifel weggelassen. Bitte in bands.md entscheiden"
+        },
+        {
+          "title": "Sean Koch @ Bierhübeli Bern, 18.10.2026",
+          "why": "Surf-Folk/Indie-Folk, Reggae nur als Nebentag"
+        },
+        {
+          "title": "FUSE Party @ Bierhübeli Bern, 28.11.2026",
+          "why": "Afrobeats/Dancehall/Trap – Mainstream-Clubnacht (criteria.md)"
+        },
+        {
+          "title": "JetLag Gang «soirée reggaeton y perreo» @ L'Usine Genève, 24.10.2026",
+          "why": "Reggaeton, kein Reggae-Bezug"
+        },
+        {
+          "title": "Modestep @ Dachstock Bern, 09.11.2026",
+          "why": "Dubstep/EDM, nicht Dub"
+        },
+        {
+          "title": "DIVERCITY BASS @ Salzhaus Winterthur, 21.11.2026",
+          "why": "Drum & Bass"
+        },
+        {
+          "title": "Skandal Vol. 20 @ Schüür Luzern, 07.11.2026",
+          "why": "2000er-Hits-Party, kein Ska trotz Name"
+        },
+        {
+          "title": "Brushy One String @ Mokka Thun, 15.10.2026",
+          "why": "Jamaikanischer One-String-Blues, kein Reggae"
+        },
+        {
+          "title": "Dubioza Kollektiv @ Club Vaudeville, 30.10.2026",
+          "why": "Lindau (DE), ausserhalb der Schweiz"
+        },
+        {
+          "title": "Tryo + Sinsemilia + Vanupié @ Château Rouge, 10.12.2026",
+          "why": "Annemasse (FR), ausserhalb der Schweiz"
+        }
+      ],
+      "notes": [
+        "Testlauf auf Branch scrape-test (kein Push). Erster echter Lauf: Mock-Daten durch gescrapte ersetzt.",
+        "Mad Professor @ Kaserne Basel: Event-Seite ohne Datum; 14.11.2026 über Kaserne-Datumsfilter und Songkick bestätigt.",
+        "Gentleman @ X-TRA Zürich 10.11.2026: X-TRA-Programm zeigt nur die nächsten zwei Wochen; Datum aus der offiziellen Tour-Ankündigung (Reggaeville).",
+        "Dubtopia @ Dachstock: Seite nennt nur Titel und Uhrzeit; Reihe ist als Dub-/Soundsystem-Session bekannt (Redubtion).",
+        "Cave Club Zürich (Friday Bash): nur über Guidle-Listings belegt, die Veranstaltertexte wirken teils recycelt – Datumsfeld verwendet.",
+        "Watchlist (6 Bands unter «Dabei»): Dub Inc (Bern abgesagt), Alborosie, Skatalites, Ska-P, Talco ohne Schweizer Termin; Gentleman gefunden.",
+        "Bogen F, Salzhaus, Werkstatt Chur, KiFF: keine passenden Events im Programm."
+      ]
+    }
+  ]
 }
