@@ -124,6 +124,7 @@ claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,WebFetch,WebSearc
 | eine Band fix aufnehmen oder ausschliessen   | `scraper/bands.md`                      |
 | ein Festival für die Band-Suche hinzufügen   | `scraper/sources.json` → `festivals`    |
 | eine Venue oder Agenda-Seite hinzufügen      | `scraper/sources.json`                  |
+| Venue-Koordinaten prüfen (OpenStreetMap)     | `make venues-check` → `scripts/check_venues.py` |
 | ein falsches Genre für einen Act korrigieren | `data/artists.json`                     |
 | den Ablauf des Scrapers ändern               | `.claude/skills/scrape-shows/SKILL.md`  |
 | eine neue Prüfung für die Daten              | `scripts/validate_shows.py`             |

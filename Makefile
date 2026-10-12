@@ -6,7 +6,7 @@ PORT ?= 8000
 WEB_FILES := index.html log.html style.css app.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate test lint fmt fmt-data check scrape harvest deploy status clean
+.PHONY: help serve dev validate test lint fmt fmt-data check venues-check scrape harvest deploy status clean
 
 help: ## Diese Hilfe
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -39,6 +39,9 @@ fmt-data: ## data/*.json in kanonische Form bringen (Sortierung, Einrückung)
 	python3 scripts/format_data.py
 
 check: lint validate test ## Alles prüfen (vor jedem Commit)
+
+venues-check: ## Venue-Koordinaten gegen OpenStreetMap (Nominatim) prüfen – braucht Internet, ~1 s pro Venue
+	python3 scripts/check_venues.py
 
 scrape: ## Konzerte jetzt scrapen (Claude Code, läuft auf dem Abo)
 	claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
