@@ -2255,3 +2255,16 @@ a {
   word-break: break-all;
   user-select: all;
 }
+
+/* Secondary pages: footer bar only (no About band) */
+.foot:not(:has(.about)) {
+  margin-top: 48px;
+  background: var(--bg);
+  border-top: 0;
+}
+.foot a {
+  color: var(--muted);
+}
+.foot a:hover {
+  color: var(--gold);
+}
