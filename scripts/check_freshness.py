@@ -237,7 +237,7 @@ def main(argv):
     healthy, lines = assess(now, timedelta(hours=max_h))
     print(("HEALTHY" if healthy else "UNHEALTHY") + f" (checked {fmt(now)})")
     for line in lines:
-        print("  " + l)
+        print("  " + line)
     if DRY_RUN or not TOKEN:
         print("dry run: GitHub not contacted" if DRY_RUN else "no GITHUB_TOKEN: GitHub not contacted")
     else:
