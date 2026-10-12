@@ -340,6 +340,15 @@ def check_runs(data):
                 isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)
             ):
                 errs.append(f"{where}.dropped[{j}]: needs 'title' and 'why'")
+        if "sources" in r and not isinstance(r["sources"], list):
+            errs.append(f"{where}: 'sources' must be a list")
+        for j, src in enumerate(r.get("sources") or []):
+            if not isinstance(src, dict) or not isinstance(src.get("name"), str):
+                errs.append(f"{where}.sources[{j}]: needs a 'name'")
+            elif src.get("status") not in ("ok", "empty", "failed", "skipped"):
+                errs.append(
+                    f"{where}.sources[{j}] ({src['name']}): status must be ok, empty, failed or skipped"
+                )
     return errs
 
 
