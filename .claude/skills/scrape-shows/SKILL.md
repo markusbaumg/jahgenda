@@ -102,9 +102,11 @@ Do not add acts you dropped. Change nothing else in `bands.md`.
 Each show gets `genres`: 1–3 slugs **from `data/genres.json`** — no other slugs, the
 validator rejects them. Build the list from the acts:
 
-1. Split the title into acts (`Dub Inc + Support` → `Dub Inc`; ignore "Support", "DJs", "& Friends").
-   Store them in the show's `acts` field (headliner first) when there is more than one, or when the title
-   is an event name rather than the act.
+1. Split the title into acts and store **all of them** in `acts`, headliner first: main act, every named
+   support band, guest DJs and sound systems — look on the event page for lines like "Support: …",
+   "Special Guest", "+", "feat.", "w/" and add those names. Only unnamed placeholders are left out
+   (`Dub Inc + Support` with no name given → `["Dub Inc"]`; "& Friends", "DJs" without names → dropped).
+   Fill `acts` whenever there is more than one act or the title is an event name rather than the act.
 2. For each act, look it up in `data/artists.json`: compare names case-insensitively and ignoring
    punctuation (`DUB INC.` = `Dub Inc`). If present and (`source` is `manual` or `checked` is less than
    180 days ago), use its `genres`.
