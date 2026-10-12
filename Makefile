@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html review.html admin.html style.css store.js app.js pwa.js sw.js design/logos.html
+WEB_FILES := index.html log.html review.html admin.html style.css store.js app.js pwa.js callout.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
 .PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke quality-review ics
@@ -28,7 +28,7 @@ test: ## Unit tests for validator and formatter
 
 lint: ## Syntax and format check (JS, Python via ruff if installed, HTML/CSS via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
-	node --check store.js app.js pwa.js sw.js
+	node --check store.js app.js pwa.js callout.js sw.js
 	@if ruff --version >/dev/null 2>&1; then ruff check scripts tests && ruff format --check scripts tests; else python3 -m py_compile $(PY_FILES); fi
 	npx --yes prettier@3.3.3 --check $(WEB_FILES)
 

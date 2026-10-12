@@ -20,6 +20,7 @@ const SHELL = [
   "store.js",
   "app.js",
   "pwa.js",
+  "callout.js",
   "manifest.webmanifest",
   "img/about.jpg",
   "img/logo/jahgenda.svg",
