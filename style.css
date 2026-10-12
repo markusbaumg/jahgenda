@@ -2388,3 +2388,12 @@ a {
 .sub-sticker:hover {
   transform: none;
 }
+
+/* Actions always on their own line under the tags (consistent across rows; the revamp restyles this). */
+@media (min-width: 721px) {
+  .foot-row .actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    margin-top: 2px;
+  }
+}
