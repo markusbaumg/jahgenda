@@ -95,4 +95,4 @@ status: ## Show the last deploys and the last scraper run
 	@python3 -c "import json; r=json.load(open('data/runs.json'))['runs']; print('Last scraper run:', r[0]['at'] if r else 'none yet', '-', (r[0].get('total','?') if r else ''), 'shows')"
 
 clean: ## Remove temporary files
-	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .pytest_cache
+	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .ruff_cache
