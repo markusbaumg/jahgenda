@@ -32,6 +32,7 @@ Made by Kusi & Seraina.
 ```
 index.html / style.css / app.js        The page. No build step, no framework.
 store.js                               Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
+lib.js                                 Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
 log.html                               Public scraper log (renders data/runs.json).
 data/shows.json                        The shows. Written by the scraper.
@@ -39,6 +40,8 @@ data/venues.json                       Venue database: coordinates, canton, prog
 data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
 data/artists.json                      Genre cache per act (Wikipedia / band website).
 data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
+data/slogans.json                      Taglines (header, sticky bar, stickers).
+data/status.json                       Heartbeat of the last run (ok, at, counts). Written by every skill run.
 scraper/criteria.md                    What counts as reggae? Nearby places abroad. Allowed genre slugs.
 scraper/bands.md                       Which bands are in, which are out, suggestions to review. Hand-curated.
 scraper/sources.json                   Agenda sites, festivals, nearby regions, search queries.
@@ -46,19 +49,24 @@ scraper/sources.json                   Agenda sites, festivals, nearby regions, 
 .claude/skills/harvest-bands/          Collects acts from festival line-ups as suggestions for bands.md.
 scripts/validate_shows.py              Validates data/*.json. Runs in CI and at the end of every scraper run.
 scripts/format_data.py                 Canonical formatting of data/*.json (small diffs).
+scripts/check_freshness.py             Watchdog: data stale or last run failed → GitHub issue `scraper-failed`.
+scripts/check_venues.py                Re-checks venue coordinates against OpenStreetMap (make venues-check).
+scripts/smoke.sh                       Loads the pages in headless Chrome, fails on JS errors (make check).
 scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahgenda.svg.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
-tests/                                 Unit tests (python3 -m unittest).
+tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
 design/                                Logo variants, festival spec, other design documents.
 .github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
-.github/workflows/validate.yml         Validates on branches and pull requests.
+.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) on every push and PR.
+.github/workflows/watchdog.yml         Daily freshness check → issue + badge.
 Makefile                               Everything you can run: `make` shows the help.
 ```
 
 ### Views
 
-The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch next to the result count; the
-browser remembers the choice). The calendar is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
+The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list, next to
+«Filter zurücksetzen»; the browser remembers the choice; the result count is in the footer bar next to the
+data stamp). The calendar is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
 on the phone it becomes a compact grid with dots and the list of the tapped day below. The map loads Leaflet
 1.9.4 and OpenStreetMap tiles on first open only, shows one marker per venue (popup with the shows there),
 your own location on request, and shows without coordinates below under "Ohne Standort". A tap on a show in
