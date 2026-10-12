@@ -1,0 +1,302 @@
+{
+  "note": "Venue-Datenbank: Koordinaten, Kanton und Programm-URL pro Venue. scrape=true: der Scraper liest das Programm dieser Venue bei jedem Lauf. Jede Show in shows.json muss hier eine Venue haben – die Koordinaten der Show kommen von hier. Neue Venues trägt der Scraper mit Koordinaten (Google Maps / OpenStreetMap) ein; wenn die Adresse unbekannt ist, reicht die Stadtmitte.",
+  "venues": {
+    "Bierhübeli": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9563,
+      "lon": 7.4378,
+      "url": "https://bierhuebeli.ch/",
+      "scrape": true,
+      "hint": "Genre-Tags im Programm; Tourneeacts (z. B. Dub Inc). Abgesagte Shows sind markiert – nicht aufnehmen."
+    },
+    "Bogen F": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3848,
+      "lon": 8.5208,
+      "url": "https://www.bogenf.ch/",
+      "scrape": true,
+      "hint": "Read the homepage: each concert is a block containing <time datetime=\"YYYY-MM-DD HH:MM\"> plus the German text \"Wochentag, DD.MM.YYYY | HH:MM\" and \"Türöffnung HH:MM\" (doors). The headliner is in <h1 itemprop=\"name\"> as \"Band Name <sup>COUNTRY</sup>\" (e.g. \"Bibi Vaplan CH\"); support acts are in <p class=\"supporting-act\">, sometimes just \"& Support\"; co-headliners appear as multiple h1s in the same block; an optional <div class=\"band-reason\"> holds a tour note like \"Releasetour EP & Buch\". The page starts with a \"Neu bestätigt\" (newly confirmed) section that is NOT in date order, followed by the chronological list, so dedupe by detail-page URL (/konzerte/<slug>). Price appears as \"CHF 38\"; ticket links are <a class=\"ticket-button\"> to petzi.ch (https://www.petzi.ch/de/events/<id>-bogen-f-<slug>/tickets/ or https://www.petzi.ch/events/<id>/tickets/), seetickets.com/ch or ticketcorner; a \"SOLD OUT\" label may appear above the date. There are NO genre tags; genre must be inferred from the act name or the German description on the detail page. Selten Reggae; nur bei Treffern aufnehmen."
+    },
+    "Café Mokka": {
+      "city": "Thun",
+      "canton": "BE",
+      "lat": 46.7598,
+      "lon": 7.6239,
+      "url": "https://mokka.ch/",
+      "scrape": true,
+      "hint": "Regelmässig Reggae/Dub/Soundsystem-Sessions."
+    },
+    "Cave Club": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3777,
+      "lon": 8.5264,
+      "url": "https://www.caveclub.ch/",
+      "scrape": false,
+      "hint": ""
+    },
+    "Dachstock": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.953,
+      "lon": 7.4407,
+      "url": "https://www.dachstock.ch/events",
+      "scrape": true,
+      "hint": "Prefer the iCal feed: each VEVENT has DTSTART in UTC (e.g. 20261205T213000Z, convert to Europe/Zurich), SUMMARY as \"Event/Series name – Act1, Act2, ...\" (acts after an en dash, comma separated, truncated at ~70 chars so check the event page for the full line-up), CATEGORIES with type plus genre tags (e.g. \"Party,Drum and Bass\", \"Konzert,Rock,Dubstep,EDM\"; some events like Dubtopia carry no CATEGORIES at all), LOCATION naming the room (Dachstock, Rössli, Sous le Pont, Grosse Halle at Reitschule, Neubrückstrasse 8, 3012 Bern) and URL to the detail page (/events/DD-MM-YYYY-slug). On the HTML /events page the list is in German: \"FR, 16.10.2026 - 23:00\" then the title, then one act per line each followed by its home town, then type/genre tags, then \"Tickets\" linking to https://www.petzi.ch/events/<id>/tickets (or \"Sold Out\"/\"Anmeldung Erforderlich\"). Genre tags are free text set by the venue and often missing for the dub night, so treat any event titled \"Dubtopia\" (series page /series/dubtopia) as dub/soundsystem regardless of tags. Raum der Reitschule; iCal: https://dachstock.ch/events.ics"
+    },
+    "Ebullition": {
+      "city": "Bulle",
+      "canton": "FR",
+      "lat": 46.6161,
+      "lon": 7.0544,
+      "url": "https://www.ebull.ch/fr",
+      "scrape": true,
+      "hint": "Ska-Fest, Soundsystem-Reihen (Kalabray)."
+    },
+    "Exil": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3882,
+      "lon": 8.5196,
+      "url": "https://exil.club/",
+      "scrape": true,
+      "hint": "Events are on the homepage grouped under lowercase German month headings (\"november 2026\", \"märz 2027\"); each row is \"DD.MM.YY Wochentag\" (e.g. \"21.10.26 Mittwoch\") plus the title and a type label \"live\" or \"dj\", with status markers \"Sold Out\" or \"(abgesagt)\" in or after the title; the title is just the headline act (support acts only on the detail page), and the row links to https://exil.club/events/{slug}. Detail pages give \"DD.MM.YYYY Wochentag\", \"Einlass: HH:MM Uhr\", \"Start: HH:MM Uhr\", support acts, price (\"tickets: 42.-\"), a description in German, genre tags as icon images whose alt text is the genre name (e.g. alt \"World\", \"Electronic\", \"Rock\"; Dancehall/Afrobeat/Reggaeton exist as tags), and a ticket link (seen: ticketmaster.ch; the venue's Montags series and some shows may differ). Note the venue sometimes hosts shows at other locations (title contains \"im Plaza\", \"im Dynamo\", \"(Kaufleuten)\"), so the location should be taken from the title/detail page. To triage cheaply, scan titles for known reggae/dub/ska acts and only open detail pages for candidates, checking the genre alt text for Dancehall/World. Blockiert oft automatische Abrufe (403) – dann überspringen und Exil-Shows via Skalender/Petzi/Eventfrog übernehmen."
+    },
+    "Fri-Son": {
+      "city": "Fribourg",
+      "canton": "FR",
+      "lat": 46.795,
+      "lon": 7.1516,
+      "url": "https://www.fri-son.ch/fr/programme",
+      "scrape": true,
+      "hint": "On /fr/programme each event is an <article class=\"node--type-event\"> inside a div.views-row, wrapped in an <a href=\"/fr/programme/YYYY/MM/slug\">; the date is a <time datetime=\"...Z\" class=\"datetime\"> element whose text is French (\"Vendredi 23 octobre 2026\"), followed by the doors time in field--name-field-time-doors (\"22:00\"); note the ISO datetime is UTC end-of-day so use the French text date (German on /de/programm) rather than converting the timestamp. Genres are explicit tags in div.genre-wrapper as <span data-href=\"/fr/programme?f[0]=genre:ID\">Reggae</span> (tags seen: Reggae, Roots Reggae, Roots, Dub, Steppa), and a \"For fans of ...\" advice line follows. Titles are uppercase with country codes, e.g. \"DUB ARENA\", \"KIM WILDE (UK)\"; supports/sound systems are only named on the detail page (e.g. \"Redubtion Sound System, Subsanity Sound System\"), where the ticket link is a Petzi URL of the form https://www.petzi.ch/events/NNNNN/ plus prices (Prélocations / Caisse du soir, CHF). Sold-out status appears in the status-wrapper. Genre-Filter auf der Programmseite (Reggae/Roots/Dub/Steppa)."
+    },
+    "Gaswerk": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.4946,
+      "lon": 8.7077,
+      "url": "https://www.gaswerk.ch/",
+      "scrape": true,
+      "hint": "Genre-Tags; regelmässig Ska-Punk."
+    },
+    "Grabenhalle": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4273,
+      "lon": 9.3741,
+      "url": "https://www.grabenhalle.ch/programm/",
+      "scrape": true,
+      "hint": "Events on /programm/ are listed chronologically under German month headings (Oktober 2026, November 2026, ...). Each entry has a date block in German in the form 'DO 15 OKT 21:00 – 23:30' (weekday abbreviation, day, abbreviated German month, start/end times; year only from the month heading), a title (artist name with country in parentheses, e.g. 'Elijah Salomon (CH)', multiple acts separated by ' / '), and a subtitle line that holds the tour name or support act (e.g. 'Essenz Tour', 'Support: Velvet Wasted (A)', or series names like 'Ein kleines Konzert # 240', 'Bullaugenkonzert', 'cineclub sg', 'Hallenbeiz'). Genres are NOT shown in the list or single-event HTML; they are only in the description text (e.g. 'Mundart-Reggae und Dancehall') and in the REST API taxonomy event_type_2. The ticket link is in the expanded details under 'EINTRITT & TICKET' as 'Tickets gibt's hier' pointing to eventfrog.ch, petzi.ch or ticketino.com (the eventfrog URL path often contains the genre, e.g. /konzerte/reggae-ska/); free shows (Hallenbeiz, cineclub, Ein kleines Konzert) have no ticket link. Single event pages are https://www.grabenhalle.ch/events/<slug>/ with doors/start/end as 'Türöffnung / Beginn / Schluss' and price as 'CHF 20.- bis 40.-'."
+    },
+    "ISC Club": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9534,
+      "lon": 7.4399,
+      "url": "https://isc-club.ch/",
+      "scrape": true,
+      "hint": "Dancehall-Nächte (Soul Rebel Sound)."
+    },
+    "Kammgarn": {
+      "city": "Schaffhausen",
+      "canton": "SH",
+      "lat": 47.6944,
+      "lon": 8.6361,
+      "url": "https://kammgarn.ch/",
+      "scrape": true,
+      "hint": "Genre-Tags im Programm; bucht regelmässig Reggae/Ska."
+    },
+    "Kaserne": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5638,
+      "lon": 7.5913,
+      "url": "https://kaserne-basel.ch/de",
+      "scrape": true,
+      "hint": "Read the agenda from https://kaserne-basel.ch/de (German; /en gives the same list in English). Events are in chronological order, one <details> card per date; the date is in the add-to-calendar-button attributes startdate=\"2026-11-14\" starttime=\"20:00\" (doors) and the show time is in <span class=\"times\"><time>21:00</time> (Doors <time>20:30</time>)</span>; the card's name=\"…\" attribute holds the act/title (e.g. \"Mad Professor (Ariwa/UK)\"), the subtitle \"Support: Mother Dubber + Nightmanager\" and the genre \"Dub\" are only in the embedded JSON (keys genre:\"…\", subtitle:\"…\", category:\"concert\"), and acts are also combined with \" + \" in the title (e.g. \"Jimi Tenor + TinTin Patrone & Yanik Soland\"). Filter concerts by class \"concert-type\" (and \"black-type\" for some concert nights) and by genre strings such as \"Dub\", \"Reggae / Mundart\", \"Ska\", \"Dancehall\"; dance/theatre/talk cards use dance-type/discourse-type. The ticket link is the <a class=\"external-ticket\"> seetickets.com URL on the card when sales are open, otherwise fall back to the event URL https://kaserne-basel.ch/de/events/<slug>; the room (Reithalle, Rossstall 1/2) is in the location=\"…\" attribute."
+    },
+    "KiFF": {
+      "city": "Aarau",
+      "canton": "AG",
+      "lat": 47.3987,
+      "lon": 8.0638,
+      "url": "https://www.kiff.ch/programm",
+      "scrape": true,
+      "hint": "Events are \"Card Card-Event\" blocks in German, grouped by month headings. Each card has a date like \"Di 13. Okt\" (weekday abbrev, day with period, month abbrev, no year) and a time (doors, e.g. \"19:30\"); the year is reliably derived from the event URL slug /programm/YYYY-MM-DD-slug (beware: a few slugs keep an old date after rescheduling, e.g. nenda 2026-03-18 shown as 18 Dez, so prefer the visible date plus month-heading context, and use the slug only for the year). Title is in h2.Card__Title as span.Act__name plus span.Act__country-code (e.g. \"Sara Hebe\" + \"AR\"); the Card__Byline holds \"Support: X (CH)\", \"Special guests: ...\", \"Line-up: ...\" or a tour name in «guillemets». Genre tags are NOT in the list cards but are on the detail page (e.g. \"Reggae, Dancehall, Dub\") along with Doors/Show times, Location (Foyer/Saal/Club), Mindestalter, Vorverkauf/Abendkasse prices; the simplest approach is to fetch the reggae/dub/dancehall/ska filter URLs and then open each detail page. Ticket link is the a.TicketLink in the card pointing to seetickets.com/ch/event/..., ticketcorner.ch or petzi.ch; sold-out events show \"Ausverkauft\" and no link. Genre-Filter: https://www.kiff.ch/programm?f_filters=all&f_genre=reggae (auch dub, dancehall, ska)."
+    },
+    "Kraftfeld": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.4948,
+      "lon": 8.7181,
+      "url": "https://www.kraftfeld.ch/de/programm.html",
+      "scrape": true,
+      "hint": "Heimspiel von Subsanity Soundsystem (Reggae Dub & Steppers)."
+    },
+    "KUFA": {
+      "city": "Lyss",
+      "canton": "BE",
+      "lat": 47.0807,
+      "lon": 7.2944,
+      "url": "https://kufa.ch/",
+      "scrape": false,
+      "hint": ""
+    },
+    "Kulturfabrik Kofmehl": {
+      "city": "Solothurn",
+      "canton": "SO",
+      "lat": 47.2006,
+      "lon": 7.5282,
+      "url": "https://kofmehl.net/",
+      "scrape": true,
+      "hint": "Keine Genre-Tags, nach Act-Namen entscheiden."
+    },
+    "L'Usine": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.204,
+      "lon": 6.136,
+      "url": "https://www.usine.ch/agenda",
+      "scrape": true,
+      "hint": "On /agenda each item is: date in D/M/YY (e.g. \"13/10/26\", \"5/11/26\", \"29/1/27\"), then the organiser/sub-venue (Le Rez, Le Rez-Usine, PTR, Post Tenebras Rock, ZOO, \"PTR x <co-promoter>\"), then the title with acts joined by \" + \" or \" • \" and country in parentheses, sometimes with the genre appended to the title (e.g. \"THE SLACKERS ( US) Ska\", \"Suffocation (US) Death metal\"), then a category tag (concert / dj sets / autre), not a music genre. Language is French. Each item links to /evenements/<slug>; the detail page gives time and full date in French (\"20h le mardi 13 octobre 2026\"), \"Organisé par :\" with the space, a description, and \"Billetterie :\" with a Petzi link (https://www.petzi.ch/events/<id>/). Genre must be inferred from title/description. Note the same show may be listed twice (once by PTR, once by Post Tenebras Rock); dedupe by date+acts. The sub-venues (PTR, Le Rez, Le Zoo) have their own sites, so check for duplicates if those are also sources. Mehrere Räume (PTR, Kalvingrad, Le Zoo)."
+    },
+    "Le Chat Noir": {
+      "city": "Carouge",
+      "canton": "GE",
+      "lat": 46.185,
+      "lon": 6.1424,
+      "url": "https://www.chatnoir.ch/live/",
+      "scrape": true,
+      "hint": "Genre-Tags; viele Dancehall-DJ-Nächte."
+    },
+    "Le Romandie": {
+      "city": "Lausanne",
+      "canton": "VD",
+      "lat": 46.5202,
+      "lon": 6.6315,
+      "url": "https://www.leromandie.ch/programmation",
+      "scrape": true,
+      "hint": "On /programmation, each event is an <article> under the heading \"Prochaines Dates\" (past ones under \"Dates passées\"); inside, a <time> element (datetime attribute is empty) holds two spans: the French short date \"24 oct. 2026\" (months: janv., févr., mars, avr., mai, juin, juil., août, sept., oct., nov., déc.) and the doors time \"23H00\". The title is the <h3> in upper case, usually \"ACT (COUNTRY) + ACT (COUNTRY) + SUPPORT\" (club nights have free-form names like \"ROMANDUB #2\"), followed by the price (\"25 CHF\", \"Caisse du soir\", \"Prix libre\", \"Complet\", \"Annulé\"). Links go to https://www.leromandie.ch/event/{slug}; presale tickets are links to https://www.petzi.ch/fr/events/{id}-le-romandie-{slug}/ (club nights are door-only, no Petzi link). No genre tags appear in the list; the event detail page has schema.org JSON-LD (name, startDate ISO with timezone, location) and a French description where genre words such as \"roots\", \"dub\", \"steppers\", \"sound system\" appear in the text, so the agent must read the description or recognise acts. Dub-Reihe ROMANDUB."
+    },
+    "Moods": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.389,
+      "lon": 8.5183,
+      "url": "https://www.moods.ch/en/program",
+      "scrape": true,
+      "hint": "Monatliche «K.O.S Crew Dancehall Mood» und Reggae/Dancehall-Partys."
+    },
+    "Parterre One": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5638,
+      "lon": 7.5912,
+      "url": "https://www.parterre-one.ch/kalender/",
+      "scrape": true,
+      "hint": "Monatliche Reggae/Dancehall-Soundsystem-Nacht; Kalender mit «mehr laden»."
+    },
+    "Reitschule": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.953,
+      "lon": 7.4407,
+      "url": "http://www.reitschule.ch/reitschule/?programm",
+      "scrape": true,
+      "hint": "On the umbrella page (?programm) every entry is three consecutive blocks: date line \"Di. 13.10. 18:00\" (German weekday abbreviation, DD.MM., 24h time, NO year – infer the year from the sequence, the list wraps into next year; dummy entries dated \"Sa. 01.01. 00:00\" at the end are placeholders, skip them), then the house (\"Dachstock\", \"Rössli\", \"SousLePont\", \"Cafete\", \"Grosse Halle\", \"Kino\", \"Tojo Theater\", \"Queerfeministischer Raum\"), then the title in CAPS followed by act lines with origin city (\"The Muffin Man Berlin\") and an optional genre line prefixed \"// \" (e.g. \"// Indie Pop Reggae Soul\", \"// Hard Swing Konzert Mundart Third Wave Ska Two Tone\"). No ticket links on the umbrella page. For Dachstock prefer the ICS feed: SUMMARY = \"Title – Act1, Act2\", CATEGORIES = tags incl. genres, URL = event page; tickets on event pages are petzi.ch/events/<id>/tickets. On souslepont-roessli.ch dates read \"Do., 15. Okt. 2026\" (German, with year) and each entry has tag chips and its own event page link; tickets only via the general Petzi organiser page 221. Filter on tags Reggae / Dub / Ska / Dancehall / Soundsystem and on the series name \"Dubtopia\". Programm aller Räume (Rössli, Frauenraum, Sous le Pont). Dachstock-Events unter dem Eintrag Dachstock führen."
+    },
+    "Rocking Chair": {
+      "city": "Vevey",
+      "canton": "VD",
+      "lat": 46.472,
+      "lon": 6.8522,
+      "url": "https://rockingchair.ch/",
+      "scrape": false,
+      "hint": ""
+    },
+    "Rote Fabrik": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3436,
+      "lon": 8.5359,
+      "url": "https://rotefabrik.ch/programm",
+      "scrape": false,
+      "hint": ""
+    },
+    "Royal": {
+      "city": "Baden",
+      "canton": "AG",
+      "lat": 47.4782,
+      "lon": 8.3087,
+      "url": "https://www.royalbaden.ch/",
+      "scrape": false,
+      "hint": ""
+    },
+    "Rössli": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.9496,
+      "lon": 7.4385,
+      "url": "https://www.souslepont-roessli.ch/",
+      "scrape": false,
+      "hint": "Raum der Reitschule Bern."
+    },
+    "Salzhaus": {
+      "city": "Winterthur",
+      "canton": "ZH",
+      "lat": 47.4975,
+      "lon": 8.7223,
+      "url": "https://www.salzhaus.ch/de/programm",
+      "scrape": true,
+      "hint": "On /de/programm each event is a div.sh-event-list-item.events containing an a.sh-event-link (href = event detail URL /de/programm/{id}/{slug}) with span.date (German, format \"16. Okt 26\", i.e. DD. Mon YY with German month abbreviations Jan/Feb/Mär/Apr/Mai/Jun/Jul/Aug/Sep/Okt/Nov/Dez), span.title (act name with country code in <sup>, e.g. \"Maggie Reilly <sup>SCT</sup>\"; co-headliners separated by \" | \", festival prefix like \"Afro-Pfingsten: ...\") and span.category (only coarse types: Live, Party, Ü30, Ü16, Spass, Theater, Divers; no music genre tags). Next to it a.sh-event-ticket-link points to seetickets.com/ch/event/.../salzhaus/{id} (occasionally other sellers, e.g. tickets.untzig.ch). Genre must be inferred from the act name and the detail page, whose JSON-LD MusicEvent gives startDate (ISO with +01:00/+02:00), a description mentioning \"Support: ...\" and \"Für Fans von ...\", plus Doors/Show times and prices in the visible text. Event detail text is German."
+    },
+    "Schüür": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0447,
+      "lon": 8.3112,
+      "url": "https://www.schuur.ch/programm",
+      "scrape": true,
+      "hint": "On /programm each event is a <section class=\"viz-event-list-box\" itemscope itemtype=\"schema.org/Event\"> with machine-readable <meta itemprop=\"startDate\" content=\"2026-10-15T19:00\"> and endDate, a visible German date \"Do. 15. Okt. 2026 – 19:00\" (door time) in div.viz-event-date, the title in span.viz-event-name (itemprop=\"name\", also meta itemprop=\"performer\"), a subtitle in span.viz-event-headline that carries support acts and loose genre words (e.g. \"Open Season, Two Tone Club & BB House Band\", \"Support: Riders Connection\", \"Psychedelic Rock aus Fribourg\"), and span.viz-event-genre which is only a category (Konzert, Party, Festival, Abriss, Live-Podcast), not a music genre. Detail link pattern is /programm/events/event-details/<artist>-<DD-MM-YYYY>-konzerthaus-schuur-luzern; \"– AUSVERKAUFT\" / \"– ZUSATZKONZERT\" / \"– Einzige CH-Show!\" are appended to titles. Ticket links go to seetickets.com/ch/event/<slug>/konzerthaus-schuur/<id>?PartnerID=116&src=web (target _blank, \"Tickets\" button); free parties (ground floor \"EG\", 22:00 start) have no ticket link and show \"Gratis\" on the detail page. Real genre information is only in the free-text body of the detail page, so an agent must read titles/subtitles and, when in doubt, the detail page body; detail pages give Datum \"Fr. 16. Okt. 2026\", Türöffnung/Beginn/Ende times, Preis CHF, and room (Saal/EG)."
+    },
+    "Sedel": {
+      "city": "Luzern",
+      "canton": "LU",
+      "lat": 47.0652,
+      "lon": 8.299,
+      "url": "https://www.sedel.ch/club",
+      "scrape": true,
+      "hint": "Keine Genre-Tags, nach Act-Namen entscheiden."
+    },
+    "Sommercasino": {
+      "city": "Basel",
+      "canton": "BS",
+      "lat": 47.5474,
+      "lon": 7.5986,
+      "url": "https://sommercasino.ch/Programm/",
+      "scrape": true,
+      "hint": "Soundsystem-Reihe «Wake the Town»."
+    },
+    "Werkstatt": {
+      "city": "Chur",
+      "canton": "GR",
+      "lat": 46.8486,
+      "lon": 9.5307,
+      "url": "https://werkstattchur.ch/",
+      "scrape": true,
+      "hint": "Events are on the homepage inside div.events__event blocks, grouped under German month headers (span.events__month, e.g. \"Oktober\"); each block has a link to https://werkstattchur.ch/event/<slug>/, p.events__subtitle (organiser or tour/series name, e.g. \"Präsentiert vom Folk Club Chur\", \"Soundsystem Tour 2023\"), h3.events__title (act name split into spans) and p.events__date in German without year (\"Mittwoch, 28. Oktober\"), so the year must be inferred from today's date and month order. The event detail page gives the full info: a schema.org MusicEvent JSON-LD block with startDate \"2026-10-28 19:00:00\", doorTime, performer names and offers.url, and the visible text with \"Preis: 30.- / 20.-\" and a \"Tickets\" link that points to eventfrog.ch (ticket link pattern: eventfrog.ch/de/p/konzert/<genre>/<slug>.html, where the Eventfrog URL path contains a genre word like \"folk\"). Genres are not tagged on the site itself; genre must be guessed from the subtitle, description text or the Eventfrog URL. The archive page uses the same classes but dates include the year (\"Mittwoch, 31. Mai 2023\"). Selten Reggae; nur bei Treffern aufnehmen."
+    },
+    "X-TRA": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3841,
+      "lon": 8.5329,
+      "url": "https://www.x-tra.ch/",
+      "scrape": false,
+      "hint": ""
+    }
+  }
+}

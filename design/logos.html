@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jahgenda – Logo-Varianten</title>
+    <style>
+      :root {
+        --bg: #14110e;
+        --surface: #1d1915;
+        --line: #2e2822;
+        --text: #f3ead8;
+        --muted: #a39682;
+        --red: #d8342f;
+        --gold: #f2b632;
+        --green: #1e8f4e;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        padding: 24px 16px 60px;
+      }
+      h1 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0 0 4px;
+      }
+      p.lead {
+        color: var(--muted);
+        margin: 0 0 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+        max-width: 1200px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 18px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .num {
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        color: var(--gold);
+      }
+      .logo {
+        height: 72px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .logo svg {
+        height: 100%;
+        width: auto;
+      }
+      .mini {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .mini svg {
+        width: 32px;
+        height: 32px;
+      }
+      .mini .tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #2a2521;
+        border-radius: 6px 6px 0 0;
+        padding: 4px 10px;
+        color: var(--text);
+        font-size: 0.8rem;
+      }
+      .mini .tab svg {
+        width: 16px;
+        height: 16px;
+      }
+      .desc {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: 0;
+      }
+      .word {
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        font-size: 44px;
+        line-height: 1;
+      }
+      .word b {
+        color: var(--gold);
+        font-weight: 900;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Jahgenda – 10 Logo-Varianten</h1>
+    <p class="lead">
+      Jede Karte zeigt das Logo gross, daneben als Favicon/Tab-Icon. Sag mir die
+      Nummer.
+    </p>
+    <div class="grid">
+      <!-- 1 -->
+      <div class="card">
+        <div class="num">01 · Wordmark mit Tricolor-Unterstrich</div>
+        <div class="logo">
+          <svg viewBox="0 0 300 72" aria-label="Jahgenda">
+            <text
+              x="0"
+              y="50"
+              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+              font-weight="900"
+              font-size="54"
+              letter-spacing="-2"
+              fill="#f3ead8"
+            >
+              Jah
+              <tspan fill="#f2b632">genda</tspan>
+            </text>
+            <rect x="2" y="60" width="96" height="6" fill="#d8342f" />
+            <rect x="98" y="60" width="96" height="6" fill="#f2b632" />
+            <rect x="194" y="60" width="96" height="6" fill="#1e8f4e" />
+          </svg>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 32 32">
+            <rect width="32" height="32" rx="7" fill="#14110e" />
+            <text
+              x="16"
+              y="21"
+              text-anchor="middle"
+              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+              font-weight="900"
+              font-size="18"
+              fill="#f2b632"
+            >
+              J
+            </text>
+            <rect x="6" y="25" width="6.6" height="3" fill="#d8342f" />
+            <rect x="12.6" y="25" width="6.6" height="3" fill="#f2b632" />
+            <rect x="19.2" y="25" width="6.6" height="3" fill="#1e8f4e" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 32 32">
+              <rect width="32" height="32" rx="7" fill="#14110e" />
+              <text
+                x="16"
+                y="21"
+                text-anchor="middle"
+                font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+                font-weight="900"
+                font-size="18"
+                fill="#f2b632"
+              >
+                J
+              </text>
+              <rect x="6" y="25" width="6.6" height="3" fill="#d8342f" />
+              <rect x="12.6" y="25" width="6.6" height="3" fill="#f2b632" />
+              <rect
+                x="19.2"
+                y="25"
+                width="6.6"
+                height="3"
+                fill="#1e8f4e"
+              /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Das heutige Logo, aufgeräumt: fetter Schriftzug, Stripe darunter.
+        </p>
+      </div>
+
+      <!-- 2 -->
+      <div class="card">
+        <div class="num">02 · J-Monogramm aus drei Streifen</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <path d="M22 8h30v10H22z" fill="#d8342f" />
+            <path
+              d="M34 18h10v22a16 16 0 0 1-32 0v-4h10v4a6 6 0 0 0 12 0z"
+              fill="#f2b632"
+            />
+            <path
+              d="M12 36h10v4a6 6 0 0 0 12 0v-2h10v2a16 16 0 0 1-32 0z"
+              fill="#1e8f4e"
+            /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="14" fill="#14110e" />
+            <path d="M22 8h30v10H22z" fill="#d8342f" />
+            <path
+              d="M34 18h10v22a16 16 0 0 1-32 0v-4h10v4a6 6 0 0 0 12 0z"
+              fill="#f2b632"
+            />
+            <path
+              d="M12 36h10v4a6 6 0 0 0 12 0v-2h10v2a16 16 0 0 1-32 0z"
+              fill="#1e8f4e"
+            /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <rect width="64" height="64" rx="14" fill="#14110e" />
+              <path d="M22 8h30v10H22z" fill="#d8342f" />
+              <path
+                d="M34 18h10v22a16 16 0 0 1-32 0v-4h10v4a6 6 0 0 0 12 0z"
+                fill="#f2b632"
+              />
+              <path
+                d="M12 36h10v4a6 6 0 0 0 12 0v-2h10v2a16 16 0 0 1-32 0z"
+                fill="#1e8f4e"
+              /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Ein «J», gebaut aus Rot, Gold, Grün. Funktioniert winzig als Favicon.
+        </p>
+      </div>
+
+      <!-- 3 -->
+      <div class="card">
+        <div class="num">03 · Vinyl</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="30" fill="#1a1613" />
+            <circle
+              cx="32"
+              cy="32"
+              r="30"
+              fill="none"
+              stroke="#d8342f"
+              stroke-width="4"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r="22"
+              fill="none"
+              stroke="#f2b632"
+              stroke-width="4"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r="14"
+              fill="none"
+              stroke="#1e8f4e"
+              stroke-width="4"
+            />
+            <circle cx="32" cy="32" r="7" fill="#f2b632" />
+            <circle cx="32" cy="32" r="2" fill="#14110e" /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="30" fill="#1a1613" />
+            <circle
+              cx="32"
+              cy="32"
+              r="30"
+              fill="none"
+              stroke="#d8342f"
+              stroke-width="4"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r="22"
+              fill="none"
+              stroke="#f2b632"
+              stroke-width="4"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r="14"
+              fill="none"
+              stroke="#1e8f4e"
+              stroke-width="4"
+            />
+            <circle cx="32" cy="32" r="7" fill="#f2b632" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="30" fill="#1a1613" />
+              <circle
+                cx="32"
+                cy="32"
+                r="30"
+                fill="none"
+                stroke="#d8342f"
+                stroke-width="4"
+              />
+              <circle
+                cx="32"
+                cy="32"
+                r="22"
+                fill="none"
+                stroke="#f2b632"
+                stroke-width="4"
+              />
+              <circle
+                cx="32"
+                cy="32"
+                r="14"
+                fill="none"
+                stroke="#1e8f4e"
+                stroke-width="4"
+              />
+              <circle cx="32" cy="32" r="7" fill="#f2b632" /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Schallplatte mit Rot-Gold-Grün-Rillen. Klassisch, Soundsystem-Vibe.
+        </p>
+      </div>
+
+      <!-- 4 -->
+      <div class="card">
+        <div class="num">04 · Kalenderblatt</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <rect x="6" y="10" width="52" height="48" rx="8" fill="#f3ead8" />
+            <rect x="6" y="10" width="52" height="16" rx="8" fill="#d8342f" />
+            <rect x="6" y="20" width="52" height="6" fill="#d8342f" />
+            <rect x="18" y="4" width="5" height="12" rx="2.5" fill="#14110e" />
+            <rect x="41" y="4" width="5" height="12" rx="2.5" fill="#14110e" />
+            <text
+              x="32"
+              y="50"
+              text-anchor="middle"
+              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+              font-weight="900"
+              font-size="24"
+              fill="#14110e"
+            >
+              JAH
+            </text>
+            <rect x="6" y="52" width="26" height="6" fill="#f2b632" />
+            <rect x="32" y="52" width="26" height="6" fill="#1e8f4e" /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <rect x="6" y="10" width="52" height="48" rx="8" fill="#f3ead8" />
+            <rect x="6" y="10" width="52" height="16" rx="8" fill="#d8342f" />
+            <rect x="6" y="20" width="52" height="6" fill="#d8342f" />
+            <text
+              x="32"
+              y="50"
+              text-anchor="middle"
+              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+              font-weight="900"
+              font-size="24"
+              fill="#14110e"
+            >
+              JAH
+            </text>
+            <rect x="6" y="52" width="26" height="6" fill="#f2b632" />
+            <rect x="32" y="52" width="26" height="6" fill="#1e8f4e" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <rect x="6" y="10" width="52" height="48" rx="8" fill="#f3ead8" />
+              <rect x="6" y="10" width="52" height="16" rx="8" fill="#d8342f" />
+              <rect x="6" y="20" width="52" height="6" fill="#d8342f" />
+              <text
+                x="32"
+                y="50"
+                text-anchor="middle"
+                font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+                font-weight="900"
+                font-size="24"
+                fill="#14110e"
+              >
+                JAH
+              </text>
+              <rect x="6" y="52" width="26" height="6" fill="#f2b632" />
+              <rect x="32" y="52" width="26" height="6" fill="#1e8f4e" /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Sagt sofort «Agenda». Rot-Gold-Grün als Kalenderkopf und -fuss.
+        </p>
+      </div>
+
+      <!-- 5 -->
+      <div class="card">
+        <div class="num">05 · Soundsystem-Box</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <rect
+              x="8"
+              y="4"
+              width="48"
+              height="56"
+              rx="6"
+              fill="#1a1613"
+              stroke="#f3ead8"
+              stroke-width="3"
+            />
+            <circle cx="32" cy="22" r="9" fill="#d8342f" />
+            <circle cx="32" cy="22" r="4" fill="#14110e" />
+            <circle cx="32" cy="44" r="11" fill="#1e8f4e" />
+            <circle cx="32" cy="44" r="5" fill="#14110e" />
+            <circle
+              cx="32"
+              cy="44"
+              r="14"
+              fill="none"
+              stroke="#f2b632"
+              stroke-width="2"
+            /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <rect
+              x="8"
+              y="4"
+              width="48"
+              height="56"
+              rx="6"
+              fill="#1a1613"
+              stroke="#f3ead8"
+              stroke-width="3"
+            />
+            <circle cx="32" cy="22" r="9" fill="#d8342f" />
+            <circle cx="32" cy="22" r="4" fill="#14110e" />
+            <circle cx="32" cy="44" r="11" fill="#1e8f4e" />
+            <circle cx="32" cy="44" r="5" fill="#14110e" />
+            <circle
+              cx="32"
+              cy="44"
+              r="14"
+              fill="none"
+              stroke="#f2b632"
+              stroke-width="2"
+            /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <rect
+                x="8"
+                y="4"
+                width="48"
+                height="56"
+                rx="6"
+                fill="#1a1613"
+                stroke="#f3ead8"
+                stroke-width="3"
+              />
+              <circle cx="32" cy="22" r="9" fill="#d8342f" />
+              <circle cx="32" cy="22" r="4" fill="#14110e" />
+              <circle cx="32" cy="44" r="11" fill="#1e8f4e" />
+              <circle cx="32" cy="44" r="5" fill="#14110e" />
+              <circle
+                cx="32"
+                cy="44"
+                r="14"
+                fill="none"
+                stroke="#f2b632"
+                stroke-width="2"
+              /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Lautsprecherbox mit zwei Chassis in Rot und Grün, Goldring.
+        </p>
+      </div>
+
+      <!-- 6 -->
+      <div class="card">
+        <div class="num">06 · Alpen &amp; Sonne</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <circle cx="40" cy="24" r="12" fill="#f2b632" />
+            <path d="M2 58 22 24l10 16 8-10 22 28z" fill="#1e8f4e" />
+            <path d="M2 58 22 24l6 10-10 24z" fill="#167a41" />
+            <path d="M0 58h64v6H0z" fill="#d8342f" /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="14" fill="#14110e" />
+            <circle cx="40" cy="24" r="12" fill="#f2b632" />
+            <path d="M2 58 22 24l10 16 8-10 22 28z" fill="#1e8f4e" />
+            <path d="M0 58h64v6H0z" fill="#d8342f" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <rect width="64" height="64" rx="14" fill="#14110e" />
+              <circle cx="40" cy="24" r="12" fill="#f2b632" />
+              <path d="M2 58 22 24l10 16 8-10 22 28z" fill="#1e8f4e" />
+              <path d="M0 58h64v6H0z" fill="#d8342f" /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Schweiz trifft Jamaika: grüne Berge, goldene Sonne, roter Boden.
+        </p>
+      </div>
+
+      <!-- 7 -->
+      <div class="card">
+        <div class="num">07 · Stempel</div>
+        <div class="logo">
+          <svg viewBox="0 0 320 72">
+            <rect
+              x="3"
+              y="3"
+              width="314"
+              height="66"
+              rx="12"
+              fill="none"
+              stroke="#f2b632"
+              stroke-width="4"
+              stroke-dasharray="14 7"
+            />
+            <text
+              x="160"
+              y="40"
+              text-anchor="middle"
+              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+              font-weight="900"
+              font-size="30"
+              letter-spacing="6"
+              fill="#f3ead8"
+            >
+              JAHGENDA
+            </text>
+            <rect x="90" y="50" width="46" height="5" fill="#d8342f" />
+            <rect x="136" y="50" width="46" height="5" fill="#f2b632" />
+            <rect x="182" y="50" width="46" height="5" fill="#1e8f4e" />
+          </svg>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <rect
+              x="4"
+              y="4"
+              width="56"
+              height="56"
+              rx="12"
+              fill="none"
+              stroke="#f2b632"
+              stroke-width="4"
+              stroke-dasharray="8 5"
+            />
+            <text
+              x="32"
+              y="38"
+              text-anchor="middle"
+              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+              font-weight="900"
+              font-size="22"
+              fill="#f3ead8"
+            >
+              JG
+            </text>
+            <rect x="16" y="44" width="10.6" height="4" fill="#d8342f" />
+            <rect x="26.6" y="44" width="10.6" height="4" fill="#f2b632" />
+            <rect x="37.2" y="44" width="10.6" height="4" fill="#1e8f4e" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <rect
+                x="4"
+                y="4"
+                width="56"
+                height="56"
+                rx="12"
+                fill="none"
+                stroke="#f2b632"
+                stroke-width="4"
+                stroke-dasharray="8 5"
+              />
+              <text
+                x="32"
+                y="38"
+                text-anchor="middle"
+                font-family="ui-sans-serif,system-ui,Helvetica,Arial"
+                font-weight="900"
+                font-size="22"
+                fill="#f3ead8"
+              >
+                JG
+              </text>
+              <rect x="16" y="44" width="10.6" height="4" fill="#d8342f" />
+              <rect x="26.6" y="44" width="10.6" height="4" fill="#f2b632" />
+              <rect
+                x="37.2"
+                y="44"
+                width="10.6"
+                height="4"
+                fill="#1e8f4e"
+              /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Versalien mit Sperrung im gestrichelten Rahmen – wie ein
+          Dubplate-Stempel.
+        </p>
+      </div>
+
+      <!-- 8 -->
+      <div class="card">
+        <div class="num">08 · Löwe (geometrisch)</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="34" r="26" fill="#f2b632" />
+            <circle
+              cx="32"
+              cy="34"
+              r="26"
+              fill="none"
+              stroke="#d8342f"
+              stroke-width="4"
+              stroke-dasharray="6 5"
+            />
+            <circle cx="32" cy="36" r="15" fill="#14110e" />
+            <circle cx="25" cy="33" r="2.5" fill="#f2b632" />
+            <circle cx="39" cy="33" r="2.5" fill="#f2b632" />
+            <path d="M28 40h8l-4 5z" fill="#1e8f4e" />
+            <path d="M20 20l6-10 4 8zM44 20l-6-10-4 8z" fill="#14110e" /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="34" r="26" fill="#f2b632" />
+            <circle
+              cx="32"
+              cy="34"
+              r="26"
+              fill="none"
+              stroke="#d8342f"
+              stroke-width="4"
+              stroke-dasharray="6 5"
+            />
+            <circle cx="32" cy="36" r="15" fill="#14110e" />
+            <circle cx="25" cy="33" r="2.5" fill="#f2b632" />
+            <circle cx="39" cy="33" r="2.5" fill="#f2b632" />
+            <path d="M28 40h8l-4 5z" fill="#1e8f4e" />
+            <path d="M20 20l6-10 4 8zM44 20l-6-10-4 8z" fill="#14110e" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <circle cx="32" cy="34" r="26" fill="#f2b632" />
+              <circle
+                cx="32"
+                cy="34"
+                r="26"
+                fill="none"
+                stroke="#d8342f"
+                stroke-width="4"
+                stroke-dasharray="6 5"
+              />
+              <circle cx="32" cy="36" r="15" fill="#14110e" />
+              <circle cx="25" cy="33" r="2.5" fill="#f2b632" />
+              <circle cx="39" cy="33" r="2.5" fill="#f2b632" />
+              <path d="M28 40h8l-4 5z" fill="#1e8f4e" />
+              <path d="M20 20l6-10 4 8zM44 20l-6-10-4 8z" fill="#14110e" /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Lion of Judah, reduziert auf Kreise: goldene Mähne mit rotem
+          Strahlenkranz.
+        </p>
+      </div>
+
+      <!-- 9 -->
+      <div class="card">
+        <div class="num">09 · Pin</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <path
+              d="M32 2a22 22 0 0 0-22 22c0 16 22 38 22 38s22-22 22-38A22 22 0 0 0 32 2z"
+              fill="#d8342f"
+            />
+            <path
+              d="M10 24h44c0 5-2 10-5 15H15c-3-5-5-10-5-15z"
+              fill="#f2b632"
+            />
+            <path d="M15 39h34c-6 10-17 23-17 23S21 49 15 39z" fill="#1e8f4e" />
+            <circle cx="32" cy="24" r="9" fill="#14110e" />
+            <circle cx="32" cy="24" r="4" fill="#f3ead8" /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <path
+              d="M32 2a22 22 0 0 0-22 22c0 16 22 38 22 38s22-22 22-38A22 22 0 0 0 32 2z"
+              fill="#d8342f"
+            />
+            <path
+              d="M10 24h44c0 5-2 10-5 15H15c-3-5-5-10-5-15z"
+              fill="#f2b632"
+            />
+            <path d="M15 39h34c-6 10-17 23-17 23S21 49 15 39z" fill="#1e8f4e" />
+            <circle cx="32" cy="24" r="9" fill="#14110e" />
+            <circle cx="32" cy="24" r="4" fill="#f3ead8" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <path
+                d="M32 2a22 22 0 0 0-22 22c0 16 22 38 22 38s22-22 22-38A22 22 0 0 0 32 2z"
+                fill="#d8342f"
+              />
+              <path
+                d="M10 24h44c0 5-2 10-5 15H15c-3-5-5-10-5-15z"
+                fill="#f2b632"
+              />
+              <path
+                d="M15 39h34c-6 10-17 23-17 23S21 49 15 39z"
+                fill="#1e8f4e"
+              />
+              <circle cx="32" cy="24" r="9" fill="#14110e" />
+              <circle cx="32" cy="24" r="4" fill="#f3ead8" /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Standort-Pin in Rot-Gold-Grün: «Wo ist die nächste Session?»
+        </p>
+      </div>
+
+      <!-- 10 -->
+      <div class="card">
+        <div class="num">10 · Schweizerkreuz-Stripes</div>
+        <div class="logo">
+          <svg viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="12" fill="#d8342f" />
+            <rect y="21" width="64" height="22" fill="#f2b632" />
+            <rect y="43" width="64" height="21" fill="#1e8f4e" />
+            <rect y="43" width="64" height="21" rx="0" fill="#1e8f4e" />
+            <path
+              d="M0 52a12 12 0 0 0 12 12h40a12 12 0 0 0 12-12z"
+              fill="#1e8f4e"
+            />
+            <rect x="26" y="12" width="12" height="40" fill="#f3ead8" />
+            <rect x="12" y="26" width="40" height="12" fill="#f3ead8" /></svg
+          ><span class="word">Jah<b>genda</b></span>
+        </div>
+        <div class="mini">
+          <svg viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="12" fill="#d8342f" />
+            <rect y="21" width="64" height="22" fill="#f2b632" />
+            <path
+              d="M0 43h64v9a12 12 0 0 1-12 12H12A12 12 0 0 1 0 52z"
+              fill="#1e8f4e"
+            />
+            <rect x="26" y="12" width="12" height="40" fill="#f3ead8" />
+            <rect x="12" y="26" width="40" height="12" fill="#f3ead8" /></svg
+          ><span class="tab"
+            ><svg viewBox="0 0 64 64">
+              <rect width="64" height="64" rx="12" fill="#d8342f" />
+              <rect y="21" width="64" height="22" fill="#f2b632" />
+              <path
+                d="M0 43h64v9a12 12 0 0 1-12 12H12A12 12 0 0 1 0 52z"
+                fill="#1e8f4e"
+              />
+              <rect x="26" y="12" width="12" height="40" fill="#f3ead8" />
+              <rect x="12" y="26" width="40" height="12" fill="#f3ead8" /></svg
+            >Jahgenda</span
+          >
+        </div>
+        <p class="desc">
+          Weisses Kreuz auf Reggae-Streifen. Eindeutig Schweiz, eindeutig
+          Reggae.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

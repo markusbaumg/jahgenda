@@ -1,6 +1,6 @@
 ---
 name: harvest-bands
-description: Build the band watchlist in data/artists.json from the line-ups of the big reggae and ska festivals listed in scraper/sources.json. Run monthly by a routine or by hand with /harvest-bands.
+description: Collect acts from the line-ups of the big reggae and ska festivals in scraper/sources.json and add them as suggestions to scraper/bands.md (with genres cached in data/artists.json). Run monthly by a routine or by hand with /harvest-bands.
 ---
 
 # Harvest bands from festival line-ups
@@ -36,9 +36,10 @@ to load after two tries and note them in the summary.
 For each new act (not yet in `data/artists.json`, compare case-insensitively):
 
 1. Apply `criteria.md`. Acts that stay out are simply not added — do not add them with empty genres.
-2. Find its genres: Wikipedia page (any language) first, then the act's website or Bandcamp. Map to lowercase
-   slugs (`reggae`, `roots`, `dub`, `ska`, `ska-punk`, `rocksteady`, `dancehall`, `soundsystem`,
-   `nyabinghi`, `lovers-rock`, `steppers`, …), max 3, most specific first.
+2. Find its genres: Wikipedia page (any language) first, then the act's website or Bandcamp. Map them with
+   the **Genre-Slugs** table in `criteria.md` — only those slugs are allowed — max 3, most specific first.
+   Use the Wikipedia title / band-site spelling as the key, without trailing punctuation or guest suffixes
+   (`feat. …`, `& …`); compare existing keys case-insensitively ignoring punctuation (`DUB INC.` = `Dub Inc`).
 3. Add the entry:
    ```json
    "Alborosie": { "genres": ["reggae", "roots"], "source": "https://en.wikipedia.org/wiki/Alborosie", "checked": "2026-10-13", "festivals": ["Summerjam 2026", "Rototom Sunsplash 2025"] }
@@ -63,11 +64,13 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, max 60):
 
 Write `data/artists.json` with 2-space indentation, artists sorted by key. Keep the top-level `note`.
 
+Run exactly this, as one command, so nothing is committed when validation fails:
+
 ```sh
-python3 scripts/validate_shows.py
-git add data/artists.json data/runs.json scraper/bands.md
-git commit -m "Harvest bands: +<added> new, <total> total"
-git push origin main
+python3 scripts/validate_shows.py \
+  && git add data/artists.json data/runs.json scraper/bands.md \
+  && git commit -m "Harvest bands: +<added> new, <total> total" \
+  && git push origin main
 ```
 
 Then, if you added at least one suggestion, open a GitHub issue so the humans get pinged:

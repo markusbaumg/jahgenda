@@ -1,121 +1,108 @@
 {
-  "note": "Quellen des Scrapers. agendas/venues/search_queries nutzt /scrape-shows bei jedem Lauf. festivals nutzt /harvest-bands, um aus Line-ups eine Band-Liste (data/artists.json) aufzubauen, nach der /scrape-shows gezielt Schweizer Daten sucht.",
+  "note": "Quellen des Scrapers. agendas / search_queries / nearby nutzt /scrape-shows bei jedem Lauf; die Venues (Programm-Seiten, Koordinaten) stehen in data/venues.json; festivals nutzt /harvest-bands, um Acts aus Line-ups als Vorschläge in scraper/bands.md einzutragen.",
   "agendas": [
     {
-      "name": "Skalander",
-      "url": "https://www.skalander.ch/",
-      "hint": "Ska/Reggae-Agenda für die Schweiz. Beste Einzelquelle."
+      "name": "Skalender",
+      "url": "https://skalender.net/",
+      "hint": "Ska/Reggae/Dub/Punk-Agenda für die Schweiz, Community-Einträge. Beste Einzelquelle, aber gemischt mit Punk/Rock. On the homepage, events are inside <ul id=\"dateList\">: month headers <li class=\"box monthYear\" id=\"Okt2026\"> (German month abbreviations Okt, Nov, Dez, Jan, Feb, Mrz, Mai, plus year) followed by <li class=\"box postEvent cat-item-3 cat-item-N ...\"> items, each with <a class=\"box Event\" href=\"https://skalender.net/events/<id>/\">, <span class=\"theDay\">DD</span> and <p class=\"theTitle\"><span>City</span><br />Acts</p>. Acts are joined with ' & ' (sometimes 'feat.' or a tour name in guillemets); city names are sometimes lowercase ('zürich') and the same show is occasionally listed twice (e.g. Dub Pistols 21 Oct, Open Season 19 Dec). Genres are the cat-item classes: 4=Ska, 5=Punk, 6=Reggae, 7=Rock, 8=Metal, 9=Latin, 23=Dub, 25=Folk (3=All, ignore); on detail pages the same appear as event-style-ska/reggae/dub classes. Detail pages have <time itemprop=\"startDate\" datetime=\"2026-10-21T19:00\">Mittwoch 21. Oktober 2026</time>, time range '19:00 - 22:30', price <span itemprop=\"price\">43.60 CHF</span> followed by the ticket link (<a target=\"_blank\" href=\"...\">Tickets kaufen</a>, typically petzi.ch, ticketmaster.ch, eventfrog), an 'Event Webseite' link to the venue/organizer page, venue name linking to /venues/<slug>/ and street address + city (Google Maps link), and artist links to /artists/<slug>/ (artist pages list Herkunft and Stile). Text is German."
     },
     {
       "name": "Petzi",
-      "url": "https://www.petzi.ch/",
-      "hint": "Ticketing für Clubs und Festivals der Schweiz, nach Genre filtern."
+      "url": "https://www.petzi.ch/en/search/?q=reggae",
+      "hint": "Ticketing der Schweizer Clubs. Keine Genre-Filter, nur Volltextsuche: auch ?q=ska, ?q=dub, ?q=dancehall, ?q=sound%20system abfragen; Treffer sind nach Relevanz sortiert und verrauscht, jede Show auf der Detailseite prüfen. Event tiles are <a href=\"/en/events/{id}-{venue-slug}-{title-slug}/\" class=\"masonry-grid__item ... tile\"> with <time class=\"tile__date\" datetime=\"YYYY-MM-DD\">DD.MM.YYYY</time>, <h2 class=\"tile__title\">Title</h2> and <div class=\"tile__place\">Venue</div>; the <a title=\"More info & get tickets / Title / Venue\"> attribute holds the untruncated title and venue (tile titles are cut with \"...\"). Titles are the organiser's free text: acts separated by \"+\", \"//\", \"&\", \"|\", \"w/\", \"Support:\", with country codes in parentheses or brackets, e.g. \"RAKOON [FR] + TUZI SOUND SYSTEM [FR]\". The detail page has <h1> title, a <h3> with the long English date (\"Friday 23 October 2026\"), <h4>Venue – City</h4>, \"Doors open at: HH:MM\" / \"Event starts at: HH:MM\", a French/German/English description in <p class=\"text_block\">, an \"Organized by\" link (/en/organiser/{n}/), and genre tags in <section class=\"tag-list\"> as <a href=\"/en/search/?q=reggae\" class=\"tag\">Reggae</a> (tags like Concert, Club, Reggae, Hip-Hop; many organisers leave it empty, so also scan the description for reggae/ska/dub/dancehall/sound system). Ticket link is \"/en/events/{id}-{slug}/tickets/\" with \"Price starting at CHF xx.xx\" when Petzi sells tickets; otherwise only a \"See the official website\" link; the Google-calendar link and .ics file contain the full venue street address and start/end times."
+    },
+    {
+      "name": "Eventfrog – Reggae & Ska",
+      "url": "https://eventfrog.ch/de/events/ch/reggae-ska-konzerte.html",
+      "hint": "Grösster Schweizer Eventkalender, eigene Kategorie «Reggae & Ska Konzerte in der Schweiz». Dazu die Schwesterkategorie https://eventfrog.ch/de/events/ch/dancehall-partys.html . Listet auch kleine Clubs und Partys."
     }
   ],
-  "venues": [
+  "nearby": {
+    "note": "Grenznahe Orte in den Nachbarländern, die mitgesucht werden (siehe criteria.md → Grenznah). canton = Länderkürzel D, F, I, A, FL.",
+    "search_queries": [
+      "reggae konzert konstanz OR lörrach OR freiburg OR friedrichshafen OR lindau {monat} {jahr}",
+      "reggae concert annemasse OR thonon OR mulhouse OR annecy OR pontarlier {monat} {jahr}",
+      "concerto reggae como OR varese OR domodossola OR aosta {monat} {jahr}",
+      "reggae konzert bregenz OR dornbirn OR feldkirch OR vaduz {monat} {jahr}"
+    ]
+  },
+  "festivals": [
     {
-      "name": "Schüür",
-      "city": "Luzern",
-      "canton": "LU",
-      "url": "https://www.schuur.ch/",
-      "lat": 47.0466,
-      "lon": 8.3112
+      "name": "Summerjam",
+      "where": "Köln (DE)",
+      "url": "https://summerjam.de/en/",
+      "wikipedia": "https://de.wikipedia.org/wiki/Summerjam",
+      "hint": "Line-ups pro Jahr: https://summerjam.de/en/artists-2027/ (Jahr austauschen)."
     },
     {
-      "name": "Dachstock",
-      "city": "Bern",
-      "canton": "BE",
-      "url": "https://www.dachstock.ch/",
-      "lat": 46.9496,
-      "lon": 7.4385
+      "name": "Reeds Festival",
+      "where": "Pfäffikon ZH",
+      "url": "https://www.reeds-festival.ch/",
+      "wikipedia": "",
+      "hint": "Grösstes Reggae-Festival der Schweiz. Line-up: https://www.reeds-festival.ch/line-up ; ältere Jahre via /gallery-2025 etc."
     },
     {
-      "name": "Reitschule",
-      "city": "Bern",
-      "canton": "BE",
-      "url": "https://www.reitschule.ch/",
-      "lat": 46.9496,
-      "lon": 7.4385
+      "name": "Lakesplash",
+      "where": "Twann BE",
+      "url": "https://lakesplash.ch/",
+      "wikipedia": "",
+      "hint": "Ältestes Reggae-Openair der Schweiz. Acts: https://lakesplash.ch/portfolio_category/band/ ; frühere Jahre: https://lakesplash.ch/history/"
     },
     {
-      "name": "Kaserne",
-      "city": "Basel",
-      "canton": "BS",
-      "url": "https://www.kaserne-basel.ch/",
-      "lat": 47.5627,
-      "lon": 7.5925
+      "name": "Plein-les-Watts",
+      "where": "Lancy GE",
+      "url": "https://www.pleinleswatts.ch/",
+      "wikipedia": "",
+      "hint": "Reggae-Festival von Genf, Juli."
     },
     {
-      "name": "Bogen F",
-      "city": "Zürich",
-      "canton": "ZH",
-      "url": "https://www.bogenf.ch/",
-      "lat": 47.3866,
-      "lon": 8.5215
+      "name": "Afro-Pfingsten",
+      "where": "Winterthur ZH",
+      "url": "https://www.afro-pfingsten.ch/",
+      "wikipedia": "",
+      "hint": "Bucht jedes Jahr Reggae/Dub (z. B. Mad Professor)."
     },
     {
-      "name": "Exil",
-      "city": "Zürich",
-      "canton": "ZH",
-      "url": "https://www.exil.cl/",
-      "lat": 47.3889,
-      "lon": 8.5195
+      "name": "Chiemsee Reggae Summer",
+      "where": "Übersee am Chiemsee (DE), 2026, nächste 2028",
+      "url": "https://www.chiemsee-reggae.de/",
+      "wikipedia": "https://de.wikipedia.org/wiki/Chiemsee_Reggae_Summer",
+      "hint": "Line-up: https://www.chiemsee-reggae.de/programm.html"
     },
     {
-      "name": "Grabenhalle",
-      "city": "St. Gallen",
-      "canton": "SG",
-      "url": "https://www.grabenhalle.ch/",
-      "lat": 47.4262,
-      "lon": 9.3772
+      "name": "Rototom Sunsplash",
+      "where": "Benicàssim (ES)",
+      "url": "https://rototomsunsplash.com/en/",
+      "wikipedia": "https://en.wikipedia.org/wiki/Rototom_Sunsplash",
+      "hint": "Acts aller Jahre: https://rototomsunsplash.com/en/rototom/our-story/music-archive/"
     },
     {
-      "name": "Salzhaus",
-      "city": "Winterthur",
-      "canton": "ZH",
-      "url": "https://www.salzhaus.ch/",
-      "lat": 47.4985,
-      "lon": 8.7232
+      "name": "Reggae Jam",
+      "where": "Bersenbrück (DE)",
+      "url": "https://reggaejam.de/de/",
+      "wikipedia": "https://de.wikipedia.org/wiki/Reggae_Jam",
+      "hint": "Line-up: https://reggaejam.de/de/artists/ (nur aktuelle Ausgabe; Wikipedia für ältere)."
     },
     {
-      "name": "L'Usine",
-      "city": "Genève",
-      "canton": "GE",
-      "url": "https://www.usine.ch/",
-      "lat": 46.2058,
-      "lon": 6.1404
+      "name": "Ruhr Reggae Summer",
+      "where": "Mülheim an der Ruhr (DE)",
+      "url": "https://www.ruhr-reggae-summer.de/mhx/",
+      "wikipedia": "https://de.wikipedia.org/wiki/Ruhr_Reggae_Summer",
+      "hint": "Running Order: https://www.ruhr-reggae-summer.de/mhx/festivalposter-running-order/"
     },
     {
-      "name": "Fri-Son",
-      "city": "Fribourg",
-      "canton": "FR",
-      "url": "https://www.fri-son.ch/",
-      "lat": 46.7978,
-      "lon": 7.1418
+      "name": "No Logo Festival",
+      "where": "Pont-sur-l'Ognon (FR)",
+      "url": "https://www.nologofestival.fr/",
+      "wikipedia": "",
+      "hint": "Grösstes Reggae-Festival Frankreichs, 1 h von Basel."
     },
     {
-      "name": "Le Romandie",
-      "city": "Lausanne",
-      "canton": "VD",
-      "url": "https://www.leromandie.ch/",
-      "lat": 46.5207,
-      "lon": 6.6288
-    },
-    {
-      "name": "Werkstatt",
-      "city": "Chur",
-      "canton": "GR",
-      "url": "https://www.werkstattchur.ch/",
-      "lat": 46.8526,
-      "lon": 9.5297
-    },
-    {
-      "name": "KiFF",
-      "city": "Aarau",
-      "canton": "AG",
-      "url": "https://www.kiff.ch/",
-      "lat": 47.3937,
-      "lon": 8.0505
+      "name": "Mighty Sounds",
+      "where": "Tábor (CZ), Ska/Punk",
+      "url": "https://www.mightysounds.cz/en/",
+      "wikipedia": "https://en.wikipedia.org/wiki/Mighty_Sounds",
+      "hint": "Nur Ska/Reggae-Acts: https://www.mightysounds.cz/en/rocnik/2027?genre=cat-ska (Jahr austauschen)."
     }
   ],
   "search_queries": [
@@ -123,63 +110,8 @@
     "dub soundsystem schweiz {monat} {jahr}",
     "ska konzert schweiz {monat} {jahr}",
     "dancehall party schweiz {monat} {jahr}",
-    "reggae concert suisse {monat} {jahr}",
+    "concert reggae suisse romande {monat} {jahr}",
+    "concerto reggae ticino {monat} {jahr}",
     "reggae festival schweiz {jahr}"
-  ],
-  "festivals": [
-    {
-      "name": "Summerjam",
-      "where": "Köln (DE)",
-      "url": "https://www.summerjam.de/",
-      "wikipedia": "https://de.wikipedia.org/wiki/Summerjam"
-    },
-    {
-      "name": "Reeds Festival",
-      "where": "Pfäffikon ZH",
-      "url": "https://www.reeds.ch/",
-      "wikipedia": ""
-    },
-    {
-      "name": "Lakesplash",
-      "where": "Twann BE",
-      "url": "https://www.lakesplash.ch/",
-      "wikipedia": ""
-    },
-    {
-      "name": "Chiemsee Reggae Summer",
-      "where": "Übersee (DE), bis 2016",
-      "url": "",
-      "wikipedia": "https://de.wikipedia.org/wiki/Chiemsee_Reggae_Summer"
-    },
-    {
-      "name": "Rototom Sunsplash",
-      "where": "Benicàssim (ES)",
-      "url": "https://rototomsunsplash.com/",
-      "wikipedia": "https://en.wikipedia.org/wiki/Rototom_Sunsplash"
-    },
-    {
-      "name": "Reggae Jam",
-      "where": "Bersenbrück (DE)",
-      "url": "https://www.reggaejam.de/",
-      "wikipedia": "https://de.wikipedia.org/wiki/Reggae_Jam"
-    },
-    {
-      "name": "Ruhr Reggae Summer",
-      "where": "Mülheim (DE)",
-      "url": "https://www.ruhrreggaesummer.de/",
-      "wikipedia": ""
-    },
-    {
-      "name": "Garance Reggae Festival",
-      "where": "Bagnols-sur-Cèze (FR)",
-      "url": "https://www.garancereggaefestival.com/",
-      "wikipedia": "https://fr.wikipedia.org/wiki/Garance_Reggae_Festival"
-    },
-    {
-      "name": "Mighty Sounds",
-      "where": "Tábor (CZ), Ska/Punk",
-      "url": "https://www.mightysounds.cz/",
-      "wikipedia": ""
-    }
   ]
 }

@@ -1,4 +1,4 @@
 {
-  "note": "Band-Datenbank. Genre-Cache pro Act (Wikipedia / Band-Website) und Watchlist: Bands aus Festival-Line-ups (/harvest-bands), nach denen /scrape-shows gezielt Schweizer Konzerte sucht. Einträge dürfen von Hand korrigiert werden.",
+  "note": "Genre-Cache pro Act (Wikipedia / Band-Website), plus tour_checked-Buchhaltung für die Watchlist-Suche. Welche Bands gesucht werden, steht NICHT hier, sondern in scraper/bands.md. Handkorrekturen: \"source\": \"manual\" setzen, dann fasst der Scraper den Eintrag nie mehr an.",
   "artists": {}
 }

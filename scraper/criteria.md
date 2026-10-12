@@ -27,10 +27,37 @@ Auch rein kommen:
 - Afrobeats, Amapiano, Reggaeton, Latin ohne klaren Reggae-Bezug
 - Punk-, Hardcore- oder Rockbands, bei denen Ska nur ein gelegentliches Stilmittel ist (ein, zwei Songs mit Bläsern machen noch keine Ska-Band)
 - Workshops, Vorträge, Filme ohne Live-Musik oder DJ
-- Veranstaltungen ausserhalb der Schweiz (auch grenznah, z. B. Konstanz, Lörrach, Annemasse)
+- Veranstaltungen ausserhalb der Schweiz – ausser an den grenznahen Orten unten
 
 ## Im Zweifel
 
 - Künstler mit einem bekannten Reggae-Katalog zählen, auch wenn das aktuelle Album breiter ist.
 - Bei unbekannten Acts: kurz nachschlagen (Bandcamp, Website, Veranstaltertext). Steht dort Reggae, Dub, Ska oder Dancehall als Hauptgenre → rein. Sonst → draussen.
 - Lieber einen grenzwertigen Eintrag weglassen als drei falsche aufnehmen.
+
+## Grenznah
+
+Diese Orte in den Nachbarländern kommen auch rein (Länderkürzel als «Kanton»: `D`, `F`, `I`, `A`, `FL`):
+
+- **D:** Konstanz, Singen, Friedrichshafen, Lindau, Lörrach, Weil am Rhein, Freiburg im Breisgau
+- **F:** Annemasse, Thonon-les-Bains, Évian, Annecy, Saint-Louis, Mulhouse, Pontarlier
+- **I:** Como, Varese, Domodossola, Aosta
+- **A:** Bregenz, Dornbirn, Feldkirch
+- **FL:** Vaduz, Schaan
+
+Alles andere ausserhalb der Schweiz bleibt draussen.
+
+## Genre-Slugs
+
+Nur diese Schlagwörter sind für `genres` erlaubt (der Validator prüft das). Links der Slug, rechts, was darauf abgebildet wird:
+
+- `reggae` – Reggae allgemein, Modern Roots, Reggae Revival, Lovers Rock, Mundart-Reggae
+- `roots` – Roots Reggae, Nyabinghi-geprägter Roots, Rastafari-Reggae
+- `dub` – Dub, Dub Techno aus dem Soundsystem-Umfeld, Steppers
+- `soundsystem` – Soundsystem-Sessions, Soundclashes, Selecta-Nächte
+- `dancehall` – Dancehall, Ragga, Bashment
+- `ska` – Ska, 2-Tone, Third-Wave-Ska, Early Reggae
+- `ska-punk` – Ska-Punk, Ska-Core
+- `rocksteady` – Rocksteady
+- `nyabinghi` – Nyabinghi-Trommeln
+- `festival` – Festival oder Festivaltag mit mehreren Acts

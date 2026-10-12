@@ -9,7 +9,8 @@ Eine statische Seite, gepflegt von KI-Agenten, gehostet auf GitHub Pages.
 
 Reggae-Konzerte in der Schweiz sind über Dutzende Club-Websites, Ticketing-Seiten und Facebook-Events verstreut. Jahgenda sammelt sie in einer einzigen, schnellen Liste:
 
-- nach Monat gruppiert, vergangene Shows verschwinden automatisch
+- nach Monat gruppiert, vergangene Shows verschwinden automatisch (auf Wunsch einblendbar)
+- Kantonswappen pro Show, «In Kalender», «WhatsApp», Direktlink pro Show
 - Filter nach Kanton und Genre, Volltextsuche
 - Genre-Chips pro Show (z. B. `roots`, `dub`, `ska`)
 - auf Wunsch die Luftlinien-Distanz vom eigenen Standort zu jeder Show
@@ -17,7 +18,7 @@ Reggae-Konzerte in der Schweiz sind über Dutzende Club-Websites, Ticketing-Seit
 
 Die Daten werden täglich von einem Claude-Code-Agenten recherchiert (siehe [Scraper](#scraper)). Was als Reggae zählt, steht in einer Textdatei, die jede und jeder anpassen kann.
 
-Gemacht von Markus & Seraina.
+Gemacht von Kusi & Seraina.
 
 ## Aufbau
 
@@ -73,8 +74,33 @@ Warum so?
 - **Kriterien als Text.** `scraper/criteria.md` ist Teil des Prompts. Wer die Definition von «Reggae» ändern will, editiert die Datei – ohne Code.
 - **Bands von Hand auswählen.** `scraper/bands.md` hat drei Listen: *Dabei*, *Nicht dabei*, *Vorschläge*. Was unter *Dabei* steht, zählt immer; was unter *Nicht dabei* steht, kommt nie in die Agenda. Der Harvester füllt nur *Vorschläge*; Menschen verschieben die Zeilen.
 - **Cache für Genres.** Jeder Act wird höchstens alle 180 Tage auf Wikipedia / der eigenen Website nachgeschlagen; das Ergebnis liegt in `data/artists.json` und darf von Hand korrigiert werden.
-- **Nichts Ungeprüftes geht live.** Der Validator läuft am Ende des Scraper-Laufs und nochmals vor dem Deploy. Fällt er durch, bleibt die alte Seite online.
+- **Nichts Ungeprüftes geht live.** Der Validator läuft am Ende des Scraper-Laufs (streng) und nochmals vor dem Deploy (`--allow-past`, damit ein Push an einem Tag ohne Lauf nicht an gestrigen Shows scheitert). Fällt er durch, bleibt die alte Seite online.
+- **Grenznah zählt mit.** Konstanz, Lörrach, Annemasse, Como, Bregenz & Co. (Liste in `criteria.md`) werden mitgesucht und mit Länderflagge statt Kantonswappen angezeigt.
 - **Keine Erfindungen.** Jede gescrapte Show braucht eine `source_url` – die Seite, auf der der Agent sie gefunden hat. Der Validator erzwingt das.
+
+### Routinen einrichten (läuft auf dem Claude-Abo)
+
+Die Routinen leben nicht im Repo, sondern unter https://claude.ai/code/routines (Konto markus.baumgartner@gmail.com).
+Beide klonen dieses Repo, brauchen Push-Recht auf `main` (GitHub-Verbindung unter https://claude.ai/connect-github)
+und Internetzugang für WebFetch/WebSearch.
+
+| Routine            | Zeitplan                         | Prompt             |
+|--------------------|----------------------------------|--------------------|
+| Jahgenda – Shows   | täglich 06:00 (Europe/Zurich)    | `/scrape-shows`    |
+| Jahgenda – Bands   | monatlich, am 1. um 07:00        | `/harvest-bands`   |
+
+Anlegen oder ändern: in Claude Code `/schedule` tippen, oder im Web unter Routinen.
+
+### Wenn ein Lauf fehlschlägt
+
+- **Nichts kaputt:** Ein fehlgeschlagener Lauf committet nichts; die Seite zeigt weiter den letzten guten Stand
+  (`Stand: …` im Footer). Vergangene Shows blendet der Browser aus.
+- **Nachschauen:** https://claude.ai/code/routines → Routine → letzter Lauf → Log. Oder `log.html` auf der Seite,
+  falls der Lauf bis zum Schreiben von `data/runs.json` kam.
+- **Häufigste Ursachen:** eine Quelle blockiert (steht im Log unter «Nicht erreichbar» – Quelle in `sources.json`
+  anpassen oder entfernen), Validator schlägt fehl (Fehlermeldung nennt Datei und Feld), Abo-Limit erreicht
+  (nächster Lauf holt es nach).
+- **Von Hand nachholen:** `claude` im Repo starten und `/scrape-shows` eingeben.
 
 ### Den Scraper von Hand laufen lassen
 
@@ -141,7 +167,11 @@ claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,WebFetch,WebSearc
 | `url`        | nein           | Link zum Event / Tickets                                    |
 | `source_url` | bei `scraper`  | Seite, auf der die Show gefunden wurde                      |
 | `lat`, `lon` | nein           | Koordinaten der Venue (für die Distanz), beide oder keine   |
-| `genres`     | nein           | Kleingeschriebene Slugs, max. 3, z. B. `["roots", "dub"]`   |
+| `acts`       | nein           | Acts einzeln, Headliner zuerst, z. B. `["Dub Inc", "Mista Sanchez"]` |
+| `genres`     | nein           | Max. 3 Slugs aus der Liste «Genre-Slugs» in `scraper/criteria.md` |
+
+Grenznahe Shows in den Nachbarländern (Orte siehe `criteria.md` → Grenznah) tragen statt eines Kantons das
+Länderkürzel `D`, `F`, `I`, `A` oder `FL`.
 
 `source` ist `mock` (Beispieldaten, die Seite zeigt einen Hinweis) oder `scraper`.
 
@@ -150,10 +180,18 @@ claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,WebFetch,WebSearc
 ```json
 {
   "artists": {
-    "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc", "checked": "2026-10-13" }
+    "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc", "checked": "2026-10-13",
+                 "festivals": ["Summerjam 2026"], "tour_checked": "2026-10-13" }
   }
 }
 ```
+
+Felder pro Act: `genres` (Pflicht, Slugs aus `criteria.md`), `source` (URL oder `manual`), `checked`, `festivals`,
+`tour_checked`. Wer ein Genre von Hand korrigiert, setzt `"source": "manual"` – dann lässt der Scraper den Eintrag
+für immer in Ruhe. Welche Bands der Scraper aktiv sucht, steht nicht hier, sondern in `scraper/bands.md`.
+
+`data/runs.json`: ein Eintrag pro Scraper-Lauf (Zähler, nicht erreichbare Quellen, verworfene Kandidaten mit
+Begründung). Wird auf `log.html` angezeigt.
 
 Prüfen: `python3 scripts/validate_shows.py`
 

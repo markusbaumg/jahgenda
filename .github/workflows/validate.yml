@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 scripts/validate_shows.py
+      - run: python3 scripts/validate_shows.py --allow-past
