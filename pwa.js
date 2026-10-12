@@ -1,27 +1,12 @@
 /* Progressive-web-app glue: service worker registration, "new version" toast and the install banner.
  * Kept separate from app.js so the agenda works without it. */
 (() => {
-  const DISMISS_KEY = "jahgenda.install.dismissed"; // timestamp of the last "×", or "forever"
+  const DISMISS_KEY = store.KEYS.INSTALL_DISMISSED; // timestamp of the last "×", or "forever"
   const DISMISS_DAYS = 30;
   const standalone =
     window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
-  const store = {
-    get(k) {
-      try {
-        return localStorage.getItem(k);
-      } catch {
-        return null;
-      }
-    },
-    set(k, v) {
-      try {
-        localStorage.setItem(k, v);
-      } catch {
-        /* private mode: ignore */
-      }
-    },
-  };
+  const store = window.jahStore;
 
   // ---- Service worker + update toast ------------------------------------------------------------
   const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
@@ -94,7 +79,7 @@
   function dismiss(forever) {
     banner.classList.remove("show");
     setTimeout(() => (banner.hidden = true), 300);
-    store.set(DISMISS_KEY, forever ? "forever" : String(Date.now()));
+    store.set(DISMISS_KEY, forever ? "forever" : Date.now());
   }
   closeBtn.addEventListener("click", () => dismiss(false));
   banner.addEventListener("click", (e) => {

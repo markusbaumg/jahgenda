@@ -1,6 +1,9 @@
 (() => {
   const DATA_URL = "data/shows.json";
   const VENUES_URL = "data/venues.json";
+  const GENRES_URL = "data/genres.json";
+  let genreOrder = []; // slugs in display order (from data/genres.json)
+  let genreLabel = {}; // slug → label
   let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
   const venueKey = (name) =>
     String(name)
@@ -50,13 +53,11 @@
   const mapView = el("map-view");
   const viewSwitch = el("view-switch");
   const VIEWS = ["list", "calendar", "map"];
-  const VIEW_KEY = "jahgenda:view";
+  const store = window.jahStore;
   let view = "list";
-  try {
-    const stored = localStorage.getItem(VIEW_KEY);
+  {
+    const stored = store.get(store.KEYS.VIEW, "list");
     if (VIEWS.includes(stored)) view = stored;
-  } catch {
-    /* private mode or blocked storage: fall back to the list */
   }
   let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
@@ -268,14 +269,14 @@
         </div>
         <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
-            ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
+            ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(genreLabel[g] || g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
             <div class="actions">
               ${starButton(s)}
               <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
               <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
               <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
               ${tickets ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>` : ""}
-              <button type="button" class="act" data-act="link" title="Link kopieren">${ICONS.link}<span>Link</span></button>
+              <button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>
             </div>
           </div>
       </li>`;
@@ -365,10 +366,22 @@
 
   async function init() {
     try {
-      const [res, vres] = await Promise.all([
+      const [res, vres, gres] = await Promise.all([
         fetch(DATA_URL, { cache: "no-cache" }),
         fetch(VENUES_URL, { cache: "no-cache" }).catch(() => null),
+        fetch(GENRES_URL, { cache: "no-cache" }).catch(() => null),
       ]);
+      try {
+        const g = gres && gres.ok ? await gres.json() : null;
+        for (const item of (g && g.genres) || []) {
+          if (item && typeof item.slug === "string") {
+            genreOrder.push(item.slug);
+            genreLabel[item.slug] = item.label || item.slug;
+          }
+        }
+      } catch {
+        /* genres.json is optional for the page; chips then follow the data */
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       try {
@@ -399,16 +412,18 @@
         used.map((c) => `<option value="${escape(c)}">${escape(regionName(c))}</option>`).join(""),
       );
 
-      // Genre chips: one toggle per genre that occurs at least once, most common first.
+      // Genre chips: one toggle per genre that occurs at least once, in the order of data/genres.json
+      // (unknown slugs go last, alphabetically).
       const counts = new Map();
       for (const s of shows) for (const g of s.genres) counts.set(g, (counts.get(g) || 0) + 1);
+      const rank = (g) => (genreOrder.includes(g) ? genreOrder.indexOf(g) : genreOrder.length);
       genreBar.innerHTML =
         `<button type="button" class="chip" data-genre="" aria-pressed="true">Alle</button>` +
         [...counts]
-          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
           .map(
             ([g]) =>
-              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(g)}</button>`,
+              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(genreLabel[g] || g)}</button>`,
           )
           .join("");
       updateChipArrows();
@@ -450,7 +465,7 @@
       } catch {
         label.textContent = "Link in Adresszeile";
       }
-      setTimeout(() => (label.textContent = "Link"), 1500);
+      setTimeout(() => (label.textContent = "Link teilen"), 1500);
     }
   });
 
@@ -547,7 +562,6 @@
 
   // --- Meine Shows: mark shows as "Interessiert" / "Ich gehe", filter to them, share the list. ---
   // Marks live only in this browser (localStorage); without it they last for the page view.
-  const MARKS_KEY = "jahgenda.marks";
   const MARK_LABEL = {
     "": "Merken",
     interested: "Interessiert",
@@ -555,12 +569,9 @@
   };
   const NEXT_MARK = { "": "interested", interested: "going", going: "" };
   let marks = {};
-  try {
-    // Only keep well-formed entries; anything else in storage is ignored.
-    const stored = JSON.parse(localStorage.getItem(MARKS_KEY));
-    for (const [id, st] of Object.entries(stored || {}))
-      if (st === "interested" || st === "going") marks[id] = st;
-  } catch {}
+  // Only keep well-formed entries; anything else in storage is ignored.
+  for (const [id, st] of Object.entries(store.get(store.KEYS.MARKS, {}) || {}))
+    if (st === "interested" || st === "going") marks[id] = st;
   // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
   const decodeHashPart = (t) => {
     try {
@@ -576,9 +587,7 @@
   const sharedBox = el("shared");
 
   function saveMarks() {
-    try {
-      localStorage.setItem(MARKS_KEY, JSON.stringify(marks));
-    } catch {}
+    store.set(store.KEYS.MARKS, marks);
   }
   const markedShows = () => shows.filter((s) => marks[s.id]);
   const markClass = (s) =>
@@ -684,11 +693,7 @@
   function setView(next) {
     if (!VIEWS.includes(next)) return;
     view = next;
-    try {
-      localStorage.setItem(VIEW_KEY, view);
-    } catch {
-      /* not remembered, that's fine */
-    }
+    store.set(store.KEYS.VIEW, view);
     markView();
     render();
   }

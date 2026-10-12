@@ -37,7 +37,7 @@ For each new act (not yet in `data/artists.json`, compare case-insensitively):
 
 1. Apply `criteria.md`. Acts that stay out are simply not added — do not add them with empty genres.
 2. Find its genres: Wikipedia page (any language) first, then the act's website or Bandcamp. Map them with
-   the **Genre slugs** table in `criteria.md` — only those slugs are allowed — max 3, most specific first.
+   the `maps` column of `data/genres.json` — only those slugs are allowed — max 3, most specific first.
    Use the Wikipedia title / band-site spelling as the key, without trailing punctuation or guest suffixes
    (`feat. …`, `& …`); compare existing keys case-insensitively ignoring punctuation (`DUB INC.` = `Dub Inc`).
 3. Add the entry:

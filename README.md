@@ -29,10 +29,12 @@ Made by Kusi & Seraina.
 
 ```
 index.html / style.css / app.js        The page. No build step, no framework.
+store.js                               Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
 log.html                               Public scraper log (renders data/runs.json).
 data/shows.json                        The shows. Written by the scraper.
 data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag.
+data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
 data/artists.json                      Genre cache per act (Wikipedia / band website).
 data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
 scraper/criteria.md                    What counts as reggae? Nearby places abroad. Allowed genre slugs.
@@ -214,7 +216,7 @@ make harvest      # suggest bands from festival line-ups
 | `tickets`    | no            | Ticket shop link                                                                     |
 | `source_url` | for `scraper` | Page where the show was found                                                        |
 | `lat`, `lon` | no            | Coordinates (from the venue), both or none                                           |
-| `genres`     | no            | Max. 3 slugs from the "Genre slugs" list in `scraper/criteria.md`                    |
+| `genres`     | no            | Max. 3 slugs from `data/genres.json`                    |
 
 `source` is `mock` (sample data, the page shows a notice) or `scraper`.
 

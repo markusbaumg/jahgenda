@@ -970,26 +970,28 @@ body {
 }
 .about-body {
   display: flex;
-  gap: 20px;
-  align-items: flex-start;
-  margin-top: 16px;
+  gap: 32px;
+  align-items: center;
+  margin-top: 18px;
 }
 .about-photo {
   flex: 0 0 auto;
-  width: 112px;
-  height: 112px;
+  width: 168px;
+  height: 168px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--gold);
+  border: 2px solid var(--gold);
   box-shadow:
-    0 0 0 3px var(--bg),
+    0 0 0 4px var(--bg),
     0 0 0 6px var(--green),
-    0 0 0 9px var(--bg),
-    0 0 0 12px var(--red);
+    0 0 0 8px var(--bg),
+    0 0 0 10px var(--red);
 }
 .about p {
   margin: 0 0 12px;
-  max-width: 60ch;
+  max-width: 58ch;
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 .about-body p:first-child {
   margin-top: 0;

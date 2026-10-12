@@ -96,7 +96,7 @@ Do not add acts you dropped. Change nothing else in `bands.md`.
 
 ## 4. Genres per act (with cache)
 
-Each show gets `genres`: 1–3 slugs **from the "Genre slugs" list in `criteria.md`** — no other slugs, the
+Each show gets `genres`: 1–3 slugs **from `data/genres.json`** — no other slugs, the
 validator rejects them. Build the list from the acts:
 
 1. Split the title into acts (`Dub Inc + Support` → `Dub Inc`; ignore "Support", "DJs", "& Friends").
@@ -106,7 +106,7 @@ validator rejects them. Build the list from the acts:
    punctuation (`DUB INC.` = `Dub Inc`). If present and (`source` is `manual` or `checked` is less than
    180 days ago), use its `genres`.
 3. Otherwise research: first the act's Wikipedia page (any language), then the act's own website or
-   Bandcamp. Map the stated genres to slugs with the table in `criteria.md` and write the entry back:
+   Bandcamp. Map the stated genres to slugs with the `maps` column of `data/genres.json` and write the entry back:
    ```json
    "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc", "checked": "2026-10-13" }
    ```

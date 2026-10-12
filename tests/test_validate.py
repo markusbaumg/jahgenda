@@ -91,7 +91,7 @@ class ShowChecks(unittest.TestCase):
 
     def test_genres_from_allowed_list_max_three_no_duplicates(self):
         self.assertTrue(
-            any("not in the 'Genre slugs'" in e for e in self.errs(shows_doc(show(genres=["jazz"]))))
+            any("not in data/genres.json" in e for e in self.errs(shows_doc(show(genres=["jazz"]))))
         )
         self.assertTrue(
             any(
@@ -149,7 +149,7 @@ class ArtistChecks(unittest.TestCase):
     def test_genres_required_list_and_allowed(self):
         self.assertTrue(any("'genres' must be a list" in e for e in self.errs({"A": {"genres": "reggae"}})))
         self.assertTrue(any("'genres' must be a list" in e for e in self.errs({"A": {}})))
-        self.assertTrue(any("not in the 'Genre slugs'" in e for e in self.errs({"A": {"genres": ["pop"]}})))
+        self.assertTrue(any("not in data/genres.json" in e for e in self.errs({"A": {"genres": ["pop"]}})))
 
     def test_unknown_field_and_bad_dates_and_source(self):
         self.assertTrue(
@@ -222,7 +222,7 @@ class RunChecks(unittest.TestCase):
 
 
 class GenreSlugs(unittest.TestCase):
-    def test_slugs_are_read_from_criteria(self):
+    def test_slugs_are_read_from_genres_json(self):
         slugs = V.allowed_genres()
         self.assertIn("reggae", slugs)
         self.assertIn("ska-punk", slugs)

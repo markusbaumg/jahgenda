@@ -1,0 +1,55 @@
+{
+  "note": "Allowed genre slugs in display order (reggae family → ska family → special). The validator, the scraper and the genre filter on the page all read this file. Edit here, nowhere else.",
+  "genres": [
+    {
+      "slug": "reggae",
+      "label": "Reggae",
+      "maps": "reggae in general, modern roots, reggae revival, lovers rock, Swiss-German reggae"
+    },
+    {
+      "slug": "roots",
+      "label": "Roots",
+      "maps": "roots reggae, Nyabinghi-flavoured roots, Rastafari reggae"
+    },
+    {
+      "slug": "dub",
+      "label": "Dub",
+      "maps": "dub, dub techno from the sound-system scene, steppers"
+    },
+    {
+      "slug": "soundsystem",
+      "label": "Soundsystem",
+      "maps": "sound-system sessions, sound clashes, selecta nights"
+    },
+    {
+      "slug": "dancehall",
+      "label": "Dancehall",
+      "maps": "dancehall, ragga, bashment"
+    },
+    {
+      "slug": "rocksteady",
+      "label": "Rocksteady",
+      "maps": "rocksteady"
+    },
+    {
+      "slug": "ska",
+      "label": "Ska",
+      "maps": "ska, 2-tone, third-wave ska, early reggae"
+    },
+    {
+      "slug": "ska-punk",
+      "label": "Ska-Punk",
+      "maps": "ska-punk, ska-core"
+    },
+    {
+      "slug": "nyabinghi",
+      "label": "Nyabinghi",
+      "maps": "Nyabinghi drumming"
+    },
+    {
+      "slug": "festival",
+      "label": "Festival",
+      "maps": "festival or festival day with several acts"
+    }
+  ]
+}

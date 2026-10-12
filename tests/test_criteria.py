@@ -1,4 +1,4 @@
-"""Genre-Slug parsing from scraper/criteria.md and the finer validator rules. Run: make test"""
+"""Genre slug parsing from data/genres.json and the finer validator rules. Run: make test"""
 
 import importlib.util
 import tempfile
@@ -23,80 +23,30 @@ ALLOWED = {"reggae", "dub", "ska"}
 
 
 class AllowedGenres(unittest.TestCase):
-    """allowed_genres() reads every backticked slug under '## Genre slugs' – nothing more, nothing less."""
+    """allowed_genres() reads the slugs from data/genres.json – nothing more, nothing less."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self._orig = V.CRITERIA
-        V.CRITERIA = Path(self.tmp.name) / "criteria.md"
+        self._orig = V.GENRES
+        V.GENRES = Path(self.tmp.name) / "genres.json"
 
     def tearDown(self):
-        V.CRITERIA = self._orig
+        V.GENRES = self._orig
         self.tmp.cleanup()
 
     def parse(self, text):
-        V.CRITERIA.write_text(text, encoding="utf-8")
+        V.GENRES.write_text(text, encoding="utf-8")
         return V.allowed_genres()
 
-    def test_missing_file_or_section_gives_empty_set(self):
+    def test_missing_or_malformed_file_gives_empty_set(self):
         self.assertEqual(V.allowed_genres(), set())
-        self.assertEqual(self.parse("# Kriterien\n\n- `reggae` zählt\n"), set())
-        self.assertEqual(self.parse("## Genre slugs\n\nnoch nichts\n"), set())
+        self.assertEqual(self.parse("not json"), set())
+        self.assertEqual(self.parse('{"genres": "reggae"}'), set())
+        self.assertEqual(self.parse('{"genres": []}'), set())
 
-    def test_only_the_slug_section_counts(self):
-        text = (
-            "# Was zählt\n\n- `dancehall` ist ok, aber das hier ist nicht die Liste\n\n"
-            "## Genre slugs\n\n- `reggae` – allgemein\n- `ska-punk` – Ska-Punk\n\n"
-            "## Danach\n\n- `jazz` steht in einem anderen Abschnitt\n"
-        )
+    def test_slugs_are_read_and_validated(self):
+        text = '{"genres": [{"slug": "reggae"}, {"slug": "ska-punk"}, {"slug": "Not Valid"}, {"label": "x"}]}'
         self.assertEqual(self.parse(text), {"reggae", "ska-punk"})
-
-    def test_section_at_end_of_file_and_without_trailing_newline(self):
-        self.assertEqual(
-            self.parse("## Nearby\n\n- x\n\n## Genre slugs\n- `dub`\n- `roots`"), {"dub", "roots"}
-        )
-
-    def test_heading_must_match_exactly(self):
-        self.assertEqual(self.parse("## Genre slugs (old)\n- `dub`\n"), set())
-        self.assertEqual(self.parse("### Genre slugs\n- `dub`\n"), set())
-        self.assertEqual(self.parse("## Genre slugs   \n- `dub`\n"), {"dub"})  # trailing spaces are fine
-
-    def test_non_slugs_in_backticks_are_ignored(self):
-        text = "## Genre slugs\n\n- `Reggae` (falsch geschrieben)\n- `dub techno`\n- `-dub`\n- `dub-`\n"
-        text += "- `2tone`\n- `ska`\n"
-        self.assertEqual(self.parse(text), {"2tone", "ska"})
-
-    def test_several_slugs_on_one_line_and_duplicates(self):
-        self.assertEqual(self.parse("## Genre slugs\n`dub`, `ska` und nochmals `dub`\n"), {"dub", "ska"})
-
-    def test_repo_criteria_matches_the_data(self):
-        """The real criteria.md must list the slugs the data uses (same file the validator reads)."""
-        V.CRITERIA = self._orig
-        slugs = V.allowed_genres()
-        self.assertGreaterEqual(len(slugs), 5)
-        for g in ("reggae", "dub", "ska", "dancehall", "festival"):
-            self.assertIn(g, slugs)
-
-
-def show(**over):
-    base = {
-        "id": f"{TOMORROW}-dub-inc-bern",
-        "date": TOMORROW,
-        "title": "Dub Inc",
-        "venue": "Dachstock",
-        "city": "Bern",
-        "canton": "BE",
-        "source_url": "https://x.ch/programm",
-    }
-    base.update(over)
-    return base
-
-
-def doc(*items, **head):
-    base = {"updated": "2026-10-13T06:00:00+02:00", "source": "scraper", "shows": list(items)}
-    base.update(head)
-    return base
-
 
 class ShowDetails(unittest.TestCase):
     def errs(self, d, allow_past=False):

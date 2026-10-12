@@ -16,6 +16,7 @@ const SHELL = [
   "index.html",
   "log.html",
   "style.css",
+  "store.js",
   "app.js",
   "pwa.js",
   "manifest.webmanifest",

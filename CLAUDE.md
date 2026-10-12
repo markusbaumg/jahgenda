@@ -12,6 +12,9 @@ layout. The site UI is German; code, docs and config are English.
   `bands.md`.
 - **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
+- **Humans also own:** `data/genres.json` (allowed genre slugs, labels, filter order — single source of truth
+  for validator, scraper and page) and `store.js` (every client-side persistence goes through `window.jahStore`;
+  never call localStorage directly, so the backend can be swapped later).
 - **Shared:** `data/venues.json` – humans maintain venues (coordinates, programme URL, `scrape` flag),
   skills add new venues they encounter but do not change existing ones.
 
@@ -60,7 +63,7 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
 - **Scraper proof:** a local run (`claude -p "/scrape-shows"`, branch `scrape-test`, worktree
   `../reggae-scrape-test`) found 29 real shows with sources, coordinates and genres — the skill works; the
   cloud run only lacks network access.
-- **Data rules:** genres only from the "Genre slugs" list in `scraper/criteria.md` (reggae, roots, dub,
+- **Data rules:** genres only from `data/genres.json` (display order = filter order) (reggae, roots, dub,
   soundsystem, dancehall, ska, ska-punk, rocksteady, nyabinghi, festival); Seraina's core list is reggae, ska,
   rocksteady, ska-punk, dub — dancehall is included, open question whether it stays. Nearby places abroad
   (criteria.md → Nearby) use country codes D/F/I/A/FL as `canton`. Every show needs `source_url` and a venue in
