@@ -44,7 +44,7 @@ MAX_GENRES = 3
 
 SHOW_REQUIRED = {"id": str, "date": str, "title": str, "venue": str, "city": str, "canton": str}
 SHOW_OPTIONAL = {
-    "time": str, "url": str, "source_url": str, "lat": (int, float), "lon": (int, float),
+    "time": str, "url": str, "tickets": str, "source_url": str, "lat": (int, float), "lon": (int, float),
     "genres": list, "acts": list,
 }
 ARTIST_FIELDS = {"genres", "source", "checked", "festivals", "tour_checked"}
@@ -127,7 +127,7 @@ def check_show(s, i, allow_past, today, allowed):
         errs.append(f"{where}: time must be HH:MM")
     if s["canton"] not in REGIONS:
         errs.append(f"{where}: unknown canton '{s['canton']}' (cantons, or D/F/I/A/FL for shows just across the border)")
-    for key in ("url", "source_url"):
+    for key in ("url", "tickets", "source_url"):
         if s.get(key) and not URL_RE.match(s[key]):
             errs.append(f"{where}: {key} must start with http(s)://")
     if ("lat" in s) != ("lon" in s):

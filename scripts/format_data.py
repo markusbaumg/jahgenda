@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 
-SHOW_ORDER = ["id", "date", "time", "title", "acts", "venue", "city", "canton", "url", "source_url", "lat", "lon", "genres"]
+SHOW_ORDER = ["id", "date", "time", "title", "acts", "venue", "city", "canton", "url", "tickets", "source_url", "lat", "lon", "genres"]
 ARTIST_ORDER = ["genres", "source", "checked", "festivals", "tour_checked"]
 MAX_RUNS = 60
 

@@ -96,6 +96,10 @@ class ShowChecks(unittest.TestCase):
         # two events in one venue on one night with different times are fine
         self.assertEqual(self.errs(shows_doc(a, show(id=f"{TOMORROW}-afterparty-bern", time="23:00", title="Afterparty"))), [])
 
+    def test_tickets_url(self):
+        self.assertEqual(self.errs(shows_doc(show(tickets="https://petzi.ch/e/1"))), [])
+        self.assertTrue(any("tickets must start" in e for e in self.errs(shows_doc(show(tickets="petzi.ch")))))
+
     def test_acts_must_be_strings(self):
         self.assertTrue(any("'acts'" in e for e in self.errs(shows_doc(show(acts=[1])))))
         self.assertEqual(self.errs(shows_doc(show(acts=["Dub Inc", "Support"]))), [])

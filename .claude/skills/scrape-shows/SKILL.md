@@ -36,7 +36,9 @@ Work from the repository root. Today's date is what `date +%F` prints — use it
 
 ## 2. Collect candidates
 
-Keep a scratch list of candidates (title, acts, date, time, venue, city, canton, url, source_url). Budget:
+Keep a scratch list of candidates (title, acts, date, time, venue, city, canton, url, tickets, source_url).
+`url` is the event page (venue or promoter), `tickets` the ticket-shop link when the page has one (Petzi,
+Eventfrog, Ticketcorner, Starticket, Eventim, See Tickets, the venue's own shop). Budget:
 the whole run should stay under roughly **120 page fetches and 40 web searches**. When a source is huge,
 take the next 6 months, not everything.
 
@@ -130,7 +132,7 @@ Only these fields are allowed per artist: `genres, source, checked, festivals, t
 4. Set `"source": "scraper"` and `"updated"` to the current time in ISO 8601 with offset.
 
 Allowed fields per show — nothing else:
-`id, date, time, title, acts, venue, city, canton, url, source_url, lat, lon, genres`.
+`id, date, time, title, acts, venue, city, canton, url, tickets, source_url, lat, lon, genres`.
 
 Write the files, then run `python3 scripts/format_data.py` — it sorts shows, artists and venues and fixes
 the layout, so you need not care about formatting.
