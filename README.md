@@ -55,9 +55,10 @@ scripts/smoke.sh                       Loads the pages in headless Chrome, fails
 scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahgenda.svg.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
+e2e/                                   End-to-end tests in a real browser (Playwright; make e2e).
 design/                                Logo variants, festival spec, other design documents.
 .github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
-.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) on every push and PR.
+.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) + e2e job on every push and PR.
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.
 Makefile                               Everything you can run: `make` shows the help.
 ```
@@ -267,6 +268,26 @@ make status       # last deploys and the last scraper run
 ```
 
 No dependencies beyond Python 3, Node (for prettier via npx) and the GitHub CLI.
+
+### End-to-end tests
+
+`e2e/` is a small [Playwright](https://playwright.dev) project that drives the real page in a browser:
+desktop Chrome (1280×800) and an iPhone 13 emulated in Chromium. One spec per area – list, search and
+genre chips, the Wo and Wann panels, the three views (the map really loads Leaflet), Meine Shows with
+share link and `.ics` download, the phone action sheet, mocked geolocation, and every page (`index.html`,
+`log.html`, `review.html`, `mischpult.html`) loading without console errors. The interaction tests run
+against a fixture served in place of `data/shows.json` (dates relative to today), so they do not depend
+on what the scraper found; the load and console checks use the real data.
+
+```sh
+make e2e                                   # npm ci, download Chromium, run the suite (serves the repo on :4173)
+cd e2e && npx playwright test --project="iPhone 13" tests/phone.spec.js   # one project / one file
+cd e2e && npx playwright test --ui          # Playwright's UI mode
+cd e2e && node adhoc.js https://markusbaumg.github.io/jahgenda/ shot.png   # ad-hoc script against any URL
+```
+
+`make e2e` is not part of `make check` (browser download, network for Leaflet and tiles); CI runs it as
+its own job in `validate.yml` and uploads the report and traces when it fails.
 
 ### Changing the logo
 
