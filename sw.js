@@ -31,12 +31,14 @@ const CANTONS =
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(SHELL_CACHE)
-      .then((cache) =>
-        cache.addAll([...SHELL, ...CANTONS.map((c) => `img/cantons/${c}.svg`)]),
-      )
-      .then(() => self.skipWaiting()),
+    caches.open(SHELL_CACHE).then((cache) =>
+      // cache: "reload" bypasses the HTTP cache, so a new worker never precaches a stale shell.
+      cache.addAll(
+        [...SHELL, ...CANTONS.map((c) => `img/cantons/${c}.svg`)].map(
+          (u) => new Request(u, { cache: "reload" }),
+        ),
+      ),
+    ),
   );
 });
 

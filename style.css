@@ -39,6 +39,10 @@ body {
   display: flex;
   height: 6px;
 }
+.stripe:first-child {
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--bg);
+}
 .stripe span {
   flex: 1;
 }
@@ -94,7 +98,7 @@ body {
 
 .filters {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 3;
   margin-bottom: 8px;
   padding: 10px 0 0;
@@ -915,7 +919,7 @@ body {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   z-index: 21;
   display: flex;
