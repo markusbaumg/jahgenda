@@ -1,7 +1,12 @@
 (() => {
   const DATA_URL = "data/shows.json";
   const VENUES_URL = "data/venues.json";
+  const GENRES_URL = "data/genres.json";
+  const SLOGANS_URL = "data/slogans.json";
+  let genreOrder = []; // slugs in display order (from data/genres.json)
+  let genreLabel = {}; // slug → label
   let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
+  let venuePlaces = []; // {city, lat, lon} per known venue – the nearest one is the start for the SBB link
   const venueKey = (name) =>
     String(name)
       .toLowerCase()
@@ -50,24 +55,22 @@
   const mapView = el("map-view");
   const viewSwitch = el("view-switch");
   const VIEWS = ["list", "calendar", "map"];
-  const VIEW_KEY = "jahgenda:view";
+  const store = window.jahStore;
   let view = "list";
-  try {
-    const stored = localStorage.getItem(VIEW_KEY);
+  {
+    const stored = store.get(store.KEYS.VIEW, "list");
     if (VIEWS.includes(stored)) view = stored;
-  } catch {
-    /* private mode or blocked storage: fall back to the list */
   }
   let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
   const resultsText = el("results-text");
-  const togglePast = el("toggle-past");
   let showPast = false;
   let pastCount = 0;
-  const cantonSelect = el("canton");
+  const cantons = new Set(); // selected canton / region codes (empty = all)
+  let radiusKm = 0; // 0 = no distance filter; only applies once the position is known
   const search = el("q");
   const genreBar = el("genres"); // genre chips
-  const chipRow = el("chips"); // the scrolling row: genre chips + (on phones) Kanton ▾ / Nähe
+  const chipRow = el("chips"); // the scrolling chip row (frozen height, arrows, drag)
   let activeGenre = "";
 
   const monthFmt = new Intl.DateTimeFormat("de-CH", {
@@ -85,6 +88,18 @@
   const parseDay = (s) => {
     const [y, m, d] = s.split("-").map(Number);
     return new Date(y, m - 1, d);
+  };
+  const pad2 = (n) => String(n).padStart(2, "0");
+  // Calendar export helpers (.ics and Google Calendar): local-time stamp YYYYMMDDTHHMM00 and the
+  // [start, end] of a timed show - shows have no end time in the data, so they last three hours
+  // (wall-clock hours, which is what a floating-time calendar entry expects).
+  const SHOW_HOURS = 3;
+  const localStamp = (x) =>
+    `${x.getFullYear()}${pad2(x.getMonth() + 1)}${pad2(x.getDate())}T${pad2(x.getHours())}${pad2(x.getMinutes())}00`;
+  const showSpan = (s) => {
+    const [h, m] = s.time.split(":").map(Number);
+    const [y, mo, d] = [s._day.getFullYear(), s._day.getMonth(), s._day.getDate()];
+    return [new Date(y, mo, d, h, m), new Date(y, mo, d, h + SHOW_HOURS, m)];
   };
 
   const todayStart = () => {
@@ -122,20 +137,49 @@
 
   const formatKm = (km) => (km < 1 ? "gleich ums Eck" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`);
 
+  // The town nearest to the user's position (from the venue list) – the "von" of the SBB timetable link.
+  let homeCity = "";
+  function updateHomeCity() {
+    if (!here || !venuePlaces.length) return;
+    const near = venuePlaces.map((p) => ({ p, km: distanceKm(here, p) })).sort((a, b) => a.km - b.km)[0];
+    homeCity = near && near.km < 60 ? near.p.city : "";
+  }
+  // SBB timetable from the user's town to the show's town, arriving an hour before the show
+  // (20:00 when no time is known). Same contract as lib.js sbbUrl (pinned by tests/lib.test.mjs).
+  function sbbUrl(s) {
+    if (!homeCity || homeCity === s.city) return "";
+    const [h, m] = (s.time || "20:00").split(":").map(Number);
+    const arrive = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h, m - 60);
+    const time = `${pad2(arrive.getHours())}:${pad2(arrive.getMinutes())}`;
+    return `https://www.sbb.ch/de?von=${encodeURIComponent(homeCity)}&nach=${encodeURIComponent(s.city)}&date=${s.date}&time=${encodeURIComponent(time)}&moment=ARRIVAL`;
+  }
+  function sbbLink(s) {
+    const url = sbbUrl(s);
+    if (!url) return "";
+    return `<a class="sbb" href="${url}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show" aria-label="SBB-Fahrplan nach ${escape(s.city)}">SBB</a>`;
+  }
   function distanceLabel(s) {
-    if (!here || typeof s.lat !== "number" || typeof s.lon !== "number") return "";
-    return ` · <span class="dist">${formatKm(distanceKm(here, s))}</span>`;
+    if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
+    // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
+    if (!here)
+      return geoDeclined
+        ? ""
+        : ` · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button>`;
+    return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
   // Venue name as a link to the venue's site when data/venues.json knows it.
   const venueLink = (s) => {
     const u = venueSites[venueKey(s.venue)];
     return u
-      ? `<a class="venue-link" href="${escape(u)}" target="_blank" rel="noopener" title="Website von ${escape(s.venue)}">${escape(s.venue)}</a>`
+      ? `<a class="venue-link" href="${escape(u)}" target="_blank" rel="noopener" title="Website von ${escape(s.venue)} öffnen">${escape(s.venue)}</a>`
       : escape(s.venue);
   };
 
   const ICONS = {
+    rss: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.2 15.6a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM4 9.5a10.5 10.5 0 0 1 10.5 10.5h-3A7.5 7.5 0 0 0 4 12.5v-3zM4 3.5A16.5 16.5 0 0 1 20.5 20h-3A13.5 13.5 0 0 0 4 6.5v-3z"/></svg>',
+    event:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3zM5 5h6v2H5v12h12v-6h2v8H3V5h2z"/></svg>',
     ticket:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7zm2 0v2.2A4 4 0 0 1 5 14.8V17h14v-2.2a4 4 0 0 1 0-5.6V7H5zm5 2h2v6h-2V9zm4 0h2v6h-2V9z"/></svg>',
     gcal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm3.5 2.5h5v1.6h-3.3v1h3v1.5h-3v1.2h3.4v1.6h-5.1z"/></svg>',
@@ -143,6 +187,7 @@
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0 1.4 4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.6 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 2.9 2.9 1 1 0 0 1 1.4 0zm2.8-2.8a1 1 0 0 1 0-1.4 4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.6 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.8 0l3-3a2 2 0 0 0-2.9-2.9 1 1 0 0 1-1.4 0z"/></svg>',
     star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.6 6 21l1.3-6.8-5-4.7 6.8-.8z"/></svg>',
+    more: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>',
   };
 
   // Short, stable hash per show for links: FNV-1a over the id, base36 (6-7 chars), e.g. #k3f9zq.
@@ -165,19 +210,20 @@
 
   // One VEVENT for a show (floating local time, so it lands at the right hour in Switzerland).
   function vevent(s, status) {
-    const d = s.date.replace(/-/g, "");
+    // RFC 5545 text escaping; a bare CR would end the content line, so it is dropped.
     const esc = (t) =>
-      String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+      String(t)
+        .replace(/\r/g, "")
+        .replace(/\\/g, "\\\\")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,")
+        .replace(/\n/g, "\\n");
     let when;
     if (s.time) {
-      const [h, m] = s.time.split(":").map(Number);
-      const end = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h + 3, m);
-      const pad = (n) => String(n).padStart(2, "0");
-      const stamp = (x) =>
-        `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
-      when = `DTSTART:${d}T${pad(h)}${pad(m)}00\r\nDTEND:${stamp(end)}`;
+      const [start, end] = showSpan(s);
+      when = `DTSTART:${localStamp(start)}\r\nDTEND:${localStamp(end)}`;
     } else {
-      when = `DTSTART;VALUE=DATE:${d}`;
+      when = `DTSTART;VALUE=DATE:${s.date.replace(/-/g, "")}`;
     }
     return [
       "BEGIN:VEVENT",
@@ -186,7 +232,7 @@
       when,
       `SUMMARY:${esc(s.title)}`,
       `LOCATION:${esc(`${s.venue}, ${s.city}`)}`,
-      `DESCRIPTION:${esc(`${safeUrl(s.url) || ""}\n${showUrl(s)}`)}`,
+      `DESCRIPTION:${esc(`${safeUrl(s.url) || ""}\n${showUrl(s)}`.trim())}`,
       `URL:${showUrl(s)}`,
       ...(status ? [`STATUS:${status}`] : []),
       "END:VEVENT",
@@ -201,17 +247,13 @@
 
   // "Add to Google Calendar" link (works in the Google Calendar app and on the web).
   function gcalUrl(s) {
-    const d = s.date.replace(/-/g, "");
     let dates;
     if (s.time) {
-      const [h, m] = s.time.split(":").map(Number);
-      const pad = (n) => String(n).padStart(2, "0");
-      const end = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h + 3, m);
-      dates = `${d}T${pad(h)}${pad(m)}00/${end.getFullYear()}${pad(end.getMonth() + 1)}${pad(end.getDate())}T${pad(end.getHours())}${pad(end.getMinutes())}00`;
+      const [start, end] = showSpan(s);
+      dates = `${localStamp(start)}/${localStamp(end)}`;
     } else {
       const next = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate() + 1);
-      const pad = (n) => String(n).padStart(2, "0");
-      dates = `${d}/${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}`;
+      dates = `${s.date.replace(/-/g, "")}/${localStamp(next).slice(0, 8)}`;
     }
     const p = new URLSearchParams({
       action: "TEMPLATE",
@@ -249,20 +291,19 @@
     const dow = d.getDay();
     const url = safeUrl(s.url);
     const title = url
-      ? `<a href="${escape(url)}" target="_blank" rel="noopener">${escape(s.title)}</a>`
+      ? `<a href="${escape(url)}" target="_blank" rel="noopener" title="Konzertseite beim Veranstalter öffnen">${escape(s.title)}</a>`
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
-    const tickets = safeUrl(s.tickets);
     // Genres are muted words at the end of the meta line; the active genre chip is not repeated.
     const genreWords = s.genres
       .filter((g) => g !== activeGenre)
-      .map((g) => ` · <span class="genre">${escape(g)}</span>`)
+      .map((g) => ` · <span class="genre">${escape(genreLabel[g] || g)}</span>`)
       .join("");
     return `
       <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <time class="date" datetime="${escape(s.date)}">
           <span class="dow">${dowFmt.format(d).replace(".", "")}</span>
-          <span class="day">${String(d.getDate()).padStart(2, "0")}</span>
+          <span class="day">${String(d.getDate()).padStart(2, "0")}<i class="dot">.</i></span>
         </time>
         <div>
           <h3 class="title">${title}</h3>
@@ -273,46 +314,63 @@
           }
           <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}${genreWords}</p>
         </div>
-        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
+        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
             ${shared && shared[s.id] === "going" ? `<div class="tags"><span class="tag-chip going">geht hin</span></div>` : ""}
             <div class="actions">
-              ${starButton(s)}
-              <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
-              <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
-              <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
-              ${tickets ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>` : ""}
-              <button type="button" class="act" data-act="link" title="Link kopieren">${ICONS.link}<span>Link</span></button>
+              ${actionsHtml(s)}
+              <button type="button" class="act more" data-act="more" aria-haspopup="dialog" aria-expanded="false" title="Aktionen zu dieser Show">${ICONS.more}<span>Mehr</span></button>
             </div>
           </div>
       </li>`;
   }
 
+  // The per-show actions, shared by the row (short labels) and the action sheet (long labels).
+  // Links carry their href, buttons carry data-act – both are handled by runAction().
+  function actionsHtml(s, long = false) {
+    const url = safeUrl(s.url);
+    const tickets = safeUrl(s.tickets);
+    return [
+      starButton(s),
+      `<button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender${long ? " (.ics)" : ""}</span></button>`,
+      `<a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google${long ? " Kalender" : ""}</span></a>`,
+      url
+        ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" title="Event-Seite des Veranstalters öffnen">${ICONS.event}<span>Event${long ? "-Seite" : ""}</span></a>`
+        : "",
+      tickets
+        ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>`
+        : "",
+      `<a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`,
+      `<button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>`,
+    ].join("");
+  }
+  // Every filter except the date range (the histogram in the "Wann" panel uses exactly these).
+  function matchesFilters(s) {
+    const q = search.value.trim().toLowerCase();
+    if (shared && !shared[s.id]) return false;
+    if (mineOnly && !marks[s.id]) return false;
+    if (cantons.size && !cantons.has(s.canton)) return false;
+    if (radiusKm && here && typeof s.lat === "number" && distanceKm(here, s) > radiusKm) return false;
+    if (activeGenre && !s.genres.includes(activeGenre)) return false;
+    if (!q) return true;
+    return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
+      .join(" ")
+      .toLowerCase()
+      .includes(q);
+  }
+  const isVisible = (s) => (!s._past || showPast) && inRange(s) && matchesFilters(s);
+
   function render() {
     if (status.classList.contains("loading")) return; // data not in yet: the skeleton stays, init() renders
-    const canton = cantonSelect.value;
     const q = search.value.trim().toLowerCase();
+    const visible = shows.filter(isVisible);
 
-    const visible = shows.filter((s) => {
-      if (s._past && !showPast) return false;
-      if (shared && !shared[s.id]) return false;
-      if (mineOnly && !marks[s.id]) return false;
-      if (canton && s.canton !== canton) return false;
-      if (activeGenre && !s.genres.includes(activeGenre)) return false;
-      if (!q) return true;
-      return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
-        .join(" ")
-        .toLowerCase()
-        .includes(q);
-    });
-
-    const filtered = Boolean(canton || activeGenre || q || mineOnly || shared);
+    const filtered = Boolean(
+      cantons.size || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
+    );
     el("clear-filters").hidden = !filtered;
-    const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
-    togglePast.hidden = past === 0;
-    togglePast.textContent = showPast ? "Vergangene ausblenden" : `Vergangene anzeigen (${past})`;
     updateMine();
-    syncTools();
+    updateWhen();
     lastVisible = visible;
     if (!visible.length) {
       list.innerHTML = "";
@@ -321,7 +379,7 @@
       views.hidden = true;
       resultsText.textContent = "";
       status.innerHTML = shows.some((s) => !s._past)
-        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset">Filter zurücksetzen</button>`
+        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`
         : `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
       return;
     }
@@ -333,9 +391,10 @@
       first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
         ? monthFmt.format(first)
         : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
+    const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
     resultsText.textContent = shared
-      ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}`
-      : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}`;
+      ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
+      : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
 
     list.hidden = view !== "list";
     calendarEl.hidden = view !== "calendar";
@@ -372,18 +431,47 @@
       .join("");
   }
 
+  // Tagline: one of the slogans (same lines as on the stickers), rotating by day.
+  fetch(SLOGANS_URL, { cache: "no-cache" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      const list = (d && d.slogans) || [];
+      if (!list.length) return;
+      const line = list[Math.floor(Math.random() * list.length)];
+      const tag = el("tagline");
+      if (tag) tag.textContent = line;
+      const mini = el("mini-tag");
+      if (mini) mini.textContent = line;
+    })
+    .catch(() => {});
+
   async function init() {
     try {
-      const [res, vres] = await Promise.all([
+      const [res, vres, gres] = await Promise.all([
         fetch(DATA_URL, { cache: "no-cache" }),
         fetch(VENUES_URL, { cache: "no-cache" }).catch(() => null),
+        fetch(GENRES_URL, { cache: "no-cache" }).catch(() => null),
       ]);
+      try {
+        const g = gres && gres.ok ? await gres.json() : null;
+        for (const item of (g && g.genres) || []) {
+          if (item && typeof item.slug === "string") {
+            genreOrder.push(item.slug);
+            genreLabel[item.slug] = item.label || item.slug;
+          }
+        }
+      } catch {
+        /* genres.json is optional for the page; chips then follow the data */
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       try {
         const v = vres && vres.ok ? await vres.json() : null;
         for (const [name, info] of Object.entries((v && v.venues) || {})) {
-          if (info && safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
+          if (!info) continue;
+          if (safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
+          if (typeof info.lat === "number" && typeof info.lon === "number" && info.city)
+            venuePlaces.push({ city: info.city, lat: info.lat, lon: info.lon });
         }
       } catch {
         /* venues.json is optional for the page */
@@ -402,22 +490,38 @@
         .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
 
       pastCount = shows.filter((s) => s._past).length;
-      const used = [...new Set(shows.map((s) => s.canton).filter(Boolean))].sort();
-      cantonSelect.insertAdjacentHTML(
-        "beforeend",
-        used.map((c) => `<option value="${escape(c)}">${escape(regionName(c))}</option>`).join(""),
+      setupWhen();
+      // Canton chips (multi-select, with counts) inside the Wo panel: Swiss cantons A–Z, the
+      // neighbouring countries at the end.
+      const perCanton = new Map();
+      for (const s of shows) perCanton.set(s.canton, (perCanton.get(s.canton) || 0) + 1);
+      const used = [...perCanton.keys()].sort(
+        (a, b) =>
+          (ABROAD[a] ? 1 : 0) - (ABROAD[b] ? 1 : 0) || regionName(a).localeCompare(regionName(b), "de"),
       );
+      el("canton-chips").innerHTML =
+        `<button type="button" class="chip" data-canton="" aria-pressed="true" title="Alle Kantone anzeigen">Alle</button>` +
+        used
+          .map((c) => {
+            const name = ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c);
+            const title = `${regionName(c)}: ${perCanton.get(c)} ${perCanton.get(c) === 1 ? "Show" : "Shows"} – anklicken zum Ein-/Ausschalten`;
+            return `<button type="button" class="chip${ABROAD[c] ? " abroad" : ""}" data-canton="${escape(c)}" aria-pressed="false" title="${escape(title)}"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(name)}<small>${perCanton.get(c)}</small></button>`;
+          })
+          .join("");
+      updateWhere();
 
-      // Genre chips: one toggle per genre that occurs at least once, most common first.
+      // Genre chips: one toggle per genre that occurs at least once, in the order of data/genres.json
+      // (unknown slugs go last, alphabetically).
       const counts = new Map();
       for (const s of shows) for (const g of s.genres) counts.set(g, (counts.get(g) || 0) + 1);
+      const rank = (g) => (genreOrder.includes(g) ? genreOrder.indexOf(g) : genreOrder.length);
       genreBar.innerHTML =
-        `<button type="button" class="chip" data-genre="" aria-pressed="true">Alle</button>` +
+        `<button type="button" class="chip" data-genre="" aria-pressed="true" title="Alle Genres anzeigen">Alle</button>` +
         [...counts]
-          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
           .map(
-            ([g]) =>
-              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(g)}</button>`,
+            ([g, n]) =>
+              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false" title="Nur ${escape(genreLabel[g] || g)} anzeigen (${n})">${escape(genreLabel[g] || g)}<small>${n}</small></button>`,
           )
           .join("");
       chipRow.scrollLeft = 0; // the row starts at «Alle», whatever snapped before the chips existed
@@ -430,6 +534,7 @@
       status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
       revealFromHash();
+      autoLocate();
     } catch (err) {
       console.error(err);
       status.classList.remove("loading");
@@ -437,23 +542,22 @@
     }
   }
 
-  // Canton badge: click filters the list to that canton (click again to clear).
+  // Canton badge in a row: toggles that canton in the Wo filter.
   list.addEventListener("click", (e) => {
     const c = e.target.closest(".canton[data-canton]");
     if (!c) return;
-    cantonSelect.value = cantonSelect.value === c.dataset.canton ? "" : c.dataset.canton;
+    toggleCanton(c.dataset.canton);
     renderAndKeepInView();
   });
 
-  // Per-show actions (calendar / copy link); WhatsApp is a plain link.
-  // Bound on the views wrapper, because the calendar and the map reuse the show rows.
-  views.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-act]");
-    if (!btn) return;
-    const s = shows.find((x) => x.id === btn.closest(".show").dataset.id);
-    if (!s) return;
-    if (btn.dataset.act === "cal") downloadIcs(icsFor(s), `${s.id}.ics`);
-    if (btn.dataset.act === "link") {
+  // Per-show button actions (mark / calendar / copy link / open the action sheet); the other
+  // actions are plain links. One handler for the row buttons and for the action sheet.
+  async function runAction(btn, s, row) {
+    const act = btn.dataset.act;
+    if (act === "mark") cycleMark(s, row);
+    if (act === "cal") downloadIcs(icsFor(s), `${s.id}.ics`);
+    if (act === "more") openSheet(btn, s, row);
+    if (act === "link") {
       history.replaceState(null, "", `#${s._short}`);
       const label = btn.querySelector("span");
       try {
@@ -462,15 +566,115 @@
       } catch {
         label.textContent = "Link in Adresszeile";
       }
-      setTimeout(() => (label.textContent = "Link"), 1500);
+      setTimeout(() => (label.textContent = "Link teilen"), 1500);
     }
+  }
+  // Bound on the views wrapper, because the calendar and the map reuse the show rows.
+  views.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const row = btn.closest(".show");
+    const s = shows.find((x) => x.id === row.dataset.id);
+    if (s) runAction(btn, s, row);
   });
 
+  // --- Action sheet: on phones and touch screens the row actions collapse into "⋯ Mehr" (+ the star), which
+  // opens this sheet – a bottom sheet on phones, a popover under the button on wider touch screens. It holds
+  // the same buttons and links as the row (actionsHtml) and delegates to runAction(); nothing is duplicated.
+  const sheet = document.createElement("div");
+  sheet.className = "sheet";
+  sheet.hidden = true;
+  sheet.innerHTML =
+    `<div class="sheet-backdrop" data-close></div>` +
+    `<div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">` +
+    `<div class="sheet-head"><h2 class="sheet-title" id="sheet-title"></h2>` +
+    `<button type="button" class="sheet-close" data-close title="Schliessen" aria-label="Schliessen">&times;</button></div>` +
+    `<div class="sheet-actions"></div></div>`;
+  document.body.appendChild(sheet);
+  const sheetPanel = sheet.querySelector(".sheet-panel");
+  const sheetTitle = sheet.querySelector(".sheet-title");
+  const sheetActions = sheet.querySelector(".sheet-actions");
+  const phoneMq = matchMedia("(max-width: 600px)");
+  let sheetShow = null; // the show the open sheet belongs to
+  let sheetRow = null; // its row in the list (for the star state)
+  let sheetTrigger = null; // the "⋯" button that opened it (gets the focus back)
+
+  function openSheet(btn, s, row) {
+    closeSheet();
+    sheetShow = s;
+    sheetRow = row;
+    sheetTrigger = btn;
+    sheetTitle.textContent = s.title;
+    sheetActions.innerHTML = actionsHtml(s, true);
+    syncSheetMark();
+    btn.setAttribute("aria-expanded", "true");
+    sheet.classList.toggle("popover", !phoneMq.matches);
+    sheet.hidden = false;
+    if (!phoneMq.matches) {
+      // Popover: under the button, right-aligned with it; above it when there is no room below.
+      const r = btn.getBoundingClientRect();
+      const h = sheetPanel.offsetHeight;
+      const top = r.bottom + 6 + h > innerHeight ? r.top - 6 - h : r.bottom + 6;
+      sheetPanel.style.top = `${Math.max(8, top)}px`;
+      sheetPanel.style.right = `${Math.max(8, innerWidth - r.right)}px`;
+    }
+    sheetActions.querySelector(".act").focus();
+  }
+  // The sheet's star mirrors the row's state (label and colour).
+  function syncSheetMark() {
+    const st = marks[sheetShow.id] || "";
+    sheetPanel.classList.toggle("interested", st === "interested");
+    sheetPanel.classList.toggle("going", st === "going");
+    sheetActions.querySelector(".star span").textContent = MARK_LABEL[st];
+  }
+  function closeSheet() {
+    if (sheet.hidden) return;
+    sheet.hidden = true;
+    sheetTrigger.setAttribute("aria-expanded", "false");
+    if (sheetTrigger.isConnected) sheetTrigger.focus();
+    sheetShow = sheetRow = sheetTrigger = null;
+  }
+  sheet.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-close]")) return closeSheet();
+    const act = e.target.closest(".act");
+    if (!act) return;
+    if (!act.dataset.act) return closeSheet(); // a plain link (Google, Event, Tickets, WhatsApp) opens in a new tab
+    await runAction(act, sheetShow, sheetRow);
+    if (act.dataset.act === "mark") {
+      // "Meine Shows" re-renders the list when the last mark goes; then the row (and the sheet) is gone.
+      if (sheetRow.isConnected) syncSheetMark();
+      else closeSheet();
+    } else if (act.dataset.act === "link")
+      setTimeout(closeSheet, 1200); // let "Kopiert" be seen
+    else closeSheet();
+  });
+  // Focus stays in the sheet while it is open; Esc closes it.
+  sheet.addEventListener("keydown", (e) => {
+    if (e.key !== "Tab") return;
+    const f = [...sheetPanel.querySelectorAll("button, a[href]")];
+    const edge = e.shiftKey ? f[0] : f[f.length - 1];
+    if (document.activeElement === edge) {
+      e.preventDefault();
+      (e.shiftKey ? f[f.length - 1] : f[0]).focus();
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !sheet.hidden) closeSheet();
+  });
+  // A popover is anchored to the button; a resize or layout switch invalidates its position.
+  addEventListener("resize", () => {
+    if (sheet.classList.contains("popover")) closeSheet();
+  });
+  phoneMq.addEventListener("change", closeSheet);
+
   function resetFilters() {
-    cantonSelect.value = "";
+    cantons.clear();
+    radiusKm = 0;
+    updateWhere();
     search.value = "";
     activeGenre = "";
     mineOnly = false;
+    clearRange();
     if (shared) {
       shared = null;
       history.replaceState(null, "", location.pathname + location.search);
@@ -487,10 +691,6 @@
     }
   });
   el("clear-filters").addEventListener("click", resetFilters);
-  togglePast.addEventListener("click", () => {
-    showPast = !showPast;
-    renderAndKeepInView();
-  });
 
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
   function revealFromHash() {
@@ -499,6 +699,7 @@
     if (!target) return;
     const id = target.id;
     if (target._past && !showPast) showPast = true;
+    if (target._past) pastAuto = false; // the link asked for it, so a later range reset keeps it
     // Rows only exist in the list view; the calendar and the map link here.
     if (view !== "list") setView("list");
     if (!document.getElementById(id)) resetFilters();
@@ -511,18 +712,108 @@
   }
   window.addEventListener("hashchange", revealFromHash);
 
+  // --- Filter panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ---
+  // Open with the toolbar button, close with ×, Escape, the button again or a click/tap outside.
+  const filtersForm = el("filters");
+  const PANELS = { where: ["toggle-where", "where-panel"], when: ["toggle-when", "when-panel"] };
+  let openPanel = null;
+  function setPanel(name) {
+    openPanel = name;
+    for (const [key, [btn, panel]] of Object.entries(PANELS)) {
+      el(panel).hidden = key !== name;
+      el(btn).setAttribute("aria-expanded", String(key === name));
+    }
+    if (name === "when") updateWhen();
+  }
+  filtersForm.addEventListener("click", (e) => {
+    const close = e.target.closest(".panel-close");
+    if (!close) return;
+    const panel = close.closest(".panel").id === "where-panel" ? "where" : "when";
+    setPanel(null);
+    el(PANELS[panel][0]).focus();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !openPanel) return;
+    const btn = PANELS[openPanel][0];
+    setPanel(null);
+    el(btn).focus();
+  });
+  document.addEventListener("click", (e) => {
+    // A chip that re-rendered itself on click is detached by now – that is not an outside click.
+    if (openPanel && e.target.isConnected && !filtersForm.contains(e.target)) setPanel(null);
+  });
+
+  // --- Wo: canton chips (multi-select) + own position (+ radius) behind the pin button ---
+  const toggleWhere = el("toggle-where");
+  function toggleCanton(code) {
+    if (cantons.has(code)) cantons.delete(code);
+    else cantons.add(code);
+    updateWhere();
+  }
+  function whereLabel() {
+    const codes = [...cantons];
+    const parts = [];
+    if (codes.length > 3) parts.push(`${codes.length} Kantone`);
+    else if (codes.length) parts.push(codes.join(" · "));
+    if (here && radiusKm) parts.push(`≤ ${radiusKm} km`);
+    return parts.join(" · ");
+  }
+  function updateWhere() {
+    const label = whereLabel();
+    const badge = toggleWhere.querySelector("b");
+    badge.textContent = label;
+    badge.hidden = !label;
+    // The badge only names real filters; a known position just lights the pin up.
+    toggleWhere.classList.toggle("located", Boolean(here));
+    toggleWhere.setAttribute("aria-pressed", String(Boolean(cantons.size || (here && radiusKm))));
+    toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kantone wählen oder meinen Standort verwenden";
+    for (const c of el("canton-chips").querySelectorAll(".chip"))
+      c.setAttribute(
+        "aria-pressed",
+        String(c.dataset.canton ? cantons.has(c.dataset.canton) : !cantons.size),
+      );
+    el("where-radius").hidden = !here;
+    for (const r of el("where-radius").querySelectorAll(".chip"))
+      r.setAttribute("aria-pressed", String(Number(r.dataset.radius) === radiusKm));
+  }
+  toggleWhere.addEventListener("click", () => setPanel(openPanel === "where" ? null : "where"));
+  el("canton-chips").addEventListener("click", (e) => {
+    const c = e.target.closest(".chip[data-canton]");
+    if (!c) return;
+    if (c.dataset.canton) toggleCanton(c.dataset.canton);
+    else {
+      cantons.clear();
+      updateWhere();
+    }
+    renderAndKeepInView();
+  });
+  el("where-radius").addEventListener("click", (e) => {
+    const r = e.target.closest(".chip[data-radius]");
+    if (!r) return;
+    radiusKm = Number(r.dataset.radius);
+    updateWhere();
+    renderAndKeepInView();
+  });
+
   const locateBtn = el("locate");
   const geoStatus = el("geo-status");
 
   if (!("geolocation" in navigator)) locateBtn.hidden = true;
 
-  locateBtn.addEventListener("click", () => {
+  // Ask the browser for the position. Used by the Wo button, by the placeholder in every row and –
+  // once per visit, when the browser already allows it or has never been asked – right on start.
+  // The position is only used in this browser tab; it is never stored or sent anywhere.
+  let locating = false;
+  function locate() {
+    if (locating || !("geolocation" in navigator)) return;
+    locating = true;
     geoStatus.textContent = "Suche dich …";
     locateBtn.disabled = true;
-    // The position is only used in this browser tab; it is never stored or sent anywhere.
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        locating = false;
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        updateHomeCity();
         locateBtn.disabled = false;
         locateBtn.setAttribute("aria-pressed", "true");
         // Closest upcoming show (never a past one), as a link into the list.
@@ -530,49 +821,67 @@
           .filter((s) => !s._past && typeof s.lat === "number")
           .map((s) => ({ s, km: distanceKm(here, s) }))
           .sort((a, b) => a.km - b.km)
-          .slice(0, 3);
+          .slice(0, 1);
+        updateWhere();
         if (near.length) {
           const n = near[0];
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
-            `<span class="geo-pin">📍</span> Am nächsten bei dir: ` +
-            `<a href="#${n.s._short}"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
-            `<span class="dist">${formatKm(n.km)}</span>` +
-            (near.length > 1
-              ? ` <span class="geo-more">· danach ${near
-                  .slice(1)
-                  .map((x) => `${escape(x.s.city)} (${formatKm(x.km)})`)
-                  .join(", ")}</span>`
-              : "");
+            `<span class="geo-pin">📍</span> Nächste Show: ` +
+            `<a href="#${n.s._short}" title="Zur Show in der Liste springen"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
+            `<span class="dist" title="Luftlinie von deinem Standort">${formatKm(n.km)}${sbbLink(n.s)}</span>`;
         } else {
           geoStatus.textContent = "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
         }
         render();
       },
       () => {
+        locating = false;
         locateBtn.disabled = false;
         geoStatus.textContent = "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+        geoDeclined = true;
+        render();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
+  }
+  let geoDeclined = false; // no placeholder in the rows once the browser said no
+  locateBtn.addEventListener("click", locate);
+  list.addEventListener("click", (e) => {
+    if (e.target.closest(".geo-ask")) locate();
   });
+  // On start: silently when permission was granted before; with the browser's own question when it
+  // has never been asked; never when it was denied (the browser would not ask again anyway).
+  function autoLocate() {
+    if (!("geolocation" in navigator) || !shows.length) return;
+    if (!navigator.permissions || !navigator.permissions.query) return locate();
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((p) => {
+        if (p.state !== "denied") locate();
+        else geoDeclined = true;
+      })
+      .catch(() => locate());
+  }
 
   // --- Meine Shows: mark shows as "Interessiert" / "Ich gehe", filter to them, share the list. ---
   // Marks live only in this browser (localStorage); without it they last for the page view.
-  const MARKS_KEY = "jahgenda.marks";
   const MARK_LABEL = {
     "": "Merken",
     interested: "Interessiert",
     going: "Ich gehe",
   };
   const NEXT_MARK = { "": "interested", interested: "going", going: "" };
+  // Tooltip of the star button: what the next click does.
+  const MARK_TITLE = {
+    "": "Als «Interessiert» merken",
+    interested: "Als «Ich gehe» markieren",
+    going: "Markierung entfernen",
+  };
   let marks = {};
-  try {
-    // Only keep well-formed entries; anything else in storage is ignored.
-    const stored = JSON.parse(localStorage.getItem(MARKS_KEY));
-    for (const [id, st] of Object.entries(stored || {}))
-      if (st === "interested" || st === "going") marks[id] = st;
-  } catch {}
+  // Only keep well-formed entries; anything else in storage is ignored.
+  for (const [id, st] of Object.entries(store.get(store.KEYS.MARKS, {}) || {}))
+    if (st === "interested" || st === "going") marks[id] = st;
   // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
   const decodeHashPart = (t) => {
     try {
@@ -582,21 +891,18 @@
     }
   };
   let mineOnly = false;
-  let shared = null; // { id: state } from a #mine=… link, shown until taken over or closed
+  let shared = null; // { id: state } from a #m=… link: the list is filtered to those shows
   const toggleMine = el("toggle-mine");
   const minePanel = el("mine-panel");
-  const sharedBox = el("shared");
 
   function saveMarks() {
-    try {
-      localStorage.setItem(MARKS_KEY, JSON.stringify(marks));
-    } catch {}
+    store.set(store.KEYS.MARKS, marks);
   }
   const markedShows = () => shows.filter((s) => marks[s.id]);
   const markClass = (s) =>
     `${marks[s.id] ? ` ${marks[s.id]}` : ""}${shared && shared[s.id] ? " shared-row" : ""}`;
   const starButton = (s) =>
-    `<button type="button" class="act star" data-act="mark" title="Markieren: Interessiert → Ich gehe">${ICONS.star}<span>${MARK_LABEL[marks[s.id] || ""]}</span></button>`;
+    `<button type="button" class="act star" data-act="mark" title="${MARK_TITLE[marks[s.id] || ""]}">${ICONS.star}<span>${MARK_LABEL[marks[s.id] || ""]}</span></button>`;
   const dayShort = (s) =>
     `${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
   const mineUrl = () =>
@@ -606,10 +912,10 @@
       .join(",");
 
   minePanel.innerHTML =
-    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle übernehmen».</span>` +
-    `<button type="button" class="act" data-mine="ics">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
-    `<button type="button" class="act" data-mine="share">${ICONS.link}<span>Liste teilen</span></button>` +
-    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener">${ICONS.wa}<span>WhatsApp</span></a>`;
+    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» – der Link zeigt genau diese Shows.</span>` +
+    `<button type="button" class="act" data-mine="ics" title="Meine Shows als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
+    `<button type="button" class="act" data-mine="share" title="Link zu meiner Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
+    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Meine Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
 
   // The ★ button is always there; without marks it is muted and only explains itself (title).
   function updateMine() {
@@ -618,6 +924,7 @@
     toggleMine.setAttribute("aria-disabled", String(n === 0));
     toggleMine.title = n === 0 ? "Shows merken · nur in diesem Browser" : "Meine Shows";
     toggleMine.setAttribute("aria-pressed", String(mineOnly));
+    toggleMine.title = mineOnly ? "Wieder alle Shows anzeigen" : "Nur meine Shows anzeigen";
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !mineOnly || n === 0;
     if (!minePanel.hidden)
@@ -637,15 +944,9 @@
     row.classList.toggle("interested", next === "interested");
     row.classList.toggle("going", next === "going");
     row.querySelector(".star span").textContent = MARK_LABEL[next];
+    row.querySelector(".star").title = MARK_TITLE[next];
     updateMine();
   }
-  list.addEventListener("click", (e) => {
-    const btn = e.target.closest('[data-act="mark"]');
-    if (!btn) return;
-    const row = btn.closest(".show");
-    const s = shows.find((x) => x.id === row.dataset.id);
-    if (s) cycleMark(s, row);
-  });
 
   toggleMine.addEventListener("click", () => {
     if (!markedShows().length) return; // nothing marked yet: the tooltip says what the star does
@@ -690,21 +991,172 @@
       shared = null;
       return;
     }
-    if (Object.keys(shared).some((id) => findShow(id)?._past)) showPast = true;
-    sharedBox.hidden = true;
+    if (Object.keys(shared).some((id) => findShow(id)?._past)) {
+      showPast = true;
+      pastAuto = false;
+    }
     render();
   }
+
+  // --- Wann: quick picks (Heute / Wochenende / 7 Tage) or any set of months. ---
+  // The choice lives for this visit only (nothing is stored). Default = no range = everything upcoming.
+  const toggleWhen = el("toggle-when");
+  const whenPanel = el("when-panel");
+  const whenMonths = el("when-months");
+  const whenCount = el("when-count");
+  const togglePast = el("toggle-past");
+  const pastLabel = togglePast.closest("label");
+  let rangeFrom = null; // local day (Date) or null – set by a quick pick
+  let rangeTo = null;
+  const months = new Set(); // selected months as "YYYY-M" keys – set by the month chips
+  let pastAuto = false; // past shows were switched on by a choice that reaches into the past
+  let monthList = []; // every month from the first show (or today) to the last show
+
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const sameDay = (a, b) => a.getTime() === b.getTime();
+  const dm = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
+  const monthKey = (d) => `${d.getFullYear()}-${d.getMonth() + 1}`;
+  const monthStart = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+  const shortMonthFmt = new Intl.DateTimeFormat("de-CH", { month: "short" });
+  // "Okt" this year, "Jan ’27" in another year.
+  const monthLabel = (d) =>
+    `${shortMonthFmt.format(d).replace(".", "")}${d.getFullYear() === todayStart().getFullYear() ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
+  const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
+  const inRange = (s) => {
+    if (months.size) return months.has(monthKey(s._day));
+    return !(rangeFrom && rangeTo) || (s._day >= rangeFrom && s._day <= rangeTo);
+  };
+  function rangeLabel() {
+    if (months.size) {
+      const picked = monthList.filter((d) => months.has(monthKey(d)));
+      return picked.length > 2 ? `${picked.length} Monate` : picked.map(monthLabel).join(", ");
+    }
+    return sameDay(rangeFrom, rangeTo) ? dm(rangeFrom) : `${dm(rangeFrom)}–${dm(rangeTo)}`;
+  }
+
+  function setupWhen() {
+    toggleWhen.hidden = !shows.length;
+    if (!shows.length) return;
+    const today = todayStart();
+    const first = monthStart(shows[0]._day < today ? shows[0]._day : today);
+    const last = monthStart(shows[shows.length - 1]._day > today ? shows[shows.length - 1]._day : today);
+    monthList = [];
+    for (let d = first; d <= last; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) monthList.push(d);
+  }
+
+  // Past shows follow the choice: a month before this one switches them on, and off again once no
+  // such month is selected any more (unless the user switched them on by hand).
+  function syncPast() {
+    const thisMonth = monthStart(todayStart());
+    const reachesPast = [...months].some((k) => monthList.find((d) => monthKey(d) === k) < thisMonth);
+    if (reachesPast && !showPast) {
+      showPast = true;
+      pastAuto = true;
+    } else if (!reachesPast && pastAuto) {
+      showPast = false;
+      pastAuto = false;
+    }
+  }
+  function setRange(from, to) {
+    months.clear();
+    rangeFrom = from;
+    rangeTo = to;
+    syncPast();
+  }
+  function clearRange() {
+    rangeFrom = rangeTo = null;
+    months.clear();
+    syncPast();
+  }
+
+  // Quick picks, as [from, to].
+  function quickRange(kind) {
+    const today = todayStart();
+    const dow = today.getDay(); // 0 = Sunday
+    if (kind === "today") return [today, today];
+    if (kind === "weekend")
+      return [dow === 0 || dow >= 5 ? today : addDays(today, 5 - dow), addDays(today, (7 - dow) % 7)];
+    return [today, addDays(today, Number(kind) - 1)];
+  }
+
+  // Button, badge, past checkbox and (when open) month chips with counts, quick chips and the count.
+  function updateWhen() {
+    if (!monthList.length) return;
+    const active = rangeActive();
+    toggleWhen.setAttribute("aria-pressed", String(active));
+    toggleWhen.title = active ? `Wann: ${rangeLabel()} (ändern)` : "Wann: Zeitraum wählen";
+    const badge = toggleWhen.querySelector("b");
+    badge.hidden = !active;
+    badge.textContent = active ? rangeLabel() : "";
+    const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
+    pastLabel.hidden = past === 0;
+    togglePast.checked = showPast;
+    if (openPanel !== "when") return;
+
+    // Histogram: one clickable bar per month over the whole span, counted with every filter except the time.
+    const counts = new Map();
+    for (const s of shows)
+      if (matchesFilters(s)) counts.set(monthKey(s._day), (counts.get(monthKey(s._day)) || 0) + 1);
+    const thisMonth = monthStart(todayStart());
+    const max = Math.max(1, ...counts.values());
+    whenMonths.innerHTML = monthList
+      .map((d) => {
+        const k = monthKey(d);
+        const n = counts.get(k) || 0;
+        const cls = ["bar"];
+        if (!n) cls.push("empty");
+        if (d < thisMonth) cls.push("past");
+        if (months.size && !months.has(k)) cls.push("dim");
+        if (monthKey(d) === monthKey(thisMonth)) cls.push("today");
+        const title = `${monthFmt.format(d)}: ${n === 1 ? "1 Konzert" : `${n} Konzerte`}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
+        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}" style="--h:${Math.round((n / max) * 100)}%"><b>${n || ""}</b><i></i><span>${monthLabel(d)}</span></button>`;
+      })
+      .join("");
+    for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
+      const [qa, qb] = quickRange(chip.dataset.quick);
+      chip.setAttribute(
+        "aria-pressed",
+        String(!months.size && rangeFrom && sameDay(qa, rangeFrom) && sameDay(qb, rangeTo)),
+      );
+    }
+    const n = shows.filter(isVisible).length;
+    whenCount.textContent = active
+      ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
+      : `${n} ${n === 1 ? "Konzert" : "Konzerte"}, alle kommenden`;
+  }
+
+  toggleWhen.addEventListener("click", () => setPanel(openPanel === "when" ? null : "when"));
+  whenPanel.addEventListener("click", (e) => {
+    const quick = e.target.closest("[data-quick]");
+    const month = e.target.closest("[data-month]");
+    if (quick) {
+      const [a, b] = quickRange(quick.dataset.quick);
+      if (!months.size && rangeFrom && sameDay(a, rangeFrom) && sameDay(b, rangeTo)) clearRange();
+      else setRange(a, b);
+    } else if (month) {
+      rangeFrom = rangeTo = null;
+      if (months.has(month.dataset.month)) months.delete(month.dataset.month);
+      else months.add(month.dataset.month);
+      syncPast();
+    } else if (e.target.id === "when-reset") {
+      clearRange();
+      showPast = false;
+      pastAuto = false;
+    } else return;
+    renderAndKeepInView();
+  });
+  togglePast.addEventListener("change", () => {
+    showPast = togglePast.checked;
+    pastAuto = false;
+    renderAndKeepInView();
+  });
 
   // --- Views: Liste | Kalender | Karte ---
   // All three show the same filtered shows (`lastVisible`); render() dispatches to them.
   function setView(next) {
     if (!VIEWS.includes(next)) return;
     view = next;
-    try {
-      localStorage.setItem(VIEW_KEY, view);
-    } catch {
-      /* not remembered, that's fine */
-    }
+    store.set(store.KEYS.VIEW, view);
     markView();
     render();
   }
@@ -736,7 +1188,6 @@
 
   // Kalender: a Monday-first month grid. On narrow screens the cells only show dots
   // and the shows of the selected day are listed below the grid (see style.css).
-  const pad2 = (n) => String(n).padStart(2, "0");
   const dayKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
   const longDayFmt = new Intl.DateTimeFormat("de-CH", {
     weekday: "long",
@@ -787,7 +1238,7 @@
       const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Konzert" : "Konzerte"}` : ""}`;
       cells.push(`
         <div class="${cls.join(" ")}" data-day="${key}">
-          <button type="button" class="cal-num" aria-label="${escape(label)}">${d.getDate()}</button>
+          <button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
             .map((s) => `<i style="background:${genreColor(s)}"></i>`)
@@ -795,7 +1246,7 @@
           <div class="cal-pills">${items
             .map(
               (s) =>
-                `<button type="button" class="pill" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)}">${escape(s.title)}</button>`,
+                `<button type="button" class="pill" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)} – zur Show in der Liste springen">${escape(s.title)}</button>`,
             )
             .join("")}</div>
         </div>`);
@@ -804,10 +1255,11 @@
     const selected = byDay.get(calDay) || [];
     calendarEl.innerHTML = `
       <div class="cal-head">
-        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat">&lsaquo;</button>
+        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat">&lsaquo;</button>
         <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
-        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat">&rsaquo;</button>
-        <button type="button" class="linkish cal-today" data-cal="0">Heute</button>
+        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat">&rsaquo;</button>
+        <button type="button" class="linkish cal-today" data-cal="0" title="Zum aktuellen Monat springen">Heute</button>
+        <button type="button" class="linkish cal-subscribe" data-subscribe title="Alle Shows als Kalender abonnieren – aktualisiert sich von selbst">${ICONS.rss} Abonnieren</button>
       </div>
       <div class="cal-grid">
         ${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w) => `<span class="cal-dow">${w}</span>`).join("")}
@@ -895,12 +1347,17 @@
     }
     if (!map) {
       mapEl.innerHTML = "";
-      map = L.map(mapEl, { scrollWheelZoom: false });
+      map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
+      // Leaflet's own controls get German tooltips.
+      L.control.zoom({ zoomInTitle: "Hineinzoomen", zoomOutTitle: "Herauszoomen" }).addTo(map);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         className: "map-tiles",
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
       }).addTo(map);
+      for (const a of mapEl.querySelectorAll(".leaflet-control-attribution a"))
+        if (/leafletjs/.test(a.href)) a.title = "Leaflet-Website öffnen";
       markerLayer = L.layerGroup().addTo(map);
       // Leaflet stops clicks inside popups from bubbling up to the page, so the
       // show links are handled on the popup element itself (bound once per popup).
@@ -908,6 +1365,8 @@
         const popup = e.popup.getElement();
         if (!popup || popup.dataset.bound) return;
         popup.dataset.bound = "1";
+        const close = popup.querySelector(".leaflet-popup-close-button");
+        if (close) close.title = "Schliessen";
         popup.addEventListener("click", (ev) => {
           const a = ev.target.closest("a[data-id]");
           if (!a) return;
@@ -963,12 +1422,16 @@
     });
     const pinKind = (items) => (items.some((x) => marks[x.id] === "going") ? "going" : "venue");
     for (const { s, items } of venues.values()) {
-      L.marker([s.lat, s.lon], { icon: pinIcon(pinKind(items), items.length), riseOnHover: true })
+      L.marker([s.lat, s.lon], {
+        icon: pinIcon(pinKind(items), items.length),
+        riseOnHover: true,
+        title: `${s.venue}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`,
+      })
         .bindPopup(
           `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
             .map(
               (x) =>
-                `<li><a href="#${x._short}" data-id="${escape(x.id)}"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+                `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
             )
             .join("")}</ul>`,
         )
@@ -976,7 +1439,7 @@
       points.push([s.lat, s.lon]);
     }
     if (here) {
-      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000 })
+      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000, title: "Dein Standort" })
         .bindPopup("Du bist hier")
         .addTo(markerLayer);
       points.push([here.lat, here.lon]);
@@ -993,6 +1456,64 @@
         ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
         : "");
   }
+
+  // --- Kalender abonnieren: the same callout as the install nudge --------------------------------
+  const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
+  const feedUrl = (region) => FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
+  function showSubscribe(force) {
+    const canton = cantons.size === 1 ? [...cantons][0] : "";
+    const url = feedUrl(canton);
+    window.jahCallout.show({
+      id: "subscribe",
+      force,
+      title: canton ? `Shows in ${regionName(canton)} in deinem Kalender` : "Alle Shows in deinem Kalender",
+      text: "Einmal abonnieren – danach hält sich der Kalender selbst aktuell.",
+      actions: [
+        {
+          label: "Apple / Outlook",
+          primary: true,
+          href: url.replace("https://", "webcal://"),
+          title: "In Apple Kalender oder Outlook abonnieren",
+        },
+        {
+          label: "Google",
+          href: `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(url)}`,
+          external: true,
+          title: "In Google Kalender abonnieren",
+        },
+        {
+          label: "Adresse kopieren",
+          title: "Feed-Adresse kopieren (für jede Kalender-App)",
+          onClick: async () => {
+            try {
+              await navigator.clipboard.writeText(url);
+              const b = document.querySelector('.callout [data-callout-action="2"]');
+              if (b) b.textContent = "Kopiert";
+            } catch {
+              prompt("Feed-Adresse:", url);
+            }
+          },
+        },
+      ],
+    });
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-subscribe]");
+    if (!b) return;
+    e.preventDefault();
+    showSubscribe(true);
+  });
+  // Nudge once: after the visitor has scrolled into the list (not on the first second).
+  let nudged = false;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (nudged || window.scrollY < 600 || !shows.length) return;
+      nudged = true;
+      setTimeout(() => showSubscribe(false), 1500);
+    },
+    { passive: true },
+  );
 
   // --- Sticky bar ---
   // Its height is frozen in CSS (--bar-h: 84 px on phones, 96 px from 768 px); nothing is measured here.
@@ -1011,33 +1532,6 @@
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: reducedMotion.matches ? "auto" : "smooth" });
   });
-
-  // Phones: the canton <select> and the locate button live in the chip row as «Kanton ▾» and «Nähe»
-  // chips (the select sits transparently over its chip, so the native picker opens). Wider screens keep
-  // them in the toolbar. The elements are moved, never cloned, so state and listeners stay the same.
-  const phone = matchMedia("(max-width: 420px)");
-  const toolbar = filters.querySelector(".toolbar");
-  const toolsGroup = el("tools");
-  const cantonChip = el("canton-chip");
-  function placeTools() {
-    if (phone.matches) {
-      cantonChip.append(cantonSelect);
-      toolsGroup.append(locateBtn);
-      locateBtn.classList.replace("icon-btn", "chip");
-    } else {
-      toolbar.insertBefore(cantonSelect, toggleMine);
-      toolbar.insertBefore(locateBtn, toggleMine);
-      locateBtn.classList.replace("chip", "icon-btn");
-    }
-    updateChipArrows();
-  }
-  // Chip labels mirror the real controls (called from render(), so every filter change updates them).
-  function syncTools() {
-    const opt = cantonSelect.selectedOptions[0];
-    cantonChip.querySelector(".chip-text").textContent =
-      cantonSelect.value && opt ? opt.textContent : "Kanton";
-    cantonChip.classList.toggle("on", Boolean(cantonSelect.value));
-  }
 
   // Note pill: <details> that opens as a card; closing waits for the collapse transition.
   const note = el("note");
@@ -1151,14 +1645,11 @@
     renderAndKeepInView();
   });
 
-  cantonSelect.addEventListener("change", renderAndKeepInView);
   // Search: debounced 120 ms so typing does not re-render on every key.
   let searchTimer = 0;
   search.addEventListener("input", () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(renderAndKeepInView, 120);
   });
-  placeTools();
-  phone.addEventListener("change", placeTools);
   init();
 })();

@@ -15,9 +15,13 @@ const SHELL = [
   "./",
   "index.html",
   "log.html",
+  "review.html",
   "style.css",
+  "store.js",
+  "lib.js",
   "app.js",
   "pwa.js",
+  "callout.js",
   "manifest.webmanifest",
   "img/about.jpg",
   "img/logo/jahgenda.svg",
@@ -73,7 +77,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(cacheFirst(req, LIB_CACHE));
     return;
   }
-  if (url.hostname.endsWith("openstreetmap.org")) return; // tiles: always live
+  if (url.hostname.endsWith("openstreetmap.org") || url.hostname.endsWith("cartocdn.com")) return; // tiles: always live
   if (url.origin === location.origin) {
     event.respondWith(cacheFirst(req, SHELL_CACHE));
   }

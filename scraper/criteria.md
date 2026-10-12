@@ -53,15 +53,5 @@ Everything else outside Switzerland stays out.
 
 ## Genre slugs
 
-Only these tags are allowed in `genres` (the validator checks this). Left the slug, right what maps to it:
-
-- `reggae` – reggae in general, modern roots, reggae revival, lovers rock, Swiss-German reggae
-- `roots` – roots reggae, Nyabinghi-flavoured roots, Rastafari reggae
-- `dub` – dub, dub techno from the sound-system scene, steppers
-- `soundsystem` – sound-system sessions, sound clashes, selecta nights
-- `dancehall` – dancehall, ragga, bashment
-- `ska` – ska, 2-tone, third-wave ska, early reggae
-- `ska-punk` – ska-punk, ska-core
-- `rocksteady` – rocksteady
-- `nyabinghi` – Nyabinghi drumming
-- `festival` – festival or festival day with several acts
+Only the slugs in `data/genres.json` are allowed in `genres` (the validator checks this). That file also defines
+the display order of the genre filter and what each slug covers. Edit it there, not here.

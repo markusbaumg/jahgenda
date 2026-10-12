@@ -14,8 +14,9 @@ guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
 
 ## 1. Load the inputs
 
-1. `scraper/criteria.md` — what counts as reggae, which places across the border count ("Nearby"), and
-   the **Genre slugs** list. **This file is authoritative.** Apply it literally.
+1. `scraper/criteria.md` — what counts as reggae and which places across the border count ("Nearby").
+   **This file is authoritative** for those two questions; the allowed genre slugs come from
+   `data/genres.json` (step 4).
 2. `scraper/bands.md` — the hand-curated band list. It overrides everything: an act under **Included**
    always counts, an act under **Excluded** never does. Read the setting line
    `Search suggestions automatically: yes|no` — it decides whether acts under **Suggestions** are part of
@@ -46,8 +47,11 @@ take the next 6 months, not everything.
 1. **Agendas** (`agendas`): open each one, read its `hint` (it says which page and how the events are
    written), collect everything that could match `criteria.md`, in Switzerland or in the nearby regions,
    from today up to 6 months ahead.
-2. **Venues** (`data/venues.json`, those with `"scrape": true`): open each venue's programme page (`url`;
-   `hint` says where the events are and how they are tagged) and pick matching events. Use the venue's
+2. **Venues** (`data/venues.json`, those with `"scrape": true` — the venues with high or medium reggae
+   relevance, see the `hint`): open each venue's programme page (`url`; `hint` says where the events are and
+   how they are tagged) and pick matching events. If there are more than ~60 such venues, take the ones whose
+   hint says "high" every run and rotate through the "medium" ones (about 20 per run, by name order starting
+   where the previous run's log says it stopped). Use the venue's
    name as the key is written, plus its `city`, `canton`, `lat`, `lon` for the entry.
 3. **Web search** (`search_queries`): run each distinct query once per month for the current and the next
    two months. `{monat}` is the month name in the language of the query, `{jahr}` the year; a query without
@@ -96,17 +100,19 @@ Do not add acts you dropped. Change nothing else in `bands.md`.
 
 ## 4. Genres per act (with cache)
 
-Each show gets `genres`: 1–3 slugs **from the "Genre slugs" list in `criteria.md`** — no other slugs, the
+Each show gets `genres`: 1–3 slugs **from `data/genres.json`** — no other slugs, the
 validator rejects them. Build the list from the acts:
 
-1. Split the title into acts (`Dub Inc + Support` → `Dub Inc`; ignore "Support", "DJs", "& Friends").
-   Store them in the show's `acts` field (headliner first) when there is more than one, or when the title
-   is an event name rather than the act.
+1. Split the title into acts and store **all of them** in `acts`, headliner first: main act, every named
+   support band, guest DJs and sound systems — look on the event page for lines like "Support: …",
+   "Special Guest", "+", "feat.", "w/" and add those names. Only unnamed placeholders are left out
+   (`Dub Inc + Support` with no name given → `["Dub Inc"]`; "& Friends", "DJs" without names → dropped).
+   Fill `acts` whenever there is more than one act or the title is an event name rather than the act.
 2. For each act, look it up in `data/artists.json`: compare names case-insensitively and ignoring
    punctuation (`DUB INC.` = `Dub Inc`). If present and (`source` is `manual` or `checked` is less than
    180 days ago), use its `genres`.
 3. Otherwise research: first the act's Wikipedia page (any language), then the act's own website or
-   Bandcamp. Map the stated genres to slugs with the table in `criteria.md` and write the entry back:
+   Bandcamp. Map the stated genres to slugs with the `maps` column of `data/genres.json` and write the entry back:
    ```json
    "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc", "checked": "2026-10-13" }
    ```
@@ -148,13 +154,27 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
   "at": "2026-10-13T06:14:00+02:00",
   "added": 3, "updated": 1, "removed": 2, "total": 41,
   "failed_sources": ["https://www.example.ch/programm (timeout)"],
-  "dropped": [ { "title": "Afro Night @ Plaza", "why": "Afrobeats, kein Reggae-Bezug (criteria.md)" } ],
-  "notes": ["Exil: Seite blockiert Bots (403), Events via Skalender übernommen"]
+  "dropped": [ { "title": "Afro Night @ Plaza", "date": "2026-11-07", "venue": "Plaza", "city": "Zürich",
+                 "url": "https://…/afro-night", "why": "Afrobeats, kein Reggae-Bezug (criteria.md)" } ],
+  "notes": ["Exil: Seite blockiert Bots (403), Events via Skalender übernommen"],
+  "sources": [
+    { "name": "Skalender", "url": "https://skalender.net/", "status": "ok", "found": 41, "kept": 23 },
+    { "name": "Exil", "url": "https://exil.club/", "status": "failed", "found": 0, "kept": 0, "error": "403" },
+    { "name": "Bogen F", "url": "https://www.bogenf.ch/", "status": "empty", "found": 0, "kept": 0 }
+  ]
 }
 ```
 
+`sources` has one line for **every** source you touched this run (each agenda, every venue you opened,
+each web-search query as `"search: <query>"`, the watchlist as `"watchlist"`): `status` is `ok` (loaded,
+events read), `empty` (loaded, nothing matching), `failed` (could not load — put the reason in `error`),
+`skipped` (not opened this run, e.g. medium-relevance venue not in this rotation); `found` = candidates
+seen there, `kept` = how many ended up in shows.json. This is what makes the public log honest: a reader
+sees which sources were covered, which failed and where the shows come from.
+
 `dropped` lists every candidate you rejected after looking at it closely (not every unrelated event on a
-page). This log is public — it is shown on `log.html` — so write it in German (the site's language), so
+page) — always with `date`, `venue`, `city` and the `url` you looked at, so a human can re-check the
+decision on `review.html` and flag false negatives. This log is public — it is shown on `log.html` — so write it in German (the site's language), so
 a reader understands the decision.
 
 Also overwrite `data/status.json` — the heartbeat the watchdog (`.github/workflows/watchdog.yml`) reads:

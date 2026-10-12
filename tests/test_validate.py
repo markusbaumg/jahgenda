@@ -1,7 +1,9 @@
 """Tests for scripts/validate_shows.py and scripts/format_data.py. Run: make test"""
 
+import contextlib
 import copy
 import importlib.util
+import io
 import json
 import unittest
 from datetime import date, timedelta
@@ -91,7 +93,7 @@ class ShowChecks(unittest.TestCase):
 
     def test_genres_from_allowed_list_max_three_no_duplicates(self):
         self.assertTrue(
-            any("not in the 'Genre slugs'" in e for e in self.errs(shows_doc(show(genres=["jazz"]))))
+            any("not in data/genres.json" in e for e in self.errs(shows_doc(show(genres=["jazz"]))))
         )
         self.assertTrue(
             any(
@@ -149,7 +151,7 @@ class ArtistChecks(unittest.TestCase):
     def test_genres_required_list_and_allowed(self):
         self.assertTrue(any("'genres' must be a list" in e for e in self.errs({"A": {"genres": "reggae"}})))
         self.assertTrue(any("'genres' must be a list" in e for e in self.errs({"A": {}})))
-        self.assertTrue(any("not in the 'Genre slugs'" in e for e in self.errs({"A": {"genres": ["pop"]}})))
+        self.assertTrue(any("not in data/genres.json" in e for e in self.errs({"A": {"genres": ["pop"]}})))
 
     def test_unknown_field_and_bad_dates_and_source(self):
         self.assertTrue(
@@ -217,12 +219,20 @@ class RunChecks(unittest.TestCase):
         }
         self.assertEqual(V.check_runs(ok), [])
         bad = {"runs": [{"skill": "other", "at": "x", "added": "1", "dropped": [{"title": 1}]}]}
-        self.assertGreaterEqual(len(V.check_runs(bad)), 4)
+        errs = V.check_runs(bad)
+        self.assertEqual(len(errs), 4, errs)
+        for fragment in (
+            "'skill' must be",
+            "'at' must be",
+            "'added' must be an integer",
+            "needs 'title' and 'why'",
+        ):
+            self.assertTrue(any(fragment in e for e in errs), (fragment, errs))
         self.assertTrue(V.check_runs({"runs": [{}] * 61}))
 
 
 class GenreSlugs(unittest.TestCase):
-    def test_slugs_are_read_from_criteria(self):
+    def test_slugs_are_read_from_genres_json(self):
         slugs = V.allowed_genres()
         self.assertIn("reggae", slugs)
         self.assertIn("ska-punk", slugs)
@@ -231,10 +241,12 @@ class GenreSlugs(unittest.TestCase):
 
 class RepoData(unittest.TestCase):
     def test_repo_data_validates(self):
-        self.assertEqual(V.main(["--allow-past"]), 0)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(V.main(["--allow-past"]), 0)
 
     def test_repo_data_is_formatted(self):
-        self.assertEqual(F.main(["--check"]), 0)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(F.main(["--check"]), 0)
 
 
 class Formatter(unittest.TestCase):

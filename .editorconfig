@@ -1,4 +1,4 @@
-# https://editorconfig.org – Editoren lesen das automatisch (VS Code: Plugin «EditorConfig»).
+# https://editorconfig.org – editors pick this up automatically (VS Code: EditorConfig extension).
 root = true
 
 [*]

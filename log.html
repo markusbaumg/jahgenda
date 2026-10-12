@@ -72,6 +72,42 @@
         color: var(--muted);
         font-size: 0.9rem;
       }
+      .tbl {
+        overflow-x: auto;
+        margin-top: 6px;
+      }
+      table.sources {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.85rem;
+      }
+      table.sources th,
+      table.sources td {
+        text-align: left;
+        padding: 5px 8px;
+        border-bottom: 1px solid var(--line);
+      }
+      table.sources th {
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      table.sources td:nth-child(3),
+      table.sources td:nth-child(4) {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      tr.st-failed td:nth-child(2) {
+        color: var(--red);
+      }
+      tr.st-ok td:nth-child(2) {
+        color: var(--green-text);
+      }
+      tr.st-empty td:nth-child(2),
+      tr.st-skipped td:nth-child(2) {
+        color: var(--muted);
+      }
       .back,
       .foot a {
         display: inline-block;
@@ -97,7 +133,8 @@
         Scraper-Log<span class="tri-dots" aria-hidden="true"><i></i><i></i><i></i></span
         ><span>Was die KI-Agenten gemacht haben</span>
       </p>
-      <a class="back" href="./">← zur Agenda</a>
+      <a class="back" href="./" title="Zurück zur Agenda">← zur Agenda</a> ·
+      <a class="back" href="review.html" title="Aussortierte Kandidaten gegenprüfen">Aussortiert prüfen →</a>
     </header>
 
     <main class="wrap">
@@ -109,11 +146,17 @@
       <div id="runs"></div>
     </main>
 
-    <footer class="wrap foot">
-      <p class="updated">
-        <a href="https://github.com/markusbaumg/jahgenda">GitHub</a> ·
-        <a href="https://github.com/markusbaumg/jahgenda/commits/main/data">Alle Änderungen an den Daten</a>
-      </p>
+    <footer class="foot">
+      <div class="wrap">
+        <p class="updated">
+          <a href="https://github.com/markusbaumg/jahgenda" title="Quellcode auf GitHub öffnen">GitHub</a> ·
+          <a
+            href="https://github.com/markusbaumg/jahgenda/commits/main/data"
+            title="Änderungsverlauf der Daten auf GitHub öffnen"
+            >Alle Änderungen an den Daten</a
+          >
+        </p>
+      </div>
     </footer>
 
     <script>
@@ -143,8 +186,30 @@
 
         const list = (title, items, render) =>
           items && items.length
-            ? `<details open><summary>${title} (${items.length})</summary><ul>${items.map(render).join("")}</ul></details>`
+            ? `<details open><summary title="Auf- oder zuklappen">${title} (${items.length})</summary><ul>${items.map(render).join("")}</ul></details>`
             : "";
+
+        // Per-source table: which sources were covered, which failed, where the shows came from.
+        const STATUS = {
+          ok: ["ok", "geladen"],
+          empty: ["empty", "nichts gefunden"],
+          failed: ["failed", "nicht erreichbar"],
+          skipped: ["skipped", "übersprungen"],
+        };
+        const sourcesTable = (sources) => {
+          if (!Array.isArray(sources) || !sources.length) return "";
+          const counts = {};
+          for (const s of sources) counts[s.status] = (counts[s.status] || 0) + 1;
+          const summary = Object.entries(counts)
+            .map(([k, n]) => `${n} ${(STATUS[k] || [k, k])[1]}`)
+            .join(" · ");
+          return `<details><summary>Quellen (${sources.length}: ${escape(summary)})</summary><div class="tbl"><table class="sources"><thead><tr><th>Quelle</th><th>Status</th><th>gefunden</th><th>übernommen</th></tr></thead><tbody>${sources
+            .map(
+              (s) =>
+                `<tr class="st-${escape((STATUS[s.status] || ["x"])[0])}"><td>${s.url ? `<a href="${escape(s.url)}" target="_blank" rel="noopener">${escape(s.name)}</a>` : escape(s.name)}</td><td>${escape((STATUS[s.status] || [s.status, s.status])[1])}${s.error ? ` – ${escape(s.error)}` : ""}</td><td>${s.found ?? ""}</td><td>${s.kept ?? ""}</td></tr>`,
+            )
+            .join("")}</tbody></table></div></details>`;
+        };
 
         fetch("data/runs.json", { cache: "no-cache" })
           .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
@@ -171,6 +236,7 @@
                   ${r.removed ? `<span class="count rem">−${r.removed} entfernt</span>` : ""}
                   ${typeof r.total === "number" ? `<span class="count">${r.total} total</span>` : ""}
                 </div>
+                ${sourcesTable(r.sources)}
                 ${list("Verworfen", r.dropped, (d) => `<li><strong>${escape(d.title)}</strong> – ${escape(d.why)}</li>`)}
                 ${list("Nicht erreichbar", r.failed_sources, (f) => `<li>${escape(f)}</li>`)}
                 ${list("Notizen", r.notes, (n) => `<li>${escape(n)}</li>`)}

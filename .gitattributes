@@ -1,0 +1,2 @@
+# PDFs are binary – keep diffs and merges sane
+*.pdf binary

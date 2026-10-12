@@ -1,4 +1,5 @@
-# Runs on every push and pull request: `make ci` = lint (node, ruff, prettier) + validate + test + data format.
+# Runs on every push and pull request: `make ci` = lint (node, ruff, prettier) + validate + test
+# + smoke (headless Chrome, skipped when absent) + data format.
 # Same as `make check` locally. The deploy (pages.yml) validates the data once more before uploading.
 name: CI
 

@@ -11,6 +11,8 @@
     <string>-lc</string>
     <string>cd "__REPO__" &amp;&amp; git pull -q --rebase origin main &amp;&amp; make scrape</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>JAHGENDA_RUNNER</key><string>launchd</string></dict>
   <key>StartCalendarInterval</key>
   <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>10</integer></dict>
   <key>StandardOutPath</key><string>__HOME__/Library/Logs/jahgenda/scrape.log</string>

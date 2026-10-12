@@ -32,18 +32,20 @@
           ><i></i><i></i><i></i></span
         >Ska <span>— Schweiz</span>
       </p>
+      <!-- One of the slogans in data/slogans.json per page load (app.js); the first one is the default. -->
+      <p class="slogan" id="tagline">Reggae, Dub &amp; Ska in der Schweiz</p>
     </header>
 
     <main class="wrap">
       <div id="stuck-sentinel" aria-hidden="true"></div>
       <!-- Sticky filter bar: two rows of frozen height (48 + 36 px, 56 + 40 px from 768 px). Nothing in it
            may grow after the data arrives: the chip row reserves its height, the mini-brand sits inside the
-           search field. On phones the canton select and the locate button move into the chip row (app.js). -->
+           search field. Wo and Wann are dropdown panels hanging from the bar (one open at a time). -->
       <form class="filters" id="filters" role="search" onsubmit="return false">
         <div class="toolbar">
           <label class="sr" for="q">Suche</label>
           <div class="search">
-            <a class="mini-brand" href="#top" aria-label="Nach oben"
+            <a class="mini-brand" href="#top" aria-label="Nach oben" title="Nach oben"
               ><img src="img/logo/jahgenda.svg" alt="" width="22" height="22"
             /></a>
             <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -52,26 +54,31 @@
                 d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"
               />
             </svg>
-            <input id="q" type="search" placeholder="Band, Club, Ort …" autocomplete="off" />
+            <input
+              id="q"
+              type="search"
+              placeholder="Band, Club, Ort …"
+              autocomplete="off"
+              title="Nach Band, Club oder Ort suchen"
+            />
           </div>
-          <label class="sr" for="canton">Kanton</label>
-          <select id="canton">
-            <option value="">Alle Kantone</option>
-          </select>
           <button
-            id="locate"
             type="button"
-            class="icon-btn"
+            id="toggle-where"
+            class="icon-btn where"
             aria-pressed="false"
-            title="Distanz von meinem Standort anzeigen"
-            aria-label="Nähe: Distanz von meinem Standort anzeigen"
+            aria-expanded="false"
+            aria-controls="where-panel"
+            title="Wo: Kanton wählen oder meinen Standort verwenden"
+            aria-label="Wo: Kanton wählen oder meinen Standort verwenden"
           >
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <circle cx="12" cy="12" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
-              <circle cx="12" cy="12" r="2.4" fill="currentColor" />
-              <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="currentColor"
+                d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
+              />
             </svg>
-            <span class="lbl">Nähe</span>
+            <b hidden></b>
           </button>
           <button
             type="button"
@@ -90,47 +97,173 @@
             </svg>
             <b>0</b>
           </button>
+          <button
+            type="button"
+            id="toggle-when"
+            class="icon-btn when"
+            aria-pressed="false"
+            aria-expanded="false"
+            aria-controls="when-panel"
+            title="Zeitraum wählen"
+            aria-label="Zeitraum wählen"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 3h3v2H8v-2zm0 4h8v2H8v-2zm5-4h3v2h-3v-2z"
+              />
+            </svg>
+            <b hidden></b>
+          </button>
         </div>
         <div class="chips-wrap">
           <button
             type="button"
             class="scroll-btn left"
             data-dir="-1"
-            aria-label="Filter nach links scrollen"
+            aria-label="Genres nach links scrollen"
+            title="Genres nach links scrollen"
             hidden
           >
             &lsaquo;
           </button>
           <div id="chips" class="chips">
             <div id="genres" class="chip-group" role="group" aria-label="Genre"></div>
-            <div id="tools" class="chip-group tools" role="group" aria-label="Kanton und Nähe">
-              <span class="chip chip-canton" id="canton-chip">
-                <span class="chip-text">Kanton</span>
-                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                  <path
-                    d="M7 10l5 5 5-5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </span>
-            </div>
           </div>
           <button
             type="button"
             class="scroll-btn right"
             data-dir="1"
-            aria-label="Filter nach rechts scrollen"
+            aria-label="Genres nach rechts scrollen"
+            title="Genres nach rechts scrollen"
             hidden
           >
             &rsaquo;
           </button>
         </div>
+        <div id="where-panel" class="panel where-panel" role="group" aria-label="Wo" hidden>
+          <div class="panel-head">
+            <strong>Wo</strong>
+            <button
+              type="button"
+              class="panel-close"
+              data-close
+              title="Schliessen"
+              aria-label="Wo schliessen"
+            >
+              &times;
+            </button>
+          </div>
+          <div class="where-row">
+            <button
+              type="button"
+              id="locate"
+              class="chip where-locate"
+              title="Meinen Standort verwenden und Distanzen anzeigen"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1a9 9 0 0 0 7.9-7.9H23v-2h-2.1zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
+                />
+              </svg>
+              Mein Standort
+            </button>
+            <span class="where-radius" id="where-radius" role="group" aria-label="Umkreis" hidden>
+              <button
+                type="button"
+                class="chip"
+                data-radius="10"
+                aria-pressed="false"
+                title="Nur Shows im Umkreis von 10 km"
+              >
+                10 km
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-radius="25"
+                aria-pressed="false"
+                title="Nur Shows im Umkreis von 25 km"
+              >
+                25 km
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-radius="50"
+                aria-pressed="false"
+                title="Nur Shows im Umkreis von 50 km"
+              >
+                50 km
+              </button>
+              <button type="button" class="chip" data-radius="0" aria-pressed="true" title="Alle Distanzen">
+                Alle
+              </button>
+            </span>
+          </div>
+          <p id="geo-status" class="geo-status" role="status"></p>
+          <div
+            id="canton-chips"
+            class="canton-chips"
+            role="group"
+            aria-label="Kantone (Mehrfachauswahl)"
+          ></div>
+        </div>
+        <div id="when-panel" class="panel when-panel" role="group" aria-label="Wann" hidden>
+          <div class="panel-head">
+            <strong>Wann</strong>
+            <button
+              type="button"
+              class="panel-close"
+              data-close
+              title="Schliessen"
+              aria-label="Wann schliessen"
+            >
+              &times;
+            </button>
+          </div>
+          <div class="when-quick" role="group" aria-label="Schnellauswahl">
+            <button type="button" class="chip" data-quick="today" aria-pressed="false" title="Nur heute">
+              Heute
+            </button>
+            <button
+              type="button"
+              class="chip"
+              data-quick="weekend"
+              aria-pressed="false"
+              title="Nächstes Wochenende (Freitag bis Sonntag)"
+            >
+              Wochenende
+            </button>
+            <button
+              type="button"
+              class="chip"
+              data-quick="7"
+              aria-pressed="false"
+              title="Die nächsten 7 Tage"
+            >
+              7 Tage
+            </button>
+          </div>
+          <div id="when-months" class="when-months" role="group" aria-label="Monate (Mehrfachauswahl)"></div>
+          <p class="when-foot">
+            <span id="when-count" aria-live="polite"></span>
+            <button
+              type="button"
+              id="when-reset"
+              class="linkish"
+              title="Zeitraum zurücksetzen: alle kommenden Konzerte"
+            >
+              Zurücksetzen
+            </button>
+            <label class="when-past" title="Auch Konzerte anzeigen, die schon vorbei sind" hidden>
+              <input type="checkbox" id="toggle-past" />
+              Vergangene einblenden
+            </label>
+          </p>
+        </div>
       </form>
-      <p id="geo-status" class="geo-status" role="status"></p>
-      <div id="shared" class="shared" role="region" aria-label="Geteilte Liste" hidden></div>
 
       <div class="results-row">
         <details class="note-pill" id="note">
@@ -163,13 +296,77 @@
           </div>
         </details>
         <p id="results" class="results" aria-live="polite">
-          <button type="button" id="clear-filters" class="linkish clear" hidden>✕ Filter zurücksetzen</button>
-          <button type="button" id="toggle-past" class="linkish" hidden>Vergangene anzeigen</button>
+          <button
+            type="button"
+            id="clear-filters"
+            class="linkish clear"
+            title="Alle Filter zurücksetzen"
+            hidden
+          >
+            ✕ Filter zurücksetzen
+          </button>
         </p>
         <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
-          <button type="button" data-view="list" aria-pressed="true">Liste</button>
-          <button type="button" data-view="calendar" aria-pressed="false">Kalender</button>
-          <button type="button" data-view="map" aria-pressed="false">Karte</button>
+          <button type="button" data-view="list" aria-pressed="true" title="Als Liste anzeigen">
+            <svg
+              class="ico"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="8" x2="21" y1="6" y2="6" />
+              <line x1="8" x2="21" y1="12" y2="12" />
+              <line x1="8" x2="21" y1="18" y2="18" />
+              <line x1="3" x2="3.01" y1="6" y2="6" />
+              <line x1="3" x2="3.01" y1="12" y2="12" />
+              <line x1="3" x2="3.01" y1="18" y2="18" /></svg
+            ><span>Liste</span>
+          </button>
+          <button type="button" data-view="calendar" aria-pressed="false" title="Als Kalender anzeigen">
+            <svg
+              class="ico"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 2v4" />
+              <path d="M16 2v4" />
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <path d="M3 10h18" />
+              <path d="M8 14h.01" />
+              <path d="M12 14h.01" />
+              <path d="M16 14h.01" />
+              <path d="M8 18h.01" />
+              <path d="M12 18h.01" />
+              <path d="M16 18h.01" /></svg
+            ><span>Kalender</span>
+          </button>
+          <button type="button" data-view="map" aria-pressed="false" title="Auf der Karte anzeigen">
+            <svg
+              class="ico"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"
+              />
+              <path d="M15 5.764v15" />
+              <path d="M9 3.236v15" /></svg
+            ><span>Karte</span>
+          </button>
         </span>
       </div>
       <div id="mine-panel" class="mine-panel" hidden></div>
@@ -222,7 +419,7 @@
     <footer class="foot">
       <div class="wrap">
         <section class="about" aria-labelledby="about-title">
-          <h2 id="about-title" class="section-title">Über uns</h2>
+          <h2 id="about-title" class="section-title">Über Jahgenda</h2>
           <div class="about-body">
             <img
               class="about-photo"
@@ -233,20 +430,23 @@
               loading="lazy"
             />
             <div>
+              <p class="about-head">Für die Reggae-Community. Von uns.</p>
               <p>
-                Wir sind Kusi und Seraina. Die Reggae-Szene in der Schweiz schenkt uns seit Jahren wunderbare
-                Abende, schöne Begegnungen und beste Vibes. Mit Jahgenda geben wir der Community etwas zurück:
-                alle Reggae-, Dub- und Ska-Konzerte an einem Ort, frei und für alle. So findet jede und jeder
-                die nächste gute Session, und die Clubs und Soundsystems, die unsere Szene lebendig machen,
-                bekommen volle Tanzflächen.
+                Hallo zäme, wir sind Kusi und Seraina. Die Reggae-Szene schenkt uns seit Jahren die besten
+                Abende: gute Musik, gute Leute, gute Vibes. Irgendwann haben wir uns gefragt, warum man ewig
+                suchen muss, um zu wissen, wo am Wochenende was läuft. Jetzt steht es hier: alle Reggae-, Dub-
+                und Ska-Konzerte der Schweiz an einem Ort, gratis, ohne Login, ohne Werbung. Je mehr Leute den
+                Weg in die Clubs finden, desto länger bleibt unsere Szene lebendig.
               </p>
-              <p class="gut">
-                <strong>Gut zu wissen:</strong> Die Konzerte werden von KI-Agenten im Netz gesucht und
-                zusammengetragen, damit die Agenda immer aktuell ist. Wirf vor dem Konzert kurz einen Blick
-                auf die Seite des Clubs oder Veranstalters – dort findest du Datum, Zeit und Ort immer
-                topaktuell.
+              <p>
+                Das Sammeln übernehmen KI-Agenten für uns, jede Nacht. Sie sind fleissig, aber nicht unfehlbar
+                – wirf vor dem Konzert kurz einen Blick auf die Seite des Clubs. Fehlt eine Show oder stimmt
+                etwas nicht? Schreib uns, wir freuen uns über jeden Tipp.
               </p>
-              <p class="authors">Gemacht von <strong>Kusi</strong> &amp; <strong>Seraina</strong></p>
+              <p class="authors">
+                Mit <span class="heart" aria-label="Liebe">♥</span> gemacht – ein Herzensprojekt von
+                <strong>Kusi</strong> &amp; <strong>Seraina</strong>.
+              </p>
             </div>
           </div>
         </section>
@@ -255,23 +455,35 @@
         <div class="wrap foot-bar-inner">
           <p class="updated"><span id="results-text"></span><span id="updated"></span></p>
           <p class="foot-links">
-            <a href="https://github.com/markusbaumg/jahgenda">GitHub</a> ·
-            <a href="log.html">Scraper-Log</a> ·
-            <a href="https://github.com/users/markusbaumg/projects/2">Roadmap</a>
+            <a
+              href="webcal://markusbaumg.github.io/jahgenda/jahgenda.ics"
+              title="Alle Shows als Kalender abonnieren (Apple, Google, Outlook – aktualisiert sich täglich)"
+              >Kalender abonnieren</a
+            >
+            · <a href="mailto:info@jahgenda.ch" title="Schreib uns eine E-Mail">info@jahgenda.ch</a> ·
+            <a
+              href="https://github.com/users/markusbaumg/projects/2"
+              target="_blank"
+              rel="noopener"
+              title="Roadmap auf GitHub öffnen"
+              >Roadmap</a
+            >
+            ·
+            <a
+              href="https://github.com/markusbaumg/jahgenda"
+              target="_blank"
+              rel="noopener"
+              title="Quellcode auf GitHub öffnen"
+              >GitHub</a
+            >
           </p>
         </div>
       </div>
     </footer>
 
-    <aside id="install" class="install" hidden>
-      <div class="install-icon">
-        <img src="img/logo/jahgenda.svg" alt="" width="40" height="40" />
-      </div>
-      <div class="install-body"></div>
-      <button type="button" class="install-close" aria-label="Schliessen">&times;</button>
-    </aside>
-
+    <script src="store.js"></script>
     <script src="app.js"></script>
+    <script src="callout.js"></script>
     <script src="pwa.js"></script>
     <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
   </body>

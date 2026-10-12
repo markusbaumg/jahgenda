@@ -1,6 +1,7 @@
-"""Genre-Slug parsing from scraper/criteria.md and the finer validator rules. Run: make test"""
+"""Genre slug parsing from data/genres.json and the finer validator rules. Run: make test"""
 
 import importlib.util
+import json
 import tempfile
 import unittest
 from datetime import date, timedelta
@@ -23,59 +24,90 @@ ALLOWED = {"reggae", "dub", "ska"}
 
 
 class AllowedGenres(unittest.TestCase):
-    """allowed_genres() reads every backticked slug under '## Genre slugs' – nothing more, nothing less."""
+    """allowed_genres() reads the slugs from data/genres.json – nothing more, nothing less."""
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self._orig = V.CRITERIA
-        V.CRITERIA = Path(self.tmp.name) / "criteria.md"
+        self._orig = V.GENRES
+        V.GENRES = Path(self.tmp.name) / "genres.json"
 
     def tearDown(self):
-        V.CRITERIA = self._orig
+        V.GENRES = self._orig
         self.tmp.cleanup()
 
     def parse(self, text):
-        V.CRITERIA.write_text(text, encoding="utf-8")
+        V.GENRES.write_text(text, encoding="utf-8")
         return V.allowed_genres()
 
-    def test_missing_file_or_section_gives_empty_set(self):
+    def test_missing_or_malformed_file_gives_empty_set(self):
         self.assertEqual(V.allowed_genres(), set())
-        self.assertEqual(self.parse("# Kriterien\n\n- `reggae` zählt\n"), set())
-        self.assertEqual(self.parse("## Genre slugs\n\nnoch nichts\n"), set())
+        self.assertEqual(self.parse("not json"), set())
+        self.assertEqual(self.parse('{"genres": "reggae"}'), set())
+        self.assertEqual(self.parse('{"genres": []}'), set())
 
-    def test_only_the_slug_section_counts(self):
-        text = (
-            "# Was zählt\n\n- `dancehall` ist ok, aber das hier ist nicht die Liste\n\n"
-            "## Genre slugs\n\n- `reggae` – allgemein\n- `ska-punk` – Ska-Punk\n\n"
-            "## Danach\n\n- `jazz` steht in einem anderen Abschnitt\n"
-        )
+    def test_slugs_are_read_and_validated(self):
+        text = '{"genres": [{"slug": "reggae"}, {"slug": "ska-punk"}, {"slug": "Not Valid"}, {"label": "x"}]}'
         self.assertEqual(self.parse(text), {"reggae", "ska-punk"})
 
-    def test_section_at_end_of_file_and_without_trailing_newline(self):
+
+class GenresFile(unittest.TestCase):
+    """check_genres_file(): the page contract behind the chips - unique slug + label per entry."""
+
+    def test_repo_file_passes(self):
+        self.assertEqual(V.check_genres_file(json.loads(V.GENRES.read_text(encoding="utf-8"))), [])
+
+    def test_shape(self):
+        self.assertEqual(V.check_genres_file([]), ["genres.json: must be an object with a 'genres' list"])
         self.assertEqual(
-            self.parse("## Nearby\n\n- x\n\n## Genre slugs\n- `dub`\n- `roots`"), {"dub", "roots"}
+            V.check_genres_file({"genres": {}}), ["genres.json: must be an object with a 'genres' list"]
+        )
+        errs = V.check_genres_file({"note": "x", "genres": ["reggae"], "order": []})
+        self.assertEqual(errs, ["genres[0]: not an object", "genres.json: unknown field 'order'"])
+
+    def test_slug_label_and_unknown_fields(self):
+        doc = {
+            "genres": [
+                {"slug": "reggae", "label": "Reggae", "maps": "reggae"},
+                {"slug": "Ska Punk", "label": "Ska-Punk"},
+                {"slug": "reggae", "label": ""},
+                {"slug": "dub", "label": "Dub", "maps": 3, "colour": "gold"},
+                {"label": "Roots"},
+            ]
+        }
+        errs = V.check_genres_file(doc)
+        self.assertEqual(
+            errs,
+            [
+                "genres[1]: 'slug' must be a lowercase slug like 'roots' or 'ska-punk'",
+                "genres[2]: duplicate slug 'reggae'",
+                "genres[2]: 'label' must be a non-empty string",
+                "genres[3]: 'maps' must be a string",
+                "genres[3]: unknown field 'colour'",
+                "genres[4]: 'slug' must be a lowercase slug like 'roots' or 'ska-punk'",
+            ],
         )
 
-    def test_heading_must_match_exactly(self):
-        self.assertEqual(self.parse("## Genre slugs (old)\n- `dub`\n"), set())
-        self.assertEqual(self.parse("### Genre slugs\n- `dub`\n"), set())
-        self.assertEqual(self.parse("## Genre slugs   \n- `dub`\n"), {"dub"})  # trailing spaces are fine
 
-    def test_non_slugs_in_backticks_are_ignored(self):
-        text = "## Genre slugs\n\n- `Reggae` (falsch geschrieben)\n- `dub techno`\n- `-dub`\n- `dub-`\n"
-        text += "- `2tone`\n- `ska`\n"
-        self.assertEqual(self.parse(text), {"2tone", "ska"})
+class Slogans(unittest.TestCase):
+    def test_repo_file_passes(self):
+        self.assertEqual(V.check_slogans(json.loads(V.SLOGANS.read_text(encoding="utf-8"))), [])
 
-    def test_several_slugs_on_one_line_and_duplicates(self):
-        self.assertEqual(self.parse("## Genre slugs\n`dub`, `ska` und nochmals `dub`\n"), {"dub", "ska"})
-
-    def test_repo_criteria_matches_the_data(self):
-        """The real criteria.md must list the slugs the data uses (same file the validator reads)."""
-        V.CRITERIA = self._orig
-        slugs = V.allowed_genres()
-        self.assertGreaterEqual(len(slugs), 5)
-        for g in ("reggae", "dub", "ska", "dancehall", "festival"):
-            self.assertIn(g, slugs)
+    def test_shape_and_entries(self):
+        self.assertEqual(V.check_slogans(["x"]), ["slogans.json: must be an object with a 'slogans' list"])
+        self.assertEqual(
+            V.check_slogans({"slogans": "x"}), ["slogans.json: must be an object with a 'slogans' list"]
+        )
+        self.assertEqual(V.check_slogans({"slogans": []}), ["slogans.json: 'slogans' is empty"])
+        errs = V.check_slogans({"note": "n", "slogans": ["Irie", "", 3, " Irie "], "lang": "gsw"})
+        self.assertEqual(
+            errs,
+            [
+                "slogans[1]: must be a non-empty string",
+                "slogans[2]: must be a non-empty string",
+                "slogans[3]: duplicate ' Irie '",
+                "slogans.json: unknown field 'lang'",
+            ],
+        )
 
 
 def show(**over):
@@ -173,6 +205,57 @@ class Keys(unittest.TestCase):
         self.assertEqual(V.artist_key("DUB INC."), V.artist_key("Dub Inc"))
         self.assertNotEqual(V.artist_key("Dub Inc"), V.artist_key("Dub Incorporated"))
         self.assertEqual(V.venue_key(123), "123")
+
+
+class StatusChecks(unittest.TestCase):
+    """data/status.json, the heartbeat: the exact shape the skills write and the watchdog reads."""
+
+    GOOD = {
+        "ok": True,
+        "skill": "scrape-shows",
+        "at": "2026-10-13T06:14:22+02:00",
+        "runner": "cloud",
+        "counts": {"added": 3, "updated": 1, "removed": 2, "total": 41},
+        "failed_sources": 1,
+        "error": None,
+    }
+
+    def one(self, fragment, **over):
+        errs = V.check_status({**self.GOOD, **over})
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn(fragment, errs[0])
+
+    def test_skill_examples_pass(self):
+        self.assertEqual(V.check_status(self.GOOD), [])
+        harvest = {
+            "ok": True,
+            "skill": "harvest-bands",
+            "at": "2026-11-01T05:10:00+01:00",
+            "runner": "cloud",
+            "counts": {"added": 12, "total": 57},
+            "error": None,
+        }
+        self.assertEqual(V.check_status(harvest), [])
+        self.assertEqual(V.check_status({**self.GOOD, "ok": False, "error": "WebFetch ENOTFOUND"}), [])
+        self.assertEqual(V.check_status({**self.GOOD, "at": "2026-10-13T04:14:22Z"}), [])
+
+    def test_absent_file_is_fine_but_shape_is_not_negotiable(self):
+        self.assertEqual(V.check_status(None), [])
+        self.assertEqual(V.check_status([]), ["status.json: must be an object"])
+
+    def test_each_wrong_type_gives_one_specific_message(self):
+        self.one("'ok' must be true or false", ok="true")
+        self.one("'skill' must be", skill="scraper")
+        self.one("'at' must be an ISO 8601 timestamp", at=1760336062)
+        self.one("'at' needs a UTC offset", at="2026-10-13T06:14:22")
+        self.one("'runner' must be a string", runner=1)
+        self.one("'counts' must be an object", counts=[3, 1, 2, 41])
+        self.one("count 'added' must be an integer", counts={"added": "3"})
+        self.one("count 'total' must be an integer", counts={"total": True})
+        self.one("unknown count 'kept'", counts={"kept": 3})
+        self.one("'failed_sources' must be an integer", failed_sources=["Exil"])
+        self.one("'error' must be a string or null", error=403)
+        self.one("unknown field 'message'", message="x")
 
 
 class RunDetails(unittest.TestCase):
