@@ -244,6 +244,15 @@
       "scrape": false,
       "hint": "The /programm/ page is JS-rendered; use the WordPress REST API https://chaeslager-kulturhaus.ch/wp-json/wp/v2/event?per_page=40 (title.rendered, link) and read the event date from the server-rendered detail page /event/<slug>/. Reggae relevance: low — Irish folk, big band, films, improv."
     },
+    "Club Vaudeville": {
+      "city": "Lindau",
+      "canton": "D",
+      "lat": 47.5484,
+      "lon": 9.6861,
+      "url": "https://www.club-vaudeville.de/",
+      "scrape": true,
+      "hint": "Lindau (Bodensee), nearby region D. Programme on the homepage. Reggae relevance: high — books ska/reggae touring acts (Dubioza Kolektiv)."
+    },
     "Conrad Sohm": {
       "city": "Dornbirn",
       "canton": "A",
