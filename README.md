@@ -42,7 +42,7 @@ data/artists.json                      Genre cache per act (Wikipedia / band web
 data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
 data/slogans.json                      Taglines (header, sticky bar, stickers).
 data/status.json                       Heartbeat of the last run (ok, at, counts). Written by every skill run.
-scraper/criteria.md                    What counts as reggae? Nearby places abroad. Allowed genre slugs.
+scraper/criteria.md                    What counts as reggae? Nearby places abroad.
 scraper/bands.md                       Which bands are in, which are out, suggestions to review. Hand-curated.
 scraper/sources.json                   Agenda sites, festivals, nearby regions, search queries.
 .claude/skills/scrape-shows/           The scraper itself: a Claude Code skill (a prompt), not code.
@@ -86,7 +86,7 @@ the result and commits it.
                          │ clones the repo
                          ▼
             ┌──────────────────────────┐     scraper/bands.md      (who is in? – beats everything)
-            │ skill scrape-shows       │ ◄── scraper/criteria.md   (what counts? genre slugs)
+            │ skill scrape-shows       │ ◄── scraper/criteria.md   (what counts? nearby?)
             │  1 read sources          │ ◄── scraper/sources.json  (where to look?)
             │  2 bands + criteria      │ ◄── data/venues.json      (venues, coordinates)
             │  3 look up genres        │ ◄── data/artists.json     (genre cache)
@@ -274,11 +274,12 @@ icons (`make icons` re-renders those). All ten variants live in `img/logo/NN-nam
 
 ### Contributing (for Seraina and everyone else)
 
-You can shape the agenda without touching code – three text files:
+You can shape the agenda without touching code – four text files:
 
-1. `scraper/criteria.md` – what counts as reggae, which places abroad count, allowed genre slugs.
+1. `scraper/criteria.md` – what counts as reggae, which places abroad count.
 2. `scraper/bands.md` – move a band to _Included_ or _Excluded_; review the _Suggestions_ the harvester adds.
 3. `data/venues.json` – add a venue (name, city, canton, coordinates, programme URL).
+4. `data/genres.json` – allowed genre slugs, labels and filter order.
 
 Edit on GitHub, commit to `main`, done. The next scraper run picks it up; the validator stops anything
 that would break the page.

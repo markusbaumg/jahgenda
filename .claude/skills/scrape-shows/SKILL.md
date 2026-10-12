@@ -14,8 +14,9 @@ guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
 
 ## 1. Load the inputs
 
-1. `scraper/criteria.md` — what counts as reggae, which places across the border count ("Nearby"), and
-   the **Genre slugs** list. **This file is authoritative.** Apply it literally.
+1. `scraper/criteria.md` — what counts as reggae and which places across the border count ("Nearby").
+   **This file is authoritative** for those two questions; the allowed genre slugs come from
+   `data/genres.json` (step 4).
 2. `scraper/bands.md` — the hand-curated band list. It overrides everything: an act under **Included**
    always counts, an act under **Excluded** never does. Read the setting line
    `Search suggestions automatically: yes|no` — it decides whether acts under **Suggestions** are part of
