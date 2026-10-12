@@ -1331,3 +1331,39 @@ body {
 .filters.stuck .mini-brand {
   display: inline-flex;
 }
+
+/* Map: tiles toned down to sit on the dark page; legend under the map. */
+.map .leaflet-tile-pane {
+  filter: brightness(0.82) contrast(1.05) saturate(0.8);
+}
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.map-legend .dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--line);
+  margin-right: 5px;
+  vertical-align: -1px;
+}
+.map-legend .gold {
+  background: var(--gold);
+}
+.map-legend .green {
+  background: var(--green);
+}
+.map-legend .red {
+  background: var(--red);
+}
+.map-legend .you {
+  background: var(--text);
+}

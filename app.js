@@ -873,19 +873,27 @@
       venues.get(key).items.push(s);
     }
     const points = [];
+    // Marker colour: red = a show here is marked "Ich gehe", green = a show within 7 days, gold = everything else.
+    const soon = new Date(Date.now() + 7 * 86400e3);
+    const markerColor = (items) =>
+      items.some((x) => marks[x.id] === "going")
+        ? "#d8342f"
+        : items.some((x) => !x._past && x._day <= soon)
+          ? "#1e8f4e"
+          : "#f2b632";
     for (const { s, items } of venues.values()) {
       L.circleMarker([s.lat, s.lon], {
         radius: 7 + Math.min(items.length, 5) * 1.5,
         color: "#14110e",
         weight: 2,
-        fillColor: "#f2b632",
+        fillColor: markerColor(items),
         fillOpacity: 0.95,
       })
         .bindPopup(
           `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
             .map(
               (x) =>
-                `<li><a href="#${encodeURIComponent(x.id)}" data-id="${escape(x.id)}"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+                `<li><a href="#${x._short}" data-id="${escape(x.id)}"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
             )
             .join("")}</ul>`,
         )
@@ -894,10 +902,10 @@
     }
     if (here) {
       L.circleMarker([here.lat, here.lon], {
-        radius: 8,
-        color: "#f3ead8",
+        radius: 7,
+        color: "#14110e",
         weight: 3,
-        fillColor: "#1e8f4e",
+        fillColor: "#f3ead8",
         fillOpacity: 1,
       })
         .bindPopup("Du bist hier")
@@ -909,9 +917,12 @@
     else map.setView([46.8, 8.2], 7);
 
     const rest = visible.filter((s) => !hasPos(s));
-    mapRest.innerHTML = rest.length
-      ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
-      : "";
+    mapRest.innerHTML =
+      `<p class="map-legend"><span class="dot gold"></span>Shows <span class="dot green"></span>in den nächsten 7 Tagen ` +
+      `<span class="dot red"></span>«Ich gehe»${here ? ` <span class="dot you"></span>du` : ""}</p>` +
+      (rest.length
+        ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
+        : "");
   }
 
   // --- Scrolling ---
