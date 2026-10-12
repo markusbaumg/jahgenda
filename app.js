@@ -62,7 +62,6 @@
   let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
   const resultsText = el("results-text");
-  const togglePast = el("toggle-past");
   let showPast = false;
   let pastCount = 0;
   const cantonSelect = el("canton");
@@ -282,29 +281,31 @@
       </li>`;
   }
 
+  // Every filter except the date range (the histogram in the "Wann" panel uses exactly these).
+  function matchesFilters(s) {
+    const canton = cantonSelect.value;
+    const q = search.value.trim().toLowerCase();
+    if (shared && !shared[s.id]) return false;
+    if (mineOnly && !marks[s.id]) return false;
+    if (canton && s.canton !== canton) return false;
+    if (activeGenre && !s.genres.includes(activeGenre)) return false;
+    if (!q) return true;
+    return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
+      .join(" ")
+      .toLowerCase()
+      .includes(q);
+  }
+  const isVisible = (s) => (!s._past || showPast) && inRange(s) && matchesFilters(s);
+
   function render() {
     const canton = cantonSelect.value;
     const q = search.value.trim().toLowerCase();
+    const visible = shows.filter(isVisible);
 
-    const visible = shows.filter((s) => {
-      if (s._past && !showPast) return false;
-      if (shared && !shared[s.id]) return false;
-      if (mineOnly && !marks[s.id]) return false;
-      if (canton && s.canton !== canton) return false;
-      if (activeGenre && !s.genres.includes(activeGenre)) return false;
-      if (!q) return true;
-      return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
-        .join(" ")
-        .toLowerCase()
-        .includes(q);
-    });
-
-    const filtered = Boolean(canton || activeGenre || q || mineOnly || shared);
+    const filtered = Boolean(canton || activeGenre || q || mineOnly || shared || rangeActive());
     el("clear-filters").hidden = !filtered;
-    const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
-    togglePast.hidden = past === 0;
-    togglePast.textContent = showPast ? "Vergangene ausblenden" : `Vergangene anzeigen (${past})`;
     updateMine();
+    updateWhen();
     lastVisible = visible;
     if (!visible.length) {
       list.innerHTML = "";
@@ -325,9 +326,10 @@
       first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
         ? monthFmt.format(first)
         : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
+    const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
     resultsText.textContent = shared
-      ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}`
-      : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}`;
+      ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
+      : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
 
     list.hidden = view !== "list";
     calendarEl.hidden = view !== "calendar";
@@ -406,6 +408,7 @@
         .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
 
       pastCount = shows.filter((s) => s._past).length;
+      setupWhen();
       const used = [...new Set(shows.map((s) => s.canton).filter(Boolean))].sort();
       cantonSelect.insertAdjacentHTML(
         "beforeend",
@@ -474,6 +477,7 @@
     search.value = "";
     activeGenre = "";
     mineOnly = false;
+    clearRange();
     if (shared) {
       shared = null;
       history.replaceState(null, "", location.pathname + location.search);
@@ -490,10 +494,6 @@
     }
   });
   el("clear-filters").addEventListener("click", resetFilters);
-  togglePast.addEventListener("click", () => {
-    showPast = !showPast;
-    renderAndKeepInView();
-  });
 
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
   function revealFromHash() {
@@ -502,6 +502,7 @@
     if (!target) return;
     const id = target.id;
     if (target._past && !showPast) showPast = true;
+    if (target._past) pastAuto = false; // the link asked for it, so a later range reset keeps it
     // Rows only exist in the list view; the calendar and the map link here.
     if (view !== "list") setView("list");
     if (!document.getElementById(id)) resetFilters();
@@ -683,10 +684,221 @@
       shared = null;
       return;
     }
-    if (Object.keys(shared).some((id) => findShow(id)?._past)) showPast = true;
+    if (Object.keys(shared).some((id) => findShow(id)?._past)) {
+      showPast = true;
+      pastAuto = false;
+    }
     sharedBox.hidden = true;
     render();
   }
+
+  // --- Wann: date range [von, bis] with a weekly histogram and two overlaid range sliders. ---
+  // The range lives for this visit only (nothing is stored). Default = no range = everything upcoming.
+  const toggleWhen = el("toggle-when");
+  const whenPanel = el("when-panel");
+  const whenTrack = whenPanel.querySelector(".when-track");
+  const whenHist = el("when-hist");
+  const whenFill = whenPanel.querySelector(".when-fill");
+  const whenFrom = el("when-from");
+  const whenTo = el("when-to");
+  const whenFromDate = el("when-from-date");
+  const whenToDate = el("when-to-date");
+  const whenCount = el("when-count");
+  const togglePast = el("toggle-past");
+  const pastLabel = togglePast.closest("label");
+  let rangeFrom = null; // local day (Date) or null = no range
+  let rangeTo = null;
+  let pastAuto = false; // past shows were switched on by a range that starts before today
+  let spanStart = null; // Monday of the week of the earliest show (or of this week, if earlier)
+  let spanDays = 0; // days up to the Sunday of the week of the latest show; slider values are day offsets
+  let whenOpen = false;
+
+  const DAY = 86400000;
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const dayDiff = (a, b) => Math.round((b - a) / DAY); // whole days from a to b (DST-safe)
+  const mondayOf = (d) => addDays(d, -((d.getDay() + 6) % 7));
+  const dm = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
+  const isoWeek = (d) => {
+    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / DAY + 1) / 7);
+  };
+  const rangeActive = () => Boolean(rangeFrom && rangeTo);
+  const inRange = (s) => !rangeActive() || (s._day >= rangeFrom && s._day <= rangeTo);
+  const rangeLabel = () => (dayDiff(rangeFrom, rangeTo) ? `${dm(rangeFrom)}–${dm(rangeTo)}` : dm(rangeFrom));
+  const spanEnd = () => addDays(spanStart, spanDays - 1);
+  const clampDay = (d) => (d < spanStart ? spanStart : d > spanEnd() ? spanEnd() : d);
+  // What the sliders show when no range is set: today (or the very start when past shows are on) → end.
+  const defaultFrom = () => (showPast ? spanStart : clampDay(todayStart()));
+  const effFrom = () => rangeFrom || defaultFrom();
+  const effTo = () => rangeTo || spanEnd();
+
+  function setupWhen() {
+    toggleWhen.hidden = !shows.length;
+    if (!shows.length) return;
+    const today = todayStart();
+    const first = shows[0]._day < today ? shows[0]._day : today;
+    const last = shows[shows.length - 1]._day > today ? shows[shows.length - 1]._day : today;
+    spanStart = mondayOf(first);
+    spanDays = dayDiff(spanStart, mondayOf(last)) + 7;
+    whenFrom.max = whenTo.max = spanDays - 1;
+    whenFromDate.min = whenToDate.min = dayKey(spanStart);
+    whenFromDate.max = whenToDate.max = dayKey(spanEnd());
+    whenTrack.style.setProperty("--buckets", spanDays / 7);
+  }
+
+  // Apply a range. A start before today switches past shows on (and off again when the start moves back);
+  // the default position (today → end) counts as "no range".
+  function setRange(from, to) {
+    const today = todayStart();
+    if (from > to) [from, to] = [to, from];
+    from = clampDay(from);
+    to = clampDay(to);
+    if (from < today && !showPast) {
+      showPast = true;
+      pastAuto = true;
+    } else if (from >= today && pastAuto) {
+      showPast = false;
+      pastAuto = false;
+    }
+    const isDefault = dayDiff(from, defaultFrom()) === 0 && dayDiff(to, spanEnd()) === 0;
+    rangeFrom = isDefault ? null : from;
+    rangeTo = isDefault ? null : to;
+  }
+  function clearRange() {
+    rangeFrom = rangeTo = null;
+    if (pastAuto) {
+      showPast = false;
+      pastAuto = false;
+    }
+  }
+
+  // Quick picks, as [from, to]; "all" is the whole span (past included).
+  function quickRange(kind) {
+    const today = todayStart();
+    const dow = today.getDay(); // 0 = Sunday
+    if (kind === "today") return [today, today];
+    if (kind === "weekend")
+      return [dow === 0 || dow >= 5 ? today : addDays(today, 5 - dow), addDays(today, (7 - dow) % 7)];
+    if (kind === "all") return [spanStart, spanEnd()];
+    return [today, addDays(today, Number(kind) - 1)];
+  }
+
+  // Button, badge, past checkbox and (when open) sliders, dates, histogram, count and quick chips.
+  function updateWhen() {
+    if (!spanStart) return;
+    const active = rangeActive();
+    toggleWhen.setAttribute("aria-pressed", String(active));
+    toggleWhen.setAttribute("aria-expanded", String(whenOpen));
+    toggleWhen.title = active ? `Zeitraum: ${rangeLabel()} (ändern)` : "Zeitraum wählen";
+    const badge = toggleWhen.querySelector("b");
+    badge.hidden = !active;
+    badge.textContent = active ? rangeLabel() : "";
+    whenPanel.hidden = !whenOpen;
+    const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
+    pastLabel.hidden = past === 0;
+    togglePast.checked = showPast;
+    if (!whenOpen) return;
+
+    const from = effFrom();
+    const to = effTo();
+    const a = dayDiff(spanStart, from);
+    const b = dayDiff(spanStart, to);
+    whenFrom.value = a;
+    whenTo.value = b;
+    whenFromDate.value = dayKey(from);
+    whenToDate.value = dayKey(to);
+    whenFill.style.setProperty("--a", a / Math.max(1, spanDays - 1));
+    whenFill.style.setProperty("--w", (b - a) / Math.max(1, spanDays - 1));
+    // When both thumbs sit on the same day, the one with room to move must be on top.
+    whenFrom.classList.toggle("on-top", a === b && a > 0);
+
+    // Histogram: one bucket per week over the whole span, with every filter except the range applied.
+    const counts = new Array(spanDays / 7).fill(0);
+    for (const s of shows) if (matchesFilters(s)) counts[Math.floor(dayDiff(spanStart, s._day) / 7)]++;
+    const max = Math.max(1, ...counts);
+    const todayWeek = Math.floor(dayDiff(spanStart, todayStart()) / 7);
+    const aWeek = Math.floor(a / 7);
+    const bWeek = Math.floor(b / 7);
+    whenHist.innerHTML = counts
+      .map((c, i) => {
+        const mon = addDays(spanStart, i * 7);
+        const label = `KW ${isoWeek(mon)} (${dm(mon)}–${dm(addDays(mon, 6))}) · ${c === 1 ? "1 Konzert" : `${c} Konzerte`}`;
+        const cls = ["bar"];
+        if (!c) cls.push("empty");
+        if (i < aWeek || i > bWeek) cls.push("dim");
+        if (i === todayWeek) cls.push("today");
+        return `<span class="${cls.join(" ")}" style="--h:${Math.round((c / max) * 100)}%" title="${escape(label)}"><i></i></span>`;
+      })
+      .join("");
+
+    const n = shows.filter(isVisible).length;
+    whenCount.textContent = `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`;
+    for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
+      const [qa, qb] = quickRange(chip.dataset.quick).map(clampDay);
+      chip.setAttribute("aria-pressed", String(dayDiff(qa, from) === 0 && dayDiff(qb, to) === 0));
+    }
+  }
+
+  toggleWhen.addEventListener("click", () => {
+    whenOpen = !whenOpen;
+    updateWhen();
+  });
+  whenPanel.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    whenOpen = false;
+    updateWhen();
+    toggleWhen.focus();
+  });
+
+  // Sliders: while dragging only the panel follows (cheap); the list re-renders on release / per key press.
+  function onSlide(e) {
+    let a = Number(whenFrom.value);
+    let b = Number(whenTo.value);
+    if (a > b) {
+      if (e.target === whenFrom) b = a;
+      else a = b;
+    }
+    setRange(addDays(spanStart, a), addDays(spanStart, b));
+    updateWhen();
+  }
+  for (const input of [whenFrom, whenTo]) {
+    input.addEventListener("input", onSlide);
+    input.addEventListener("change", renderAndKeepInView);
+  }
+  // Date inputs: a start after the end (or vice versa) pushes the other bound along, like the thumbs.
+  whenFromDate.addEventListener("change", () => {
+    if (whenFromDate.value) {
+      const d = parseDay(whenFromDate.value);
+      setRange(d, d > effTo() ? d : effTo());
+    }
+    renderAndKeepInView();
+  });
+  whenToDate.addEventListener("change", () => {
+    if (whenToDate.value) {
+      const d = parseDay(whenToDate.value);
+      setRange(d < effFrom() ? d : effFrom(), d);
+    }
+    renderAndKeepInView();
+  });
+  whenPanel.addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-quick]");
+    if (chip) {
+      setRange(...quickRange(chip.dataset.quick));
+      renderAndKeepInView();
+    }
+    if (e.target.id === "when-reset") {
+      clearRange();
+      showPast = false;
+      pastAuto = false;
+      renderAndKeepInView();
+    }
+  });
+  togglePast.addEventListener("change", () => {
+    showPast = togglePast.checked;
+    pastAuto = false;
+    renderAndKeepInView();
+  });
 
   // --- Views: Liste | Kalender | Karte ---
   // All three show the same filtered shows (`lastVisible`); render() dispatches to them.

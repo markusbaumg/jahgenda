@@ -1076,6 +1076,264 @@ body {
   background: var(--green-text);
   border: 2px solid var(--bg);
 }
+
+/* Wann: date range panel – weekly histogram, two overlaid range sliders, date inputs, quick picks. */
+.icon-btn.when {
+  position: relative;
+}
+.icon-btn.when[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.icon-btn.when b {
+  position: absolute;
+  top: -8px;
+  right: -2px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  line-height: 14px;
+  white-space: nowrap;
+  color: var(--bg);
+  background: var(--green-text);
+  border: 2px solid var(--bg);
+}
+.icon-btn.when b[hidden] {
+  display: none;
+}
+.when-panel {
+  margin: 0 0 12px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+}
+.when-panel[hidden] {
+  display: none;
+}
+.when-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.when-track {
+  min-width: calc(var(--buckets, 1) * 8px);
+}
+.when-hist {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 56px;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--line);
+}
+.when-hist .bar {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 4px;
+  display: flex;
+  align-items: flex-end;
+}
+.when-hist .bar i {
+  display: block;
+  width: 100%;
+  height: var(--h, 0%);
+  min-height: 2px;
+  background: var(--gold);
+  border-radius: 2px 2px 0 0;
+  transition: opacity 0.15s;
+}
+.when-hist .bar.empty i {
+  background: var(--line);
+}
+.when-hist .bar.dim i {
+  opacity: 0.3;
+}
+.when-hist .bar.today::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 2px;
+  height: 8px;
+  margin-left: -1px;
+  background: var(--red);
+}
+.when-hist .bar.today::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  border: 4px solid transparent;
+  border-bottom-color: var(--red);
+  margin-left: -4px;
+}
+.when-slider {
+  position: relative;
+  height: 44px;
+  margin-top: 6px;
+}
+.when-slider::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 20px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.when-fill {
+  position: absolute;
+  top: 20px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gold);
+  left: calc(22px + (100% - 44px) * var(--a, 0));
+  width: calc((100% - 44px) * var(--w, 1));
+}
+.when-slider input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: none;
+}
+.when-slider input.on-top {
+  z-index: 1;
+}
+.when-slider input:focus {
+  outline: none;
+}
+.when-slider input::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+}
+.when-slider input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 44px;
+  height: 44px;
+  margin-top: -20px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold) 0 10px, transparent 11px);
+  pointer-events: auto;
+  cursor: grab;
+}
+.when-slider input:focus-visible::-webkit-slider-thumb {
+  background: radial-gradient(
+    circle,
+    var(--gold) 0 8px,
+    var(--bg) 9px 10px,
+    var(--gold) 11px 13px,
+    transparent 14px
+  );
+}
+.when-slider input::-moz-range-track {
+  height: 4px;
+  background: transparent;
+}
+.when-slider input::-moz-range-thumb {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold) 0 10px, transparent 11px);
+  pointer-events: auto;
+  cursor: grab;
+}
+.when-slider input:focus-visible::-moz-range-thumb {
+  background: radial-gradient(
+    circle,
+    var(--gold) 0 8px,
+    var(--bg) 9px 10px,
+    var(--gold) 11px 13px,
+    transparent 14px
+  );
+}
+.when-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.when-dates label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.when-dates label span {
+  flex: 0 0 28px;
+}
+.when-dates input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 10px;
+  color-scheme: dark;
+}
+.when-dates input:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.when-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.when-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.when-foot #when-count {
+  color: var(--text);
+  font-weight: 600;
+}
+.when-past {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  cursor: pointer;
+}
+.when-past[hidden] {
+  display: none;
+}
+.when-past input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--gold);
+}
+@media (max-width: 480px) {
+  .when-dates {
+    grid-template-columns: 1fr;
+  }
+  .when-past {
+    margin-left: 0;
+  }
+}
 .mine-panel,
 .shared {
   margin: 12px 0 0;
