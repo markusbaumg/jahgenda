@@ -50,8 +50,12 @@ Kein Build-Schritt. Jeder Push auf `main` deployt via `.github/workflows/pages.y
 | `url`    | nein    | Link zum Event / Tickets (`http(s)`)  |
 | `lat`    | nein    | Breitengrad der Venue (für Distanz)   |
 | `lon`    | nein    | Längengrad der Venue (für Distanz)    |
+| `lat`    | nein    | Breitengrad der Venue (für Distanz)   |
+| `lon`    | nein    | Längengrad der Venue (für Distanz)    |
 
 Vergangene Shows werden im Browser ausgeblendet; die JSON-Datei darf sie also enthalten.
+
+Auf Knopfdruck fragt die Seite nach dem Standort und zeigt die Luftlinien-Distanz zu jeder Show. Der Standort bleibt im Browser und wird nirgends gespeichert oder verschickt.
 
 Auf Knopfdruck fragt die Seite nach dem Standort und zeigt die Luftlinien-Distanz zu jeder Show. Der Standort bleibt im Browser und wird nirgends gespeichert oder verschickt.
 
