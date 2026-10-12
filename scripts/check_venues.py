@@ -27,6 +27,7 @@ Usage: python3 scripts/check_venues.py [--max-distance M] [--only NAME ...] [--j
 Exit code 0 = everything OK/CITY, 1 = at least one CHECK or lookup error.
 If Nominatim keeps answering 429/503 (rate limit) the run stops early - wait a few minutes.
 """
+
 import argparse
 import json
 import math
@@ -52,6 +53,7 @@ BACKOFFS = (10, 30, 60)  # seconds to wait after HTTP 429/503 before retrying
 class RateLimited(Exception):
     """Nominatim kept answering 429/503 through all retries - the whole run stops, retrying
     the remaining venues would only prolong the block."""
+
 
 # Nominatim names some cities in another language than venues.json does.
 CITY_ALIASES = {
@@ -111,8 +113,18 @@ def best_hit(hits, city):
     """The hit most likely to be the venue: in the right city, and a place rather than a street or
     an administrative area (Nominatim ranks e.g. a street 'Bierhübeli' in Grossaffoltern above the
     club in Bern, and a barn 'Schüür' in Mauensee above the Konzerthaus in Luzern)."""
-    weight = {"amenity": 2, "leisure": 2, "tourism": 2, "club": 2, "building": 1, "shop": 1, "office": 1,
-              "highway": -1, "boundary": -1, "place": -1}
+    weight = {
+        "amenity": 2,
+        "leisure": 2,
+        "tourism": 2,
+        "club": 2,
+        "building": 1,
+        "shop": 1,
+        "office": 1,
+        "highway": -1,
+        "boundary": -1,
+        "place": -1,
+    }
     return max(hits, key=lambda h: (3 if in_city(h, city) else 0) + weight.get(h.get("class"), 0))
 
 
@@ -122,7 +134,8 @@ def lookup(name, city):
     queries = [f"{name}, {city}", f"{name} {city}, {city}"]
     for prefix in ("Café ", "Cafe ", "Bar ", "Le ", "La ", "L'", "Der ", "Die ", "Das "):
         if name.startswith(prefix) and len(name) > len(prefix) + 2:
-            queries.append(f"{name[len(prefix):]}, {city}")  # OSM often drops the article: "Chat noir", "Mokka"
+            # OSM often drops the article: "Chat noir", "Mokka"
+            queries.append(f"{name[len(prefix) :]}, {city}")
     for query in queries:
         found += [h for h in nominatim(query) if h not in found]
         if any(in_city(h, city) for h in found):
@@ -169,8 +182,12 @@ def main(argv):
                 hits, query, city_only = lookup(name, v["city"])
         except RateLimited as e:
             print(f"{name:{width}} | {stored:15} | {'-':15} | {'-':>10} | ERROR {e}")
-            print(f"\nNominatim is rate-limiting this machine ({e}) - stopped, {len(venues) - checked} venue(s) "
-                  "not checked. Wait a few minutes and run again.", file=sys.stderr)
+            left = len(venues) - checked
+            print(
+                f"\nNominatim is rate-limiting this machine ({e}) - stopped, {left} venue(s) "
+                "not checked. Wait a few minutes and run again.",
+                file=sys.stderr,
+            )
             return 1
         except (urllib.error.URLError, TimeoutError, ValueError) as e:
             print(f"{name:{width}} | {stored:15} | {'-':15} | {'-':>10} | ERROR {e}")

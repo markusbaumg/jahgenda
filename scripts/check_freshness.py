@@ -16,6 +16,7 @@ Set DRY_RUN=1 to print the verdict without touching GitHub.
 
 Usage: python3 scripts/check_freshness.py [--max-age-hours 36]
 """
+
 import json
 import os
 import sys
@@ -26,6 +27,7 @@ from pathlib import Path
 
 try:
     from zoneinfo import ZoneInfo
+
     ZURICH = ZoneInfo("Europe/Zurich")
 except Exception:  # pragma: no cover
     ZURICH = timezone.utc
@@ -101,19 +103,25 @@ def assess(now, max_age):
         age = now - newest
         info.append(f"last sign of life: {fmt(newest)} ({hours(age):.1f} h ago, from {key})")
         if age > max_age:
-            problems.append(f"data is stale: {hours(age):.1f} h since the last run, limit is {hours(max_age):.0f} h")
+            problems.append(
+                f"data is stale: {hours(age):.1f} h since the last run, limit is {hours(max_age):.0f} h"
+            )
         if newest > now + timedelta(hours=2):
-            problems.append(f"last timestamp lies in the future ({fmt(newest)}): clock or timezone bug in the scraper")
+            problems.append(
+                f"last timestamp lies in the future ({fmt(newest)}): clock or timezone bug in the scraper"
+            )
 
     if isinstance(status, dict) and "__error__" not in status:
         ok = status.get("ok")
         counts = status.get("counts") or {}
         info.append(
             f"status.json: ok={ok} runner={status.get('runner', '?')} skill={status.get('skill', '?')} "
-            f"total={counts.get('total', '?')} +{counts.get('added', 0)} ~{counts.get('updated', 0)} -{counts.get('removed', 0)}"
+            f"total={counts.get('total', '?')} +{counts.get('added', 0)} "
+            f"~{counts.get('updated', 0)} -{counts.get('removed', 0)}"
         )
         if ok is False:
-            problems.append(f"last run reported failure: {status.get('error') or status.get('message') or 'no reason given'}")
+            reason = status.get("error") or status.get("message") or "no reason given"
+            problems.append(f"last run reported failure: {reason}")
     else:
         info.append("status.json: missing (scraper skill does not write it yet)")
 
@@ -164,8 +172,11 @@ def open_issue():
 
 
 def ensure_label():
-    code, _ = gh("POST", f"/repos/{REPO}/labels",
-                 {"name": LABEL, "color": LABEL_COLOR, "description": "Opened by the freshness watchdog"})
+    code, _ = gh(
+        "POST",
+        f"/repos/{REPO}/labels",
+        {"name": LABEL, "color": LABEL_COLOR, "description": "Opened by the freshness watchdog"},
+    )
     if code not in (201, 422):  # 422 = already exists
         print(f"WARN cannot create label: HTTP {code}")
 
@@ -175,27 +186,44 @@ def report(healthy, lines, now):
     if os.environ.get("GITHUB_SERVER_URL") and os.environ.get("GITHUB_RUN_ID"):
         run_url = f"{os.environ['GITHUB_SERVER_URL']}/{REPO}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
     stamp = now.astimezone(ZURICH).strftime("%Y-%m-%d %H:%M %Z")
-    bullets = "\n".join(f"- {l}" for l in lines)
+    bullets = "\n".join(f"- {line}" for line in lines)
     links = (
         f"\n\nCheck: https://claude.ai/code/routines (last run and its log) · "
         f"https://markusbaumg.github.io/jahgenda/log.html · "
-        f"[watchdog run]({run_url})" if run_url else ""
+        f"[watchdog run]({run_url})"
+        if run_url
+        else ""
     )
     issue = open_issue()
     if not healthy:
         body = f"{MENTION} the watchdog found the scraper unhealthy at {stamp}:\n\n{bullets}{links}"
         if issue:
-            gh("POST", f"/repos/{REPO}/issues/{issue['number']}/comments", {"body": "Still unhealthy. " + body})
+            gh(
+                "POST",
+                f"/repos/{REPO}/issues/{issue['number']}/comments",
+                {"body": "Still unhealthy. " + body},
+            )
             print(f"commented on existing issue #{issue['number']}")
         else:
             ensure_label()
-            code, created = gh("POST", f"/repos/{REPO}/issues",
-                               {"title": ISSUE_TITLE, "body": body, "labels": [LABEL]})
-            print(f"opened issue #{created.get('number')}" if code == 201 else f"WARN cannot open issue: HTTP {code} {created}")
+            code, created = gh(
+                "POST", f"/repos/{REPO}/issues", {"title": ISSUE_TITLE, "body": body, "labels": [LABEL]}
+            )
+            if code == 201:
+                print(f"opened issue #{created.get('number')}")
+            else:
+                print(f"WARN cannot open issue: HTTP {code} {created}")
     elif issue:
-        gh("POST", f"/repos/{REPO}/issues/{issue['number']}/comments",
-           {"body": f"Healthy again at {stamp}:\n\n{bullets}{links}\n\nClosing."})
-        gh("PATCH", f"/repos/{REPO}/issues/{issue['number']}", {"state": "closed", "state_reason": "completed"})
+        gh(
+            "POST",
+            f"/repos/{REPO}/issues/{issue['number']}/comments",
+            {"body": f"Healthy again at {stamp}:\n\n{bullets}{links}\n\nClosing."},
+        )
+        gh(
+            "PATCH",
+            f"/repos/{REPO}/issues/{issue['number']}",
+            {"state": "closed", "state_reason": "completed"},
+        )
         print(f"closed issue #{issue['number']}")
     else:
         print("healthy, no open issue")
@@ -208,7 +236,7 @@ def main(argv):
     now = datetime.now(timezone.utc)
     healthy, lines = assess(now, timedelta(hours=max_h))
     print(("HEALTHY" if healthy else "UNHEALTHY") + f" (checked {fmt(now)})")
-    for l in lines:
+    for line in lines:
         print("  " + l)
     if DRY_RUN or not TOKEN:
         print("dry run: GitHub not contacted" if DRY_RUN else "no GITHUB_TOKEN: GitHub not contacted")
