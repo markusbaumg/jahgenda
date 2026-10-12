@@ -963,3 +963,29 @@ body {
 .stripe.bottom {
   margin-top: 24px;
 }
+
+/* Logo mark (img/logo/jahgenda.svg) next to the wordmark, in the big header and the collapsed bar. */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+}
+.logo-mark {
+  width: 0.92em;
+  height: 0.92em;
+  flex: 0 0 auto;
+  border-radius: 0.18em;
+}
+.mini-brand {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.mini-brand img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+.filters.stuck .mini-brand {
+  display: inline-flex;
+}
