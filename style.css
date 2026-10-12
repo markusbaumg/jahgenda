@@ -1105,8 +1105,36 @@ body {
     max-width: none;
   }
 }
-.about .authors {
+.about .about-head {
+  margin: 0 0 10px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   color: var(--text);
+}
+.about .about-head::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--red) 0 33%, var(--gold) 33% 66%, var(--green) 66%);
+}
+.about .authors {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.about .authors strong {
+  color: var(--text);
+}
+@media (max-width: 520px) {
+  .about .about-head::after {
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 .about a {
   color: var(--green-text);
