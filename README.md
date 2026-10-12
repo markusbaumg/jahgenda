@@ -18,6 +18,8 @@ Jahgenda collects them in a single fast list (UI in German, docs in English):
 - genre chips per show, acts line for multi-band bills, canton coats of arms / country flags
 - "In Kalender" (.ics), WhatsApp share and direct link per show; nearest-show hint from your location
 - installable as an app on the phone (PWA: offline, own icon, update toast)
+- subscribable calendar feeds: `webcal://markusbaumg.github.io/jahgenda/jahgenda.ics` (all shows) and
+  `jahgenda-<canton>.ics` per canton — built by CI from `data/shows.json` on every deploy (`make ics`)
 - no login, no ads, no tracking
 
 The data is researched daily by a Claude Code agent (see [Scraper](#scraper)). What counts as reggae is a

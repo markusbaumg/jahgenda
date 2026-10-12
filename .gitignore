@@ -12,3 +12,4 @@ node_modules/
 .claude/worktrees/
 .idea/
 .vscode/
+jahgenda*.ics
