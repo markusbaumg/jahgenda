@@ -118,8 +118,20 @@
     star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.6 6 21l1.3-6.8-5-4.7 6.8-.8z"/></svg>',
   };
 
-  const showUrl = (s) =>
-    `${location.origin}${location.pathname}#${encodeURIComponent(s.id)}`;
+  // Short, stable hash per show for links: FNV-1a over the id, base36 (6-7 chars), e.g. #k3f9zq.
+  function shortId(id) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < id.length; i++) {
+      h ^= id.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(36);
+  }
+  // Resolve a hash token to a show: short hash first, full id as fallback (old links keep working).
+  const findShow = (token) =>
+    shows.find((s) => s._short === token) || shows.find((s) => s.id === token);
+
+  const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
 
   const shareText = (s) =>
     `${s.title} – ${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.${s._day.getFullYear()}` +
@@ -320,7 +332,7 @@
             : [],
           acts: Array.isArray(s.acts) ? s.acts.map(String).filter(Boolean) : [],
         }))
-        .map((s) => ({ ...s, _past: s._day < today }))
+        .map((s) => ({ ...s, _past: s._day < today, _short: shortId(s.id) }))
         .sort(
           (a, b) =>
             a._day - b._day || (a.time || "").localeCompare(b.time || ""),
@@ -385,7 +397,7 @@
     if (!s) return;
     if (btn.dataset.act === "cal") downloadIcs(icsFor(s), `${s.id}.ics`);
     if (btn.dataset.act === "link") {
-      history.replaceState(null, "", `#${encodeURIComponent(s.id)}`);
+      history.replaceState(null, "", `#${s._short}`);
       const label = btn.querySelector("span");
       try {
         await navigator.clipboard.writeText(showUrl(s));
@@ -421,10 +433,10 @@
 
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
   function revealFromHash() {
-    if (location.hash.startsWith("#mine=")) return showShared();
-    const id = decodeHashPart(location.hash.slice(1));
-    const target = shows.find((s) => s.id === id);
+    if (/^#(mine|m)=/.test(location.hash)) return showShared();
+    const target = findShow(decodeHashPart(location.hash.slice(1)));
     if (!target) return;
+    const id = target.id;
     if (target._past && !showPast) showPast = true;
     if (!document.getElementById(id)) resetFilters();
     const row = document.getElementById(id);
@@ -461,7 +473,7 @@
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
             `<span class="geo-pin">📍</span> Am nächsten bei dir: ` +
-            `<a href="#${encodeURIComponent(n.s.id)}"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
+            `<a href="#${n.s._short}"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
             `<span class="dist">${formatKm(n.km)}</span>` +
             (near.length > 1
               ? ` <span class="geo-more">· danach ${near
@@ -527,13 +539,13 @@
   const dayShort = (s) =>
     `${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
   const mineUrl = () =>
-    `${location.origin}${location.pathname}#mine=` +
+    `${location.origin}${location.pathname}#m=` +
     markedShows()
-      .map((s) => `${encodeURIComponent(s.id)}:${marks[s.id][0]}`)
+      .map((s) => `${s._short}${marks[s.id][0]}`)
       .join(",");
 
   minePanel.innerHTML =
-    `<span class="mine-note">Nur in diesem Browser gespeichert.</span>` +
+    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle übernehmen».</span>` +
     `<button type="button" class="act" data-mine="ics">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
     `<button type="button" class="act" data-mine="share">${ICONS.link}<span>Liste teilen</span></button>` +
     `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener">${ICONS.wa}<span>WhatsApp</span></a>`;
@@ -604,10 +616,14 @@
   // A friend's list (#mine=id:g,id:i): banner with the shows, nothing is taken over without a click.
   function showShared() {
     shared = {};
-    for (const part of location.hash.slice(6).split(",")) {
-      const [id, st] = part.split(":").map(decodeHashPart);
-      if (shows.some((s) => s.id === id))
-        shared[id] = st === "g" ? "going" : "interested";
+    // New form #m=<short><g|i>,… ; old form #mine=<id>:<g|i>,… still accepted.
+    const raw = location.hash.replace(/^#(mine|m)=/, "");
+    for (const part of raw.split(",")) {
+      let token, st;
+      if (part.includes(":")) [token, st] = part.split(":").map(decodeHashPart);
+      else [token, st] = [decodeHashPart(part.slice(0, -1)), part.slice(-1)];
+      const show = token && findShow(token);
+      if (show) shared[show.id] = st === "g" ? "going" : "interested";
     }
     const items = shows.filter((s) => shared[s.id]);
     if (!items.length) {
@@ -620,7 +636,7 @@
       `<ul>${items
         .map(
           (s) =>
-            `<li><a href="#${encodeURIComponent(s.id)}">${escape(s.title)}</a> · ${escape(dayShort(s))} · ${escape(s.city)}` +
+            `<li><a href="#${s._short}">${escape(s.title)}</a> · ${escape(dayShort(s))} · ${escape(s.city)}` +
             `${shared[s.id] === "going" ? ` <span class="tag-chip">geht hin</span>` : ""}${s._past ? " · vorbei" : ""}</li>`,
         )
         .join("")}</ul>` +
