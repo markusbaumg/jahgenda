@@ -925,10 +925,38 @@ body {
   color: var(--muted);
 }
 
+/* Footer: a lighter full-width band for "Über uns", then a slim bottom bar with the data stamp. */
 .foot {
-  padding-top: 56px;
-  padding-bottom: 40px;
+  margin-top: 72px;
   color: var(--muted);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.foot > .wrap {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+.foot-bar {
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+.foot-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  font-size: 0.82rem;
+}
+.foot-bar-inner p {
+  margin: 0;
+}
+.foot-links a {
+  color: var(--muted);
+}
+.foot-links a:hover {
+  color: var(--gold);
 }
 .section-title {
   margin: 0;
@@ -983,8 +1011,7 @@ body {
   color: var(--green-text);
 }
 .updated {
-  margin: 32px 0 0;
-  font-size: 0.85rem;
+  margin: 0;
 }
 
 /* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared banner --- */
@@ -1276,7 +1303,7 @@ body {
 }
 /* Tricolor stripe at the bottom too */
 .stripe.bottom {
-  margin-top: 24px;
+  margin-top: 0;
 }
 
 /* Logo mark (img/logo/jahgenda.svg) next to the wordmark, in the big header and the collapsed bar. */
