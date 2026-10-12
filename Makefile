@@ -6,7 +6,7 @@ PORT ?= 8000
 WEB_FILES := index.html log.html style.css app.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate test lint fmt fmt-data check scrape harvest deploy status clean
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall
 
 help: ## Diese Hilfe
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -50,6 +50,17 @@ deploy: check ## Prüfen, committen (falls nötig) und pushen → GitHub Pages d
 	@git diff --quiet && git diff --cached --quiet || git commit -am "Update site"
 	git push origin main
 	@echo "→ https://markusbaumg.github.io/jahgenda/  (Status: make status)"
+
+cron-install: ## Local fallback: run the scraper daily at 06:10 on this Mac (launchd)
+	mkdir -p ~/Library/Logs/jahgenda ~/Library/LaunchAgents
+	sed -e 's#__REPO__#$(CURDIR)#g' -e 's#__HOME__#$(HOME)#g' scripts/launchd/ch.jahgenda.scrape.plist > ~/Library/LaunchAgents/ch.jahgenda.scrape.plist
+	launchctl unload ~/Library/LaunchAgents/ch.jahgenda.scrape.plist 2>/dev/null || true
+	launchctl load ~/Library/LaunchAgents/ch.jahgenda.scrape.plist
+	@echo "installed: daily 06:10 → make scrape (logs in ~/Library/Logs/jahgenda/)"
+
+cron-uninstall: ## Remove the local launchd job
+	launchctl unload ~/Library/LaunchAgents/ch.jahgenda.scrape.plist 2>/dev/null || true
+	rm -f ~/Library/LaunchAgents/ch.jahgenda.scrape.plist
 
 status: ## Letzte Deploys und Scraper-Läufe anzeigen
 	gh run list -R markusbaumg/jahgenda -L 5

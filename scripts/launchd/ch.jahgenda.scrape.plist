@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Local fallback for the cloud routine: runs the scraper on this Mac every day at 06:10.
+     Install with `make cron-install`, remove with `make cron-uninstall`. Logs: ~/Library/Logs/jahgenda/ -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>ch.jahgenda.scrape</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd "__REPO__" &amp;&amp; git pull -q --rebase origin main &amp;&amp; make scrape</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>10</integer></dict>
+  <key>StandardOutPath</key><string>__HOME__/Library/Logs/jahgenda/scrape.log</string>
+  <key>StandardErrorPath</key><string>__HOME__/Library/Logs/jahgenda/scrape.err.log</string>
+  <key>RunAtLoad</key><false/>
+</dict>
+</plist>
