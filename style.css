@@ -334,6 +334,88 @@ body {
   color: var(--gold);
   white-space: nowrap;
 }
+/* SBB timetable: a small red badge next to the distance, revealed on hover (always on touch screens). */
+.sbb {
+  display: inline-grid;
+  place-items: center;
+  height: 16px;
+  margin-left: 6px;
+  padding: 0 5px;
+  vertical-align: 1px;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: #eb0000;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.sbb:hover {
+  color: #fff;
+}
+.show:hover .sbb,
+.dist:hover .sbb,
+.geo-status .sbb,
+.sbb:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .sbb {
+    opacity: 1;
+  }
+}
+
+/* Loading skeleton: six grey rows in the shape of the list, so nothing jumps when the data lands. */
+.skeleton {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.skeleton li {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 14px;
+  padding: 14px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.skeleton i {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--line) 0%, var(--surface) 50%, var(--line) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.skeleton li i:first-child {
+  height: 40px;
+  border-radius: 8px;
+}
+.skeleton li span {
+  display: grid;
+  gap: 8px;
+  align-content: center;
+}
+.skeleton li span i:first-child {
+  width: 55%;
+  height: 14px;
+}
+.skeleton li span i:last-child {
+  width: 35%;
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton i {
+    animation: none;
+  }
+}
 
 .results {
   display: flex;
@@ -1078,7 +1160,7 @@ body {
   border: 2px solid var(--bg);
 }
 
-/* Wann: date range panel – weekly histogram, two overlaid range sliders, date inputs, quick picks. */
+/* Wann: quick picks and month chips (multi-select). */
 .icon-btn.when {
   position: relative;
 }
@@ -1105,198 +1187,24 @@ body {
 .icon-btn.when b[hidden] {
   display: none;
 }
-.when-panel {
-  margin: 0 0 12px;
-  padding: 12px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--gold);
-  border-radius: 0 6px 6px 0;
-}
-.when-panel[hidden] {
-  display: none;
-}
-.when-scroll {
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-.when-track {
-  min-width: calc(var(--buckets, 1) * 8px);
-}
-.when-hist {
+.when-months {
   display: flex;
-  align-items: stretch;
-  gap: 2px;
-  height: 56px;
-  padding: 0 22px;
-  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
 }
-.when-hist .bar {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 4px;
-  display: flex;
-  align-items: flex-end;
+.when-months .chip.past,
+.canton-chips .chip.empty,
+.when-months .chip.empty {
+  opacity: 0.55;
 }
-.when-hist .bar i {
-  display: block;
-  width: 100%;
-  height: var(--h, 0%);
-  min-height: 2px;
-  background: var(--gold);
-  border-radius: 2px 2px 0 0;
-  transition: opacity 0.15s;
-}
-.when-hist .bar.empty i {
-  background: var(--line);
-}
-.when-hist .bar.dim i {
-  opacity: 0.3;
-}
-.when-hist .bar.today::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -8px;
-  width: 2px;
-  height: 8px;
-  margin-left: -1px;
-  background: var(--red);
-}
-.when-hist .bar.today::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -8px;
-  border: 4px solid transparent;
-  border-bottom-color: var(--red);
-  margin-left: -4px;
-}
-.when-slider {
-  position: relative;
-  height: 44px;
-  margin-top: 6px;
-}
-.when-slider::before {
-  content: "";
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  top: 20px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--line);
-}
-.when-fill {
-  position: absolute;
-  top: 20px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--gold);
-  left: calc(22px + (100% - 44px) * var(--a, 0));
-  width: calc((100% - 44px) * var(--w, 1));
-}
-.when-slider input[type="range"] {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 44px;
-  margin: 0;
-  padding: 0;
-  background: none;
-  -webkit-appearance: none;
-  appearance: none;
-  pointer-events: none;
-}
-.when-slider input.on-top {
-  z-index: 1;
-}
-.when-slider input:focus {
-  outline: none;
-}
-.when-slider input::-webkit-slider-runnable-track {
-  height: 4px;
-  background: transparent;
-}
-.when-slider input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 44px;
-  height: 44px;
-  margin-top: -20px;
-  border: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--gold) 0 10px, transparent 11px);
-  pointer-events: auto;
-  cursor: grab;
-}
-.when-slider input:focus-visible::-webkit-slider-thumb {
-  background: radial-gradient(
-    circle,
-    var(--gold) 0 8px,
-    var(--bg) 9px 10px,
-    var(--gold) 11px 13px,
-    transparent 14px
-  );
-}
-.when-slider input::-moz-range-track {
-  height: 4px;
-  background: transparent;
-}
-.when-slider input::-moz-range-thumb {
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--gold) 0 10px, transparent 11px);
-  pointer-events: auto;
-  cursor: grab;
-}
-.when-slider input:focus-visible::-moz-range-thumb {
-  background: radial-gradient(
-    circle,
-    var(--gold) 0 8px,
-    var(--bg) 9px 10px,
-    var(--gold) 11px 13px,
-    transparent 14px
-  );
-}
-.when-dates {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 4px;
-}
-.when-dates label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-.when-dates label span {
-  flex: 0 0 28px;
-}
-.when-dates input {
-  flex: 1;
-  min-width: 0;
-  font: inherit;
-  color: var(--text);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  height: 40px;
-  padding: 0 10px;
-  color-scheme: dark;
-}
-.when-dates input:focus {
-  outline: 2px solid var(--gold);
-  outline-offset: 1px;
+.when-months .chip[aria-pressed="true"] {
+  opacity: 1;
 }
 .when-quick {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 10px;
 }
 .when-foot {
   display: flex;
@@ -1328,9 +1236,6 @@ body {
   accent-color: var(--gold);
 }
 @media (max-width: 480px) {
-  .when-dates {
-    grid-template-columns: 1fr;
-  }
   .when-past {
     margin-left: 0;
   }
@@ -1861,14 +1766,68 @@ a {
   white-space: nowrap;
 }
 
-/* Wo panel: own position, radius, canton chips */
-.where-panel {
-  margin: 0 0 12px;
-  padding: 12px;
+/* Filter panels: dropdowns hanging from the sticky bar (so they open wherever you are on the page),
+   one at a time, with a × in the corner. */
+.filters .panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 4;
+  max-height: calc(100vh - var(--bar-h, 120px) - 24px);
+  overflow: auto;
+  padding: 10px 14px 14px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 18px 32px -12px rgba(0, 0, 0, 0.75);
 }
+.filters .panel[hidden] {
+  display: none;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.panel-head strong {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.panel-close {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  margin-right: -6px;
+  padding: 0;
+  font: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.panel-close:hover {
+  color: var(--text);
+  border-color: var(--gold);
+}
+.panel-close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.icon-btn[aria-expanded="true"] {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+/* Wo panel: own position, radius, canton chips */
 .where-row {
   display: flex;
   flex-wrap: wrap;
@@ -1899,6 +1858,12 @@ a {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 10px;
+}
+.canton-chips .chip.abroad {
+  border-style: dashed;
+}
+.canton-chips .chip.abroad:first-of-type {
+  margin-left: 0;
 }
 .canton-chips .chip {
   display: inline-flex;

@@ -57,10 +57,6 @@
               title="Nach Band, Club oder Ort suchen"
             />
           </div>
-          <label class="sr" for="canton">Kanton</label>
-          <select id="canton" class="sr" tabindex="-1" aria-hidden="true" title="Nach Kanton filtern">
-            <option value="">Alle Kantone</option>
-          </select>
           <button
             type="button"
             id="toggle-where"
@@ -137,150 +133,129 @@
             &rsaquo;
           </button>
         </div>
-      </form>
-      <div id="when-panel" class="when-panel" role="group" aria-label="Zeitraum" hidden>
-        <div class="when-quick" role="group" aria-label="Schnellauswahl">
-          <button type="button" class="chip" data-quick="today" aria-pressed="false" title="Nur heute">
-            Heute
-          </button>
-          <button
-            type="button"
-            class="chip"
-            data-quick="weekend"
-            aria-pressed="false"
-            title="Nächstes Wochenende (Freitag bis Sonntag)"
-          >
-            Wochenende
-          </button>
-          <button type="button" class="chip" data-quick="7" aria-pressed="false" title="Die nächsten 7 Tage">
-            7 Tage
-          </button>
-          <button
-            type="button"
-            class="chip"
-            data-quick="30"
-            aria-pressed="false"
-            title="Die nächsten 30 Tage"
-          >
-            30 Tage
-          </button>
-          <button
-            type="button"
-            class="chip"
-            data-quick="all"
-            aria-pressed="false"
-            title="Alle Konzerte, auch vergangene"
-          >
-            Alles
-          </button>
-        </div>
-        <div class="when-scroll">
-          <div class="when-track">
-            <div id="when-hist" class="when-hist" aria-hidden="true"></div>
-            <div class="when-slider">
-              <span class="when-fill" aria-hidden="true"></span>
-              <label class="sr" for="when-from">Von (Tag)</label>
-              <input
-                id="when-from"
-                type="range"
-                min="0"
-                max="0"
-                step="1"
-                value="0"
-                title="Anfang des Zeitraums"
-              />
-              <label class="sr" for="when-to">Bis (Tag)</label>
-              <input
-                id="when-to"
-                type="range"
-                min="0"
-                max="0"
-                step="1"
-                value="0"
-                title="Ende des Zeitraums"
-              />
-            </div>
+        <div id="where-panel" class="panel where-panel" role="group" aria-label="Wo" hidden>
+          <div class="panel-head">
+            <strong>Wo</strong>
+            <button
+              type="button"
+              class="panel-close"
+              data-close
+              title="Schliessen"
+              aria-label="Wo schliessen"
+            >
+              &times;
+            </button>
           </div>
+          <div class="where-row">
+            <button
+              type="button"
+              id="locate"
+              class="chip where-locate"
+              title="Meinen Standort verwenden und Distanzen anzeigen"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1a9 9 0 0 0 7.9-7.9H23v-2h-2.1zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
+                />
+              </svg>
+              Mein Standort
+            </button>
+            <span class="where-radius" id="where-radius" role="group" aria-label="Umkreis" hidden>
+              <button
+                type="button"
+                class="chip"
+                data-radius="10"
+                aria-pressed="false"
+                title="Nur Shows im Umkreis von 10 km"
+              >
+                10 km
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-radius="25"
+                aria-pressed="false"
+                title="Nur Shows im Umkreis von 25 km"
+              >
+                25 km
+              </button>
+              <button
+                type="button"
+                class="chip"
+                data-radius="50"
+                aria-pressed="false"
+                title="Nur Shows im Umkreis von 50 km"
+              >
+                50 km
+              </button>
+              <button type="button" class="chip" data-radius="0" aria-pressed="true" title="Alle Distanzen">
+                Alle
+              </button>
+            </span>
+          </div>
+          <p id="geo-status" class="geo-status" role="status"></p>
+          <div
+            id="canton-chips"
+            class="canton-chips"
+            role="group"
+            aria-label="Kantone (Mehrfachauswahl)"
+          ></div>
         </div>
-        <div class="when-dates">
-          <label>
-            <span>Von</span>
-            <input id="when-from-date" type="date" title="Anfang des Zeitraums" />
-          </label>
-          <label>
-            <span>Bis</span>
-            <input id="when-to-date" type="date" title="Ende des Zeitraums" />
-          </label>
-        </div>
-
-        <p class="when-foot">
-          <span id="when-count" aria-live="polite"></span>
-          <button
-            type="button"
-            id="when-reset"
-            class="linkish"
-            title="Zeitraum zurücksetzen: alle kommenden Konzerte"
-          >
-            Zurücksetzen
-          </button>
-          <label class="when-past" title="Auch Konzerte anzeigen, die schon vorbei sind" hidden>
-            <input type="checkbox" id="toggle-past" />
-            Vergangene einblenden
-          </label>
-        </p>
-      </div>
-      <div id="where-panel" class="where-panel" role="group" aria-label="Wo" hidden>
-        <div class="where-row">
-          <button
-            type="button"
-            id="locate"
-            class="chip where-locate"
-            title="Meinen Standort verwenden und Distanzen anzeigen"
-          >
-            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.9 3A9 9 0 0 0 13 3.1V1h-2v2.1A9 9 0 0 0 3.1 11H1v2h2.1A9 9 0 0 0 11 20.9V23h2v-2.1a9 9 0 0 0 7.9-7.9H23v-2h-2.1zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
-              />
-            </svg>
-            Mein Standort
-          </button>
-          <span class="where-radius" id="where-radius" role="group" aria-label="Umkreis" hidden>
+        <div id="when-panel" class="panel when-panel" role="group" aria-label="Wann" hidden>
+          <div class="panel-head">
+            <strong>Wann</strong>
+            <button
+              type="button"
+              class="panel-close"
+              data-close
+              title="Schliessen"
+              aria-label="Wann schliessen"
+            >
+              &times;
+            </button>
+          </div>
+          <div class="when-quick" role="group" aria-label="Schnellauswahl">
+            <button type="button" class="chip" data-quick="today" aria-pressed="false" title="Nur heute">
+              Heute
+            </button>
             <button
               type="button"
               class="chip"
-              data-radius="10"
+              data-quick="weekend"
               aria-pressed="false"
-              title="Nur Shows im Umkreis von 10 km"
+              title="Nächstes Wochenende (Freitag bis Sonntag)"
             >
-              10 km
+              Wochenende
             </button>
             <button
               type="button"
               class="chip"
-              data-radius="25"
+              data-quick="7"
               aria-pressed="false"
-              title="Nur Shows im Umkreis von 25 km"
+              title="Die nächsten 7 Tage"
             >
-              25 km
+              7 Tage
             </button>
+          </div>
+          <div id="when-months" class="when-months" role="group" aria-label="Monate (Mehrfachauswahl)"></div>
+          <p class="when-foot">
+            <span id="when-count" aria-live="polite"></span>
             <button
               type="button"
-              class="chip"
-              data-radius="50"
-              aria-pressed="false"
-              title="Nur Shows im Umkreis von 50 km"
+              id="when-reset"
+              class="linkish"
+              title="Zeitraum zurücksetzen: alle kommenden Konzerte"
             >
-              50 km
+              Zurücksetzen
             </button>
-            <button type="button" class="chip" data-radius="0" aria-pressed="true" title="Alle Distanzen">
-              Alle
-            </button>
-          </span>
+            <label class="when-past" title="Auch Konzerte anzeigen, die schon vorbei sind" hidden>
+              <input type="checkbox" id="toggle-past" />
+              Vergangene einblenden
+            </label>
+          </p>
         </div>
-        <p id="geo-status" class="geo-status" role="status"></p>
-        <div id="canton-chips" class="canton-chips" role="group" aria-label="Kanton"></div>
-      </div>
+      </form>
       <div id="shared" class="shared" role="region" aria-label="Geteilte Liste" hidden></div>
 
       <p id="results" class="results" aria-live="polite">
@@ -358,22 +333,41 @@
       </p>
       <div id="mine-panel" class="mine-panel" hidden></div>
       <div id="views">
-        <div id="list"></div>
+        <div id="list">
+          <ul class="skeleton" aria-label="Lade Konzerte …">
+            <li aria-hidden="true">
+              <i></i><span><i></i><i></i></span>
+            </li>
+            <li aria-hidden="true">
+              <i></i><span><i></i><i></i></span>
+            </li>
+            <li aria-hidden="true">
+              <i></i><span><i></i><i></i></span>
+            </li>
+            <li aria-hidden="true">
+              <i></i><span><i></i><i></i></span>
+            </li>
+            <li aria-hidden="true">
+              <i></i><span><i></i><i></i></span>
+            </li>
+            <li aria-hidden="true">
+              <i></i><span><i></i><i></i></span>
+            </li>
+          </ul>
+        </div>
         <div id="calendar" class="calendar" hidden></div>
         <div id="map-view" class="map-view" hidden>
           <div id="map" class="map" aria-label="Karte der Konzertorte"></div>
           <div id="map-rest"></div>
         </div>
       </div>
-      <div id="status" class="status" role="status">
-        <p>Lade Konzerte …</p>
-      </div>
+      <div id="status" class="status" role="status"></div>
     </main>
 
     <footer class="foot">
       <div class="wrap">
         <section class="about" aria-labelledby="about-title">
-          <h2 id="about-title" class="section-title">Über uns</h2>
+          <h2 id="about-title" class="section-title">Gemacht von Kusi &amp; Seraina</h2>
           <div class="about-body">
             <img
               class="about-photo"
@@ -396,7 +390,6 @@
                 neuesten Details findest du jeweils auf der Seite des Clubs oder Veranstalters – ein kurzer
                 Blick dorthin lohnt sich vor jedem Konzert.
               </p>
-              <p class="authors">Gemacht von <strong>Kusi</strong> &amp; <strong>Seraina</strong></p>
             </div>
           </div>
         </section>
@@ -406,7 +399,6 @@
           <p class="updated"><span id="results-text"></span><span id="updated"></span></p>
           <p class="foot-links">
             <a href="https://github.com/markusbaumg/jahgenda" title="Quellcode auf GitHub öffnen">GitHub</a> ·
-            <a href="log.html" title="Scraper-Log öffnen: was die KI-Agenten gemacht haben">Scraper-Log</a> ·
             <a
               href="webcal://markusbaumg.github.io/jahgenda/jahgenda.ics"
               title="Alle Shows als Kalender abonnieren (Apple, Google, Outlook – aktualisiert sich täglich)"

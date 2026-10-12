@@ -6,6 +6,7 @@
   let genreOrder = []; // slugs in display order (from data/genres.json)
   let genreLabel = {}; // slug → label
   let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
+  let venuePlaces = []; // {city, lat, lon} per known venue – the nearest one is the start for the SBB link
   const venueKey = (name) =>
     String(name)
       .toLowerCase()
@@ -65,7 +66,7 @@
   const resultsText = el("results-text");
   let showPast = false;
   let pastCount = 0;
-  const cantonSelect = el("canton");
+  const cantons = new Set(); // selected canton / region codes (empty = all)
   let radiusKm = 0; // 0 = no distance filter; only applies once the position is known
   const search = el("q");
   const genreBar = el("genres");
@@ -122,9 +123,32 @@
 
   const formatKm = (km) => (km < 1 ? "gleich ums Eck" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`);
 
+  // The town nearest to the user's position (from the venue list) – the "von" of the SBB timetable link.
+  let homeCity = "";
+  function updateHomeCity() {
+    if (!here || !venuePlaces.length) return;
+    const near = venuePlaces.map((p) => ({ p, km: distanceKm(here, p) })).sort((a, b) => a.km - b.km)[0];
+    homeCity = near && near.km < 60 ? near.p.city : "";
+  }
+  // SBB timetable from the user's town to the show's town, arriving an hour before the show
+  // (20:00 when no time is known).
+  function sbbUrl(s) {
+    if (!homeCity || homeCity === s.city) return "";
+    const [h, m] = (s.time || "20:00").split(":").map(Number);
+    const arrive = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate(), h, m);
+    arrive.setMinutes(arrive.getMinutes() - 60);
+    const two = (n) => String(n).padStart(2, "0");
+    const time = `${two(arrive.getHours())}:${two(arrive.getMinutes())}`;
+    return `https://www.sbb.ch/de?von=${encodeURIComponent(homeCity)}&nach=${encodeURIComponent(s.city)}&date=${s.date}&time=${encodeURIComponent(time)}&moment=ARRIVAL`;
+  }
+  function sbbLink(s) {
+    const url = sbbUrl(s);
+    if (!url) return "";
+    return `<a class="sbb" href="${url}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show" aria-label="SBB-Fahrplan nach ${escape(s.city)}">SBB</a>`;
+  }
   function distanceLabel(s) {
     if (!here || typeof s.lat !== "number" || typeof s.lon !== "number") return "";
-    return ` · <span class="dist">${formatKm(distanceKm(here, s))}</span>`;
+    return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
   // Venue name as a link to the venue's site when data/venues.json knows it.
@@ -271,7 +295,7 @@
           }
           <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}</p>
         </div>
-        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
+        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
             ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(genreLabel[g] || g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
             <div class="actions">
@@ -303,11 +327,10 @@
   }
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these).
   function matchesFilters(s) {
-    const canton = cantonSelect.value;
     const q = search.value.trim().toLowerCase();
     if (shared && !shared[s.id]) return false;
     if (mineOnly && !marks[s.id]) return false;
-    if (canton && s.canton !== canton) return false;
+    if (cantons.size && !cantons.has(s.canton)) return false;
     if (radiusKm && here && typeof s.lat === "number" && distanceKm(here, s) > radiusKm) return false;
     if (activeGenre && !s.genres.includes(activeGenre)) return false;
     if (!q) return true;
@@ -319,12 +342,11 @@
   const isVisible = (s) => (!s._past || showPast) && inRange(s) && matchesFilters(s);
 
   function render() {
-    const canton = cantonSelect.value;
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter(isVisible);
 
     const filtered = Boolean(
-      canton || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
+      cantons.size || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
     );
     el("clear-filters").hidden = !filtered;
     updateMine();
@@ -426,7 +448,10 @@
       try {
         const v = vres && vres.ok ? await vres.json() : null;
         for (const [name, info] of Object.entries((v && v.venues) || {})) {
-          if (info && safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
+          if (!info) continue;
+          if (safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
+          if (typeof info.lat === "number" && typeof info.lon === "number" && info.city)
+            venuePlaces.push({ city: info.city, lat: info.lat, lon: info.lon });
         }
       } catch {
         /* venues.json is optional for the page */
@@ -446,21 +471,22 @@
 
       pastCount = shows.filter((s) => s._past).length;
       setupWhen();
-      const used = [...new Set(shows.map((s) => s.canton).filter(Boolean))].sort();
-      cantonSelect.insertAdjacentHTML(
-        "beforeend",
-        used.map((c) => `<option value="${escape(c)}">${escape(regionName(c))}</option>`).join(""),
-      );
-      // Canton chips (with counts) inside the Wo panel; the hidden select stays the single source of truth.
+      // Canton chips (multi-select, with counts) inside the Wo panel: Swiss cantons A–Z, the
+      // neighbouring countries at the end.
       const perCanton = new Map();
       for (const s of shows) perCanton.set(s.canton, (perCanton.get(s.canton) || 0) + 1);
+      const used = [...perCanton.keys()].sort(
+        (a, b) =>
+          (ABROAD[a] ? 1 : 0) - (ABROAD[b] ? 1 : 0) || regionName(a).localeCompare(regionName(b), "de"),
+      );
       el("canton-chips").innerHTML =
-        `<button type="button" class="chip" data-canton="" aria-pressed="true" title="Alle Kantone anzeigen">Alle Kantone</button>` +
+        `<button type="button" class="chip" data-canton="" aria-pressed="true" title="Alle Kantone anzeigen">Alle</button>` +
         used
-          .map(
-            (c) =>
-              `<button type="button" class="chip" data-canton="${escape(c)}" aria-pressed="false" title="Nur ${escape(regionName(c))} anzeigen (${perCanton.get(c)})"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(regionName(c))}<small>${perCanton.get(c)}</small></button>`,
-          )
+          .map((c) => {
+            const name = ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c);
+            const title = `${regionName(c)}: ${perCanton.get(c)} ${perCanton.get(c) === 1 ? "Show" : "Shows"} – anklicken zum Ein-/Ausschalten`;
+            return `<button type="button" class="chip${ABROAD[c] ? " abroad" : ""}" data-canton="${escape(c)}" aria-pressed="false" title="${escape(title)}"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(name)}<small>${perCanton.get(c)}</small></button>`;
+          })
           .join("");
       updateWhere();
 
@@ -492,12 +518,11 @@
     }
   }
 
-  // Canton badge: click filters the list to that canton (click again to clear).
+  // Canton badge in a row: toggles that canton in the Wo filter.
   list.addEventListener("click", (e) => {
     const c = e.target.closest(".canton[data-canton]");
     if (!c) return;
-    cantonSelect.value = cantonSelect.value === c.dataset.canton ? "" : c.dataset.canton;
-    updateWhere();
+    toggleCanton(c.dataset.canton);
     renderAndKeepInView();
   });
 
@@ -619,7 +644,7 @@
   phoneMq.addEventListener("change", closeSheet);
 
   function resetFilters() {
-    cantonSelect.value = "";
+    cantons.clear();
     radiusKm = 0;
     updateWhere();
     search.value = "";
@@ -663,39 +688,79 @@
   }
   window.addEventListener("hashchange", revealFromHash);
 
-  // --- Wo: canton chips + own position (+ radius) in one panel behind the pin button ---
+  // --- Filter panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ---
+  // Open with the toolbar button, close with ×, Escape, the button again or a click/tap outside.
+  const filtersForm = el("filters");
+  const PANELS = { where: ["toggle-where", "where-panel"], when: ["toggle-when", "when-panel"] };
+  let openPanel = null;
+  function setPanel(name) {
+    openPanel = name;
+    for (const [key, [btn, panel]] of Object.entries(PANELS)) {
+      el(panel).hidden = key !== name;
+      el(btn).setAttribute("aria-expanded", String(key === name));
+    }
+    if (name === "when") updateWhen();
+  }
+  filtersForm.addEventListener("click", (e) => {
+    const close = e.target.closest(".panel-close");
+    if (!close) return;
+    const panel = close.closest(".panel").id === "where-panel" ? "where" : "when";
+    setPanel(null);
+    el(PANELS[panel][0]).focus();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !openPanel) return;
+    const btn = PANELS[openPanel][0];
+    setPanel(null);
+    el(btn).focus();
+  });
+  document.addEventListener("click", (e) => {
+    // A chip that re-rendered itself on click is detached by now – that is not an outside click.
+    if (openPanel && e.target.isConnected && !filtersForm.contains(e.target)) setPanel(null);
+  });
+
+  // --- Wo: canton chips (multi-select) + own position (+ radius) behind the pin button ---
   const toggleWhere = el("toggle-where");
-  const wherePanel = el("where-panel");
-  let whereOpen = false;
   let nearestCity = "";
-  function setWhereOpen(open) {
-    whereOpen = open;
-    wherePanel.hidden = !open;
-    toggleWhere.setAttribute("aria-expanded", String(open));
-    if (open && typeof whenOpen !== "undefined" && whenOpen) el("toggle-when").click();
+  function toggleCanton(code) {
+    if (cantons.has(code)) cantons.delete(code);
+    else cantons.add(code);
+    updateWhere();
+  }
+  function whereLabel() {
+    const codes = [...cantons];
+    const parts = [];
+    if (codes.length > 3) parts.push(`${codes.length} Kantone`);
+    else if (codes.length) parts.push(codes.join(" · "));
+    if (here && radiusKm) parts.push(`≤ ${radiusKm} km`);
+    else if (here && !codes.length) parts.push(nearestCity ? `bei ${nearestCity}` : "Standort");
+    return parts.join(" · ");
   }
   function updateWhere() {
-    const canton = cantonSelect.value;
+    const label = whereLabel();
     const badge = toggleWhere.querySelector("b");
-    let label = canton || "";
-    if (here && radiusKm) label = `${label ? label + " · " : ""}≤ ${radiusKm} km`;
-    else if (here && !canton) label = nearestCity ? `bei ${nearestCity}` : "Standort";
     badge.textContent = label;
     badge.hidden = !label;
-    toggleWhere.setAttribute("aria-pressed", String(Boolean(canton || (here && radiusKm))));
-    toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kanton wählen oder meinen Standort verwenden";
+    toggleWhere.setAttribute("aria-pressed", String(Boolean(cantons.size || (here && radiusKm))));
+    toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kantone wählen oder meinen Standort verwenden";
     for (const c of el("canton-chips").querySelectorAll(".chip"))
-      c.setAttribute("aria-pressed", String(c.dataset.canton === canton));
+      c.setAttribute(
+        "aria-pressed",
+        String(c.dataset.canton ? cantons.has(c.dataset.canton) : !cantons.size),
+      );
     el("where-radius").hidden = !here;
     for (const r of el("where-radius").querySelectorAll(".chip"))
       r.setAttribute("aria-pressed", String(Number(r.dataset.radius) === radiusKm));
   }
-  toggleWhere.addEventListener("click", () => setWhereOpen(!whereOpen));
+  toggleWhere.addEventListener("click", () => setPanel(openPanel === "where" ? null : "where"));
   el("canton-chips").addEventListener("click", (e) => {
     const c = e.target.closest(".chip[data-canton]");
     if (!c) return;
-    cantonSelect.value = c.dataset.canton;
-    updateWhere();
+    if (c.dataset.canton) toggleCanton(c.dataset.canton);
+    else {
+      cantons.clear();
+      updateWhere();
+    }
     renderAndKeepInView();
   });
   el("where-radius").addEventListener("click", (e) => {
@@ -704,9 +769,6 @@
     radiusKm = Number(r.dataset.radius);
     updateWhere();
     renderAndKeepInView();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && whereOpen) setWhereOpen(false);
   });
 
   const locateBtn = el("locate");
@@ -721,6 +783,7 @@
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        updateHomeCity();
         locateBtn.disabled = false;
         locateBtn.classList.add("active");
         // Closest upcoming show (never a past one), as a link into the list.
@@ -728,22 +791,16 @@
           .filter((s) => !s._past && typeof s.lat === "number")
           .map((s) => ({ s, km: distanceKm(here, s) }))
           .sort((a, b) => a.km - b.km)
-          .slice(0, 3);
+          .slice(0, 1);
         nearestCity = near.length ? near[0].s.city : "";
         updateWhere();
         if (near.length) {
           const n = near[0];
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
-            `<span class="geo-pin">📍</span> Am nächsten bei dir: ` +
+            `<span class="geo-pin">📍</span> Nächste Show: ` +
             `<a href="#${n.s._short}" title="Zur Show in der Liste springen"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
-            `<span class="dist">${formatKm(n.km)}</span>` +
-            (near.length > 1
-              ? ` <span class="geo-more">· danach ${near
-                  .slice(1)
-                  .map((x) => `${escape(x.s.city)} (${formatKm(x.km)})`)
-                  .join(", ")}</span>`
-              : "");
+            `<span class="dist" title="Luftlinie von deinem Standort">${formatKm(n.km)}${sbbLink(n.s)}</span>`;
         } else {
           geoStatus.textContent = "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
         }
@@ -889,207 +946,149 @@
     render();
   }
 
-  // --- Wann: date range [von, bis] with a weekly histogram and two overlaid range sliders. ---
-  // The range lives for this visit only (nothing is stored). Default = no range = everything upcoming.
+  // --- Wann: quick picks (Heute / Wochenende / 7 Tage) or any set of months. ---
+  // The choice lives for this visit only (nothing is stored). Default = no range = everything upcoming.
   const toggleWhen = el("toggle-when");
   const whenPanel = el("when-panel");
-  const whenTrack = whenPanel.querySelector(".when-track");
-  const whenHist = el("when-hist");
-  const whenFill = whenPanel.querySelector(".when-fill");
-  const whenFrom = el("when-from");
-  const whenTo = el("when-to");
-  const whenFromDate = el("when-from-date");
-  const whenToDate = el("when-to-date");
+  const whenMonths = el("when-months");
   const whenCount = el("when-count");
   const togglePast = el("toggle-past");
   const pastLabel = togglePast.closest("label");
-  let rangeFrom = null; // local day (Date) or null = no range
+  let rangeFrom = null; // local day (Date) or null – set by a quick pick
   let rangeTo = null;
-  let pastAuto = false; // past shows were switched on by a range that starts before today
-  let spanStart = null; // Monday of the week of the earliest show (or of this week, if earlier)
-  let spanDays = 0; // days up to the Sunday of the week of the latest show; slider values are day offsets
-  let whenOpen = false;
+  const months = new Set(); // selected months as "YYYY-M" keys – set by the month chips
+  let pastAuto = false; // past shows were switched on by a choice that reaches into the past
+  let monthList = []; // every month from the first show (or today) to the last show
 
-  const DAY = 86400000;
   const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-  const dayDiff = (a, b) => Math.round((b - a) / DAY); // whole days from a to b (DST-safe)
-  const mondayOf = (d) => addDays(d, -((d.getDay() + 6) % 7));
+  const sameDay = (a, b) => a.getTime() === b.getTime();
   const dm = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
-  const isoWeek = (d) => {
-    const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
-    return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / DAY + 1) / 7);
+  const monthKey = (d) => `${d.getFullYear()}-${d.getMonth() + 1}`;
+  const monthStart = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
+  const shortMonthFmt = new Intl.DateTimeFormat("de-CH", { month: "short" });
+  // "Okt" this year, "Jan ’27" in another year.
+  const monthLabel = (d) =>
+    `${shortMonthFmt.format(d).replace(".", "")}${d.getFullYear() === todayStart().getFullYear() ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
+  const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
+  const inRange = (s) => {
+    if (months.size) return months.has(monthKey(s._day));
+    return !(rangeFrom && rangeTo) || (s._day >= rangeFrom && s._day <= rangeTo);
   };
-  const rangeActive = () => Boolean(rangeFrom && rangeTo);
-  const inRange = (s) => !rangeActive() || (s._day >= rangeFrom && s._day <= rangeTo);
-  const rangeLabel = () => (dayDiff(rangeFrom, rangeTo) ? `${dm(rangeFrom)}–${dm(rangeTo)}` : dm(rangeFrom));
-  const spanEnd = () => addDays(spanStart, spanDays - 1);
-  const clampDay = (d) => (d < spanStart ? spanStart : d > spanEnd() ? spanEnd() : d);
-  // What the sliders show when no range is set: today (or the very start when past shows are on) → end.
-  const defaultFrom = () => (showPast ? spanStart : clampDay(todayStart()));
-  const effFrom = () => rangeFrom || defaultFrom();
-  const effTo = () => rangeTo || spanEnd();
+  function rangeLabel() {
+    if (months.size) {
+      const picked = monthList.filter((d) => months.has(monthKey(d)));
+      return picked.length > 2 ? `${picked.length} Monate` : picked.map(monthLabel).join(", ");
+    }
+    return sameDay(rangeFrom, rangeTo) ? dm(rangeFrom) : `${dm(rangeFrom)}–${dm(rangeTo)}`;
+  }
 
   function setupWhen() {
     toggleWhen.hidden = !shows.length;
     if (!shows.length) return;
     const today = todayStart();
-    const first = shows[0]._day < today ? shows[0]._day : today;
-    const last = shows[shows.length - 1]._day > today ? shows[shows.length - 1]._day : today;
-    spanStart = mondayOf(first);
-    spanDays = dayDiff(spanStart, mondayOf(last)) + 7;
-    whenFrom.max = whenTo.max = spanDays - 1;
-    whenFromDate.min = whenToDate.min = dayKey(spanStart);
-    whenFromDate.max = whenToDate.max = dayKey(spanEnd());
-    whenTrack.style.setProperty("--buckets", spanDays / 7);
+    const first = monthStart(shows[0]._day < today ? shows[0]._day : today);
+    const last = monthStart(shows[shows.length - 1]._day > today ? shows[shows.length - 1]._day : today);
+    monthList = [];
+    for (let d = first; d <= last; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) monthList.push(d);
   }
 
-  // Apply a range. A start before today switches past shows on (and off again when the start moves back);
-  // the default position (today → end) counts as "no range".
-  function setRange(from, to) {
-    const today = todayStart();
-    if (from > to) [from, to] = [to, from];
-    from = clampDay(from);
-    to = clampDay(to);
-    if (from < today && !showPast) {
+  // Past shows follow the choice: a month before this one switches them on, and off again once no
+  // such month is selected any more (unless the user switched them on by hand).
+  function syncPast() {
+    const thisMonth = monthStart(todayStart());
+    const reachesPast = [...months].some((k) => monthList.find((d) => monthKey(d) === k) < thisMonth);
+    if (reachesPast && !showPast) {
       showPast = true;
       pastAuto = true;
-    } else if (from >= today && pastAuto) {
+    } else if (!reachesPast && pastAuto) {
       showPast = false;
       pastAuto = false;
     }
-    const isDefault = dayDiff(from, defaultFrom()) === 0 && dayDiff(to, spanEnd()) === 0;
-    rangeFrom = isDefault ? null : from;
-    rangeTo = isDefault ? null : to;
+  }
+  function setRange(from, to) {
+    months.clear();
+    rangeFrom = from;
+    rangeTo = to;
+    syncPast();
   }
   function clearRange() {
     rangeFrom = rangeTo = null;
-    if (pastAuto) {
-      showPast = false;
-      pastAuto = false;
-    }
+    months.clear();
+    syncPast();
   }
 
-  // Quick picks, as [from, to]; "all" is the whole span (past included).
+  // Quick picks, as [from, to].
   function quickRange(kind) {
     const today = todayStart();
     const dow = today.getDay(); // 0 = Sunday
     if (kind === "today") return [today, today];
     if (kind === "weekend")
       return [dow === 0 || dow >= 5 ? today : addDays(today, 5 - dow), addDays(today, (7 - dow) % 7)];
-    if (kind === "all") return [spanStart, spanEnd()];
     return [today, addDays(today, Number(kind) - 1)];
   }
 
-  // Button, badge, past checkbox and (when open) sliders, dates, histogram, count and quick chips.
+  // Button, badge, past checkbox and (when open) month chips with counts, quick chips and the count.
   function updateWhen() {
-    if (!spanStart) return;
+    if (!monthList.length) return;
     const active = rangeActive();
     toggleWhen.setAttribute("aria-pressed", String(active));
-    toggleWhen.setAttribute("aria-expanded", String(whenOpen));
-    toggleWhen.title = active ? `Zeitraum: ${rangeLabel()} (ändern)` : "Zeitraum wählen";
+    toggleWhen.title = active ? `Wann: ${rangeLabel()} (ändern)` : "Wann: Zeitraum wählen";
     const badge = toggleWhen.querySelector("b");
     badge.hidden = !active;
     badge.textContent = active ? rangeLabel() : "";
-    whenPanel.hidden = !whenOpen;
     const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
     pastLabel.hidden = past === 0;
     togglePast.checked = showPast;
-    if (!whenOpen) return;
+    if (openPanel !== "when") return;
 
-    const from = effFrom();
-    const to = effTo();
-    const a = dayDiff(spanStart, from);
-    const b = dayDiff(spanStart, to);
-    whenFrom.value = a;
-    whenTo.value = b;
-    whenFromDate.value = dayKey(from);
-    whenToDate.value = dayKey(to);
-    whenFill.style.setProperty("--a", a / Math.max(1, spanDays - 1));
-    whenFill.style.setProperty("--w", (b - a) / Math.max(1, spanDays - 1));
-    // When both thumbs sit on the same day, the one with room to move must be on top.
-    whenFrom.classList.toggle("on-top", a === b && a > 0);
-
-    // Histogram: one bucket per week over the whole span, with every filter except the range applied.
-    const counts = new Array(spanDays / 7).fill(0);
-    for (const s of shows) if (matchesFilters(s)) counts[Math.floor(dayDiff(spanStart, s._day) / 7)]++;
-    const max = Math.max(1, ...counts);
-    const todayWeek = Math.floor(dayDiff(spanStart, todayStart()) / 7);
-    const aWeek = Math.floor(a / 7);
-    const bWeek = Math.floor(b / 7);
-    whenHist.innerHTML = counts
-      .map((c, i) => {
-        const mon = addDays(spanStart, i * 7);
-        const label = `KW ${isoWeek(mon)} (${dm(mon)}–${dm(addDays(mon, 6))}) · ${c === 1 ? "1 Konzert" : `${c} Konzerte`}`;
-        const cls = ["bar"];
-        if (!c) cls.push("empty");
-        if (i < aWeek || i > bWeek) cls.push("dim");
-        if (i === todayWeek) cls.push("today");
-        return `<span class="${cls.join(" ")}" style="--h:${Math.round((c / max) * 100)}%" title="${escape(label)}"><i></i></span>`;
+    // One chip per month over the whole span, counted with every filter except the time applied.
+    const counts = new Map();
+    for (const s of shows)
+      if (matchesFilters(s)) counts.set(monthKey(s._day), (counts.get(monthKey(s._day)) || 0) + 1);
+    const thisMonth = monthStart(todayStart());
+    whenMonths.innerHTML = monthList
+      .map((d) => {
+        const k = monthKey(d);
+        const n = counts.get(k) || 0;
+        const cls = ["chip"];
+        if (!n) cls.push("empty");
+        if (d < thisMonth) cls.push("past");
+        const title = `${monthFmt.format(d)}: ${n === 1 ? "1 Konzert" : `${n} Konzerte`}${d < thisMonth ? " (vergangen)" : ""}`;
+        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}">${monthLabel(d)}<small>${n}</small></button>`;
       })
       .join("");
-
-    const n = shows.filter(isVisible).length;
-    whenCount.textContent = `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`;
     for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
-      const [qa, qb] = quickRange(chip.dataset.quick).map(clampDay);
-      chip.setAttribute("aria-pressed", String(dayDiff(qa, from) === 0 && dayDiff(qb, to) === 0));
+      const [qa, qb] = quickRange(chip.dataset.quick);
+      chip.setAttribute(
+        "aria-pressed",
+        String(!months.size && rangeFrom && sameDay(qa, rangeFrom) && sameDay(qb, rangeTo)),
+      );
     }
+    const n = shows.filter(isVisible).length;
+    whenCount.textContent = active
+      ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
+      : `${n} ${n === 1 ? "Konzert" : "Konzerte"}, alle kommenden`;
   }
 
-  toggleWhen.addEventListener("click", () => {
-    whenOpen = !whenOpen;
-    updateWhen();
-  });
-  whenPanel.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    whenOpen = false;
-    updateWhen();
-    toggleWhen.focus();
-  });
-
-  // Sliders: while dragging only the panel follows (cheap); the list re-renders on release / per key press.
-  function onSlide(e) {
-    let a = Number(whenFrom.value);
-    let b = Number(whenTo.value);
-    if (a > b) {
-      if (e.target === whenFrom) b = a;
-      else a = b;
-    }
-    setRange(addDays(spanStart, a), addDays(spanStart, b));
-    updateWhen();
-  }
-  for (const input of [whenFrom, whenTo]) {
-    input.addEventListener("input", onSlide);
-    input.addEventListener("change", renderAndKeepInView);
-  }
-  // Date inputs: a start after the end (or vice versa) pushes the other bound along, like the thumbs.
-  whenFromDate.addEventListener("change", () => {
-    if (whenFromDate.value) {
-      const d = parseDay(whenFromDate.value);
-      setRange(d, d > effTo() ? d : effTo());
-    }
-    renderAndKeepInView();
-  });
-  whenToDate.addEventListener("change", () => {
-    if (whenToDate.value) {
-      const d = parseDay(whenToDate.value);
-      setRange(d < effFrom() ? d : effFrom(), d);
-    }
-    renderAndKeepInView();
-  });
+  toggleWhen.addEventListener("click", () => setPanel(openPanel === "when" ? null : "when"));
   whenPanel.addEventListener("click", (e) => {
-    const chip = e.target.closest("[data-quick]");
-    if (chip) {
-      setRange(...quickRange(chip.dataset.quick));
-      renderAndKeepInView();
-    }
-    if (e.target.id === "when-reset") {
+    const quick = e.target.closest("[data-quick]");
+    const month = e.target.closest("[data-month]");
+    if (quick) {
+      const [a, b] = quickRange(quick.dataset.quick);
+      if (!months.size && rangeFrom && sameDay(a, rangeFrom) && sameDay(b, rangeTo)) clearRange();
+      else setRange(a, b);
+    } else if (month) {
+      rangeFrom = rangeTo = null;
+      if (months.has(month.dataset.month)) months.delete(month.dataset.month);
+      else months.add(month.dataset.month);
+      syncPast();
+    } else if (e.target.id === "when-reset") {
       clearRange();
       showPast = false;
       pastAuto = false;
-      renderAndKeepInView();
-    }
+    } else return;
+    renderAndKeepInView();
   });
   togglePast.addEventListener("change", () => {
     showPast = togglePast.checked;
@@ -1408,7 +1407,7 @@
   const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
   const feedUrl = (region) => FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
   function showSubscribe(force) {
-    const canton = cantonSelect.value;
+    const canton = cantons.size === 1 ? [...cantons][0] : "";
     const url = feedUrl(canton);
     window.jahCallout.show({
       id: "subscribe",
@@ -1546,7 +1545,6 @@
     renderAndKeepInView();
   });
 
-  cantonSelect.addEventListener("change", renderAndKeepInView);
   search.addEventListener("input", renderAndKeepInView);
   init();
 })();
