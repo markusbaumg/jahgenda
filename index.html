@@ -92,6 +92,24 @@
             </svg>
             <b>0</b>
           </button>
+          <button
+            type="button"
+            id="toggle-when"
+            class="icon-btn when"
+            aria-pressed="false"
+            aria-expanded="false"
+            aria-controls="when-panel"
+            title="Zeitraum wählen"
+            aria-label="Zeitraum wählen"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 3h3v2H8v-2zm0 4h8v2H8v-2zm5-4h3v2h-3v-2z"
+              />
+            </svg>
+            <b hidden></b>
+          </button>
         </div>
         <div class="genres-wrap">
           <button
@@ -117,6 +135,96 @@
           </button>
         </div>
       </form>
+      <div id="when-panel" class="when-panel" role="group" aria-label="Zeitraum" hidden>
+        <div class="when-scroll">
+          <div class="when-track">
+            <div id="when-hist" class="when-hist" aria-hidden="true"></div>
+            <div class="when-slider">
+              <span class="when-fill" aria-hidden="true"></span>
+              <label class="sr" for="when-from">Von (Tag)</label>
+              <input
+                id="when-from"
+                type="range"
+                min="0"
+                max="0"
+                step="1"
+                value="0"
+                title="Anfang des Zeitraums"
+              />
+              <label class="sr" for="when-to">Bis (Tag)</label>
+              <input
+                id="when-to"
+                type="range"
+                min="0"
+                max="0"
+                step="1"
+                value="0"
+                title="Ende des Zeitraums"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="when-dates">
+          <label>
+            <span>Von</span>
+            <input id="when-from-date" type="date" title="Anfang des Zeitraums" />
+          </label>
+          <label>
+            <span>Bis</span>
+            <input id="when-to-date" type="date" title="Ende des Zeitraums" />
+          </label>
+        </div>
+        <div class="when-quick" role="group" aria-label="Schnellauswahl">
+          <button type="button" class="chip" data-quick="today" aria-pressed="false" title="Nur heute">
+            Heute
+          </button>
+          <button
+            type="button"
+            class="chip"
+            data-quick="weekend"
+            aria-pressed="false"
+            title="Nächstes Wochenende (Freitag bis Sonntag)"
+          >
+            Wochenende
+          </button>
+          <button type="button" class="chip" data-quick="7" aria-pressed="false" title="Die nächsten 7 Tage">
+            7 Tage
+          </button>
+          <button
+            type="button"
+            class="chip"
+            data-quick="30"
+            aria-pressed="false"
+            title="Die nächsten 30 Tage"
+          >
+            30 Tage
+          </button>
+          <button
+            type="button"
+            class="chip"
+            data-quick="all"
+            aria-pressed="false"
+            title="Alle Konzerte, auch vergangene"
+          >
+            Alles
+          </button>
+        </div>
+        <p class="when-foot">
+          <span id="when-count" aria-live="polite"></span>
+          <button
+            type="button"
+            id="when-reset"
+            class="linkish"
+            title="Zeitraum zurücksetzen: alle kommenden Konzerte"
+          >
+            Zurücksetzen
+          </button>
+          <label class="when-past" title="Auch Konzerte anzeigen, die schon vorbei sind" hidden>
+            <input type="checkbox" id="toggle-past" />
+            Vergangene einblenden
+          </label>
+        </p>
+      </div>
       <p id="geo-status" class="geo-status" role="status"></p>
       <div id="shared" class="shared" role="region" aria-label="Geteilte Liste" hidden></div>
 
@@ -138,9 +246,6 @@
           hidden
         >
           ✕ Filter zurücksetzen
-        </button>
-        <button type="button" id="toggle-past" class="linkish" title="Vergangene Konzerte anzeigen" hidden>
-          Vergangene anzeigen
         </button>
       </p>
       <div id="mine-panel" class="mine-panel" hidden></div>
