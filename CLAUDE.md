@@ -75,6 +75,8 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   `#m=…`, .ics export); short per-show hashes in links; PWA with install banner ("Nie mehr fragen"); footer band
   "Über uns" with photo (red/gold/green ring) and a bottom bar with result count + data stamp; no link
   underlines; nearest-show hint links to the closest upcoming show.
+- **Admin page:** `admin.html` is hidden (no links, noindex) — the owners' overview of sources, prompt,
+  rules and runs. Keep it unlinked from the public pages.
 - **Design documents:** `design/logos.html` (picker), `design/festival-spec.md`, `design/pwa-spec.md`,
   `design/promo-plan.md` (domain jahgenda.ch is free; stickers; QR), `design/monitoring-plan.md`,
   `design/ui-revamp.md` (when the panel delivers). Promo concept for Seraina as a Claude artifact:

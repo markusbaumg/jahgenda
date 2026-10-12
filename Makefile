@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 PORT ?= 8000
-WEB_FILES := index.html log.html review.html style.css store.js app.js pwa.js sw.js design/logos.html
+WEB_FILES := index.html log.html review.html admin.html style.css store.js app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
 .PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke quality-review ics

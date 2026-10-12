@@ -144,6 +144,10 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   locally without touching GitHub.
 - **Where to look:** the badge, the `scraper-failed` issue, `log.html`, and the routine's own run log at
   https://claude.ai/code/routines.
+- **Admin section (hidden, not linked, `noindex`):** https://markusbaumg.github.io/jahgenda/admin.html shows
+  status, every portal/venue/festival the scraper uses (with scrape flags and parse hints), the search
+  queries, the scraper prompt (SKILL.md), criteria.md, bands.md, genres and the run table — read live from
+  the data files and the repository. No password: whoever has the link can read it (nothing there is secret).
 - **Quality (false positives/negatives):** `review.html` lists every candidate the scraper looked at and
   dropped, with date, venue, source link and reason; «Gehört rein» opens a prefilled GitHub issue. Every
   Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped

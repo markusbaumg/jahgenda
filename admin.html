@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="de-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin · Jahgenda</title>
+    <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* Hidden admin section: not linked from the public pages, no index. Everything here is read from
+         the published data files and the repository (raw.githubusercontent.com). */
+      .adm h2 {
+        margin-top: 36px;
+      }
+      .adm nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 14px 0 0;
+      }
+      .adm nav a {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 11px;
+      }
+      .adm nav a:hover {
+        color: var(--gold);
+        border-color: var(--gold);
+      }
+      .tbl {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        margin: 10px 0 18px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.86rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        position: sticky;
+        top: 0;
+        background: var(--surface);
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td.hint {
+        color: var(--muted);
+        max-width: 46ch;
+      }
+      .yes {
+        color: var(--green-text);
+        font-weight: 700;
+      }
+      .no {
+        color: var(--muted);
+      }
+      .md {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 18px;
+        max-width: 80ch;
+      }
+      .md h1,
+      .md h2,
+      .md h3 {
+        font-size: 1rem;
+        margin: 18px 0 6px;
+        color: var(--gold);
+        letter-spacing: 0;
+        text-transform: none;
+        border: 0;
+        padding: 0;
+      }
+      .md h1 {
+        font-size: 1.2rem;
+      }
+      .md p,
+      .md li {
+        font-size: 0.9rem;
+      }
+      .md code {
+        font-size: 0.82em;
+        background: var(--bg);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+      .md pre {
+        background: var(--bg);
+        padding: 10px 12px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.8rem;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 10px;
+      }
+      .kv div {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .kv dt {
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .kv dd {
+        margin: 2px 0 0;
+        font-weight: 600;
+        word-break: break-word;
+      }
+      .ok {
+        color: var(--green-text);
+      }
+      .bad {
+        color: var(--red-text);
+      }
+      details summary {
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 6px 0;
+      }
+      .filter {
+        font: inherit;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin: 0 0 8px;
+        width: 100%;
+        max-width: 320px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
+    <header class="wrap head adm">
+      <h1 class="logo">
+        <img class="logo-mark" src="img/logo/jahgenda.svg" alt="" width="48" height="48" /><span
+          class="wordmark"
+          >Jah<span>genda</span></span
+        >
+      </h1>
+      <p class="tag">Admin: Quellen, Prompt, Regeln, Läufe – nur über diesen Link erreichbar</p>
+      <nav>
+        <a href="#status">Status</a><a href="#agendas">Portale</a><a href="#venues">Venues</a
+        ><a href="#festivals">Festivals</a><a href="#queries">Suchen</a> <a href="#prompt">Prompt</a
+        ><a href="#criteria">Kriterien</a><a href="#bands">Bands</a><a href="#genres">Genres</a
+        ><a href="#runs">Läufe</a><a href="#links">Links</a>
+      </nav>
+    </header>
+    <main class="wrap adm">
+      <h2 id="status" class="section-title">Status</h2>
+      <dl class="kv" id="kv"></dl>
+
+      <h2 id="agendas" class="section-title">Portale (Agenda-Seiten)</h2>
+      <div class="tbl" id="agendas-tbl"></div>
+
+      <h2 id="venues" class="section-title">Venues <small id="venues-count"></small></h2>
+      <input class="filter" id="venue-filter" type="search" placeholder="Venue, Ort, Kanton filtern …" />
+      <div class="tbl" id="venues-tbl"></div>
+
+      <h2 id="festivals" class="section-title">Festivals (für /harvest-bands)</h2>
+      <div class="tbl" id="festivals-tbl"></div>
+
+      <h2 id="queries" class="section-title">Suchanfragen &amp; grenznahe Regionen</h2>
+      <div class="md" id="queries-box"></div>
+
+      <h2 id="prompt" class="section-title">Scraper-Prompt (.claude/skills/scrape-shows/SKILL.md)</h2>
+      <div class="md" id="prompt-box">Lade …</div>
+
+      <h2 id="criteria" class="section-title">Kriterien (scraper/criteria.md)</h2>
+      <div class="md" id="criteria-box">Lade …</div>
+
+      <h2 id="bands" class="section-title">Bands (scraper/bands.md)</h2>
+      <div class="md" id="bands-box">Lade …</div>
+
+      <h2 id="genres" class="section-title">Genres (data/genres.json)</h2>
+      <div class="tbl" id="genres-tbl"></div>
+
+      <h2 id="runs" class="section-title">Läufe</h2>
+      <p class="note">
+        Details pro Lauf auf <a href="log.html">log.html</a>, verworfene Kandidaten auf
+        <a href="review.html">review.html</a>.
+      </p>
+      <div class="tbl" id="runs-tbl"></div>
+
+      <h2 id="links" class="section-title">Links</h2>
+      <ul>
+        <li>
+          <a href="https://claude.ai/code/routines" target="_blank" rel="noopener"
+            >Routinen (claude.ai) – tägliche Shows, monatliche Bands</a
+          >
+        </li>
+        <li>
+          <a href="https://github.com/markusbaumg/jahgenda/actions" target="_blank" rel="noopener"
+            >GitHub Actions – Deploy, CI, Watchdog, Quality review</a
+          >
+        </li>
+        <li>
+          <a href="https://github.com/users/markusbaumg/projects/2" target="_blank" rel="noopener"
+            >Projekt-Board</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/markusbaumg/jahgenda/issues?q=label%3Aquality"
+            target="_blank"
+            rel="noopener"
+            >Qualitäts-Issues</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/markusbaumg/jahgenda/edit/main/scraper/criteria.md"
+            target="_blank"
+            rel="noopener"
+            >criteria.md bearbeiten</a
+          >
+          ·
+          <a
+            href="https://github.com/markusbaumg/jahgenda/edit/main/scraper/bands.md"
+            target="_blank"
+            rel="noopener"
+            >bands.md bearbeiten</a
+          >
+          ·
+          <a
+            href="https://github.com/markusbaumg/jahgenda/edit/main/data/venues.json"
+            target="_blank"
+            rel="noopener"
+            >venues.json bearbeiten</a
+          >
+        </li>
+      </ul>
+    </main>
+    <footer class="foot">
+      <div class="foot-bar">
+        <div class="wrap foot-bar-inner">
+          <p class="foot-links">
+            <a href="./">Agenda</a> · <a href="log.html">Scraper-Log</a> ·
+            <a href="review.html">Aussortiert</a>
+          </p>
+        </div>
+      </div>
+    </footer>
+    <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
+    <script>
+      (() => {
+        const RAW = "https://raw.githubusercontent.com/markusbaumg/jahgenda/main/";
+        const esc = (s) =>
+          String(s ?? "").replace(
+            /[&<>"']/g,
+            (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+          );
+        const link = (u, t) =>
+          u
+            ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t || u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</a>`
+            : "";
+        const get = (u) =>
+          fetch(u, { cache: "no-cache" }).then((r) => (r.ok ? r : Promise.reject(new Error(r.status))));
+        const json = (u) =>
+          get(u)
+            .then((r) => r.json())
+            .catch(() => null);
+        const text = (u) =>
+          get(u)
+            .then((r) => r.text())
+            .catch(() => null);
+        // Minimal markdown → HTML (headings, lists, code, bold, inline code, paragraphs) for the repo files.
+        const md = (src) => {
+          const inline = (t) =>
+            esc(t)
+              .replace(/`([^`]+)`/g, "<code>$1</code>")
+              .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+              .replace(
+                /\[([^\]]+)\]\((https?:[^)]+)\)/g,
+                '<a href="$2" target="_blank" rel="noopener">$1</a>',
+              );
+          const out = [];
+          const lines = src.split("\n");
+          let i = 0;
+          while (i < lines.length) {
+            const l = lines[i];
+            if (l.startsWith("```")) {
+              const buf = [];
+              i++;
+              while (i < lines.length && !lines[i].startsWith("```")) buf.push(lines[i++]);
+              i++;
+              out.push(`<pre>${esc(buf.join("\n"))}</pre>`);
+              continue;
+            }
+            const h = /^(#{1,4}) (.*)/.exec(l);
+            if (h) {
+              out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`);
+              i++;
+              continue;
+            }
+            if (/^\s*[-*] /.test(l)) {
+              const items = [];
+              while (i < lines.length && /^\s*[-*] /.test(lines[i]))
+                items.push(lines[i++].replace(/^\s*[-*] /, ""));
+              out.push(`<ul>${items.map((x) => `<li>${inline(x)}</li>`).join("")}</ul>`);
+              continue;
+            }
+            if (/^\s*\d+\. /.test(l)) {
+              const items = [];
+              while (i < lines.length && /^\s*\d+\. /.test(lines[i]))
+                items.push(lines[i++].replace(/^\s*\d+\. /, ""));
+              out.push(`<ol>${items.map((x) => `<li>${inline(x)}</li>`).join("")}</ol>`);
+              continue;
+            }
+            if (!l.trim() || l.trim() === "---") {
+              i++;
+              continue;
+            }
+            const para = [l];
+            i++;
+            while (i < lines.length && lines[i].trim() && !/^(#|```|\s*[-*] |\s*\d+\. |---)/.test(lines[i]))
+              para.push(lines[i++]);
+            out.push(`<p>${inline(para.join(" "))}</p>`);
+          }
+          return out.join("\n");
+        };
+        const table = (cols, rows) =>
+          `<table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>`;
+
+        Promise.all([
+          json("data/status.json"),
+          json("data/shows.json"),
+          json("data/runs.json"),
+          json("data/venues.json"),
+          json("scraper/sources.json"),
+          json("data/genres.json"),
+          json("data/artists.json"),
+        ]).then(([status, shows, runs, venues, sources, genres, artists]) => {
+          const n = shows && shows.shows ? shows.shows.length : 0;
+          const kv = [
+            ["Shows live", n],
+            ["Stand", shows && shows.updated],
+            ["Quelle", shows && shows.source],
+            [
+              "Letzter Lauf",
+              status
+                ? `<span class="${status.ok ? "ok" : "bad"}">${status.ok ? "ok" : "FEHLER"}</span> · ${esc(status.at)} · ${esc(status.runner || "")}`
+                : "kein status.json",
+            ],
+            ["Venues", venues ? Object.keys(venues.venues).length : "–"],
+            ["davon gescrapt", venues ? Object.values(venues.venues).filter((v) => v.scrape).length : "–"],
+            ["Artists im Cache", artists ? Object.keys(artists.artists).length : "–"],
+            ["Läufe im Log", runs ? runs.runs.length : "–"],
+          ];
+          document.getElementById("kv").innerHTML = kv
+            .map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`)
+            .join("");
+
+          if (sources) {
+            document.getElementById("agendas-tbl").innerHTML = table(
+              ["Portal", "URL", "Hinweis für den Scraper"],
+              (sources.agendas || []).map(
+                (a) =>
+                  `<tr><td><strong>${esc(a.name)}</strong></td><td>${link(a.url)}</td><td class="hint">${esc(a.hint)}</td></tr>`,
+              ),
+            );
+            document.getElementById("festivals-tbl").innerHTML = table(
+              ["Festival", "Wo", "URL", "Wikipedia", "Hinweis"],
+              (sources.festivals || []).map(
+                (f) =>
+                  `<tr><td><strong>${esc(f.name)}</strong></td><td>${esc(f.where)}</td><td>${link(f.url)}</td><td>${link(f.wikipedia, "Wikipedia")}</td><td class="hint">${esc(f.hint)}</td></tr>`,
+              ),
+            );
+            document.getElementById("queries-box").innerHTML =
+              `<h3>Suchanfragen (Schweiz)</h3><ul>${(sources.search_queries || []).map((q) => `<li><code>${esc(q)}</code></li>`).join("")}</ul><h3>Grenznahe Regionen</h3><p>${esc((sources.nearby || {}).note || "")}</p><ul>${((sources.nearby || {}).search_queries || []).map((q) => `<li><code>${esc(q)}</code></li>`).join("")}</ul>`;
+          }
+          if (venues) {
+            const all = Object.entries(venues.venues).sort((a, b) =>
+              (a[1].canton + a[0]).localeCompare(b[1].canton + b[0]),
+            );
+            document.getElementById("venues-count").textContent =
+              `(${all.length}, ${all.filter(([, v]) => v.scrape).length} gescrapt)`;
+            const render = (q) => {
+              const rows = all
+                .filter(([name, v]) => !q || `${name} ${v.city} ${v.canton}`.toLowerCase().includes(q))
+                .map(([name, v]) => {
+                  const rel = /Reggae relevance:\s*(\w+)/i.exec(v.hint || "");
+                  return `<tr><td><strong>${esc(name)}</strong></td><td>${esc(v.city)} <small>${esc(v.canton)}</small></td><td class="${v.scrape ? "yes" : "no"}">${v.scrape ? "ja" : "nein"}</td><td>${rel ? esc(rel[1]) : ""}</td><td>${link(v.url)}</td><td class="hint">${esc(v.hint)}</td></tr>`;
+                });
+              document.getElementById("venues-tbl").innerHTML = table(
+                ["Venue", "Ort", "gescrapt", "Relevanz", "Programm", "Hinweis"],
+                rows,
+              );
+            };
+            render("");
+            document
+              .getElementById("venue-filter")
+              .addEventListener("input", (e) => render(e.target.value.trim().toLowerCase()));
+          }
+          if (genres)
+            document.getElementById("genres-tbl").innerHTML = table(
+              ["Slug", "Label", "Deckt ab"],
+              genres.genres.map(
+                (g) =>
+                  `<tr><td><code>${esc(g.slug)}</code></td><td>${esc(g.label)}</td><td class="hint">${esc(g.maps)}</td></tr>`,
+              ),
+            );
+          if (runs)
+            document.getElementById("runs-tbl").innerHTML = table(
+              ["Lauf", "Skill", "+", "~", "−", "total", "nicht erreichbar", "verworfen"],
+              runs.runs.map(
+                (r) =>
+                  `<tr><td>${esc(r.at)}</td><td>${esc(r.skill)}</td><td>${r.added ?? ""}</td><td>${r.updated ?? ""}</td><td>${r.removed ?? ""}</td><td>${r.total ?? ""}</td><td>${(r.failed_sources || []).length}</td><td>${(r.dropped || []).length}</td></tr>`,
+              ),
+            );
+        });
+        for (const [id, path] of [
+          ["prompt-box", ".claude/skills/scrape-shows/SKILL.md"],
+          ["criteria-box", "scraper/criteria.md"],
+          ["bands-box", "scraper/bands.md"],
+        ]) {
+          text(RAW + path).then((t) => {
+            document.getElementById(id).innerHTML = t ? md(t) : `Konnte ${esc(path)} nicht laden.`;
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
