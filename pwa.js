@@ -24,7 +24,11 @@
   };
 
   // ---- Service worker + update toast ------------------------------------------------------------
-  if ("serviceWorker" in navigator) {
+  const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
+  if ("serviceWorker" in navigator && isLocal) {
+    // Local preview: never cache the shell, and drop any worker a previous visit left behind.
+    navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
+  } else if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
       try {
         const reg = await navigator.serviceWorker.register("sw.js");
