@@ -1335,6 +1335,8 @@ body {
 /* Collapsed one-line brand that appears in the sticky bar while scrolling. */
 .mini-brand {
   display: none;
+  align-items: center;
+  gap: 6px;
   font-weight: 900;
   letter-spacing: -0.03em;
   font-size: 1.1rem;
@@ -1515,11 +1517,6 @@ body {
   height: 0.92em;
   flex: 0 0 auto;
   border-radius: 0.18em;
-}
-.mini-brand {
-  display: none;
-  align-items: center;
-  gap: 6px;
 }
 .mini-brand img {
   width: 20px;
@@ -2370,6 +2367,14 @@ a,
 a:visited {
   color: var(--green-text);
   text-decoration: none;
+}
+/* The wordmark link in the sticky bar keeps the brand colours (cream «Jah», gold «genda»), visited or not. */
+.mini-brand,
+.mini-brand:visited {
+  color: var(--text);
+}
+.about .authors .heart {
+  color: var(--red-text);
 }
 a:hover {
   color: var(--gold);
