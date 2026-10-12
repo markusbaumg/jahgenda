@@ -279,7 +279,13 @@ def check_venues(data):
     return errs, keys
 
 
-def check_shows(data, allow_past, allowed, venue_keys=None):
+# A show's coordinates may differ from its venue's by this much (≈ 2 km) before it counts as a different place.
+VENUE_DRIFT = 0.03
+
+
+def check_shows(data, allow_past, allowed, venue_keys=None, venues=None):
+    """venue_keys: {norm_key: name} of data/venues.json (scraped shows must use a known venue);
+    venues: the venue records by name – scraped shows must then sit in their venue's canton and place."""
     if not isinstance(data, dict):
         return ["shows.json: top level must be an object"]
     errs = []
@@ -328,6 +334,32 @@ def check_shows(data, allow_past, allowed, venue_keys=None):
             errs.append(
                 f"shows[{i}] ({sid}): venue '{s['venue']}' is not in data/venues.json — "
                 "add it with coordinates"
+            )
+        elif source == "scraper" and venues is not None and isinstance(s.get("venue"), str):
+            errs += check_show_venue(s, i, venues.get(venue_keys.get(venue_key(s["venue"]), s["venue"])))
+    return errs
+
+
+def check_show_venue(s, i, v):
+    """Scraped show vs its venue record: same canton, coordinates at the venue (catches a show filed
+    under a venue of the same name in another town, or stale coordinates)."""
+    if not isinstance(v, dict):
+        return []
+    sid = s.get("id")
+    errs = []
+    if isinstance(s.get("canton"), str) and isinstance(v.get("canton"), str) and s["canton"] != v["canton"]:
+        errs.append(
+            f"shows[{i}] ({sid}): canton '{s['canton']}' but venue '{s['venue']}' is in {v['canton']} — "
+            "wrong venue or wrong canton"
+        )
+    if all(
+        isinstance(x, (int, float)) and not isinstance(x, bool)
+        for x in (s.get("lat"), s.get("lon"), v.get("lat"), v.get("lon"))
+    ):
+        if abs(s["lat"] - v["lat"]) + abs(s["lon"] - v["lon"]) > VENUE_DRIFT:
+            errs.append(
+                f"shows[{i}] ({sid}): coordinates are not at venue '{s['venue']}' ({v.get('city')}) — "
+                "another place with the same name? add it as its own venue"
             )
     return errs
 
@@ -472,7 +504,13 @@ def main(argv):
     shows, e = load(SHOWS)
     errs += e
     if shows is not None:
-        errs += check_shows(shows, allow_past, allowed, venue_keys if venues is not None else None)
+        errs += check_shows(
+            shows,
+            allow_past,
+            allowed,
+            venue_keys if venues is not None else None,
+            venues["venues"] if isinstance(venues, dict) and isinstance(venues.get("venues"), dict) else None,
+        )
     artists, e = load(ARTISTS)
     errs += e
     errs += check_artists(artists, allowed)
