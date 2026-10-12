@@ -1,5 +1,11 @@
 (() => {
   const DATA_URL = "data/shows.json";
+  const VENUES_URL = "data/venues.json";
+  let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
+  const venueKey = (name) =>
+    String(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
 
   const CANTONS = {
     AG: "Aargau",
@@ -119,7 +125,17 @@
     return ` · <span class="dist">${formatKm(distanceKm(here, s))}</span>`;
   }
 
+  // Venue name as a link to the venue's site when data/venues.json knows it.
+  const venueLink = (s) => {
+    const u = venueSites[venueKey(s.venue)];
+    return u
+      ? `<a class="venue-link" href="${escape(u)}" target="_blank" rel="noopener" title="Website von ${escape(s.venue)}">${escape(s.venue)}</a>`
+      : escape(s.venue);
+  };
+
   const ICONS = {
+    ticket:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7zm2 0v2.2A4 4 0 0 1 5 14.8V17h14v-2.2a4 4 0 0 1 0-5.6V7H5zm5 2h2v6h-2V9zm4 0h2v6h-2V9z"/></svg>',
     gcal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm3.5 2.5h5v1.6h-3.3v1h3v1.5h-3v1.2h3.4v1.6h-5.1z"/></svg>',
     cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm-1 8v10h12V10H6zm2 2h3v3H8v-3z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
@@ -234,6 +250,7 @@
       ? `<a href="${escape(url)}" target="_blank" rel="noopener">${escape(s.title)}</a>`
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
+    const tickets = safeUrl(s.tickets);
     return `
       <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <time class="date" datetime="${escape(s.date)}">
@@ -247,7 +264,7 @@
               ? `<p class="acts">${s.acts.map((a) => `<span>${escape(a)}</span>`).join("")}</p>`
               : ""
           }
-          <p class="meta">${time}${escape(s.venue)} · ${escape(s.city)}${distanceLabel(s)}</p>
+          <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}</p>
         </div>
         <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
@@ -257,6 +274,7 @@
               <button type="button" class="act" data-act="cal" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender</span></button>
               <a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" title="In Google Kalender eintragen">${ICONS.gcal}<span>Google</span></a>
               <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
+              ${tickets ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>` : ""}
               <button type="button" class="act" data-act="link" title="Link kopieren">${ICONS.link}<span>Link</span></button>
             </div>
           </div>
@@ -347,9 +365,20 @@
 
   async function init() {
     try {
-      const res = await fetch(DATA_URL, { cache: "no-cache" });
+      const [res, vres] = await Promise.all([
+        fetch(DATA_URL, { cache: "no-cache" }),
+        fetch(VENUES_URL, { cache: "no-cache" }).catch(() => null),
+      ]);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      try {
+        const v = vres && vres.ok ? await vres.json() : null;
+        for (const [name, info] of Object.entries((v && v.venues) || {})) {
+          if (info && safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
+        }
+      } catch {
+        /* venues.json is optional for the page */
+      }
 
       const today = todayStart();
       shows = (data.shows || [])

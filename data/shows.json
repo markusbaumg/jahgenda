@@ -3,7 +3,7 @@
   "source": "mock",
   "shows": [
     {"id": "2026-10-03-rootsnight-luzern", "date": "2026-10-03", "time": "21:00", "title": "Roots Night Vol. 12", "venue": "Schüür", "city": "Luzern", "canton": "LU", "url": "", "lat": 47.0466, "lon": 8.3112, "genres": ["roots", "reggae"]},
-    {"id": "2026-10-16-dub-collective-bern", "date": "2026-10-16", "time": "20:30", "title": "Alpine Dub Collective + Support", "acts": ["Alpine Dub Collective", "Mista Sanchez"], "venue": "Dachstock", "city": "Bern", "canton": "BE", "url": "", "lat": 46.9496, "lon": 7.4385, "genres": ["dub"]},
+    {"id": "2026-10-16-dub-collective-bern", "date": "2026-10-16", "time": "20:30", "title": "Alpine Dub Collective + Support", "acts": ["Alpine Dub Collective", "Mista Sanchez"], "venue": "Dachstock", "city": "Bern", "canton": "BE", "url": "", "tickets": "https://www.petzi.ch/", "lat": 46.9496, "lon": 7.4385, "genres": ["dub"]},
     {"id": "2026-10-17-soundclash-basel", "date": "2026-10-17", "time": "22:00", "title": "Rhein Soundclash", "acts": ["Rhein Sound", "Lion Vibes Hi-Fi", "Dub Kartell"], "venue": "Kaserne", "city": "Basel", "canton": "BS", "url": "", "lat": 47.5627, "lon": 7.5925, "genres": ["soundsystem", "dancehall"]},
     {"id": "2026-10-24-lion-steppers-zuerich", "date": "2026-10-24", "time": "21:00", "title": "Lion Steppers", "venue": "Bogen F", "city": "Zürich", "canton": "ZH", "url": "", "lat": 47.3866, "lon": 8.5215, "genres": ["dub"]},
     {"id": "2026-10-31-irie-halloween-stgallen", "date": "2026-10-31", "time": "22:00", "title": "Irie Halloween Dance", "venue": "Grabenhalle", "city": "St. Gallen", "canton": "SG", "url": "", "lat": 47.4262, "lon": 9.3772, "genres": ["reggae", "dancehall"]},

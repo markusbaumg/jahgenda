@@ -1450,3 +1450,16 @@ a {
   color: var(--bg);
   background: var(--green-text);
 }
+
+/* Venue and ticket links inside a row */
+.venue-link {
+  color: inherit;
+  border-bottom: 1px dotted var(--muted);
+}
+.venue-link:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.act.tickets {
+  color: var(--green-text);
+}
