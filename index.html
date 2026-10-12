@@ -116,16 +116,33 @@
         </div>
       </form>
       <p id="geo-status" class="geo-status" role="status"></p>
+      <div
+        id="shared"
+        class="shared"
+        role="region"
+        aria-label="Geteilte Liste"
+        hidden
+      ></div>
 
       <p id="results" class="results" aria-live="polite">
         <span id="results-text"></span>
         <button type="button" id="clear-filters" class="linkish clear" hidden>
           ✕ Filter zurücksetzen
         </button>
+        <button
+          type="button"
+          id="toggle-mine"
+          class="linkish mine"
+          aria-pressed="false"
+          hidden
+        >
+          ★ Meine Shows <b>0</b>
+        </button>
         <button type="button" id="toggle-past" class="linkish" hidden>
           Vergangene anzeigen
         </button>
       </p>
+      <div id="mine-panel" class="mine-panel" hidden></div>
       <div id="list"></div>
       <div id="status" class="status" role="status">
         <p>Lade Konzerte …</p>

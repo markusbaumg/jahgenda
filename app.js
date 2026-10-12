@@ -115,6 +115,7 @@
     cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm-1 8v10h12V10H6zm2 2h3v3H8v-3z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0 1.4 4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.6 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 2.9 2.9 1 1 0 0 1 1.4 0zm2.8-2.8a1 1 0 0 1 0-1.4 4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.6 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.8 0l3-3a2 2 0 0 0-2.9-2.9 1 1 0 0 1-1.4 0z"/></svg>',
+    star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.6 6 21l1.3-6.8-5-4.7 6.8-.8z"/></svg>',
   };
 
   const showUrl = (s) =>
@@ -124,8 +125,8 @@
     `${s.title} – ${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.${s._day.getFullYear()}` +
     `${s.time ? ` ${s.time}` : ""} · ${s.venue}, ${s.city}\n${showUrl(s)}`;
 
-  // Build an .ics file for one show (floating local time, so it lands at the right hour in Switzerland).
-  function icsFor(s) {
+  // One VEVENT for a show (floating local time, so it lands at the right hour in Switzerland).
+  function vevent(s, status) {
     const d = s.date.replace(/-/g, "");
     const esc = (t) =>
       String(t)
@@ -151,27 +152,37 @@
       when = `DTSTART;VALUE=DATE:${d}`;
     }
     return [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Jahgenda//DE",
       "BEGIN:VEVENT",
       `UID:${s.id}@jahgenda`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g, "")}`,
       when,
       `SUMMARY:${esc(s.title)}`,
       `LOCATION:${esc(`${s.venue}, ${s.city}`)}`,
       `DESCRIPTION:${esc(`${safeUrl(s.url) || ""}\n${showUrl(s)}`)}`,
       `URL:${showUrl(s)}`,
+      ...(status ? [`STATUS:${status}`] : []),
       "END:VEVENT",
+    ];
+  }
+
+  const icsWrap = (events) =>
+    [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Jahgenda//DE",
+      ...events,
       "END:VCALENDAR",
       "",
     ].join("\r\n");
-  }
 
-  function downloadIcs(s) {
-    const blob = new Blob([icsFor(s)], { type: "text/calendar;charset=utf-8" });
+  // Build an .ics file for one show.
+  const icsFor = (s) => icsWrap(vevent(s));
+
+  function downloadIcs(text, name) {
+    const blob = new Blob([text], { type: "text/calendar;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `${s.id}.ics`;
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -196,7 +207,7 @@
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
     return `
-      <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}" id="${escape(s.id)}" data-id="${escape(s.id)}">
+      <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <time class="date" datetime="${escape(s.date)}">
           <span class="dow">${dowFmt.format(d).replace(".", "")}</span>
           <span class="day">${String(d.getDate()).padStart(2, "0")}</span>
@@ -214,6 +225,7 @@
         <div class="foot-row">
             ${s.genres.length ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}</div>` : ""}
             <div class="actions">
+              ${starButton(s)}
               <button type="button" class="act" data-act="cal" title="In Kalender speichern">${ICONS.cal}<span>Kalender</span></button>
               <a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>
               <button type="button" class="act" data-act="link" title="Link kopieren">${ICONS.link}<span>Link</span></button>
@@ -228,6 +240,7 @@
 
     const visible = shows.filter((s) => {
       if (s._past && !showPast) return false;
+      if (mineOnly && !marks[s.id]) return false;
       if (canton && s.canton !== canton) return false;
       if (activeGenre && !s.genres.includes(activeGenre)) return false;
       if (!q) return true;
@@ -244,12 +257,16 @@
         .includes(q);
     });
 
-    const filtered = Boolean(canton || activeGenre || q);
+    const filtered = Boolean(canton || activeGenre || q || mineOnly);
     el("clear-filters").hidden = !filtered;
-    togglePast.hidden = pastCount === 0;
+    const past = mineOnly
+      ? markedShows().filter((s) => s._past).length
+      : pastCount;
+    togglePast.hidden = past === 0;
     togglePast.textContent = showPast
       ? "Vergangene ausblenden"
-      : `Vergangene anzeigen (${pastCount})`;
+      : `Vergangene anzeigen (${past})`;
+    updateMine();
     if (!visible.length) {
       list.innerHTML = "";
       resultsText.textContent = "";
@@ -366,7 +383,7 @@
     if (!btn) return;
     const s = shows.find((x) => x.id === btn.closest(".show").dataset.id);
     if (!s) return;
-    if (btn.dataset.act === "cal") downloadIcs(s);
+    if (btn.dataset.act === "cal") downloadIcs(icsFor(s), `${s.id}.ics`);
     if (btn.dataset.act === "link") {
       history.replaceState(null, "", `#${encodeURIComponent(s.id)}`);
       const label = btn.querySelector("span");
@@ -384,6 +401,7 @@
     cantonSelect.value = "";
     search.value = "";
     activeGenre = "";
+    mineOnly = false;
     for (const c of genreBar.querySelectorAll(".chip"))
       c.setAttribute("aria-pressed", String(c.dataset.genre === ""));
     genreBar.scrollTo({ left: 0 });
@@ -403,7 +421,8 @@
 
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
   function revealFromHash() {
-    const id = decodeURIComponent(location.hash.slice(1));
+    if (location.hash.startsWith("#mine=")) return showShared();
+    const id = decodeHashPart(location.hash.slice(1));
     const target = shows.find((s) => s.id === id);
     if (!target) return;
     if (target._past && !showPast) showPast = true;
@@ -463,6 +482,166 @@
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
+  });
+
+  // --- Meine Shows: mark shows as "Interessiert" / "Ich gehe", filter to them, share the list. ---
+  // Marks live only in this browser (localStorage); without it they last for the page view.
+  const MARKS_KEY = "jahgenda.marks";
+  const MARK_LABEL = {
+    "": "Merken",
+    interested: "Interessiert",
+    going: "Ich gehe",
+  };
+  const NEXT_MARK = { "": "interested", interested: "going", going: "" };
+  let marks = {};
+  try {
+    // Only keep well-formed entries; anything else in storage is ignored.
+    const stored = JSON.parse(localStorage.getItem(MARKS_KEY));
+    for (const [id, st] of Object.entries(stored || {}))
+      if (st === "interested" || st === "going") marks[id] = st;
+  } catch {}
+  // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
+  const decodeHashPart = (t) => {
+    try {
+      return decodeURIComponent(t);
+    } catch {
+      return t;
+    }
+  };
+  let mineOnly = false;
+  let shared = null; // { id: state } from a #mine=… link, shown until taken over or closed
+  const toggleMine = el("toggle-mine");
+  const minePanel = el("mine-panel");
+  const sharedBox = el("shared");
+
+  function saveMarks() {
+    try {
+      localStorage.setItem(MARKS_KEY, JSON.stringify(marks));
+    } catch {}
+  }
+  const markedShows = () => shows.filter((s) => marks[s.id]);
+  const markClass = (s) =>
+    `${marks[s.id] ? ` ${marks[s.id]}` : ""}${shared && shared[s.id] ? " shared-row" : ""}`;
+  const starButton = (s) =>
+    `<button type="button" class="act star" data-act="mark" title="Markieren: Interessiert → Ich gehe">${ICONS.star}<span>${MARK_LABEL[marks[s.id] || ""]}</span></button>`;
+  const dayShort = (s) =>
+    `${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
+  const mineUrl = () =>
+    `${location.origin}${location.pathname}#mine=` +
+    markedShows()
+      .map((s) => `${encodeURIComponent(s.id)}:${marks[s.id][0]}`)
+      .join(",");
+
+  minePanel.innerHTML =
+    `<span class="mine-note">Nur in diesem Browser gespeichert.</span>` +
+    `<button type="button" class="act" data-mine="ics">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
+    `<button type="button" class="act" data-mine="share">${ICONS.link}<span>Liste teilen</span></button>` +
+    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener">${ICONS.wa}<span>WhatsApp</span></a>`;
+
+  function updateMine() {
+    const n = markedShows().length;
+    toggleMine.hidden = n === 0;
+    toggleMine.setAttribute("aria-pressed", String(mineOnly));
+    toggleMine.querySelector("b").textContent = n;
+    minePanel.hidden = !mineOnly || n === 0;
+    if (!minePanel.hidden)
+      el("mine-wa").href =
+        `https://wa.me/?text=${encodeURIComponent(`Meine Reggae-Shows: ${mineUrl()}`)}`;
+  }
+
+  function cycleMark(s, row) {
+    const next = NEXT_MARK[marks[s.id] || ""];
+    if (next) marks[s.id] = next;
+    else delete marks[s.id];
+    saveMarks();
+    if (mineOnly) {
+      if (!markedShows().length) mineOnly = false;
+      render();
+      return;
+    }
+    row.classList.toggle("interested", next === "interested");
+    row.classList.toggle("going", next === "going");
+    row.querySelector(".star span").textContent = MARK_LABEL[next];
+    updateMine();
+  }
+  list.addEventListener("click", (e) => {
+    const btn = e.target.closest('[data-act="mark"]');
+    if (!btn) return;
+    const row = btn.closest(".show");
+    const s = shows.find((x) => x.id === row.dataset.id);
+    if (s) cycleMark(s, row);
+  });
+
+  toggleMine.addEventListener("click", () => {
+    mineOnly = !mineOnly;
+    renderAndKeepInView();
+  });
+
+  minePanel.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-mine]");
+    if (!btn) return;
+    if (btn.dataset.mine === "ics")
+      downloadIcs(
+        icsWrap(
+          markedShows().flatMap((s) =>
+            vevent(s, marks[s.id] === "going" ? "CONFIRMED" : "TENTATIVE"),
+          ),
+        ),
+        "meine-shows.ics",
+      );
+    if (btn.dataset.mine === "share") {
+      const label = btn.querySelector("span");
+      try {
+        await navigator.clipboard.writeText(mineUrl());
+        label.textContent = "Link kopiert";
+      } catch {
+        label.textContent = "Kopieren nicht möglich";
+      }
+      setTimeout(() => (label.textContent = "Liste teilen"), 1500);
+    }
+  });
+
+  // A friend's list (#mine=id:g,id:i): banner with the shows, nothing is taken over without a click.
+  function showShared() {
+    shared = {};
+    for (const part of location.hash.slice(6).split(",")) {
+      const [id, st] = part.split(":").map(decodeHashPart);
+      if (shows.some((s) => s.id === id))
+        shared[id] = st === "g" ? "going" : "interested";
+    }
+    const items = shows.filter((s) => shared[s.id]);
+    if (!items.length) {
+      shared = null;
+      sharedBox.hidden = true;
+      return;
+    }
+    sharedBox.innerHTML =
+      `<div><strong>Geteilte Liste von einem Freund</strong> (${items.length} ${items.length === 1 ? "Show" : "Shows"})</div>` +
+      `<ul>${items
+        .map(
+          (s) =>
+            `<li><a href="#${encodeURIComponent(s.id)}">${escape(s.title)}</a> · ${escape(dayShort(s))} · ${escape(s.city)}` +
+            `${shared[s.id] === "going" ? ` <span class="tag-chip">geht hin</span>` : ""}${s._past ? " · vorbei" : ""}</li>`,
+        )
+        .join("")}</ul>` +
+      `<div class="actions"><button type="button" class="act star" data-shared="take">${ICONS.star}<span>Alle übernehmen</span></button>` +
+      `<button type="button" class="act" data-shared="close"><span>Schliessen</span></button></div>`;
+    sharedBox.hidden = false;
+    render();
+  }
+  sharedBox.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-shared]");
+    if (!btn) return;
+    if (btn.dataset.shared === "take") {
+      for (const id in shared)
+        if (marks[id] !== "going") marks[id] = "interested";
+      saveMarks();
+      mineOnly = true;
+    }
+    shared = null;
+    sharedBox.hidden = true;
+    history.replaceState(null, "", location.pathname + location.search);
+    renderAndKeepInView();
   });
 
   // --- Scrolling ---

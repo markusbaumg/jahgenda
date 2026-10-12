@@ -674,6 +674,98 @@ body {
   font-size: 0.85rem;
 }
 
+/* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared banner --- */
+.act.star svg path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.show.interested .act.star {
+  color: var(--gold);
+}
+.show.going .act.star {
+  color: var(--green-text);
+}
+.show.going .act.star svg path {
+  fill: currentColor;
+}
+.show.interested,
+.show.going {
+  padding-left: 10px;
+  margin-left: -10px;
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.show.going {
+  box-shadow: inset 3px 0 0 var(--green);
+}
+.show.shared-row {
+  background: rgba(242, 182, 50, 0.07);
+}
+.results .mine {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.results .mine:not([hidden]) + .linkish {
+  margin-left: 0; /* keep "Vergangene anzeigen" next to the chip instead of spreading both */
+}
+.results .mine[aria-pressed="true"] {
+  color: var(--gold);
+  border-color: var(--gold);
+  font-weight: 700;
+}
+.results .mine b {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--bg);
+  background: var(--gold);
+}
+.mine-panel,
+.shared {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+}
+.mine-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.mine-panel[hidden] {
+  display: none;
+}
+.mine-panel .act,
+.shared .act {
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.mine-panel .act span,
+.shared .act span {
+  display: inline;
+}
+.shared {
+  border-left-color: var(--green);
+}
+.shared ul {
+  margin: 6px 0 10px;
+  padding: 0 0 0 18px;
+}
+.shared a,
+.shared strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .sr {
   position: absolute;
   width: 1px;
