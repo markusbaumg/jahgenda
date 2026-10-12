@@ -66,6 +66,7 @@
         border-radius: 10px;
         padding: 12px;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 12px;
         min-width: 0;
@@ -84,20 +85,23 @@
       .tabs {
         display: flex;
         flex-direction: column;
+        align-items: flex-start;
         gap: 6px;
         min-width: 0;
       }
+      /* Block statt inline-flex, damit der Tab-Titel mit «…» endet statt hart
+         abgeschnitten zu werden, wenn der Platz neben dem 72-px-Icon knapp ist. */
       .tab {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+        display: block;
         border-radius: 7px 7px 0 0;
         padding: 4px 10px;
         font-size: 0.78rem;
+        line-height: 1;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 100%;
+        box-sizing: border-box;
       }
       .dark .tab {
         background: #2a2521;
@@ -108,7 +112,8 @@
         color: #222;
       }
       .tab img {
-        flex: 0 0 auto;
+        vertical-align: middle;
+        margin-right: 6px;
       }
       .mock {
         border: 1px solid var(--line);
