@@ -173,8 +173,13 @@ def check_show(s, i, allow_past, today, allowed):
     return errs
 
 
-def venue_key(name):
+def norm_key(name):
+    """Normalised form for near-duplicate detection (venues, artists, same-slot shows):
+    lowercase ASCII letters and digits only. app.js venueKey applies the same rule."""
     return re.sub(r"[^a-z0-9]+", "", str(name).lower())
+
+
+venue_key = artist_key = norm_key
 
 
 def check_venues(data):
@@ -245,7 +250,7 @@ def check_shows(data, allow_past, allowed, venue_keys=None):
             seen_ids[sid] = i
         if isinstance(s.get("date"), str) and isinstance(s.get("venue"), str):
             # Same night, same venue, same (or no) start time: almost certainly the same show twice.
-            slot = (s["date"], re.sub(r"\W+", "", s["venue"].lower()), s.get("time") or "")
+            slot = (s["date"], venue_key(s["venue"]), s.get("time") or "")
             if slot in seen_slots:
                 errs.append(
                     f"shows[{i}] ({sid}): same date, venue and time as {seen_slots[slot]} — merge them"
@@ -267,11 +272,6 @@ def check_shows(data, allow_past, allowed, venue_keys=None):
                 "add it with coordinates"
             )
     return errs
-
-
-def artist_key(name):
-    """Normalised form used to detect near-duplicate artist names (DUB INC / Dub Inc. / dub inc)."""
-    return re.sub(r"[^a-z0-9]+", "", name.lower())
 
 
 def check_artists(data, allowed):
