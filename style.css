@@ -3,7 +3,8 @@
   --surface: #1d1915;
   --line: #2e2822;
   --text: #f3ead8;
-  --muted: #a39682;
+  --muted: #bcae98;
+  --red-text: #ff7a6e;
   --red: #d8342f;
   --gold: #f2b632;
   --green: #1e8f4e;
@@ -854,7 +855,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .show.weekend .date .dow {
-  color: var(--red);
+  color: var(--red-text);
 }
 
 .title {
@@ -1518,4 +1519,12 @@ a {
   display: inline-flex;
   align-items: center;
   height: 20px;
+}
+
+/* Reserve space while data loads so the page does not jump (CLS). */
+#views {
+  min-height: 60vh;
+}
+.genres {
+  min-height: 42px;
 }

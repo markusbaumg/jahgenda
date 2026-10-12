@@ -1,12 +1,11 @@
 /* Progressive-web-app glue: service worker registration, "new version" toast and the install banner.
  * Kept separate from app.js so the agenda works without it. */
 (() => {
+  const store = window.jahStore;
   const DISMISS_KEY = store.KEYS.INSTALL_DISMISSED; // timestamp of the last "×", or "forever"
   const DISMISS_DAYS = 30;
   const standalone =
     window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-
-  const store = window.jahStore;
 
   // ---- Service worker + update toast ------------------------------------------------------------
   const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);

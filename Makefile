@@ -6,7 +6,7 @@ PORT ?= 8000
 WEB_FILES := index.html log.html style.css store.js app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check ci
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check ci smoke
 
 help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -39,8 +39,11 @@ fmt: ## Format code (prettier for HTML/CSS/JS, ruff if installed) and normalise 
 fmt-data: ## Bring data/*.json into canonical form (sorting, indentation)
 	python3 scripts/format_data.py
 
-check: lint validate test ## Run everything (before every commit)
+check: lint validate test smoke ## Run everything (before every commit)
 	python3 scripts/format_data.py --check
+
+smoke: ## Load both pages in headless Chrome and fail on uncaught JS errors
+	scripts/smoke.sh
 
 ci: check ## What GitHub Actions runs (validate.yml)
 
