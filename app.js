@@ -881,14 +881,21 @@
         : items.some((x) => !x._past && x._day <= soon)
           ? "#1e8f4e"
           : "#f2b632";
+    // Google-Maps-style pins in the Jahgenda colours; the badge shows the number of shows at the venue.
+    const pinIcon = (color, count) =>
+      L.divIcon({
+        className: "pin-icon",
+        html:
+          `<svg viewBox="0 0 28 40" width="28" height="40" aria-hidden="true">` +
+          `<path d="M14 1C7 1 1.5 6.5 1.5 13.5c0 9.5 12.5 25 12.5 25s12.5-15.5 12.5-25C26.5 6.5 21 1 14 1z" fill="${color}" stroke="#14110e" stroke-width="2"/>` +
+          `<circle cx="14" cy="13.5" r="5.5" fill="#14110e"/></svg>` +
+          (count > 1 ? `<b>${count}</b>` : ""),
+        iconSize: [28, 40],
+        iconAnchor: [14, 39],
+        popupAnchor: [0, -34],
+      });
     for (const { s, items } of venues.values()) {
-      L.circleMarker([s.lat, s.lon], {
-        radius: 7 + Math.min(items.length, 5) * 1.5,
-        color: "#14110e",
-        weight: 2,
-        fillColor: markerColor(items),
-        fillOpacity: 0.95,
-      })
+      L.marker([s.lat, s.lon], { icon: pinIcon(markerColor(items), items.length), riseOnHover: true })
         .bindPopup(
           `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
             .map(
@@ -901,13 +908,7 @@
       points.push([s.lat, s.lon]);
     }
     if (here) {
-      L.circleMarker([here.lat, here.lon], {
-        radius: 7,
-        color: "#14110e",
-        weight: 3,
-        fillColor: "#f3ead8",
-        fillOpacity: 1,
-      })
+      L.marker([here.lat, here.lon], { icon: pinIcon("#f3ead8", 1), zIndexOffset: 1000 })
         .bindPopup("Du bist hier")
         .addTo(markerLayer);
       points.push([here.lat, here.lon]);
