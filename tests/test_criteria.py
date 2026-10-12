@@ -1,6 +1,7 @@
 """Genre slug parsing from data/genres.json and the finer validator rules. Run: make test"""
 
 import importlib.util
+import json
 import tempfile
 import unittest
 from datetime import date, timedelta
@@ -47,6 +48,66 @@ class AllowedGenres(unittest.TestCase):
     def test_slugs_are_read_and_validated(self):
         text = '{"genres": [{"slug": "reggae"}, {"slug": "ska-punk"}, {"slug": "Not Valid"}, {"label": "x"}]}'
         self.assertEqual(self.parse(text), {"reggae", "ska-punk"})
+
+
+class GenresFile(unittest.TestCase):
+    """check_genres_file(): the page contract behind the chips - unique slug + label per entry."""
+
+    def test_repo_file_passes(self):
+        self.assertEqual(V.check_genres_file(json.loads(V.GENRES.read_text(encoding="utf-8"))), [])
+
+    def test_shape(self):
+        self.assertEqual(V.check_genres_file([]), ["genres.json: must be an object with a 'genres' list"])
+        self.assertEqual(
+            V.check_genres_file({"genres": {}}), ["genres.json: must be an object with a 'genres' list"]
+        )
+        errs = V.check_genres_file({"note": "x", "genres": ["reggae"], "order": []})
+        self.assertEqual(errs, ["genres[0]: not an object", "genres.json: unknown field 'order'"])
+
+    def test_slug_label_and_unknown_fields(self):
+        doc = {
+            "genres": [
+                {"slug": "reggae", "label": "Reggae", "maps": "reggae"},
+                {"slug": "Ska Punk", "label": "Ska-Punk"},
+                {"slug": "reggae", "label": ""},
+                {"slug": "dub", "label": "Dub", "maps": 3, "colour": "gold"},
+                {"label": "Roots"},
+            ]
+        }
+        errs = V.check_genres_file(doc)
+        self.assertEqual(
+            errs,
+            [
+                "genres[1]: 'slug' must be a lowercase slug like 'roots' or 'ska-punk'",
+                "genres[2]: duplicate slug 'reggae'",
+                "genres[2]: 'label' must be a non-empty string",
+                "genres[3]: 'maps' must be a string",
+                "genres[3]: unknown field 'colour'",
+                "genres[4]: 'slug' must be a lowercase slug like 'roots' or 'ska-punk'",
+            ],
+        )
+
+
+class Slogans(unittest.TestCase):
+    def test_repo_file_passes(self):
+        self.assertEqual(V.check_slogans(json.loads(V.SLOGANS.read_text(encoding="utf-8"))), [])
+
+    def test_shape_and_entries(self):
+        self.assertEqual(V.check_slogans(["x"]), ["slogans.json: must be an object with a 'slogans' list"])
+        self.assertEqual(
+            V.check_slogans({"slogans": "x"}), ["slogans.json: must be an object with a 'slogans' list"]
+        )
+        self.assertEqual(V.check_slogans({"slogans": []}), ["slogans.json: 'slogans' is empty"])
+        errs = V.check_slogans({"note": "n", "slogans": ["Irie", "", 3, " Irie "], "lang": "gsw"})
+        self.assertEqual(
+            errs,
+            [
+                "slogans[1]: must be a non-empty string",
+                "slogans[2]: must be a non-empty string",
+                "slogans[3]: duplicate ' Irie '",
+                "slogans.json: unknown field 'lang'",
+            ],
+        )
 
 
 def show(**over):

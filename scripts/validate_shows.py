@@ -25,6 +25,7 @@ RUNS = ROOT / "data" / "runs.json"
 STATUS = ROOT / "data" / "status.json"
 VENUES = ROOT / "data" / "venues.json"
 GENRES = ROOT / "data" / "genres.json"
+SLOGANS = ROOT / "data" / "slogans.json"
 
 CANTONS = {
     "AG",
@@ -84,6 +85,7 @@ VENUE_OPTIONAL = {"url": str, "scrape": bool, "hint": str}
 SKILLS = ("scrape-shows", "harvest-bands")
 STATUS_FIELDS = {"ok", "skill", "at", "runner", "counts", "failed_sources", "error"}
 COUNT_KEYS = {"added", "updated", "removed", "total"}
+GENRE_FIELDS = {"slug", "label", "maps"}
 
 
 def load(path):
@@ -102,6 +104,58 @@ def allowed_genres():
         return {g["slug"] for g in data["genres"] if SLUG_RE.match(str(g.get("slug", "")))}
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return set()
+
+
+def check_genres_file(data):
+    """data/genres.json: the single source for slugs, labels and chip order - so every entry needs a
+    unique slug and a label, and nothing else goes unnoticed (allowed_genres() only skims the slugs)."""
+    if not isinstance(data, dict) or not isinstance(data.get("genres"), list):
+        return ["genres.json: must be an object with a 'genres' list"]
+    errs, seen = [], set()
+    for i, g in enumerate(data["genres"]):
+        where = f"genres[{i}]"
+        if not isinstance(g, dict):
+            errs.append(f"{where}: not an object")
+            continue
+        slug = g.get("slug")
+        if not isinstance(slug, str) or not SLUG_RE.match(slug):
+            errs.append(f"{where}: 'slug' must be a lowercase slug like 'roots' or 'ska-punk'")
+        elif slug in seen:
+            errs.append(f"{where}: duplicate slug '{slug}'")
+        else:
+            seen.add(slug)
+        if not isinstance(g.get("label"), str) or not g["label"].strip():
+            errs.append(f"{where}: 'label' must be a non-empty string")
+        if "maps" in g and not isinstance(g["maps"], str):
+            errs.append(f"{where}: 'maps' must be a string")
+        for key in g:
+            if key not in GENRE_FIELDS:
+                errs.append(f"{where}: unknown field '{key}'")
+    for key in data:
+        if key not in ("note", "genres"):
+            errs.append(f"genres.json: unknown field '{key}'")
+    return errs
+
+
+def check_slogans(data):
+    """data/slogans.json: {"slogans": [non-empty strings]} - anything else makes the page silently
+    keep its static tagline."""
+    if not isinstance(data, dict) or not isinstance(data.get("slogans"), list):
+        return ["slogans.json: must be an object with a 'slogans' list"]
+    errs, seen = [], set()
+    for i, line in enumerate(data["slogans"]):
+        if not isinstance(line, str) or not line.strip():
+            errs.append(f"slogans[{i}]: must be a non-empty string")
+        elif line.strip() in seen:
+            errs.append(f"slogans[{i}]: duplicate '{line}'")
+        else:
+            seen.add(line.strip())
+    if not data["slogans"]:
+        errs.append("slogans.json: 'slogans' is empty")
+    for key in data:
+        if key not in ("note", "slogans"):
+            errs.append(f"slogans.json: unknown field '{key}'")
+    return errs
 
 
 def check_genres(where, genres, allowed):
@@ -403,6 +457,12 @@ def main(argv):
     errs = []
     if not allowed:
         errs.append("data/genres.json: missing or malformed (no genre slugs)")
+    else:
+        genres, e = load(GENRES)
+        errs += e or check_genres_file(genres)
+    if SLOGANS.exists():  # optional: without it the page keeps its static tagline
+        slogans, e = load(SLOGANS)
+        errs += e or check_slogans(slogans)
 
     venues, e = load(VENUES)
     errs += e
