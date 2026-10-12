@@ -66,7 +66,8 @@
   let pastCount = 0;
   const cantonSelect = el("canton");
   const search = el("q");
-  const genreBar = el("genres");
+  const genreBar = el("genres"); // genre chips
+  const chipRow = el("chips"); // the scrolling row: genre chips + (on phones) Kanton ▾ / Nähe
   let activeGenre = "";
 
   const monthFmt = new Intl.DateTimeFormat("de-CH", {
@@ -310,6 +311,7 @@
     togglePast.hidden = past === 0;
     togglePast.textContent = showPast ? "Vergangene ausblenden" : `Vergangene anzeigen (${past})`;
     updateMine();
+    syncTools();
     lastVisible = visible;
     if (!visible.length) {
       list.innerHTML = "";
@@ -417,16 +419,19 @@
               `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(g)}</button>`,
           )
           .join("");
+      chipRow.scrollLeft = 0; // the row starts at «Alle», whatever snapped before the chips existed
       updateChipArrows();
 
       if (data.updated) {
         const note = data.source === "mock" ? " · Beispieldaten" : "";
         el("updated").textContent = `Stand: ${stampFmt.format(new Date(data.updated))}${note}`;
       }
+      status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
       revealFromHash();
     } catch (err) {
       console.error(err);
+      status.classList.remove("loading");
       status.innerHTML = `<p class="state-icon">${STATE_ICONS.offline}</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
     }
   }
@@ -471,7 +476,7 @@
     }
     for (const c of genreBar.querySelectorAll(".chip"))
       c.setAttribute("aria-pressed", String(c.dataset.genre === ""));
-    genreBar.scrollTo({ left: 0 });
+    chipRow.scrollTo({ left: 0 });
     render();
   }
   status.addEventListener("click", (e) => {
@@ -518,7 +523,7 @@
       (pos) => {
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         locateBtn.disabled = false;
-        locateBtn.classList.add("active");
+        locateBtn.setAttribute("aria-pressed", "true");
         // Closest upcoming show (never a past one), as a link into the list.
         const near = shows
           .filter((s) => !s._past && typeof s.lat === "number")
@@ -605,9 +610,12 @@
     `<button type="button" class="act" data-mine="share">${ICONS.link}<span>Liste teilen</span></button>` +
     `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener">${ICONS.wa}<span>WhatsApp</span></a>`;
 
+  // The ★ button is always there; without marks it is muted and only explains itself (title).
   function updateMine() {
     const n = markedShows().length;
-    toggleMine.hidden = n === 0;
+    toggleMine.classList.toggle("empty", n === 0);
+    toggleMine.setAttribute("aria-disabled", String(n === 0));
+    toggleMine.title = n === 0 ? "Shows merken · nur in diesem Browser" : "Meine Shows";
     toggleMine.setAttribute("aria-pressed", String(mineOnly));
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !mineOnly || n === 0;
@@ -639,6 +647,7 @@
   });
 
   toggleMine.addEventListener("click", () => {
+    if (!markedShows().length) return; // nothing marked yet: the tooltip says what the star does
     mineOnly = !mineOnly;
     renderAndKeepInView();
   });
@@ -984,21 +993,82 @@
         : "");
   }
 
-  // --- Scrolling ---
+  // --- Sticky bar ---
+  // Its height is frozen in CSS (--bar-h: 84 px on phones, 96 px from 768 px); nothing is measured here.
   const filters = el("filters");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
-  // Month headings stick below the filter bar, so expose its real height to CSS.
-  const setBarHeight = () =>
-    document.documentElement.style.setProperty("--bar-h", `${filters.offsetHeight}px`);
-  setBarHeight();
-  if ("ResizeObserver" in window) new ResizeObserver(setBarHeight).observe(filters);
-
-  // Show a divider under the filter bar only once it is actually stuck.
+  // Shadow and tricolor edge only once the bar is actually stuck.
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(([entry]) => filters.classList.toggle("stuck", !entry.isIntersecting)).observe(
       el("stuck-sentinel"),
     );
   }
+
+  // Mini-brand in the stuck bar: back to the top, without touching the hash (deep links stay intact).
+  filters.querySelector(".mini-brand").addEventListener("click", (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: reducedMotion.matches ? "auto" : "smooth" });
+  });
+
+  // Phones: the canton <select> and the locate button live in the chip row as «Kanton ▾» and «Nähe»
+  // chips (the select sits transparently over its chip, so the native picker opens). Wider screens keep
+  // them in the toolbar. The elements are moved, never cloned, so state and listeners stay the same.
+  const phone = matchMedia("(max-width: 420px)");
+  const toolbar = filters.querySelector(".toolbar");
+  const toolsGroup = el("tools");
+  const cantonChip = el("canton-chip");
+  function placeTools() {
+    if (phone.matches) {
+      cantonChip.append(cantonSelect);
+      toolsGroup.append(locateBtn);
+      locateBtn.classList.replace("icon-btn", "chip");
+    } else {
+      toolbar.insertBefore(cantonSelect, toggleMine);
+      toolbar.insertBefore(locateBtn, toggleMine);
+      locateBtn.classList.replace("chip", "icon-btn");
+    }
+    updateChipArrows();
+  }
+  // Chip labels mirror the real controls (called from render(), so every filter change updates them).
+  function syncTools() {
+    const opt = cantonSelect.selectedOptions[0];
+    cantonChip.querySelector(".chip-text").textContent =
+      cantonSelect.value && opt ? opt.textContent : "Kanton";
+    cantonChip.classList.toggle("on", Boolean(cantonSelect.value));
+  }
+
+  // Note pill: <details> that opens as a card; closing waits for the collapse transition.
+  const note = el("note");
+  const noteBody = note.querySelector(".note-body");
+  function closeNote() {
+    if (!note.open || note.dataset.closing) return;
+    note.dataset.closing = "1";
+    note.classList.remove("is-open");
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      delete note.dataset.closing;
+      note.open = false;
+    };
+    noteBody.addEventListener("transitionend", finish, { once: true });
+    setTimeout(finish, 450); // reduced motion: 0 ms transitions fire no transitionend
+  }
+  note.querySelector("summary").addEventListener("click", (e) => {
+    if (!note.open) return; // opening: let the browser do it, then animate in (toggle event)
+    e.preventDefault();
+    closeNote();
+  });
+  note.addEventListener("toggle", () => {
+    if (note.open) requestAnimationFrame(() => note.classList.add("is-open"));
+  });
+  document.addEventListener("click", (e) => {
+    if (note.open && !note.contains(e.target)) closeNote();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeNote();
+  });
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
@@ -1010,65 +1080,74 @@
   }
 
   // Scroll arrows for the chip row: only shown when there is something hidden in that direction.
-  const genreWrap = genreBar.parentElement;
+  const chipWrap = chipRow.parentElement;
   function updateChipArrows() {
-    const canLeft = genreBar.scrollLeft > 2;
-    const canRight = genreBar.scrollLeft + genreBar.clientWidth < genreBar.scrollWidth - 2;
-    genreWrap.classList.toggle("can-left", canLeft);
-    genreWrap.classList.toggle("can-right", canRight);
-    genreWrap.querySelector(".scroll-btn.left").hidden = !canLeft;
-    genreWrap.querySelector(".scroll-btn.right").hidden = !canRight;
+    const canLeft = chipRow.scrollLeft > 2;
+    const canRight = chipRow.scrollLeft + chipRow.clientWidth < chipRow.scrollWidth - 2;
+    chipWrap.classList.toggle("can-left", canLeft);
+    chipWrap.classList.toggle("can-right", canRight);
+    chipWrap.querySelector(".scroll-btn.left").hidden = !canLeft;
+    chipWrap.querySelector(".scroll-btn.right").hidden = !canRight;
   }
-  genreBar.addEventListener("scroll", updateChipArrows, { passive: true });
+  chipRow.addEventListener("scroll", updateChipArrows, { passive: true });
   window.addEventListener("resize", updateChipArrows);
-  genreWrap.addEventListener("click", (e) => {
+  chipWrap.addEventListener("click", (e) => {
     const btn = e.target.closest(".scroll-btn");
     if (btn)
-      genreBar.scrollBy({
-        left: Number(btn.dataset.dir) * genreBar.clientWidth * 0.7,
+      chipRow.scrollBy({
+        left: Number(btn.dataset.dir) * chipRow.clientWidth * 0.7,
       });
   });
 
   // Drag the chip row with the mouse (touch scrolls natively). A real drag suppresses the click.
   let drag = null;
-  genreBar.addEventListener("pointerdown", (e) => {
+  chipRow.addEventListener("pointerdown", (e) => {
     if (e.pointerType !== "mouse") return;
-    drag = { x: e.clientX, left: genreBar.scrollLeft, moved: false };
-    genreBar.style.scrollBehavior = "auto";
+    drag = { x: e.clientX, left: chipRow.scrollLeft, moved: false };
+    chipRow.style.scrollBehavior = "auto";
   });
-  genreBar.addEventListener("pointermove", (e) => {
+  chipRow.addEventListener("pointermove", (e) => {
     if (!drag) return;
     const dx = e.clientX - drag.x;
     if (Math.abs(dx) > 4) drag.moved = true;
-    genreBar.scrollLeft = drag.left - dx;
+    chipRow.scrollLeft = drag.left - dx;
   });
   const endDrag = () => {
     if (!drag) return;
-    genreBar.style.scrollBehavior = "";
+    chipRow.style.scrollBehavior = "";
     const moved = drag.moved;
     drag = null;
     if (moved)
-      genreBar.addEventListener("click", (e) => e.stopPropagation(), {
+      chipRow.addEventListener("click", (e) => e.stopPropagation(), {
         capture: true,
         once: true,
       });
   };
-  genreBar.addEventListener("pointerup", endDrag);
-  genreBar.addEventListener("pointerleave", endDrag);
-  genreBar.addEventListener("pointercancel", endDrag);
+  chipRow.addEventListener("pointerup", endDrag);
+  chipRow.addEventListener("pointerleave", endDrag);
+  chipRow.addEventListener("pointercancel", endDrag);
 
   genreBar.addEventListener("click", (e) => {
-    const btn = e.target.closest(".chip");
+    const btn = e.target.closest(".chip[data-genre]");
     if (!btn) return;
     activeGenre = activeGenre === btn.dataset.genre ? "" : btn.dataset.genre;
-    if (btn.dataset.genre === "") genreBar.scrollTo({ left: 0 });
     for (const c of genreBar.querySelectorAll(".chip")) {
       c.setAttribute("aria-pressed", String(c.dataset.genre === activeGenre));
     }
+    // Keep the chip in view (the row scrolls smoothly unless motion is reduced).
+    if (btn.dataset.genre === "") chipRow.scrollTo({ left: 0 });
+    else btn.scrollIntoView({ inline: "nearest", block: "nearest" });
     renderAndKeepInView();
   });
 
   cantonSelect.addEventListener("change", renderAndKeepInView);
-  search.addEventListener("input", renderAndKeepInView);
+  // Search: debounced 120 ms so typing does not re-render on every key.
+  let searchTimer = 0;
+  search.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(renderAndKeepInView, 120);
+  });
+  placeTools();
+  phone.addEventListener("change", placeTools);
   init();
 })();

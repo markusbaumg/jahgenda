@@ -65,7 +65,7 @@
   --tap: 44px;
   --bar-top: 48px;
   --bar-chips: 36px;
-  --bar-h: calc(var(--bar-top) + var(--bar-chips)); /* app.js overrides with the measured height */
+  --bar-h: calc(var(--bar-top) + var(--bar-chips)); /* 84 px, frozen: the bar never changes height */
   --month-h: 32px;
   --r-1: 4px;
   --r-2: 8px;
@@ -86,6 +86,12 @@
   --stagger: 24ms;
 
   font-family: var(--font-body);
+}
+@media (min-width: 768px) {
+  :root {
+    --bar-top: 56px;
+    --bar-chips: 40px; /* 96 px bar on desktop */
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -161,8 +167,7 @@ body::after {
 /* Tricolor rule: the three stripe colours as structure (month heads, section titles, stuck bar, cards). */
 .rule-tri,
 .month,
-.section-title,
-.filters.stuck {
+.section-title {
   border-bottom: 3px solid;
   border-image: linear-gradient(90deg, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%) 1;
 }
@@ -295,25 +300,45 @@ body::after {
   color: var(--green-text);
 }
 
+/* Sticky filter bar: two rows of frozen height (--bar-top + --bar-chips = 84 px, 96 px from 768 px).
+ * The height is set explicitly so neither the data nor the stuck state can ever change it. When stuck:
+ * the bar shadow plus a 3 px tricolor rule drawn as an overlay along the bottom edge (no border, no shift). */
 .filters {
   position: sticky;
   top: env(safe-area-inset-top, 0px);
   z-index: 3;
+  height: var(--bar-h);
   margin-bottom: 8px;
-  padding: 10px 0 0;
+  padding: 0;
   background:
     var(--sun) fixed no-repeat,
     var(--bg);
-  border-bottom: 3px solid transparent; /* same height as the stuck .rule-tri edge: no shift */
   transition: box-shadow var(--t-2) var(--ease-tape);
+}
+.filters::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%);
+  opacity: 0;
+  transition: opacity var(--t-2) var(--ease-tape);
+  pointer-events: none;
 }
 .filters.stuck {
   box-shadow: var(--sh-bar);
 }
+.filters.stuck::after {
+  opacity: 1;
+}
 
 .toolbar {
   display: flex;
+  align-items: center;
   gap: 8px;
+  height: var(--bar-top);
 }
 .toolbar input,
 .toolbar select,
@@ -322,8 +347,8 @@ body::after {
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  height: 44px;
+  border-radius: var(--r-2);
+  height: var(--tap);
   min-width: 0;
 }
 .search {
@@ -331,13 +356,14 @@ body::after {
   flex: 1;
   min-width: 0;
 }
-.search svg {
+.search-icon {
   position: absolute;
   left: 13px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
   pointer-events: none;
+  transition: opacity var(--t-2) var(--ease-tape);
 }
 .search input {
   width: 100%;
@@ -352,6 +378,31 @@ body::after {
   -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z' fill='black'/></svg>")
     center / contain no-repeat;
 }
+/* Mini-brand: the cross mark takes the place of the magnifier while the bar is stuck (tap = back to top).
+ * It is absolute inside the first row, so the bar never grows a third row. */
+.mini-brand {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  z-index: 1;
+  display: none;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+  border-radius: 4px;
+}
+.mini-brand img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+}
+.filters.stuck .mini-brand {
+  display: block;
+}
+.filters.stuck .search-icon {
+  opacity: 0;
+}
 .toolbar select {
   flex: 0 0 auto;
   max-width: 40%;
@@ -365,50 +416,104 @@ body::after {
   cursor: pointer;
 }
 .icon-btn {
-  flex: 0 0 44px;
-  display: grid;
-  place-items: center;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: var(--tap);
   padding: 0;
   cursor: pointer;
   color: var(--muted);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn .lbl {
+  display: none;
+  font-size: var(--fs-2);
+  font-weight: 600;
+}
+@media (min-width: 768px) {
+  /* «◎ Nähe» with its word on desktop; icon-only on tablets, a chip on phones (see .tools). */
+  #locate.icon-btn {
+    padding: 0 14px 0 12px;
+  }
+  #locate.icon-btn .lbl {
+    display: inline;
+  }
 }
 .icon-btn:hover {
   color: var(--gold);
   border-color: var(--gold);
 }
-.icon-btn[disabled] {
+.icon-btn[disabled],
+.chip[disabled] {
   opacity: 0.5;
   cursor: progress;
 }
-.icon-btn.active {
+.icon-btn[aria-pressed="true"] {
   color: var(--on-gold);
   background: var(--gold);
   border-color: var(--gold);
 }
-
-/* Genre chips: one scrollable row, no wrapping; arrows appear when there is more to see. */
-.genres-wrap {
-  position: relative;
+.icon-btn[hidden] {
+  display: none;
 }
-.genres {
+
+/* Chip row: one scrollable line of frozen height. Genre chips first, then (on phones) the Kanton ▾ and
+ * Nähe chips; arrows appear when there is more to see. The row keeps its height before the data arrives. */
+.chips-wrap {
+  position: relative;
+  height: var(--bar-chips);
+}
+.chips {
   display: flex;
+  align-items: flex-start;
+  height: var(--bar-chips);
+  padding: 1px 0 3px;
   cursor: grab;
   user-select: none;
-  gap: 6px;
-  padding: 10px 0;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding: 0 8px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
-.genres-wrap.can-left .genres {
+@media (min-width: 768px) {
+  .chips {
+    padding: 4px 0 4px;
+  }
+}
+.chips::-webkit-scrollbar {
+  display: none;
+}
+.chips-wrap.can-left .chips {
   mask-image: linear-gradient(90deg, transparent, #000 40px);
 }
-.genres-wrap.can-right .genres {
+.chips-wrap.can-right .chips {
   mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
 }
-.genres-wrap.can-left.can-right .genres {
+.chips-wrap.can-left.can-right .chips {
   mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+}
+.chip-group {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+/* A thin separator between chip groups. */
+.chip-group:not(:empty) + .chip-group:not(:empty)::before {
+  content: "";
+  flex: 0 0 1px;
+  align-self: center;
+  height: 20px;
+  margin: 0 6px;
+  background: var(--line);
+}
+.chip-group:empty {
+  display: none;
 }
 .scroll-btn {
   position: absolute;
@@ -439,34 +544,105 @@ body::after {
 .scroll-btn[hidden] {
   display: none;
 }
-.genres::-webkit-scrollbar {
-  display: none;
-}
-.genres:empty {
-  display: none;
-}
+/* Chips (§3.3): 32 px high, visible 1 px edge, radius --r-1, muted; pressed = gold plate with dark text. */
 .chip {
+  position: relative;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
   font: inherit;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: var(--fs-2);
+  font-weight: 500;
+  line-height: 1;
   color: var(--muted);
   background: none;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 5px 12px;
+  border-radius: var(--r-1);
+  padding: 0 11px;
   cursor: pointer;
   white-space: nowrap;
+  scroll-snap-align: start;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--t-1) var(--ease-skank),
+    color var(--t-2) var(--ease-tape),
+    background-color var(--t-2) var(--ease-tape),
+    border-color var(--t-2) var(--ease-tape);
+}
+.chip::after {
+  /* 36 px hit area without changing the drawn box */
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+.chip svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
 }
 .chip:hover {
   color: var(--text);
   border-color: var(--muted);
 }
-.chip[aria-pressed="true"] {
+.chip:active {
+  transform: scale(0.96);
+}
+.chip[aria-pressed="true"],
+.chip.on {
   color: var(--on-gold);
   background: var(--gold);
   border-color: var(--gold);
-  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--gold); /* reads as the 2 px border of the pressed state */
+  font-weight: 600;
+}
+.chip[hidden] {
+  display: none;
+}
+@media (forced-colors: active) {
+  .chip[aria-pressed="true"],
+  .chip.on {
+    border: 3px solid;
+  }
+}
+/* Phone tools: the real <select> sits invisibly over the «Kanton ▾» chip, so a tap opens the native picker
+ * and keyboard / screen-reader behaviour stays native. app.js moves the select (and the locate button) in. */
+.chip-canton {
+  padding-right: 8px;
+}
+.chip-canton::after {
+  content: none; /* the select itself is the hit area */
+}
+.chip-canton select {
+  position: absolute;
+  inset: -2px; /* the whole chip plus its 2 px hit margin */
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  font-size: 16px; /* no iOS zoom on focus */
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.chip-canton:focus-within {
+  box-shadow: var(--ring);
+}
+.chip-canton.on:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--gold),
+    var(--ring);
+}
+.tools .chip {
+  scroll-snap-align: none; /* only genre chips snap; otherwise Chrome re-snaps to these when the genre chips arrive */
+}
+@media (min-width: 421px) {
+  .tools {
+    display: none;
+  }
 }
 
 .geo-status {
@@ -509,32 +685,118 @@ body::after {
   white-space: nowrap;
 }
 
+/* Results row: note pill on the left, filter buttons, view switch on the right. */
+.results-row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: var(--s-3) 0 0;
+  color: var(--muted);
+  font-size: var(--fs-2);
+}
 .results {
+  order: 3; /* filter buttons on their own line under pill + view switch */
+  flex: 1 1 100%;
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
   align-items: baseline;
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 0.85rem;
+  margin: 0;
+}
+.results:not(:has(:not([hidden]))) {
+  display: none; /* no visible button: no empty line */
 }
 .results .clear {
-  color: var(--gold);
-  border-color: var(--gold);
-  margin-left: 0;
+  color: var(--gold-text);
 }
 .results .linkish {
-  margin-left: auto;
   color: var(--muted);
   text-decoration: none;
-  border-bottom: 1px dotted var(--muted);
 }
 .results .linkish:hover {
-  color: var(--gold);
-  border-color: var(--gold);
+  color: var(--gold-text);
 }
-.results:empty {
+.results-row .seg {
+  margin-left: auto;
+}
+/* Note pill: the «collected by AI agents» notice as a one-line disclosure. The body opens as a card under
+ * the row (grid-template-rows 0fr → 1fr over --t-3), so nothing around it moves. */
+.note-pill {
+  position: static;
+}
+.note-pill summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px 0 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-2);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.note-pill summary::-webkit-details-marker {
   display: none;
+}
+.note-pill summary:hover,
+.note-pill[open] summary {
+  color: var(--text);
+  border-color: var(--muted);
+}
+.note-pill summary svg:first-child {
+  color: var(--gold-text);
+}
+.note-pill .chev {
+  transition: transform var(--t-2) var(--ease-tape);
+}
+.note-pill[open] .chev {
+  transform: rotate(180deg);
+}
+.note-short {
+  display: none;
+}
+.note-body {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 4;
+  width: min(100%, 480px);
+  display: grid;
+  grid-template-rows: 0fr;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  box-shadow: var(--sh-2);
+  transition: grid-template-rows var(--t-3) var(--ease-tape);
+}
+.note-pill.is-open .note-body {
+  grid-template-rows: 1fr;
+}
+.note-body p {
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0 14px;
+  color: var(--text);
+  line-height: var(--lh-body);
+  transition: padding var(--t-3) var(--ease-tape);
+}
+.note-pill.is-open .note-body p {
+  padding: 12px 14px;
+}
+.note-body a {
+  color: var(--green-text);
+}
+.note-body a:hover {
+  color: var(--gold-text);
 }
 .linkish {
   font: inherit;
@@ -567,7 +829,7 @@ body::after {
   color: var(--muted);
   background: none;
   border: 0;
-  padding: 4px 11px;
+  padding: 4px 10px;
   cursor: pointer;
 }
 .seg button + button {
@@ -887,6 +1149,60 @@ body::after {
 }
 .status button.primary:hover {
   filter: brightness(1.08);
+}
+/* Loading: six skeleton rows in the final row grid; only their opacity shimmers (1.2 s). */
+.status.loading {
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  text-align: left;
+  border: 0;
+}
+.skeleton .show {
+  min-height: 64px;
+  pointer-events: none;
+}
+.sk {
+  display: block;
+  background: var(--surface);
+  border-radius: var(--r-1);
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+.sk-date {
+  width: 40px;
+  height: 46px;
+  margin: 0 auto;
+}
+.sk-bar {
+  width: 72%;
+  height: 15px;
+  margin: 4px 0 8px;
+}
+.sk-bar.short {
+  width: 46%;
+  height: 13px;
+}
+.sk-badge {
+  width: 24px;
+  height: 28px;
+  margin-top: 2px;
+}
+.skeleton .show:nth-child(2) .sk-bar {
+  width: 58%;
+}
+.skeleton .show:nth-child(4) .sk-bar {
+  width: 84%;
+}
+.skeleton .show:nth-child(5) .sk-bar.short {
+  width: 36%;
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .show.past {
@@ -1236,16 +1552,20 @@ body::after {
 .show.shared-row {
   background: rgba(242, 182, 50, 0.07);
 }
+/* ★ button: always visible right of the search; muted without the badge while nothing is marked. */
 .icon-btn.mine {
   position: relative;
 }
-.icon-btn.mine[hidden] {
-  display: none;
+.icon-btn.mine.empty {
+  color: var(--faint);
+  cursor: default;
 }
-.icon-btn.mine[aria-pressed="true"] {
-  color: var(--on-gold);
-  background: var(--gold);
-  border-color: var(--gold);
+.icon-btn.mine.empty:hover {
+  color: var(--muted);
+  border-color: var(--line);
+}
+.icon-btn.mine.empty b {
+  display: none;
 }
 .icon-btn.mine b {
   position: absolute;
@@ -1329,31 +1649,6 @@ body::after {
   .act span {
     display: none;
   }
-}
-
-/* Collapsed one-line brand that appears in the sticky bar while scrolling (same lockup, small). */
-.mini-brand {
-  display: none;
-  align-items: baseline;
-  gap: 6px;
-  margin-bottom: var(--s-2);
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 400;
-  font-synthesis: none;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  text-transform: uppercase;
-  color: var(--text);
-  text-decoration: none;
-}
-.mini-brand img {
-  width: 1em;
-  height: 1em;
-  border-radius: 4px;
-}
-.filters.stuck .mini-brand {
-  display: inline-flex;
 }
 
 /* Install banner (PWA) and update toast */
@@ -1632,7 +1927,7 @@ a {
 /* Reduced motion: colour states stay, nothing moves (the duration tokens are already 0 ms). */
 @media (prefers-reduced-motion: reduce) {
   html,
-  .genres {
+  .chips {
     scroll-behavior: auto;
   }
   .show.highlight {
@@ -1642,4 +1937,20 @@ a {
   .install {
     transition: none;
   }
+  .sk {
+    animation: none;
+  }
+}
+
+/* Phones (≤ 420): full-width search, Kanton ▾ and Nähe as chips at the end of the chip row, short note label. */
+@media (max-width: 420px) {
+  .note-short {
+    display: inline;
+  }
+  .note-long {
+    display: none;
+  }
+}
+.about .gut strong {
+  color: var(--gold-text);
 }
