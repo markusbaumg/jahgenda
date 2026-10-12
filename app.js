@@ -1295,7 +1295,8 @@
       map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
       // Leaflet's own controls get German tooltips.
       L.control.zoom({ zoomInTitle: "Hineinzoomen", zoomOutTitle: "Herauszoomen" }).addTo(map);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        subdomains: "abcd",
         maxZoom: 19,
         className: "map-tiles",
         attribution:

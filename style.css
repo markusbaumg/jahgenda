@@ -1615,7 +1615,10 @@ body {
 
 /* Map: tiles toned down to sit on the dark page; legend under the map. */
 .map .leaflet-tile-pane {
-  filter: brightness(0.82) contrast(1.05) saturate(0.8);
+  filter: none;
+}
+.map {
+  background: #0d0b09;
 }
 .map-legend {
   display: flex;
@@ -1938,7 +1941,7 @@ a {
   color: var(--gold);
   border-color: var(--gold);
 }
-@media (max-width: 600px), (hover: none) {
+@media (max-width: 720px), (hover: none) {
   .show .actions .act:not(.star):not(.more) {
     display: none;
   }
@@ -2118,4 +2121,33 @@ a {
 .seg button:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* Results bar: view switch centred, reset link on the right */
+.results {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.results .seg {
+  grid-column: 2;
+  justify-self: center;
+}
+.results .clear {
+  grid-column: 3;
+  justify-self: end;
+}
+.results #results-text {
+  grid-column: 1;
+}
+
+/* Row actions never overflow the card: wrap to a second line, right-aligned */
+.foot-row {
+  flex-wrap: wrap;
+}
+.foot-row .actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  row-gap: 4px;
 }

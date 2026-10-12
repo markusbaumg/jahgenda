@@ -6,7 +6,7 @@ PORT ?= 8000
 WEB_FILES := index.html log.html review.html style.css store.js app.js pwa.js sw.js design/logos.html
 PY_FILES  := scripts/*.py tests/*.py
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons watchdog venues-check ci smoke quality-review ics
+.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke quality-review ics
 
 help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
@@ -61,6 +61,10 @@ deploy: check ## Check, commit (if needed) and push → GitHub Pages deploys
 
 icons: ## Render PWA icons (img/icons/*.png) from img/logo/jahgenda.svg
 	scripts/make_icons.sh
+
+stickers: ## Sticker print files (design/stickers/): SVG + PDF via headless Chrome, QR via segno in .venv-stickers
+	@test -x .venv-stickers/bin/python || (python3 -m venv .venv-stickers && .venv-stickers/bin/pip install --quiet segno)
+	.venv-stickers/bin/python scripts/make_stickers.py --verify
 
 cron-install: ## Local fallback: run the scraper daily at 06:10 on this Mac (launchd)
 	mkdir -p ~/Library/Logs/jahgenda ~/Library/LaunchAgents
