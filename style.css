@@ -73,6 +73,26 @@ body {
 .logo span {
   color: var(--gold);
 }
+/* Bild-Logo vor dem Schriftzug (README → «Logo wechseln»). Ohne src bleibt es
+   unsichtbar; eine Zeile in index.html / log.html schaltet eine Variante aus
+   img/logo/ ein. Grösse relativ zur Schrift, damit es auf dem Handy mitschrumpft. */
+.logo-mark {
+  display: none;
+  height: var(--logo-mark-size, 0.95em);
+  width: auto;
+  vertical-align: -0.09em;
+  margin-right: 0.22em;
+}
+.logo-mark[src]:not([hidden]) {
+  display: inline-block;
+}
+/* Alternative: die ganze Wortmarke als Bild (img/logo/NN-name-wordmark.svg). */
+.logo-word {
+  display: block;
+  height: 1.1em;
+  width: auto;
+  max-width: 100%;
+}
 .tag {
   margin: 8px 0 0;
   color: var(--muted);

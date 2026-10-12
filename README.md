@@ -31,6 +31,7 @@ scraper/bands.md                     Welche Bands sind dabei, welche nicht? Von 
 scraper/sources.json                 Agenda-Seiten, Venues (mit Kanton + Koordinaten), Festivals, Suchanfragen.
 .claude/skills/scrape-shows/         Der Scraper selbst: eine Claude-Code-Skill (Prompt), kein Code.
 .claude/skills/harvest-bands/        Sammelt Bands aus Festival-Line-ups als Vorschläge für bands.md.
+img/logo/                            Logo-Varianten 01–10 (Icon + Wortmarke). Auswahl: design/logos.html
 scripts/validate_shows.py            Prüft die JSON-Dateien. Läuft in CI und am Ende jedes Scraper-Laufs.
 .github/workflows/pages.yml          Validiert und deployt bei jedem Push auf main.
 .github/workflows/validate.yml       Validiert auf Branches und Pull Requests.
@@ -202,6 +203,27 @@ python3 -m http.server 8000      # http://localhost:8000
 ```
 
 oder mit Auto-Reload: `npx live-server`
+
+## Logo wechseln
+
+Zurzeit ist der Text-Schriftzug «Jahgenda» aktiv. In `img/logo/` liegen zehn Varianten, je als Icon
+(`NN-name.svg`, quadratisch, taugt auch als Favicon) und als Wortmarke (`NN-name-wordmark.svg`, Icon + Schriftzug).
+Vergleichen: `make serve` und http://localhost:8000/design/logos.html öffnen – dort steht jede Variante gross,
+als Favicon (16/32 px, dunkel und weiss) und im Seitenkopf.
+
+Hat man sich für eine Nummer entschieden, z. B. `02-j-monogramm`:
+
+1. **Icon vor dem Schriftzug** – in `index.html` und `log.html` in der Zeile
+   `<img class="logo-mark" alt="" width="64" height="64" hidden />` das `hidden` durch
+   `src="img/logo/02-j-monogramm.svg"` ersetzen. Mehr ist nicht nötig; die Grösse folgt der Schrift
+   (`--logo-mark-size` in `style.css`, Standard `0.95em`).
+2. **Favicon** (optional) – in beiden Dateien `<link rel="icon" href="data:…" />` durch
+   `<link rel="icon" href="img/logo/02-j-monogramm.svg" />` ersetzen.
+3. **Nur Wortmarke statt Text** (Alternative zu 1) – den Inhalt von `<h1 class="logo">` durch
+   `<img class="logo-word" src="img/logo/02-j-monogramm-wordmark.svg" alt="Jahgenda" />` ersetzen.
+
+Die Icons kommen ohne Schriften aus (nur Pfade), die Wortmarken nutzen den System-Font-Stack der Seite.
+Farben: Rot `#d8342f`, Gold `#f2b632`, Grün `#1e8f4e`, Creme `#f3ead8`, Hintergrund `#14110e`.
 
 ## Standort
 
