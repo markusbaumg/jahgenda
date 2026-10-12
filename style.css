@@ -82,9 +82,8 @@ body {
   padding: 10px 12px;
   font-size: 0.85rem;
   color: var(--muted);
-  border-left: 3px solid var(--gold);
   background: var(--surface);
-  border-radius: 0 6px 6px 0;
+  border-radius: 8px;
 }
 .notice strong {
   color: var(--gold);
@@ -388,10 +387,14 @@ body {
   color: var(--text);
   margin-bottom: 6px;
 }
-.status .emoji {
-  font-size: 2rem;
-  line-height: 1;
+.status .state-icon {
   margin-bottom: 12px;
+  color: var(--muted);
+  opacity: 0.7;
+}
+.status .state-icon svg {
+  width: 40px;
+  height: 40px;
 }
 .status button.primary {
   margin-top: 16px;
@@ -463,8 +466,6 @@ body {
 .show.highlight {
   animation: flash 2.5s ease-out;
   box-shadow: inset 3px 0 0 var(--gold);
-  padding-left: 10px;
-  margin-left: -10px;
 }
 @keyframes flash {
   from {
@@ -571,10 +572,23 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 2px 4px;
+  border-radius: 6px;
+  cursor: pointer;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+.canton:hover {
+  background: rgba(242, 182, 50, 0.1);
+  color: var(--text);
+}
+.canton:focus-visible {
+  outline: 2px solid var(--gold);
 }
 .canton img {
   width: 22px;
@@ -832,4 +846,24 @@ body {
   border-radius: 999px;
   padding: 5px 12px;
   cursor: pointer;
+}
+
+/* Zebra stripes and hover highlight make the dense list easier to scan. */
+.shows .show:nth-child(even) {
+  background: rgba(243, 234, 216, 0.025);
+}
+.shows .show {
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.shows .show:hover {
+  background: rgba(242, 182, 50, 0.07);
+}
+/* Tricolor stripe at the bottom too */
+.stripe.bottom {
+  margin-top: 24px;
 }

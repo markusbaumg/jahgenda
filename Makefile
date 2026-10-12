@@ -1,4 +1,4 @@
-# Jahgenda – alles Wichtige in einem Makefile. `make` zeigt die Hilfe.
+# Jahgenda – everything you can run. `make` shows the help.
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
@@ -8,48 +8,48 @@ PY_FILES  := scripts/*.py tests/*.py
 
 .PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall
 
-help: ## Diese Hilfe
+help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
 
-serve: ## Seite lokal ansehen (http://localhost:$(PORT))
+serve: ## View the page locally (http://localhost:$(PORT))
 	python3 -m http.server $(PORT)
 
-dev: ## Seite lokal mit Auto-Reload (npx live-server)
+dev: ## Local preview with live reload (npx live-server)
 	npx --yes live-server@1.2.2 --port=5500 --host=127.0.0.1 --no-browser --wait=200 --ignore=.git,tests
 
-validate: ## Daten prüfen (data/*.json gegen criteria.md)
+validate: ## Validate data/*.json (past shows allowed, as in CI)
 	python3 scripts/validate_shows.py --allow-past
 
-validate-strict: ## Daten streng prüfen (keine vergangenen Shows) – so läuft es im Scraper
+validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 	python3 scripts/validate_shows.py
 
-test: ## Unit-Tests für Validator und Formatierer
+test: ## Unit tests for validator and formatter
 	python3 -m unittest discover -s tests -v
 
-lint: ## Syntax- und Formatcheck (JS, Python, HTML/CSS via prettier)
+lint: ## Syntax and format check (JS, Python, HTML/CSS via prettier)
 	node --check app.js
 	python3 -m py_compile $(PY_FILES)
 	npx --yes prettier@3.3.3 --check $(WEB_FILES)
 
-fmt: ## Code formatieren (prettier für HTML/CSS/JS) + Daten normalisieren
+fmt: ## Format code (prettier for HTML/CSS/JS) and normalise data
 	npx --yes prettier@3.3.3 --write $(WEB_FILES)
 	$(MAKE) fmt-data
 
-fmt-data: ## data/*.json in kanonische Form bringen (Sortierung, Einrückung)
+fmt-data: ## Bring data/*.json into canonical form (sorting, indentation)
 	python3 scripts/format_data.py
 
-check: lint validate test ## Alles prüfen (vor jedem Commit)
+check: lint validate test ## Run everything (before every commit)
 
-scrape: ## Konzerte jetzt scrapen (Claude Code, läuft auf dem Abo)
+scrape: ## Scrape shows now (Claude Code, runs on the subscription)
 	claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
 
-harvest: ## Bands aus Festival-Line-ups vorschlagen (Claude Code)
+harvest: ## Suggest bands from festival line-ups (Claude Code)
 	claude -p "/harvest-bands" --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,Skill"
 
-deploy: check ## Prüfen, committen (falls nötig) und pushen → GitHub Pages deployt
+deploy: check ## Check, commit (if needed) and push → GitHub Pages deploys
 	@git diff --quiet && git diff --cached --quiet || git commit -am "Update site"
 	git push origin main
-	@echo "→ https://markusbaumg.github.io/jahgenda/  (Status: make status)"
+	@echo "→ https://markusbaumg.github.io/jahgenda/  (status: make status)"
 
 icons: ## Render PWA icons (img/icons/*.png) from img/logo/jahgenda.svg
 	scripts/make_icons.sh
@@ -65,9 +65,9 @@ cron-uninstall: ## Remove the local launchd job
 	launchctl unload ~/Library/LaunchAgents/ch.jahgenda.scrape.plist 2>/dev/null || true
 	rm -f ~/Library/LaunchAgents/ch.jahgenda.scrape.plist
 
-status: ## Letzte Deploys und Scraper-Läufe anzeigen
+status: ## Show the last deploys and the last scraper run
 	gh run list -R markusbaumg/jahgenda -L 5
-	@python3 -c "import json; r=json.load(open('data/runs.json'))['runs']; print('Letzter Scraper-Lauf:', r[0]['at'] if r else 'noch keiner', '-', (r[0].get('total','?') if r else ''), 'Shows')"
+	@python3 -c "import json; r=json.load(open('data/runs.json'))['runs']; print('Last scraper run:', r[0]['at'] if r else 'none yet', '-', (r[0].get('total','?') if r else ''), 'shows')"
 
-clean: ## Temporäre Dateien entfernen
+clean: ## Remove temporary files
 	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .pytest_cache

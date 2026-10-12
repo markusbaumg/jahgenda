@@ -178,6 +178,15 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
+  const STATE_ICONS = {
+    search:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"/></svg>',
+    calendar:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 2h3v3H8v-3z"/></svg>',
+    offline:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 7h20v14H2V7zm2 2v10h16V9H4zm3 2h2v6H7v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM12 3l5 3h-10l5-3z"/></svg>',
+  };
+
   function renderShow(s) {
     const d = s._day;
     const dow = d.getDay();
@@ -201,7 +210,7 @@
           }
           <p class="meta">${time}${escape(s.venue)} · ${escape(s.city)}${distanceLabel(s)}</p>
         </div>
-        <span class="canton${ABROAD[s.canton] ? " abroad" : ""}" title="${escape(regionName(s.canton))}"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</span>
+        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
             ${s.genres.length ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}</div>` : ""}
             <div class="actions">
@@ -245,8 +254,8 @@
       list.innerHTML = "";
       resultsText.textContent = "";
       status.innerHTML = shows.some((s) => !s._past)
-        ? `<p class="emoji">🔍</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset">Filter zurücksetzen</button>`
-        : `<p class="emoji">🌴</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
+        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset">Filter zurücksetzen</button>`
+        : `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
       return;
     }
     status.innerHTML = "";
@@ -338,9 +347,18 @@
       revealFromHash();
     } catch (err) {
       console.error(err);
-      status.innerHTML = `<p class="emoji">📻</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
+      status.innerHTML = `<p class="state-icon">${STATE_ICONS.offline}</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
     }
   }
+
+  // Canton badge: click filters the list to that canton (click again to clear).
+  list.addEventListener("click", (e) => {
+    const c = e.target.closest(".canton[data-canton]");
+    if (!c) return;
+    cantonSelect.value =
+      cantonSelect.value === c.dataset.canton ? "" : c.dataset.canton;
+    renderAndKeepInView();
+  });
 
   // Per-show actions (calendar / copy link); WhatsApp is a plain link.
   list.addEventListener("click", async (e) => {

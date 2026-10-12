@@ -1,134 +1,153 @@
 # Jahgenda
 
-**Alle Reggae-, Dub- und Ska-Konzerte der Schweiz an einem Ort.**
-Eine statische Seite, gepflegt von KI-Agenten, gehostet auf GitHub Pages.
+**All reggae, dub and ska shows in Switzerland in one place.**
+A static site, kept up to date by AI agents, hosted on GitHub Pages.
 
-**Live:** https://markusbaumg.github.io/jahgenda/
+**Live:** https://markusbaumg.github.io/jahgenda/ · **Board:** https://github.com/users/markusbaumg/projects/2 · **Scraper log:** https://markusbaumg.github.io/jahgenda/log.html
 
-## Was es ist
+## What it is
 
-Reggae-Konzerte in der Schweiz sind über Dutzende Club-Websites, Ticketing-Seiten und Facebook-Events verstreut. Jahgenda sammelt sie in einer einzigen, schnellen Liste:
+Reggae shows in Switzerland are scattered over dozens of club websites, ticket shops and Facebook events.
+Jahgenda collects them in a single fast list (UI in German, docs in English):
 
-- nach Monat gruppiert, vergangene Shows verschwinden automatisch (auf Wunsch einblendbar)
-- Kantonswappen pro Show, «In Kalender», «WhatsApp», Direktlink pro Show
-- Filter nach Kanton und Genre, Volltextsuche
-- Genre-Chips pro Show (z. B. `roots`, `dub`, `ska`)
-- auf Wunsch die Luftlinien-Distanz vom eigenen Standort zu jeder Show
-- kein Login, keine Werbung, kein Tracking
+- grouped by month, past shows disappear automatically (can be shown on request)
+- filters by canton (click a coat of arms to filter) and genre, full-text search
+- genre chips per show, acts line for multi-band bills, canton coats of arms / country flags
+- "In Kalender" (.ics), WhatsApp share and direct link per show; nearest-show hint from your location
+- installable as an app on the phone (PWA: offline, own icon, update toast)
+- no login, no ads, no tracking
 
-Die Daten werden täglich von einem Claude-Code-Agenten recherchiert (siehe [Scraper](#scraper)). Was als Reggae zählt, steht in einer Textdatei, die jede und jeder anpassen kann.
+The data is researched daily by a Claude Code agent (see [Scraper](#scraper)). What counts as reggae is a
+text file anyone can edit.
 
-Gemacht von Kusi & Seraina.
+Made by Kusi & Seraina.
 
-## Aufbau
+## Layout of the repo
 
 ```
-index.html / style.css / app.js      Die Seite. Kein Build-Schritt, kein Framework.
-data/shows.json                      Die Konzerte. Wird vom Scraper geschrieben.
-data/artists.json                    Genre-Cache pro Act (Wikipedia / Band-Website).
-scraper/criteria.md                  Was zählt als Reggae? – der editierbare Teil des Scraper-Prompts.
-scraper/bands.md                     Welche Bands sind dabei, welche nicht? Von Hand gepflegt, schlägt alles.
-scraper/sources.json                 Agenda-Seiten, Venues (mit Kanton + Koordinaten), Festivals, Suchanfragen.
-.claude/skills/scrape-shows/         Der Scraper selbst: eine Claude-Code-Skill (Prompt), kein Code.
-.claude/skills/harvest-bands/        Sammelt Bands aus Festival-Line-ups als Vorschläge für bands.md.
-scripts/validate_shows.py            Prüft die JSON-Dateien. Läuft in CI und am Ende jedes Scraper-Laufs.
-.github/workflows/pages.yml          Validiert und deployt bei jedem Push auf main.
-.github/workflows/validate.yml       Validiert auf Branches und Pull Requests.
+index.html / style.css / app.js        The page. No build step, no framework.
+pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
+log.html                               Public scraper log (renders data/runs.json).
+data/shows.json                        The shows. Written by the scraper.
+data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag.
+data/artists.json                      Genre cache per act (Wikipedia / band website).
+data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
+scraper/criteria.md                    What counts as reggae? Nearby places abroad. Allowed genre slugs.
+scraper/bands.md                       Which bands are in, which are out, suggestions to review. Hand-curated.
+scraper/sources.json                   Agenda sites, festivals, nearby regions, search queries.
+.claude/skills/scrape-shows/           The scraper itself: a Claude Code skill (a prompt), not code.
+.claude/skills/harvest-bands/          Collects acts from festival line-ups as suggestions for bands.md.
+scripts/validate_shows.py              Validates data/*.json. Runs in CI and at the end of every scraper run.
+scripts/format_data.py                 Canonical formatting of data/*.json (small diffs).
+scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahgenda.svg.
+scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
+tests/                                 Unit tests (python3 -m unittest).
+design/                                Logo variants, festival spec, other design documents.
+.github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
+.github/workflows/validate.yml         Validates on branches and pull requests.
+Makefile                               Everything you can run: `make` shows the help.
 ```
-
-Die Seite lädt beim Öffnen `data/shows.json`, blendet vergangene Shows aus, gruppiert nach Monat und baut Kanton- und Genre-Filter aus den vorhandenen Daten.
 
 ## Scraper
 
-Der Scraper ist kein klassisches Programm, sondern eine **Claude-Code-Skill**: `/scrape-shows`. Sie beschreibt Schritt für Schritt, wie der Agent die Quellen abgrast, entscheidet, was Reggae ist, Genres nachschlägt und das Ergebnis validiert und committet.
+The scraper is not a classic program but a **Claude Code skill**: `/scrape-shows`. It describes step by
+step how the agent reads the sources, decides what is reggae, looks up genres, logs the run, validates
+the result and commits it.
 
 ```
             ┌──────────────────────────┐
-  täglich → │ Claude Code Routine      │  (Cloud, läuft auf dem Claude-Abo)
-   06:00    │ Prompt: "/scrape-shows"  │
+  daily  →  │ Claude Code routine      │  (cloud, runs on the personal Claude subscription)
+  06:00     │ prompt: "/scrape-shows"  │
             └────────────┬─────────────┘
-                         │ klont das Repo
+                         │ clones the repo
                          ▼
-            ┌──────────────────────────┐     scraper/bands.md      (wer ist dabei? – schlägt alles)
-            │ Skill scrape-shows       │ ◄── scraper/criteria.md   (was zählt?)
-            │  1 Quellen besuchen      │ ◄── scraper/sources.json  (wo suchen?)
-            │  2 Bands + Kriterien     │ ◄── data/artists.json     (Genre-Cache + Watchlist)
-            │  3 Genres nachschlagen   │ ──► Wikipedia / Band-Websites
-            │  4 mergen + schreiben    │
-            │  5 validieren            │ ──► scripts/validate_shows.py
+            ┌──────────────────────────┐     scraper/bands.md      (who is in? – beats everything)
+            │ skill scrape-shows       │ ◄── scraper/criteria.md   (what counts? genre slugs)
+            │  1 read sources          │ ◄── scraper/sources.json  (where to look?)
+            │  2 bands + criteria      │ ◄── data/venues.json      (venues, coordinates)
+            │  3 look up genres        │ ◄── data/artists.json     (genre cache)
+            │  4 merge + write         │ ──► Wikipedia / band websites
+            │  5 log + validate        │ ──► scripts/validate_shows.py
             └────────────┬─────────────┘
-                         │
-  monatlich ─────────────┼──► Skill harvest-bands: Festival-Line-ups (Summerjam, Reeds, Lakesplash, …)
-                         │    → neue Acts als «Vorschläge» in bands.md + GitHub-Issue zum Abnicken
                          │ git push main
                          ▼
             ┌──────────────────────────┐
-            │ GitHub Pages Workflow    │ validiert nochmals, deployt
+            │ GitHub Pages workflow    │ validates again, deploys
             └──────────────────────────┘
+
+  monthly ──► skill harvest-bands: festival line-ups (Summerjam, Reeds, Lakesplash, …)
+              → new acts as "Suggestions" in bands.md + a GitHub issue to review them
 ```
 
-Warum so?
+Why this way?
 
-- **Abo statt API.** Routinen laufen als Claude-Code-Sessions auf dem persönlichen Claude-Abo; es fällt keine API-Rechnung an.
-- **Prompt statt Parser.** Club-Websites ändern ständig ihr Layout. Ein Agent, der die Seite liest wie ein Mensch, bricht nicht bei jedem Redesign.
-- **Kriterien als Text.** `scraper/criteria.md` ist Teil des Prompts. Wer die Definition von «Reggae» ändern will, editiert die Datei – ohne Code.
-- **Bands von Hand auswählen.** `scraper/bands.md` hat drei Listen: *Dabei*, *Nicht dabei*, *Vorschläge*. Was unter *Dabei* steht, zählt immer; was unter *Nicht dabei* steht, kommt nie in die Agenda. Der Harvester füllt nur *Vorschläge*; Menschen verschieben die Zeilen.
-- **Cache für Genres.** Jeder Act wird höchstens alle 180 Tage auf Wikipedia / der eigenen Website nachgeschlagen; das Ergebnis liegt in `data/artists.json` und darf von Hand korrigiert werden.
-- **Nichts Ungeprüftes geht live.** Der Validator läuft am Ende des Scraper-Laufs (streng) und nochmals vor dem Deploy (`--allow-past`, damit ein Push an einem Tag ohne Lauf nicht an gestrigen Shows scheitert). Fällt er durch, bleibt die alte Seite online.
-- **Grenznah zählt mit.** Konstanz, Lörrach, Annemasse, Como, Bregenz & Co. (Liste in `criteria.md`) werden mitgesucht und mit Länderflagge statt Kantonswappen angezeigt.
-- **Keine Erfindungen.** Jede gescrapte Show braucht eine `source_url` – die Seite, auf der der Agent sie gefunden hat. Der Validator erzwingt das.
+- **Subscription instead of API.** Routines run as Claude Code sessions on the personal Claude plan; no
+  API bill.
+- **Prompt instead of parser.** Club websites change their layout all the time. An agent that reads a
+  page like a human does not break on every redesign.
+- **Criteria as text.** `scraper/criteria.md` is part of the prompt. Changing the definition of "reggae"
+  means editing a text file.
+- **Bands chosen by hand.** `scraper/bands.md` has three lists: *Included*, *Excluded*, *Suggestions*.
+  Included always counts; Excluded never makes it into the agenda. The harvester only fills Suggestions;
+  humans move the lines.
+- **Genre cache.** Each act is looked up on Wikipedia / its website at most every 180 days; the result
+  lives in `data/artists.json`. Hand corrections get `"source": "manual"` and are never touched again.
+- **Nothing unvalidated goes live.** The validator runs at the end of every scraper run (strict) and
+  again before the deploy (`--allow-past`, so a push on a day without a run does not fail on yesterday's
+  shows). If it fails, the old page stays online.
+- **No invented shows.** Every scraped show needs a `source_url` – the page where the agent found it –
+  and a venue in `data/venues.json` so it has coordinates. The validator enforces both.
+- **Nearby counts.** Konstanz, Lörrach, Annemasse, Como, Bregenz & co. (list in `criteria.md`) are searched
+  too and shown with a country flag instead of a coat of arms.
 
-### Routinen einrichten (läuft auf dem Claude-Abo)
+### Routines (run on the Claude subscription)
 
-Die Routinen leben nicht im Repo, sondern unter https://claude.ai/code/routines (Konto markus.baumgartner@gmail.com).
-Beide klonen dieses Repo, brauchen Push-Recht auf `main` (GitHub-Verbindung unter https://claude.ai/connect-github)
-und Internetzugang für WebFetch/WebSearch.
+The routines do not live in the repo but at https://claude.ai/code/routines (account
+markus.baumgartner@gmail.com). Both clone this repo, need push rights on `main` (GitHub connection at
+https://claude.ai/connect-github) and **network access = Full** on the cloud environment (claude.ai/code →
+environment "Default" → Network access), otherwise every website fetch fails with ENOTFOUND.
 
-| Routine            | Zeitplan                         | Prompt             |
-|--------------------|----------------------------------|--------------------|
-| Jahgenda – Shows   | täglich 06:00 (Europe/Zurich)    | `/scrape-shows`    |
-| Jahgenda – Bands   | monatlich, am 1. um 07:00        | `/harvest-bands`   |
+| Routine            | Schedule                        | Prompt            |
+|--------------------|---------------------------------|-------------------|
+| Jahgenda – Shows   | daily 06:00 (Europe/Zurich)     | `/scrape-shows`   |
+| Jahgenda – Bands   | monthly, 1st at 07:00           | `/harvest-bands`  |
 
-Anlegen oder ändern: in Claude Code `/schedule` tippen, oder im Web unter Routinen.
+Create or change them with `/schedule` in Claude Code, or in the web UI.
 
-### Wenn ein Lauf fehlschlägt
+**Local fallback:** `make cron-install` installs a launchd job that runs `make scrape` on this Mac every day
+at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
 
-- **Nichts kaputt:** Ein fehlgeschlagener Lauf committet nichts; die Seite zeigt weiter den letzten guten Stand
-  (`Stand: …` im Footer). Vergangene Shows blendet der Browser aus.
-- **Nachschauen:** https://claude.ai/code/routines → Routine → letzter Lauf → Log. Oder `log.html` auf der Seite,
-  falls der Lauf bis zum Schreiben von `data/runs.json` kam.
-- **Häufigste Ursachen:** eine Quelle blockiert (steht im Log unter «Nicht erreichbar» – Quelle in `sources.json`
-  anpassen oder entfernen), Validator schlägt fehl (Fehlermeldung nennt Datei und Feld), Abo-Limit erreicht
-  (nächster Lauf holt es nach).
-- **Von Hand nachholen:** `claude` im Repo starten und `/scrape-shows` eingeben.
+### When a run fails
 
-### Den Scraper von Hand laufen lassen
+- **Nothing breaks.** A failed run commits nothing; the page keeps showing the last good state
+  (`Stand: …` in the footer). The browser hides past shows anyway.
+- **Where to look:** https://claude.ai/code/routines → routine → last run → log. Or `log.html` on the site
+  if the run got as far as writing `data/runs.json`.
+- **Usual causes:** a source blocks (listed in the log under "Nicht erreichbar" – adjust or remove it in
+  `sources.json` / `venues.json`), the validator fails (the message names file and field), the
+  subscription limit is reached (the next run catches up), network access of the environment not Full.
+- **Catch up by hand:** `make scrape` (or `claude` in the repo and type `/scrape-shows`).
+
+### Running the scraper by hand
 
 ```sh
-claude            # im Repo
-> /scrape-shows      # Konzerte aktualisieren
-> /harvest-bands     # Bands aus Festival-Line-ups vorschlagen
+make scrape       # update shows (Claude Code, subscription)
+make harvest      # suggest bands from festival line-ups
 ```
 
-Oder headless, z. B. aus einem lokalen Cron/launchd-Job:
+### Changing the scraper
 
-```sh
-claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,WebFetch,WebSearch"
-```
+| I want to …                                   | File                                       |
+|-----------------------------------------------|--------------------------------------------|
+| change what counts as reggae                  | `scraper/criteria.md`                      |
+| include or exclude a band for good            | `scraper/bands.md`                         |
+| add an agenda site or a festival              | `scraper/sources.json`                     |
+| add a venue / fix coordinates / crawl it      | `data/venues.json`                         |
+| correct a wrong genre for an act              | `data/artists.json` (`"source": "manual"`) |
+| change how the scraper works                  | `.claude/skills/scrape-shows/SKILL.md`     |
+| add a check for the data                      | `scripts/validate_shows.py` + `tests/`     |
 
-### Den Scraper anpassen
-
-| Ich will …                                   | Datei                                   |
-|----------------------------------------------|-----------------------------------------|
-| ändern, was als Reggae zählt                 | `scraper/criteria.md`                   |
-| eine Band fix aufnehmen oder ausschliessen   | `scraper/bands.md`                      |
-| ein Festival für die Band-Suche hinzufügen   | `scraper/sources.json` → `festivals`    |
-| eine Venue oder Agenda-Seite hinzufügen      | `scraper/sources.json`                  |
-| ein falsches Genre für einen Act korrigieren | `data/artists.json`                     |
-| den Ablauf des Scrapers ändern               | `.claude/skills/scrape-shows/SKILL.md`  |
-| eine neue Prüfung für die Daten              | `scripts/validate_shows.py`             |
-
-## Datenformat
+## Data format
 
 `data/shows.json`:
 
@@ -142,71 +161,83 @@ claude -p "/scrape-shows" --allowedTools "Bash,Read,Write,Edit,WebFetch,WebSearc
       "date": "2026-10-16",
       "time": "20:30",
       "title": "Alpine Dub Collective + Support",
+      "acts": ["Alpine Dub Collective", "Mista Sanchez"],
       "venue": "Dachstock",
       "city": "Bern",
       "canton": "BE",
       "url": "https://www.dachstock.ch/…",
-      "source_url": "https://www.dachstock.ch/programm",
-      "lat": 46.9496,
-      "lon": 7.4385,
+      "tickets": "https://www.petzi.ch/…",
+      "source_url": "https://www.dachstock.ch/events",
+      "lat": 46.953,
+      "lon": 7.4407,
       "genres": ["dub", "reggae"]
     }
   ]
 }
 ```
 
-| Feld         | Pflicht        | Beschreibung                                                |
-|--------------|----------------|-------------------------------------------------------------|
-| `id`         | ja             | Stabil: `datum-slug-ort`                                    |
-| `date`       | ja             | `YYYY-MM-DD`, lokales Datum                                 |
-| `time`       | nein           | `HH:MM`                                                     |
-| `title`      | ja             | Act(s) / Eventname                                          |
-| `venue`      | ja             | Club / Location                                             |
-| `city`       | ja             | Ort                                                         |
-| `canton`     | ja             | Kantonskürzel, z. B. `ZH`                                   |
-| `url`        | nein           | Link zum Event / Tickets                                    |
-| `source_url` | bei `scraper`  | Seite, auf der die Show gefunden wurde                      |
-| `lat`, `lon` | nein           | Koordinaten der Venue (für die Distanz), beide oder keine   |
-| `acts`       | nein           | Acts einzeln, Headliner zuerst, z. B. `["Dub Inc", "Mista Sanchez"]` |
-| `genres`     | nein           | Max. 3 Slugs aus der Liste «Genre-Slugs» in `scraper/criteria.md` |
+| Field        | Required        | Meaning                                                              |
+|--------------|-----------------|----------------------------------------------------------------------|
+| `id`         | yes             | Stable: `date-slug-city`                                             |
+| `date`       | yes             | `YYYY-MM-DD`, local date                                             |
+| `time`       | no              | `HH:MM`                                                              |
+| `title`      | yes             | Act(s) / event name                                                  |
+| `acts`       | no              | Acts separately, headliner first                                     |
+| `venue`      | yes             | Must exist in `data/venues.json`                                     |
+| `city`       | yes             | Town                                                                 |
+| `canton`     | yes             | Canton code (`ZH`) or country code `D`, `F`, `I`, `A`, `FL` for nearby places abroad |
+| `url`        | no              | Event page                                                           |
+| `tickets`    | no              | Ticket shop link                                                     |
+| `source_url` | for `scraper`   | Page where the show was found                                        |
+| `lat`, `lon` | no              | Coordinates (from the venue), both or none                           |
+| `genres`     | no              | Max. 3 slugs from the "Genre slugs" list in `scraper/criteria.md`    |
 
-Grenznahe Shows in den Nachbarländern (Orte siehe `criteria.md` → Grenznah) tragen statt eines Kantons das
-Länderkürzel `D`, `F`, `I`, `A` oder `FL`.
+`source` is `mock` (sample data, the page shows a notice) or `scraper`.
 
-`source` ist `mock` (Beispieldaten, die Seite zeigt einen Hinweis) oder `scraper`.
+`data/venues.json`: `{ "venues": { "Dachstock": { "city": "Bern", "canton": "BE", "lat": 46.953, "lon": 7.4407,
+"url": "https://www.dachstock.ch/events", "scrape": true, "hint": "…" } } }` – `scrape: true` means the
+scraper reads this venue's programme on every run; `hint` tells it where the events are on the page.
 
-`data/artists.json`:
+`data/artists.json`: `{ "artists": { "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc",
+"checked": "2026-10-13", "festivals": ["Summerjam 2026"], "tour_checked": "2026-10-13" } } }` – `source`
+may be `manual` for hand corrections, which the scraper then never changes.
 
-```json
-{
-  "artists": {
-    "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc", "checked": "2026-10-13",
-                 "festivals": ["Summerjam 2026"], "tour_checked": "2026-10-13" }
-  }
-}
-```
+`data/runs.json`: one entry per scraper run (counts, failed sources, dropped candidates with reasons). Shown
+on `log.html`.
 
-Felder pro Act: `genres` (Pflicht, Slugs aus `criteria.md`), `source` (URL oder `manual`), `checked`, `festivals`,
-`tour_checked`. Wer ein Genre von Hand korrigiert, setzt `"source": "manual"` – dann lässt der Scraper den Eintrag
-für immer in Ruhe. Welche Bands der Scraper aktiv sucht, steht nicht hier, sondern in `scraper/bands.md`.
+Check everything: `make validate` (strict: `make validate-strict`). Format: `make fmt-data`.
 
-`data/runs.json`: ein Eintrag pro Scraper-Lauf (Zähler, nicht erreichbare Quellen, verworfene Kandidaten mit
-Begründung). Wird auf `log.html` angezeigt.
-
-Prüfen: `python3 scripts/validate_shows.py`
-
-## Lokal ansehen
+## Development
 
 ```sh
-python3 -m http.server 8000      # http://localhost:8000
+make              # help: all targets
+make serve        # http://localhost:8000
+make dev          # live reload on http://127.0.0.1:5500 (npx live-server)
+make check        # lint + validate + test – must be green before every commit
+make deploy       # check, commit, push → GitHub Pages deploys
+make icons        # re-render PWA icons from img/logo/jahgenda.svg
+make status       # last deploys and the last scraper run
 ```
 
-oder mit Auto-Reload: `npx live-server`
+No dependencies beyond Python 3, Node (for prettier via npx) and the GitHub CLI.
 
-## Standort
+### Contributing (for Seraina and everyone else)
 
-Die Distanz-Funktion fragt den Browser nach dem Standort. Er wird nur im Browser verwendet und nirgends gespeichert oder verschickt.
+You can shape the agenda without touching code – three text files:
+
+1. `scraper/criteria.md` – what counts as reggae, which places abroad count, allowed genre slugs.
+2. `scraper/bands.md` – move a band to *Included* or *Excluded*; review the *Suggestions* the harvester adds.
+3. `data/venues.json` – add a venue (name, city, canton, coordinates, programme URL).
+
+Edit on GitHub, commit to `main`, done. The next scraper run picks it up; the validator stops anything
+that would break the page.
+
+## Location
+
+The distance feature asks the browser for your location. It is used only in the browser and never
+stored or sent anywhere. The same goes for the "Meine Shows" marks (localStorage only).
 
 ## Roadmap
 
-Siehe [Issues](https://github.com/markusbaumg/jahgenda/issues).
+See the [project board](https://github.com/users/markusbaumg/projects/2) and the
+[issues](https://github.com/markusbaumg/jahgenda/issues).

@@ -1,38 +1,41 @@
-# Jahgenda – Projektregeln für Claude
+# Jahgenda – project rules for Claude
 
-Jahgenda ist eine statische Agenda für Reggae-, Dub- und Ska-Konzerte in der Schweiz (GitHub Pages).
-Die Daten werden nicht von Code, sondern von Claude-Code-Skills recherchiert, die als Routinen laufen.
-Lies zuerst `README.md` – dort steht der Aufbau.
+Jahgenda is a static agenda of reggae, dub and ska shows in Switzerland (GitHub Pages). The data is not
+written by code but by Claude Code skills that run as routines. Read `README.md` first – it explains the
+layout. The site UI is German; code, docs and config are English.
 
-## Was wem gehört
+## Who owns what
 
-- **Menschen gehören:** `scraper/criteria.md`, `scraper/bands.md` (ausser dem Abschnitt «Vorschläge»),
-  `scraper/sources.json`, `index.html`, `style.css`, `app.js`, `README.md`, `CLAUDE.md`.
-  Skills ändern diese Dateien nie – mit der einen Ausnahme: `/harvest-bands` darf Zeilen unter
-  «Vorschläge» in `bands.md` anhängen.
-- **Skills gehören:** `data/shows.json`, `data/artists.json`, `data/runs.json`.
-  Menschen dürfen sie korrigieren; Skills respektieren Handkorrekturen (siehe SKILL.md).
-- **Geteilt:** `data/venues.json` – Menschen pflegen Venues (Koordinaten, Programm-URL, `scrape`-Flag),
-  Skills ergänzen neue Venues, die sie antreffen, ändern aber keine bestehenden.
+- **Humans own:** `scraper/criteria.md`, `scraper/bands.md` (except the *Suggestions* section),
+  `scraper/sources.json`, `index.html`, `style.css`, `app.js`, `pwa.js`, `sw.js`, `README.md`, `CLAUDE.md`.
+  Skills never change these files – with one exception: skills may append lines under *Suggestions* in
+  `bands.md`.
+- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`. Humans may correct them;
+  skills respect hand corrections (`"source": "manual"` in artists.json).
+- **Shared:** `data/venues.json` – humans maintain venues (coordinates, programme URL, `scrape` flag),
+  skills add new venues they encounter but do not change existing ones.
 
-## Eiserne Regeln für Skills
+## Iron rules for skills
 
-1. **Nichts erfinden.** Jede Show braucht eine `source_url` – die Seite, auf der sie gefunden wurde.
-2. **`scraper/bands.md` schlägt `scraper/criteria.md` schlägt eigenes Urteil.**
-3. **Vor jedem Commit:** `python3 scripts/validate_shows.py` muss durchlaufen. Sonst nichts committen.
-4. **Jeder Lauf hinterlässt eine Spur:** ein Eintrag in `data/runs.json` (was gefunden, was verworfen und warum,
-   welche Quellen nicht geladen werden konnten). Das ist das öffentliche Log – es wird auf `log.html` angezeigt.
-5. **Nur `data/*` und `scraper/bands.md` (Vorschläge) committen.** Alles andere ist tabu.
-   Vor dem Commit immer `python3 scripts/format_data.py` (kanonische Form, kleine Diffs).
-6. **Im Zweifel weglassen.** Lieber eine Show zu wenig als eine erfundene oder falsche.
+1. **Never invent.** Every show needs a `source_url` – the page where it was found – and a venue in
+   `data/venues.json`.
+2. **`scraper/bands.md` beats `scraper/criteria.md` beats own judgement.**
+3. **Before every commit:** `python3 scripts/format_data.py && python3 scripts/validate_shows.py` must
+   pass. Otherwise commit nothing.
+4. **Every run leaves a trace:** an entry in `data/runs.json` (what was found, what was dropped and why,
+   which sources could not be loaded). This is the public log shown on `log.html`.
+5. **Commit only `data/*` and `scraper/bands.md` (Suggestions).** Everything else is off limits.
+6. **When in doubt, leave it out.** One show too few beats one invented or wrong show.
+7. **Do not work around bot protection.** A blocked source is skipped and logged.
 
-## Befehle
+## Commands
 
 ```sh
-make              # Hilfe: alle Targets
-make check        # lint + validate + test – muss vor jedem Commit grün sein
-make serve        # Seite lokal ansehen (http://localhost:8000)
-make scrape       # Scraper jetzt laufen lassen (Claude Code, Abo)
+make              # help: all targets
+make check        # lint + validate + test – must be green before every commit
+make serve        # view the page locally (http://localhost:8000)
+make scrape       # run the scraper now (Claude Code, subscription)
 ```
 
-Skills: `/scrape-shows` (Konzerte aktualisieren), `/harvest-bands` (Bands aus Festival-Line-ups vorschlagen).
+Skills: `/scrape-shows` (update shows), `/harvest-bands` (suggest bands from festival line-ups).
+Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `main` must pass `make check`.
