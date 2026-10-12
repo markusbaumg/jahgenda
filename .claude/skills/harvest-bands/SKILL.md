@@ -9,7 +9,8 @@ Goal: a list of acts that tour Europe and are likely to play Switzerland, so `/s
 them by name. The result of this run is a commit on `main` that changes `data/artists.json` (genres) and
 `scraper/bands.md` (new names under **Suggestions**), plus a GitHub issue listing the new suggestions.
 
-Work from the repository root. Today's date is what `date +%F` prints.
+Work from the repository root. Today's date is what `TZ=Europe/Zurich date +%F` prints — use it, do not
+guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
 
 ## 1. Load the inputs
 
@@ -55,7 +56,7 @@ For acts already in `data/artists.json`: append missing `festivals` entries, lea
 
 ## 4. Log, write, validate, commit
 
-Overwrite `data/status.json` (`{"ok": true, "skill": "harvest-bands", "at": "<now with offset>", "runner": "cloud", "counts": {"added": <n>, "total": <total>}, "error": null}`)
+Overwrite `data/status.json` (`{"ok": true, "skill": "harvest-bands", "at": "<TZ=Europe/Zurich date -Iseconds>", "runner": "<$JAHGENDA_RUNNER if set, else cloud>", "counts": {"added": <n>, "total": <total>}, "error": null}`)
 and prepend one entry to `data/runs.json` → `runs` (newest first, max 60):
 
 ```json
