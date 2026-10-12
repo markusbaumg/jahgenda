@@ -1,792 +1,1111 @@
 <!doctype html>
-<html lang="de">
+<html lang="de-CH">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jahgenda – Logo-Varianten</title>
+    <title>Jahgenda – Logo wählen</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#14110e" />
+    <link rel="stylesheet" href="../style.css" />
     <style>
-      :root {
-        --bg: #14110e;
-        --surface: #1d1915;
-        --line: #2e2822;
-        --text: #f3ead8;
-        --muted: #a39682;
-        --red: #d8342f;
-        --gold: #f2b632;
-        --green: #1e8f4e;
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family:
-          ui-sans-serif,
-          system-ui,
-          -apple-system,
-          "Segoe UI",
-          Roboto,
-          Helvetica,
-          Arial,
-          sans-serif;
-        padding: 24px 16px 60px;
-      }
-      h1 {
-        font-size: 1.2rem;
-        font-weight: 700;
-        margin: 0 0 4px;
-      }
-      p.lead {
+      /* Picker-spezifisch; Farben, Schrift und .logo kommen aus ../style.css */
+      .intro {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 0 16px;
         color: var(--muted);
-        margin: 0 0 24px;
       }
-      .grid {
+      .intro code {
+        color: var(--text);
+        font-size: 0.9em;
+      }
+      .picker {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
         gap: 16px;
-        max-width: 1200px;
+        max-width: 1240px;
+        margin: 24px auto 60px;
+        padding: 0 16px;
       }
       .card {
         background: var(--surface);
         border: 1px solid var(--line);
         border-radius: 14px;
-        padding: 18px 18px 14px;
+        padding: 16px;
         display: flex;
         flex-direction: column;
         gap: 14px;
+        min-width: 0;
       }
-      .num {
-        font-size: 0.75rem;
-        font-weight: 800;
-        letter-spacing: 0.1em;
-        color: var(--gold);
-      }
-      .logo {
-        height: 72px;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-      .logo svg {
-        height: 100%;
-        width: auto;
-      }
-      .mini {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        color: var(--muted);
-        font-size: 0.8rem;
-      }
-      .mini svg {
-        width: 32px;
-        height: 32px;
-      }
-      .mini .tab {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #2a2521;
-        border-radius: 6px 6px 0 0;
-        padding: 4px 10px;
-        color: var(--text);
-        font-size: 0.8rem;
-      }
-      .mini .tab svg {
-        width: 16px;
-        height: 16px;
-      }
-      .desc {
-        color: var(--muted);
-        font-size: 0.85rem;
+      .card h2 {
         margin: 0;
+        font-size: 1rem;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+      .card .num {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--gold);
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
       }
       .word {
-        font-weight: 900;
-        letter-spacing: -0.03em;
-        font-size: 44px;
-        line-height: 1;
+        display: block;
+        width: 100%;
+        max-width: 360px;
+        height: auto;
       }
-      .word b {
-        color: var(--gold);
-        font-weight: 900;
+      .samples {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .bg {
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+      .bg.dark {
+        background: var(--bg);
+        border: 1px solid var(--line);
+      }
+      .bg.light {
+        background: #fff;
+        color: #333;
+      }
+      .bg img {
+        flex: 0 0 auto;
+      }
+      .tabs {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        min-width: 0;
+      }
+      /* Block statt inline-flex, damit der Tab-Titel mit «…» endet statt hart
+         abgeschnitten zu werden, wenn der Platz neben dem 72-px-Icon knapp ist. */
+      .tab {
+        display: block;
+        border-radius: 7px 7px 0 0;
+        padding: 4px 10px;
+        font-size: 0.78rem;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      .dark .tab {
+        background: #2a2521;
+        color: var(--text);
+      }
+      .light .tab {
+        background: #e4e6ea;
+        color: #222;
+      }
+      .tab img {
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      .mock {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--bg);
+      }
+      .mock .head {
+        padding: 14px 16px 14px;
+      }
+      .mock .logo {
+        font-size: 2.4rem;
+      }
+      .mock .tag {
+        font-size: 0.85rem;
+      }
+      .desc {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .snippet {
+        margin: 0;
+        padding: 8px 10px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: 0.75rem;
+        color: var(--muted);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .snippet b {
+        color: var(--green-text);
+        font-weight: 600;
+      }
+      .files {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .files a {
+        color: var(--green-text);
+      }
+      @media (max-width: 440px) {
+        .samples {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Jahgenda – 10 Logo-Varianten</h1>
-    <p class="lead">
-      Jede Karte zeigt das Logo gross, daneben als Favicon/Tab-Icon. Sag mir die
-      Nummer.
+    <div class="stripe" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <header class="wrap head">
+      <h1 class="logo">Jah<span>genda</span></h1>
+      <p class="tag">Logo wählen: zehn Varianten, nummeriert</p>
+    </header>
+    <p class="intro">
+      Jede Karte zeigt die Wortmarke, das Icon gross auf Dunkel und auf Weiss,
+      als Favicon mit 16 und 32 px im dunklen und im weissen Browser-Tab, und im
+      Seitenkopf anstelle des Text-Logos. Die Dateien liegen in
+      <code>img/logo/</code>. Eingebaut wird eine Variante mit einer Zeile –
+      siehe README, Abschnitt «Logo wechseln». Zurzeit ist der Text-Schriftzug
+      aktiv.
     </p>
-    <div class="grid">
-      <!-- 1 -->
-      <div class="card">
-        <div class="num">01 · Wordmark mit Tricolor-Unterstrich</div>
-        <div class="logo">
-          <svg viewBox="0 0 300 72" aria-label="Jahgenda">
-            <text
-              x="0"
-              y="50"
-              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-              font-weight="900"
-              font-size="54"
-              letter-spacing="-2"
-              fill="#f3ead8"
-            >
-              Jah
-              <tspan fill="#f2b632">genda</tspan>
-            </text>
-            <rect x="2" y="60" width="96" height="6" fill="#d8342f" />
-            <rect x="98" y="60" width="96" height="6" fill="#f2b632" />
-            <rect x="194" y="60" width="96" height="6" fill="#1e8f4e" />
-          </svg>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 32 32">
-            <rect width="32" height="32" rx="7" fill="#14110e" />
-            <text
-              x="16"
-              y="21"
-              text-anchor="middle"
-              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-              font-weight="900"
-              font-size="18"
-              fill="#f2b632"
-            >
-              J
-            </text>
-            <rect x="6" y="25" width="6.6" height="3" fill="#d8342f" />
-            <rect x="12.6" y="25" width="6.6" height="3" fill="#f2b632" />
-            <rect x="19.2" y="25" width="6.6" height="3" fill="#1e8f4e" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 32 32">
-              <rect width="32" height="32" rx="7" fill="#14110e" />
-              <text
-                x="16"
-                y="21"
-                text-anchor="middle"
-                font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-                font-weight="900"
-                font-size="18"
-                fill="#f2b632"
+    <main class="picker">
+      <article class="card" id="logo-01">
+        <h2><span class="num">01</span> Wordmark mit Tricolor-Unterstrich</h2>
+        <img
+          class="word"
+          src="../img/logo/01-wordmark-stripe-wordmark.svg"
+          alt="Jahgenda – Wortmarke 01"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/01-wordmark-stripe.svg"
+              width="72"
+              height="72"
+              alt="Icon 01 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/01-wordmark-stripe.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
               >
-                J
-              </text>
-              <rect x="6" y="25" width="6.6" height="3" fill="#d8342f" />
-              <rect x="12.6" y="25" width="6.6" height="3" fill="#f2b632" />
-              <rect
-                x="19.2"
-                y="25"
-                width="6.6"
-                height="3"
-                fill="#1e8f4e"
-              /></svg
-            >Jahgenda</span
-          >
+              <span class="tab"
+                ><img
+                  src="../img/logo/01-wordmark-stripe.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/01-wordmark-stripe.svg"
+              width="72"
+              height="72"
+              alt="Icon 01 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/01-wordmark-stripe.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/01-wordmark-stripe.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 01">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/01-wordmark-stripe.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
-          Das heutige Logo, aufgeräumt: fetter Schriftzug, Stripe darunter.
+          Das heutige Logo, aufgeräumt: fetter Schriftzug, Stripe darunter. Das
+          Icon ist ein «J» mit demselben Stripe.
         </p>
-      </div>
-
-      <!-- 2 -->
-      <div class="card">
-        <div class="num">02 · J-Monogramm aus drei Streifen</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <path d="M22 8h30v10H22z" fill="#d8342f" />
-            <path
-              d="M34 18h10v22a16 16 0 0 1-32 0v-4h10v4a6 6 0 0 0 12 0z"
-              fill="#f2b632"
-            />
-            <path
-              d="M12 36h10v4a6 6 0 0 0 12 0v-2h10v2a16 16 0 0 1-32 0z"
-              fill="#1e8f4e"
-            /></svg
-          ><span class="word">Jah<b>genda</b></span>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <rect width="64" height="64" rx="14" fill="#14110e" />
-            <path d="M22 8h30v10H22z" fill="#d8342f" />
-            <path
-              d="M34 18h10v22a16 16 0 0 1-32 0v-4h10v4a6 6 0 0 0 12 0z"
-              fill="#f2b632"
-            />
-            <path
-              d="M12 36h10v4a6 6 0 0 0 12 0v-2h10v2a16 16 0 0 1-32 0z"
-              fill="#1e8f4e"
-            /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <rect width="64" height="64" rx="14" fill="#14110e" />
-              <path d="M22 8h30v10H22z" fill="#d8342f" />
-              <path
-                d="M34 18h10v22a16 16 0 0 1-32 0v-4h10v4a6 6 0 0 0 12 0z"
-                fill="#f2b632"
-              />
-              <path
-                d="M12 36h10v4a6 6 0 0 0 12 0v-2h10v2a16 16 0 0 1-32 0z"
-                fill="#1e8f4e"
-              /></svg
-            >Jahgenda</span
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/01-wordmark-stripe.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/01-wordmark-stripe.svg"
+            >01-wordmark-stripe.svg</a
           >
+          ·
+          <a href="../img/logo/01-wordmark-stripe-wordmark.svg"
+            >01-wordmark-stripe-wordmark.svg</a
+          >
+        </p>
+      </article>
+      <article class="card" id="logo-02">
+        <h2><span class="num">02</span> J-Monogramm aus drei Streifen</h2>
+        <img
+          class="word"
+          src="../img/logo/02-j-monogramm-wordmark.svg"
+          alt="Jahgenda – Wortmarke 02"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/02-j-monogramm.svg"
+              width="72"
+              height="72"
+              alt="Icon 02 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/02-j-monogramm.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/02-j-monogramm.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/02-j-monogramm.svg"
+              width="72"
+              height="72"
+              alt="Icon 02 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/02-j-monogramm.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/02-j-monogramm.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 02">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/02-j-monogramm.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Ein «J», gebaut aus Rot, Gold, Grün. Funktioniert winzig als Favicon.
         </p>
-      </div>
-
-      <!-- 3 -->
-      <div class="card">
-        <div class="num">03 · Vinyl</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="30" fill="#1a1613" />
-            <circle
-              cx="32"
-              cy="32"
-              r="30"
-              fill="none"
-              stroke="#d8342f"
-              stroke-width="4"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="22"
-              fill="none"
-              stroke="#f2b632"
-              stroke-width="4"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="14"
-              fill="none"
-              stroke="#1e8f4e"
-              stroke-width="4"
-            />
-            <circle cx="32" cy="32" r="7" fill="#f2b632" />
-            <circle cx="32" cy="32" r="2" fill="#14110e" /></svg
-          ><span class="word">Jah<b>genda</b></span>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="32" r="30" fill="#1a1613" />
-            <circle
-              cx="32"
-              cy="32"
-              r="30"
-              fill="none"
-              stroke="#d8342f"
-              stroke-width="4"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="22"
-              fill="none"
-              stroke="#f2b632"
-              stroke-width="4"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="14"
-              fill="none"
-              stroke="#1e8f4e"
-              stroke-width="4"
-            />
-            <circle cx="32" cy="32" r="7" fill="#f2b632" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="30" fill="#1a1613" />
-              <circle
-                cx="32"
-                cy="32"
-                r="30"
-                fill="none"
-                stroke="#d8342f"
-                stroke-width="4"
-              />
-              <circle
-                cx="32"
-                cy="32"
-                r="22"
-                fill="none"
-                stroke="#f2b632"
-                stroke-width="4"
-              />
-              <circle
-                cx="32"
-                cy="32"
-                r="14"
-                fill="none"
-                stroke="#1e8f4e"
-                stroke-width="4"
-              />
-              <circle cx="32" cy="32" r="7" fill="#f2b632" /></svg
-            >Jahgenda</span
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/02-j-monogramm.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/02-j-monogramm.svg">02-j-monogramm.svg</a> ·
+          <a href="../img/logo/02-j-monogramm-wordmark.svg"
+            >02-j-monogramm-wordmark.svg</a
           >
+        </p>
+      </article>
+      <article class="card" id="logo-03">
+        <h2><span class="num">03</span> Vinyl</h2>
+        <img
+          class="word"
+          src="../img/logo/03-vinyl-wordmark.svg"
+          alt="Jahgenda – Wortmarke 03"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/03-vinyl.svg"
+              width="72"
+              height="72"
+              alt="Icon 03 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/03-vinyl.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/03-vinyl.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/03-vinyl.svg"
+              width="72"
+              height="72"
+              alt="Icon 03 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/03-vinyl.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/03-vinyl.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 03">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/03-vinyl.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Schallplatte mit Rot-Gold-Grün-Rillen. Klassisch, Soundsystem-Vibe.
         </p>
-      </div>
-
-      <!-- 4 -->
-      <div class="card">
-        <div class="num">04 · Kalenderblatt</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <rect x="6" y="10" width="52" height="48" rx="8" fill="#f3ead8" />
-            <rect x="6" y="10" width="52" height="16" rx="8" fill="#d8342f" />
-            <rect x="6" y="20" width="52" height="6" fill="#d8342f" />
-            <rect x="18" y="4" width="5" height="12" rx="2.5" fill="#14110e" />
-            <rect x="41" y="4" width="5" height="12" rx="2.5" fill="#14110e" />
-            <text
-              x="32"
-              y="50"
-              text-anchor="middle"
-              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-              font-weight="900"
-              font-size="24"
-              fill="#14110e"
-            >
-              JAH
-            </text>
-            <rect x="6" y="52" width="26" height="6" fill="#f2b632" />
-            <rect x="32" y="52" width="26" height="6" fill="#1e8f4e" /></svg
-          ><span class="word">Jah<b>genda</b></span>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <rect x="6" y="10" width="52" height="48" rx="8" fill="#f3ead8" />
-            <rect x="6" y="10" width="52" height="16" rx="8" fill="#d8342f" />
-            <rect x="6" y="20" width="52" height="6" fill="#d8342f" />
-            <text
-              x="32"
-              y="50"
-              text-anchor="middle"
-              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-              font-weight="900"
-              font-size="24"
-              fill="#14110e"
-            >
-              JAH
-            </text>
-            <rect x="6" y="52" width="26" height="6" fill="#f2b632" />
-            <rect x="32" y="52" width="26" height="6" fill="#1e8f4e" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <rect x="6" y="10" width="52" height="48" rx="8" fill="#f3ead8" />
-              <rect x="6" y="10" width="52" height="16" rx="8" fill="#d8342f" />
-              <rect x="6" y="20" width="52" height="6" fill="#d8342f" />
-              <text
-                x="32"
-                y="50"
-                text-anchor="middle"
-                font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-                font-weight="900"
-                font-size="24"
-                fill="#14110e"
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/03-vinyl.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/03-vinyl.svg">03-vinyl.svg</a> ·
+          <a href="../img/logo/03-vinyl-wordmark.svg">03-vinyl-wordmark.svg</a>
+        </p>
+      </article>
+      <article class="card" id="logo-04">
+        <h2><span class="num">04</span> Kalenderblatt</h2>
+        <img
+          class="word"
+          src="../img/logo/04-kalenderblatt-wordmark.svg"
+          alt="Jahgenda – Wortmarke 04"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/04-kalenderblatt.svg"
+              width="72"
+              height="72"
+              alt="Icon 04 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/04-kalenderblatt.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
               >
-                JAH
-              </text>
-              <rect x="6" y="52" width="26" height="6" fill="#f2b632" />
-              <rect x="32" y="52" width="26" height="6" fill="#1e8f4e" /></svg
-            >Jahgenda</span
-          >
+              <span class="tab"
+                ><img
+                  src="../img/logo/04-kalenderblatt.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/04-kalenderblatt.svg"
+              width="72"
+              height="72"
+              alt="Icon 04 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/04-kalenderblatt.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/04-kalenderblatt.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 04">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/04-kalenderblatt.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
-          Sagt sofort «Agenda». Rot-Gold-Grün als Kalenderkopf und -fuss.
+          Sagt sofort «Agenda». Rot-Gold-Grün als Kalenderkopf und -fuss, «JAH»
+          als Strichbuchstaben.
         </p>
-      </div>
-
-      <!-- 5 -->
-      <div class="card">
-        <div class="num">05 · Soundsystem-Box</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <rect
-              x="8"
-              y="4"
-              width="48"
-              height="56"
-              rx="6"
-              fill="#1a1613"
-              stroke="#f3ead8"
-              stroke-width="3"
-            />
-            <circle cx="32" cy="22" r="9" fill="#d8342f" />
-            <circle cx="32" cy="22" r="4" fill="#14110e" />
-            <circle cx="32" cy="44" r="11" fill="#1e8f4e" />
-            <circle cx="32" cy="44" r="5" fill="#14110e" />
-            <circle
-              cx="32"
-              cy="44"
-              r="14"
-              fill="none"
-              stroke="#f2b632"
-              stroke-width="2"
-            /></svg
-          ><span class="word">Jah<b>genda</b></span>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <rect
-              x="8"
-              y="4"
-              width="48"
-              height="56"
-              rx="6"
-              fill="#1a1613"
-              stroke="#f3ead8"
-              stroke-width="3"
-            />
-            <circle cx="32" cy="22" r="9" fill="#d8342f" />
-            <circle cx="32" cy="22" r="4" fill="#14110e" />
-            <circle cx="32" cy="44" r="11" fill="#1e8f4e" />
-            <circle cx="32" cy="44" r="5" fill="#14110e" />
-            <circle
-              cx="32"
-              cy="44"
-              r="14"
-              fill="none"
-              stroke="#f2b632"
-              stroke-width="2"
-            /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <rect
-                x="8"
-                y="4"
-                width="48"
-                height="56"
-                rx="6"
-                fill="#1a1613"
-                stroke="#f3ead8"
-                stroke-width="3"
-              />
-              <circle cx="32" cy="22" r="9" fill="#d8342f" />
-              <circle cx="32" cy="22" r="4" fill="#14110e" />
-              <circle cx="32" cy="44" r="11" fill="#1e8f4e" />
-              <circle cx="32" cy="44" r="5" fill="#14110e" />
-              <circle
-                cx="32"
-                cy="44"
-                r="14"
-                fill="none"
-                stroke="#f2b632"
-                stroke-width="2"
-              /></svg
-            >Jahgenda</span
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/04-kalenderblatt.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/04-kalenderblatt.svg">04-kalenderblatt.svg</a> ·
+          <a href="../img/logo/04-kalenderblatt-wordmark.svg"
+            >04-kalenderblatt-wordmark.svg</a
           >
+        </p>
+      </article>
+      <article class="card" id="logo-05">
+        <h2><span class="num">05</span> Soundsystem-Box</h2>
+        <img
+          class="word"
+          src="../img/logo/05-soundsystem-wordmark.svg"
+          alt="Jahgenda – Wortmarke 05"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/05-soundsystem.svg"
+              width="72"
+              height="72"
+              alt="Icon 05 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/05-soundsystem.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/05-soundsystem.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/05-soundsystem.svg"
+              width="72"
+              height="72"
+              alt="Icon 05 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/05-soundsystem.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/05-soundsystem.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 05">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/05-soundsystem.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Lautsprecherbox mit zwei Chassis in Rot und Grün, Goldring.
         </p>
-      </div>
-
-      <!-- 6 -->
-      <div class="card">
-        <div class="num">06 · Alpen &amp; Sonne</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <circle cx="40" cy="24" r="12" fill="#f2b632" />
-            <path d="M2 58 22 24l10 16 8-10 22 28z" fill="#1e8f4e" />
-            <path d="M2 58 22 24l6 10-10 24z" fill="#167a41" />
-            <path d="M0 58h64v6H0z" fill="#d8342f" /></svg
-          ><span class="word">Jah<b>genda</b></span>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <rect width="64" height="64" rx="14" fill="#14110e" />
-            <circle cx="40" cy="24" r="12" fill="#f2b632" />
-            <path d="M2 58 22 24l10 16 8-10 22 28z" fill="#1e8f4e" />
-            <path d="M0 58h64v6H0z" fill="#d8342f" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <rect width="64" height="64" rx="14" fill="#14110e" />
-              <circle cx="40" cy="24" r="12" fill="#f2b632" />
-              <path d="M2 58 22 24l10 16 8-10 22 28z" fill="#1e8f4e" />
-              <path d="M0 58h64v6H0z" fill="#d8342f" /></svg
-            >Jahgenda</span
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/05-soundsystem.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/05-soundsystem.svg">05-soundsystem.svg</a> ·
+          <a href="../img/logo/05-soundsystem-wordmark.svg"
+            >05-soundsystem-wordmark.svg</a
           >
+        </p>
+      </article>
+      <article class="card" id="logo-06">
+        <h2><span class="num">06</span> Alpen &amp; Sonne</h2>
+        <img
+          class="word"
+          src="../img/logo/06-alpen-sonne-wordmark.svg"
+          alt="Jahgenda – Wortmarke 06"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/06-alpen-sonne.svg"
+              width="72"
+              height="72"
+              alt="Icon 06 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/06-alpen-sonne.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/06-alpen-sonne.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/06-alpen-sonne.svg"
+              width="72"
+              height="72"
+              alt="Icon 06 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/06-alpen-sonne.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/06-alpen-sonne.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 06">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/06-alpen-sonne.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
-          Schweiz trifft Jamaika: grüne Berge, goldene Sonne, roter Boden.
+          Schweiz trifft Jamaika: grüne Berge mit Schnee, goldene Sonne, roter
+          Boden.
         </p>
-      </div>
-
-      <!-- 7 -->
-      <div class="card">
-        <div class="num">07 · Stempel</div>
-        <div class="logo">
-          <svg viewBox="0 0 320 72">
-            <rect
-              x="3"
-              y="3"
-              width="314"
-              height="66"
-              rx="12"
-              fill="none"
-              stroke="#f2b632"
-              stroke-width="4"
-              stroke-dasharray="14 7"
-            />
-            <text
-              x="160"
-              y="40"
-              text-anchor="middle"
-              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-              font-weight="900"
-              font-size="30"
-              letter-spacing="6"
-              fill="#f3ead8"
-            >
-              JAHGENDA
-            </text>
-            <rect x="90" y="50" width="46" height="5" fill="#d8342f" />
-            <rect x="136" y="50" width="46" height="5" fill="#f2b632" />
-            <rect x="182" y="50" width="46" height="5" fill="#1e8f4e" />
-          </svg>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <rect
-              x="4"
-              y="4"
-              width="56"
-              height="56"
-              rx="12"
-              fill="none"
-              stroke="#f2b632"
-              stroke-width="4"
-              stroke-dasharray="8 5"
-            />
-            <text
-              x="32"
-              y="38"
-              text-anchor="middle"
-              font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-              font-weight="900"
-              font-size="22"
-              fill="#f3ead8"
-            >
-              JG
-            </text>
-            <rect x="16" y="44" width="10.6" height="4" fill="#d8342f" />
-            <rect x="26.6" y="44" width="10.6" height="4" fill="#f2b632" />
-            <rect x="37.2" y="44" width="10.6" height="4" fill="#1e8f4e" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <rect
-                x="4"
-                y="4"
-                width="56"
-                height="56"
-                rx="12"
-                fill="none"
-                stroke="#f2b632"
-                stroke-width="4"
-                stroke-dasharray="8 5"
-              />
-              <text
-                x="32"
-                y="38"
-                text-anchor="middle"
-                font-family="ui-sans-serif,system-ui,Helvetica,Arial"
-                font-weight="900"
-                font-size="22"
-                fill="#f3ead8"
-              >
-                JG
-              </text>
-              <rect x="16" y="44" width="10.6" height="4" fill="#d8342f" />
-              <rect x="26.6" y="44" width="10.6" height="4" fill="#f2b632" />
-              <rect
-                x="37.2"
-                y="44"
-                width="10.6"
-                height="4"
-                fill="#1e8f4e"
-              /></svg
-            >Jahgenda</span
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/06-alpen-sonne.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/06-alpen-sonne.svg">06-alpen-sonne.svg</a> ·
+          <a href="../img/logo/06-alpen-sonne-wordmark.svg"
+            >06-alpen-sonne-wordmark.svg</a
           >
+        </p>
+      </article>
+      <article class="card" id="logo-07">
+        <h2><span class="num">07</span> Stempel</h2>
+        <img
+          class="word"
+          src="../img/logo/07-stempel-wordmark.svg"
+          alt="Jahgenda – Wortmarke 07"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/07-stempel.svg"
+              width="72"
+              height="72"
+              alt="Icon 07 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/07-stempel.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/07-stempel.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/07-stempel.svg"
+              width="72"
+              height="72"
+              alt="Icon 07 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/07-stempel.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/07-stempel.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 07">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/07-stempel.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Versalien mit Sperrung im gestrichelten Rahmen – wie ein
-          Dubplate-Stempel.
+          Dubplate-Stempel. Icon: «JG».
         </p>
-      </div>
-
-      <!-- 8 -->
-      <div class="card">
-        <div class="num">08 · Löwe (geometrisch)</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="34" r="26" fill="#f2b632" />
-            <circle
-              cx="32"
-              cy="34"
-              r="26"
-              fill="none"
-              stroke="#d8342f"
-              stroke-width="4"
-              stroke-dasharray="6 5"
-            />
-            <circle cx="32" cy="36" r="15" fill="#14110e" />
-            <circle cx="25" cy="33" r="2.5" fill="#f2b632" />
-            <circle cx="39" cy="33" r="2.5" fill="#f2b632" />
-            <path d="M28 40h8l-4 5z" fill="#1e8f4e" />
-            <path d="M20 20l6-10 4 8zM44 20l-6-10-4 8z" fill="#14110e" /></svg
-          ><span class="word">Jah<b>genda</b></span>
-        </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <circle cx="32" cy="34" r="26" fill="#f2b632" />
-            <circle
-              cx="32"
-              cy="34"
-              r="26"
-              fill="none"
-              stroke="#d8342f"
-              stroke-width="4"
-              stroke-dasharray="6 5"
-            />
-            <circle cx="32" cy="36" r="15" fill="#14110e" />
-            <circle cx="25" cy="33" r="2.5" fill="#f2b632" />
-            <circle cx="39" cy="33" r="2.5" fill="#f2b632" />
-            <path d="M28 40h8l-4 5z" fill="#1e8f4e" />
-            <path d="M20 20l6-10 4 8zM44 20l-6-10-4 8z" fill="#14110e" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <circle cx="32" cy="34" r="26" fill="#f2b632" />
-              <circle
-                cx="32"
-                cy="34"
-                r="26"
-                fill="none"
-                stroke="#d8342f"
-                stroke-width="4"
-                stroke-dasharray="6 5"
-              />
-              <circle cx="32" cy="36" r="15" fill="#14110e" />
-              <circle cx="25" cy="33" r="2.5" fill="#f2b632" />
-              <circle cx="39" cy="33" r="2.5" fill="#f2b632" />
-              <path d="M28 40h8l-4 5z" fill="#1e8f4e" />
-              <path d="M20 20l6-10 4 8zM44 20l-6-10-4 8z" fill="#14110e" /></svg
-            >Jahgenda</span
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/07-stempel.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/07-stempel.svg">07-stempel.svg</a> ·
+          <a href="../img/logo/07-stempel-wordmark.svg"
+            >07-stempel-wordmark.svg</a
           >
+        </p>
+      </article>
+      <article class="card" id="logo-08">
+        <h2><span class="num">08</span> Löwe (geometrisch)</h2>
+        <img
+          class="word"
+          src="../img/logo/08-loewe-wordmark.svg"
+          alt="Jahgenda – Wortmarke 08"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/08-loewe.svg"
+              width="72"
+              height="72"
+              alt="Icon 08 auf Dunkel"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/08-loewe.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/08-loewe.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/08-loewe.svg"
+              width="72"
+              height="72"
+              alt="Icon 08 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/08-loewe.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/08-loewe.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mock" aria-label="Seitenkopf mit Logo 08">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/08-loewe.svg"
+                alt=""
+                width="64"
+                height="64"
+              />
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Lion of Judah, reduziert auf Kreise: goldene Mähne mit rotem
           Strahlenkranz.
         </p>
-      </div>
-
-      <!-- 9 -->
-      <div class="card">
-        <div class="num">09 · Pin</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <path
-              d="M32 2a22 22 0 0 0-22 22c0 16 22 38 22 38s22-22 22-38A22 22 0 0 0 32 2z"
-              fill="#d8342f"
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/08-loewe.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/08-loewe.svg">08-loewe.svg</a> ·
+          <a href="../img/logo/08-loewe-wordmark.svg">08-loewe-wordmark.svg</a>
+        </p>
+      </article>
+      <article class="card" id="logo-09">
+        <h2><span class="num">09</span> Pin</h2>
+        <img
+          class="word"
+          src="../img/logo/09-pin-wordmark.svg"
+          alt="Jahgenda – Wortmarke 09"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/09-pin.svg"
+              width="72"
+              height="72"
+              alt="Icon 09 auf Dunkel"
             />
-            <path
-              d="M10 24h44c0 5-2 10-5 15H15c-3-5-5-10-5-15z"
-              fill="#f2b632"
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/09-pin.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/09-pin.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/09-pin.svg"
+              width="72"
+              height="72"
+              alt="Icon 09 auf Weiss"
             />
-            <path d="M15 39h34c-6 10-17 23-17 23S21 49 15 39z" fill="#1e8f4e" />
-            <circle cx="32" cy="24" r="9" fill="#14110e" />
-            <circle cx="32" cy="24" r="4" fill="#f3ead8" /></svg
-          ><span class="word">Jah<b>genda</b></span>
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/09-pin.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/09-pin.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
         </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <path
-              d="M32 2a22 22 0 0 0-22 22c0 16 22 38 22 38s22-22 22-38A22 22 0 0 0 32 2z"
-              fill="#d8342f"
-            />
-            <path
-              d="M10 24h44c0 5-2 10-5 15H15c-3-5-5-10-5-15z"
-              fill="#f2b632"
-            />
-            <path d="M15 39h34c-6 10-17 23-17 23S21 49 15 39z" fill="#1e8f4e" />
-            <circle cx="32" cy="24" r="9" fill="#14110e" />
-            <circle cx="32" cy="24" r="4" fill="#f3ead8" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <path
-                d="M32 2a22 22 0 0 0-22 22c0 16 22 38 22 38s22-22 22-38A22 22 0 0 0 32 2z"
-                fill="#d8342f"
+        <div class="mock" aria-label="Seitenkopf mit Logo 09">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/09-pin.svg"
+                alt=""
+                width="64"
+                height="64"
               />
-              <path
-                d="M10 24h44c0 5-2 10-5 15H15c-3-5-5-10-5-15z"
-                fill="#f2b632"
-              />
-              <path
-                d="M15 39h34c-6 10-17 23-17 23S21 49 15 39z"
-                fill="#1e8f4e"
-              />
-              <circle cx="32" cy="24" r="9" fill="#14110e" />
-              <circle cx="32" cy="24" r="4" fill="#f3ead8" /></svg
-            >Jahgenda</span
-          >
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Standort-Pin in Rot-Gold-Grün: «Wo ist die nächste Session?»
         </p>
-      </div>
-
-      <!-- 10 -->
-      <div class="card">
-        <div class="num">10 · Schweizerkreuz-Stripes</div>
-        <div class="logo">
-          <svg viewBox="0 0 64 64">
-            <rect width="64" height="64" rx="12" fill="#d8342f" />
-            <rect y="21" width="64" height="22" fill="#f2b632" />
-            <rect y="43" width="64" height="21" fill="#1e8f4e" />
-            <rect y="43" width="64" height="21" rx="0" fill="#1e8f4e" />
-            <path
-              d="M0 52a12 12 0 0 0 12 12h40a12 12 0 0 0 12-12z"
-              fill="#1e8f4e"
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/09-pin.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/09-pin.svg">09-pin.svg</a> ·
+          <a href="../img/logo/09-pin-wordmark.svg">09-pin-wordmark.svg</a>
+        </p>
+      </article>
+      <article class="card" id="logo-10">
+        <h2><span class="num">10</span> Schweizerkreuz-Stripes</h2>
+        <img
+          class="word"
+          src="../img/logo/10-schweizerkreuz-wordmark.svg"
+          alt="Jahgenda – Wortmarke 10"
+        />
+        <div class="samples">
+          <div class="bg dark">
+            <img
+              src="../img/logo/10-schweizerkreuz.svg"
+              width="72"
+              height="72"
+              alt="Icon 10 auf Dunkel"
             />
-            <rect x="26" y="12" width="12" height="40" fill="#f3ead8" />
-            <rect x="12" y="26" width="40" height="12" fill="#f3ead8" /></svg
-          ><span class="word">Jah<b>genda</b></span>
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/10-schweizerkreuz.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/10-schweizerkreuz.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
+          <div class="bg light">
+            <img
+              src="../img/logo/10-schweizerkreuz.svg"
+              width="72"
+              height="72"
+              alt="Icon 10 auf Weiss"
+            />
+            <div class="tabs">
+              <span class="tab"
+                ><img
+                  src="../img/logo/10-schweizerkreuz.svg"
+                  width="16"
+                  height="16"
+                  alt=""
+                />Jahgenda</span
+              >
+              <span class="tab"
+                ><img
+                  src="../img/logo/10-schweizerkreuz.svg"
+                  width="32"
+                  height="32"
+                  alt=""
+                />Jahgenda</span
+              >
+            </div>
+          </div>
         </div>
-        <div class="mini">
-          <svg viewBox="0 0 64 64">
-            <rect width="64" height="64" rx="12" fill="#d8342f" />
-            <rect y="21" width="64" height="22" fill="#f2b632" />
-            <path
-              d="M0 43h64v9a12 12 0 0 1-12 12H12A12 12 0 0 1 0 52z"
-              fill="#1e8f4e"
-            />
-            <rect x="26" y="12" width="12" height="40" fill="#f3ead8" />
-            <rect x="12" y="26" width="40" height="12" fill="#f3ead8" /></svg
-          ><span class="tab"
-            ><svg viewBox="0 0 64 64">
-              <rect width="64" height="64" rx="12" fill="#d8342f" />
-              <rect y="21" width="64" height="22" fill="#f2b632" />
-              <path
-                d="M0 43h64v9a12 12 0 0 1-12 12H12A12 12 0 0 1 0 52z"
-                fill="#1e8f4e"
+        <div class="mock" aria-label="Seitenkopf mit Logo 10">
+          <div class="stripe" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="head">
+            <p class="logo" role="presentation">
+              <img
+                class="logo-mark"
+                src="../img/logo/10-schweizerkreuz.svg"
+                alt=""
+                width="64"
+                height="64"
               />
-              <rect x="26" y="12" width="12" height="40" fill="#f3ead8" />
-              <rect x="12" y="26" width="40" height="12" fill="#f3ead8" /></svg
-            >Jahgenda</span
-          >
+              Jah<span>genda</span>
+            </p>
+            <p class="tag">Reggae, Dub &amp; Ska in der Schweiz</p>
+          </div>
         </div>
         <p class="desc">
           Weisses Kreuz auf Reggae-Streifen. Eindeutig Schweiz, eindeutig
           Reggae.
         </p>
-      </div>
-    </div>
+        <pre
+          class="snippet"
+        ><code>&lt;img class="logo-mark" <b>src="img/logo/10-schweizerkreuz.svg"</b> alt="" width="64" height="64" /&gt;</code></pre>
+        <p class="files">
+          <a href="../img/logo/10-schweizerkreuz.svg">10-schweizerkreuz.svg</a>
+          ·
+          <a href="../img/logo/10-schweizerkreuz-wordmark.svg"
+            >10-schweizerkreuz-wordmark.svg</a
+          >
+        </p>
+      </article>
+    </main>
   </body>
 </html>

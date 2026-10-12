@@ -236,6 +236,15 @@ make status       # last deploys and the last scraper run
 
 No dependencies beyond Python 3, Node (for prettier via npx) and the GitHub CLI.
 
+### Changing the logo
+
+Logo #10 (Swiss cross on red/gold/green stripes) is active: `img/logo/jahgenda.svg` is referenced in the
+header of `index.html` and `log.html`, as favicon, in the sticky bar and in `manifest.webmanifest` / the PWA
+icons (`make icons` re-renders those). All ten variants live in `img/logo/NN-name.svg` (icon) and
+`NN-name-wordmark.svg` (icon + wordmark); the picker page is `design/logos.html`
+(https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen icon over
+`img/logo/jahgenda.svg`, run `make icons`, commit.
+
 ### Contributing (for Seraina and everyone else)
 
 You can shape the agenda without touching code – three text files:

@@ -77,6 +77,13 @@ body {
 .logo span {
   color: var(--gold);
 }
+/* Whole wordmark as an image (img/logo/NN-name-wordmark.svg) — alternative to text + mark. */
+.logo-word {
+  display: block;
+  height: 1.1em;
+  width: auto;
+  max-width: 100%;
+}
 .tag {
   margin: 8px 0 0;
   color: var(--muted);
