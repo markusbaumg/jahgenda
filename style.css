@@ -625,7 +625,9 @@ body {
   border: 3px solid var(--gold);
   box-shadow:
     0 0 0 3px var(--bg),
-    0 0 0 5px var(--green);
+    0 0 0 6px var(--green),
+    0 0 0 9px var(--bg),
+    0 0 0 12px var(--red);
 }
 .about p {
   margin: 0 0 12px;
