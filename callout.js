@@ -86,7 +86,14 @@
       if (!c || !c.id) return;
       if (!c.force && dismissedState(c.id)) return;
       if (current && current.id === c.id) return;
-      queue.push(c);
+      if (c.force && current) {
+        // An explicit request (button click) replaces whatever nudge is showing; the nudge is re-queued.
+        queue.unshift(current);
+        current = null;
+        host.classList.remove("show");
+        host.hidden = true;
+      }
+      queue.unshift(c);
       next();
     },
     /** Close the visible callout without recording a dismissal (e.g. the action succeeded). */
