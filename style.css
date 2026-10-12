@@ -2408,3 +2408,22 @@ a {
   width: 13px;
   height: 13px;
 }
+
+/* Links everywhere: green, no underline, gold on hover — never the browser's blue. */
+a,
+a:visited {
+  color: var(--green-text);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--gold);
+}
+.title a,
+.venue-link,
+.foot-links a,
+.about .authors a {
+  color: inherit;
+}
+.foot-links a {
+  color: var(--muted);
+}
