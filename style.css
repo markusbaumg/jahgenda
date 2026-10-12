@@ -1435,3 +1435,8 @@ a {
 .foot .section-title {
   border-bottom-color: #2a241e;
 }
+
+.tag-chip.going {
+  color: var(--bg);
+  background: var(--green-text);
+}

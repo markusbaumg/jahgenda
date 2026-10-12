@@ -225,7 +225,7 @@
         </div>
         <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="Nur ${escape(regionName(s.canton))} anzeigen"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
-            ${s.genres.length ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}</div>` : ""}
+            ${s.genres.length || (shared && shared[s.id] === "going") ? `<div class="tags">${s.genres.map((g) => `<span class="tag-chip">${escape(g)}</span>`).join("")}${shared && shared[s.id] === "going" ? `<span class="tag-chip going">geht hin</span>` : ""}</div>` : ""}
             <div class="actions">
               ${starButton(s)}
               <button type="button" class="act" data-act="cal" title="In Kalender speichern">${ICONS.cal}<span>Kalender</span></button>
@@ -242,6 +242,7 @@
 
     const visible = shows.filter((s) => {
       if (s._past && !showPast) return false;
+      if (shared && !shared[s.id]) return false;
       if (mineOnly && !marks[s.id]) return false;
       if (canton && s.canton !== canton) return false;
       if (activeGenre && !s.genres.includes(activeGenre)) return false;
@@ -252,7 +253,7 @@
         .includes(q);
     });
 
-    const filtered = Boolean(canton || activeGenre || q || mineOnly);
+    const filtered = Boolean(canton || activeGenre || q || mineOnly || shared);
     el("clear-filters").hidden = !filtered;
     const past = mineOnly ? markedShows().filter((s) => s._past).length : pastCount;
     togglePast.hidden = past === 0;
@@ -278,7 +279,9 @@
       first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
         ? monthFmt.format(first)
         : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
-    resultsText.textContent = `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}`;
+    resultsText.textContent = shared
+      ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}`
+      : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}`;
 
     list.hidden = view !== "list";
     calendarEl.hidden = view !== "calendar";
@@ -400,6 +403,10 @@
     search.value = "";
     activeGenre = "";
     mineOnly = false;
+    if (shared) {
+      shared = null;
+      history.replaceState(null, "", location.pathname + location.search);
+    }
     for (const c of genreBar.querySelectorAll(".chip"))
       c.setAttribute("aria-pressed", String(c.dataset.genre === ""));
     genreBar.scrollTo({ left: 0 });
@@ -594,7 +601,8 @@
     }
   });
 
-  // A friend's list (#mine=id:g,id:i): banner with the shows, nothing is taken over without a click.
+  // A friend's list (#m=…): the list is simply filtered to those shows; the friend's "going" marks show as
+  // a small chip. "✕ Filter zurücksetzen" leaves the shared view. Nothing is written to the visitor's marks.
   function showShared() {
     shared = {};
     // New form #m=<short><g|i>,… ; old form #mine=<id>:<g|i>,… still accepted.
@@ -606,39 +614,14 @@
       const show = token && findShow(token);
       if (show) shared[show.id] = st === "g" ? "going" : "interested";
     }
-    const items = shows.filter((s) => shared[s.id]);
-    if (!items.length) {
+    if (!Object.keys(shared).length) {
       shared = null;
-      sharedBox.hidden = true;
       return;
     }
-    sharedBox.innerHTML =
-      `<div><strong>Geteilte Liste von einem Freund</strong> (${items.length} ${items.length === 1 ? "Show" : "Shows"})</div>` +
-      `<ul>${items
-        .map(
-          (s) =>
-            `<li><a href="#${s._short}">${escape(s.title)}</a> · ${escape(dayShort(s))} · ${escape(s.city)}` +
-            `${shared[s.id] === "going" ? ` <span class="tag-chip">geht hin</span>` : ""}${s._past ? " · vorbei" : ""}</li>`,
-        )
-        .join("")}</ul>` +
-      `<div class="actions"><button type="button" class="act star" data-shared="take">${ICONS.star}<span>Alle übernehmen</span></button>` +
-      `<button type="button" class="act" data-shared="close"><span>Schliessen</span></button></div>`;
-    sharedBox.hidden = false;
+    if (Object.keys(shared).some((id) => findShow(id)?._past)) showPast = true;
+    sharedBox.hidden = true;
     render();
   }
-  sharedBox.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-shared]");
-    if (!btn) return;
-    if (btn.dataset.shared === "take") {
-      for (const id in shared) if (marks[id] !== "going") marks[id] = "interested";
-      saveMarks();
-      mineOnly = true;
-    }
-    shared = null;
-    sharedBox.hidden = true;
-    history.replaceState(null, "", location.pathname + location.search);
-    renderAndKeepInView();
-  });
 
   // --- Views: Liste | Kalender | Karte ---
   // All three show the same filtered shows (`lastVisible`); render() dispatches to them.
