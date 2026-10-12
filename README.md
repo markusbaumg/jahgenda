@@ -51,6 +51,15 @@ design/                                Logo variants, festival spec, other desig
 Makefile                               Everything you can run: `make` shows the help.
 ```
 
+### Views
+
+The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch next to the result count; the
+browser remembers the choice). The calendar is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
+on the phone it becomes a compact grid with dots and the list of the tapped day below. The map loads Leaflet
+1.9.4 and OpenStreetMap tiles on first open only, shows one marker per venue (popup with the shows there),
+your own location on request, and shows without coordinates below under "Ohne Standort". A tap on a show in
+the calendar or the map jumps to its row in the list.
+
 ## Scraper
 
 The scraper is not a classic program but a **Claude Code skill**: `/scrape-shows`. It describes step by
@@ -90,7 +99,7 @@ Why this way?
   page like a human does not break on every redesign.
 - **Criteria as text.** `scraper/criteria.md` is part of the prompt. Changing the definition of "reggae"
   means editing a text file.
-- **Bands chosen by hand.** `scraper/bands.md` has three lists: *Included*, *Excluded*, *Suggestions*.
+- **Bands chosen by hand.** `scraper/bands.md` has three lists: _Included_, _Excluded_, _Suggestions_.
   Included always counts; Excluded never makes it into the agenda. The harvester only fills Suggestions;
   humans move the lines.
 - **Genre cache.** Each act is looked up on Wikipedia / its website at most every 180 days; the result
@@ -110,10 +119,10 @@ markus.baumgartner@gmail.com). Both clone this repo, need push rights on `main` 
 https://claude.ai/connect-github) and **network access = Full** on the cloud environment (claude.ai/code →
 environment "Default" → Network access), otherwise every website fetch fails with ENOTFOUND.
 
-| Routine            | Schedule                        | Prompt            |
-|--------------------|---------------------------------|-------------------|
-| Jahgenda – Shows   | daily 06:00 (Europe/Zurich)     | `/scrape-shows`   |
-| Jahgenda – Bands   | monthly, 1st at 07:00           | `/harvest-bands`  |
+| Routine          | Schedule                    | Prompt           |
+| ---------------- | --------------------------- | ---------------- |
+| Jahgenda – Shows | daily 06:00 (Europe/Zurich) | `/scrape-shows`  |
+| Jahgenda – Bands | monthly, 1st at 07:00       | `/harvest-bands` |
 
 Create or change them with `/schedule` in Claude Code, or in the web UI.
 
@@ -152,15 +161,15 @@ make harvest      # suggest bands from festival line-ups
 
 ### Changing the scraper
 
-| I want to …                                   | File                                       |
-|-----------------------------------------------|--------------------------------------------|
-| change what counts as reggae                  | `scraper/criteria.md`                      |
-| include or exclude a band for good            | `scraper/bands.md`                         |
-| add an agenda site or a festival              | `scraper/sources.json`                     |
-| add a venue / fix coordinates / crawl it      | `data/venues.json` (`make venues-check` verifies coordinates) |
-| correct a wrong genre for an act              | `data/artists.json` (`"source": "manual"`) |
-| change how the scraper works                  | `.claude/skills/scrape-shows/SKILL.md`     |
-| add a check for the data                      | `scripts/validate_shows.py` + `tests/`     |
+| I want to …                              | File                                                          |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| change what counts as reggae             | `scraper/criteria.md`                                         |
+| include or exclude a band for good       | `scraper/bands.md`                                            |
+| add an agenda site or a festival         | `scraper/sources.json`                                        |
+| add a venue / fix coordinates / crawl it | `data/venues.json` (`make venues-check` verifies coordinates) |
+| correct a wrong genre for an act         | `data/artists.json` (`"source": "manual"`)                    |
+| change how the scraper works             | `.claude/skills/scrape-shows/SKILL.md`                        |
+| add a check for the data                 | `scripts/validate_shows.py` + `tests/`                        |
 
 ## Data format
 
@@ -191,21 +200,21 @@ make harvest      # suggest bands from festival line-ups
 }
 ```
 
-| Field        | Required        | Meaning                                                              |
-|--------------|-----------------|----------------------------------------------------------------------|
-| `id`         | yes             | Stable: `date-slug-city`                                             |
-| `date`       | yes             | `YYYY-MM-DD`, local date                                             |
-| `time`       | no              | `HH:MM`                                                              |
-| `title`      | yes             | Act(s) / event name                                                  |
-| `acts`       | no              | Acts separately, headliner first                                     |
-| `venue`      | yes             | Must exist in `data/venues.json`                                     |
-| `city`       | yes             | Town                                                                 |
-| `canton`     | yes             | Canton code (`ZH`) or country code `D`, `F`, `I`, `A`, `FL` for nearby places abroad |
-| `url`        | no              | Event page                                                           |
-| `tickets`    | no              | Ticket shop link                                                     |
-| `source_url` | for `scraper`   | Page where the show was found                                        |
-| `lat`, `lon` | no              | Coordinates (from the venue), both or none                           |
-| `genres`     | no              | Max. 3 slugs from the "Genre slugs" list in `scraper/criteria.md`    |
+| Field        | Required      | Meaning                                                                              |
+| ------------ | ------------- | ------------------------------------------------------------------------------------ |
+| `id`         | yes           | Stable: `date-slug-city`                                                             |
+| `date`       | yes           | `YYYY-MM-DD`, local date                                                             |
+| `time`       | no            | `HH:MM`                                                                              |
+| `title`      | yes           | Act(s) / event name                                                                  |
+| `acts`       | no            | Acts separately, headliner first                                                     |
+| `venue`      | yes           | Must exist in `data/venues.json`                                                     |
+| `city`       | yes           | Town                                                                                 |
+| `canton`     | yes           | Canton code (`ZH`) or country code `D`, `F`, `I`, `A`, `FL` for nearby places abroad |
+| `url`        | no            | Event page                                                                           |
+| `tickets`    | no            | Ticket shop link                                                                     |
+| `source_url` | for `scraper` | Page where the show was found                                                        |
+| `lat`, `lon` | no            | Coordinates (from the venue), both or none                                           |
+| `genres`     | no            | Max. 3 slugs from the "Genre slugs" list in `scraper/criteria.md`                    |
 
 `source` is `mock` (sample data, the page shows a notice) or `scraper`.
 
@@ -250,7 +259,7 @@ icons (`make icons` re-renders those). All ten variants live in `img/logo/NN-nam
 You can shape the agenda without touching code – three text files:
 
 1. `scraper/criteria.md` – what counts as reggae, which places abroad count, allowed genre slugs.
-2. `scraper/bands.md` – move a band to *Included* or *Excluded*; review the *Suggestions* the harvester adds.
+2. `scraper/bands.md` – move a band to _Included_ or _Excluded_; review the _Suggestions_ the harvester adds.
 3. `data/venues.json` – add a venue (name, city, canton, coordinates, programme URL).
 
 Edit on GitHub, commit to `main`, done. The next scraper run picks it up; the validator stops anything

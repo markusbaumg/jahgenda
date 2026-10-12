@@ -35,7 +35,9 @@
       <div id="stuck-sentinel" aria-hidden="true"></div>
       <form class="filters" id="filters" role="search" onsubmit="return false">
         <a class="mini-brand" href="#top" aria-label="Nach oben"
-          ><img src="img/logo/jahgenda.svg" alt="" width="20" height="20" />Jah<span>genda</span></a
+          ><img src="img/logo/jahgenda.svg" alt="" width="20" height="20" /><span class="wordmark"
+            >Jah<span>genda</span></span
+          ></a
         >
         <div class="toolbar">
           <label class="sr" for="q">Suche</label>
@@ -111,11 +113,23 @@
 
       <p id="results" class="results" aria-live="polite">
         <span id="results-text"></span>
+        <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
+          <button type="button" data-view="list" aria-pressed="true">Liste</button>
+          <button type="button" data-view="calendar" aria-pressed="false">Kalender</button>
+          <button type="button" data-view="map" aria-pressed="false">Karte</button>
+        </span>
         <button type="button" id="clear-filters" class="linkish clear" hidden>✕ Filter zurücksetzen</button>
         <button type="button" id="toggle-past" class="linkish" hidden>Vergangene anzeigen</button>
       </p>
       <div id="mine-panel" class="mine-panel" hidden></div>
-      <div id="list"></div>
+      <div id="views">
+        <div id="list"></div>
+        <div id="calendar" class="calendar" hidden></div>
+        <div id="map-view" class="map-view" hidden>
+          <div id="map" class="map" aria-label="Karte der Konzertorte"></div>
+          <div id="map-rest"></div>
+        </div>
+      </div>
       <div id="status" class="status" role="status">
         <p>Lade Konzerte …</p>
       </div>
