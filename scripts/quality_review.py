@@ -50,8 +50,8 @@ def collect(days):
 def body_for(items, days):
     lines = [
         f"The scraper dropped **{len(items)} candidate(s)** in the last {days} days. Please skim them for",
-        f"false negatives on [review.html]({SITE}review.html) — each row has a «Gehört rein» button that opens",
-        "a prefilled issue. Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
+        f"false negatives on [review.html]({SITE}review.html) — each row has a «Gehört rein» button",
+        "that opens a prefilled issue. Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
         "",
     ]
     for at, d, r in sorted(items, key=lambda x: x[0], reverse=True):
