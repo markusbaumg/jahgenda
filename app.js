@@ -259,7 +259,7 @@
     if (!visible.length) {
       list.innerHTML = "";
       calendarEl.innerHTML = "";
-      el("map-rest").innerHTML = "";
+      mapRest.innerHTML = "";
       views.hidden = true;
       resultsText.textContent = "";
       status.innerHTML = shows.some((s) => !s._past)
@@ -281,13 +281,16 @@
     list.hidden = view !== "list";
     calendarEl.hidden = view !== "calendar";
     mapView.hidden = view !== "map";
+    // Only the active view keeps its rows: the calendar's day list and the map's
+    // "Ohne Standort" list reuse the row ids, and #id links must find the list row.
+    if (view !== "list") list.innerHTML = "";
+    if (view !== "calendar") calendarEl.innerHTML = "";
+    if (view !== "map") mapRest.innerHTML = "";
     if (view === "calendar") {
-      list.innerHTML = "";
       renderCalendar(visible);
       return;
     }
     if (view === "map") {
-      list.innerHTML = "";
       renderMap(visible);
       return;
     }
@@ -683,6 +686,20 @@
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',
       }).addTo(map);
       markerLayer = L.layerGroup().addTo(map);
+      // Leaflet stops clicks inside popups from bubbling up to the page, so the
+      // show links are handled on the popup element itself (bound once per popup).
+      map.on("popupopen", (e) => {
+        const popup = e.popup.getElement();
+        if (!popup || popup.dataset.bound) return;
+        popup.dataset.bound = "1";
+        popup.addEventListener("click", (ev) => {
+          const a = ev.target.closest("a[data-id]");
+          if (!a) return;
+          ev.preventDefault();
+          map.closePopup();
+          goToShow(a.dataset.id);
+        });
+      });
     }
     markerLayer.clearLayers();
 
@@ -737,13 +754,6 @@
       ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
       : "";
   }
-
-  mapView.addEventListener("click", (e) => {
-    const a = e.target.closest("a[data-id]");
-    if (!a) return;
-    e.preventDefault();
-    goToShow(a.dataset.id);
-  });
 
   // --- Scrolling ---
   const filters = el("filters");
