@@ -262,6 +262,15 @@
       "scrape": false,
       "hint": "Homepage 'Konzerte und Headline Acts' is a server-rendered list: '13 10 Di BIBIZA' = day, month, weekday, act, year implied. Reggae relevance: low — heavy touring schedule (rock/pop), reggae acts sporadic in past years."
     },
+    "Coupole": {
+      "city": "Biel/Bienne",
+      "canton": "BE",
+      "lat": 47.13595,
+      "lon": 7.25002,
+      "url": "https://ajz.ch/de-ch/chessu/programm/",
+      "scrape": false,
+      "hint": "AJZ Biel (Chessu), Grosser Saal/Kleiner Saal; Programm auf ajz.ch, Tickets via Petzi."
+    },
     "D! Club": {
       "city": "Lausanne",
       "canton": "VD",
@@ -631,6 +640,15 @@
       "scrape": true,
       "hint": "Dancehall nights (Soul Rebel Sound)."
     },
+    "Jazzhaus Freiburg": {
+      "city": "Freiburg im Breisgau",
+      "canton": "D",
+      "lat": 47.99476,
+      "lon": 7.84056,
+      "url": "https://www.jazzhaus.de/programm/",
+      "scrape": false,
+      "hint": "Schnewlinstraße 1; Monatsseiten /programm/YYYY/M.html mit #ska/#reggae-Tags, Tickets via Reservix."
+    },
     "Jazzkantine": {
       "city": "Luzern",
       "canton": "LU",
@@ -793,6 +811,14 @@
       "scrape": false,
       "hint": "Calendar is JavaScript-rendered (curl shows only navigation and a renovation notice); building under renovation in 2026, programme at interim locations. Reggae relevance: low."
     },
+    "Kultur hoch 3": {
+      "city": "Herisau",
+      "canton": "AR",
+      "lat": 47.38274,
+      "lon": 9.27558,
+      "scrape": false,
+      "hint": "Dä 3. Stock, Industriestrasse 28; Tickets via Eventfrog."
+    },
     "Kulturfabrik Kofmehl": {
       "city": "Solothurn",
       "canton": "SO",
@@ -829,6 +855,14 @@
       "scrape": false,
       "hint": "Server-rendered Joomla homepage lists events as 'Samstag 14.11.' (no year) with title and line-up; detail links /programm/event/ID-slug. Reggae relevance: low — ska-punk package shows occasionally (Skaboom); otherwise comedy, parties, drum'n'bass, Mundart rap."
     },
+    "Kulturhaus Fruchthof": {
+      "city": "Sursee",
+      "canton": "LU",
+      "lat": 47.17038,
+      "lon": 8.09893,
+      "scrape": false,
+      "hint": "Bahnhofplatz 9; Kulturraum Sursee (KRS), Tickets via Eventfrog."
+    },
     "Kulturhof Schloss Köniz": {
       "city": "Köniz",
       "canton": "BE",
@@ -846,6 +880,15 @@
       "url": "https://guggenheimliestal.ch/",
       "scrape": false,
       "hint": "Homepage mixes an Instagram-style feed ('29.10.26 • 20:00 • im guggenheim') with entries 'Freitag, 23. Oktober 2026 20:00 Uhr Tickets'; some events are co-hosted at Elefantehuus. Reggae relevance: low — pop/rock/Mundart concerts."
+    },
+    "Kulturrausch": {
+      "city": "Bürglen",
+      "canton": "TG",
+      "lat": 47.54835,
+      "lon": 9.14949,
+      "url": "https://kulturrausch.ch/events/",
+      "scrape": false,
+      "hint": "Industriestrasse 6a, Istighofen (Bürglen TG); Tickets via Eventfrog."
     },
     "Kulturwerk 118": {
       "city": "Sursee",
@@ -910,6 +953,15 @@
       "scrape": true,
       "hint": "Summer festival on the Strandboden (next 28.07.–07.08.2027); server-rendered WordPress site, line-up under 'Tagesprogramm' once announced in spring, dates in the page title. Reggae relevance: unknown — listed by a reggae-festival aggregator, no reggae acts verified."
     },
+    "Le Brise Glace": {
+      "city": "Annecy",
+      "canton": "F",
+      "lat": 45.89303,
+      "lon": 6.13565,
+      "url": "https://www.le-brise-glace.com/agenda/",
+      "scrape": false,
+      "hint": "54 bis rue des Marquisats; Genre-Angabe pro Event (z.B. 'Reggae dub'); Club-Abende gratis."
+    },
     "Le Chat Noir": {
       "city": "Carouge",
       "canton": "GE",
@@ -963,6 +1015,15 @@
       "url": "https://kartellculturel.ch/de",
       "scrape": false,
       "hint": "The /de/programm page needs JS; use the KartellCulturel homepage 'Nächste Events' block with rows 'Le Singe Do 15.10.26 20H30 Genre Name' (same source as Kreuz Nidau, filter by the venue prefix); a monthly PDF is linked too. Reggae relevance: low — jazz, cold wave, cumbia, global sounds."
+    },
+    "Le Soleil": {
+      "city": "Saignelégier",
+      "canton": "JU",
+      "lat": 47.25453,
+      "lon": 6.99814,
+      "url": "https://www.cafe-du-soleil.ch/",
+      "scrape": false,
+      "hint": "Café du Soleil – Centre culturel, Saignelégier; Konzerte via Petzi."
     },
     "Les Amis": {
       "city": "Bern",
@@ -1045,6 +1106,14 @@
       "scrape": true,
       "hint": "Monthly \"K.O.S Crew Dancehall Mood\" and reggae/dancehall parties."
     },
+    "Mundwerk": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.40898,
+      "lon": 8.55058,
+      "scrape": false,
+      "hint": "Club Mundwerk / Kulturbiotop, Dörflistrasse 76, Oerlikon; Ska Nights via Eventfrog."
+    },
     "Musigburg": {
       "city": "Aarburg",
       "canton": "AG",
@@ -1071,6 +1140,14 @@
       "url": "https://www.muehlehunziken.ch/",
       "scrape": false,
       "hint": "Server-rendered homepage (~650 KB) with every upcoming show; event links /programm/slug-YYYY-MM-DD carry the date, genre only in the event text. Reggae relevance: low — folk, blues, rock, country; Swiss reggae acts have played here in past years."
+    },
+    "Nachtzug": {
+      "city": "Aarau",
+      "canton": "AG",
+      "lat": 47.39271,
+      "lon": 8.04444,
+      "scrape": false,
+      "hint": "Koordinaten: Stadtmitte. Club in Aarau, Dancehall-Partys via Eventfrog."
     },
     "Ned": {
       "city": "Montreux",
@@ -1206,6 +1283,15 @@
       "url": "https://www.plaza-zurich.ch/",
       "scrape": false,
       "hint": "Chronological server-rendered cards with a 'live!' tag for concerts, date as weekday + day + month without year (year is in the ticket URL), genre line after the title, 'Next Page' pagination. Reggae relevance: low — has hosted reggae tours; currently only mixed urban parties with dancehall DJs."
+    },
+    "Plaza Klub": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.37415,
+      "lon": 8.5248,
+      "url": "https://www.plaza-zurich.ch/",
+      "scrape": false,
+      "hint": "Badenerstrasse 109; Tickets via Eventfrog."
     },
     "Plein-les-Watts Festival": {
       "city": "Lancy",
@@ -1485,6 +1571,15 @@
       "url": "https://soundofglarus.ch/",
       "scrape": false,
       "hint": "Open-air on the Zaunplatz in late August; line-up on the homepage as 'DONNERSTAG, 27.08.2026' then 'Act (CC) | stage | time', check in spring. Reggae relevance: low — Swiss pop/rock mainstream."
+    },
+    "Sous Soul": {
+      "city": "Bern",
+      "canton": "BE",
+      "lat": 46.94848,
+      "lon": 7.45595,
+      "url": "https://www.sous-soul.love/events",
+      "scrape": false,
+      "hint": "Junkerngasse 1, Berner Altstadt; Reggae/Ska-DJ-Nächte (Scorchers) und Dub-Konzerte."
     },
     "Spielboden": {
       "city": "Dornbirn",

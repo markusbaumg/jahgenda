@@ -3,82 +3,111 @@
   "runs": [
     {
       "skill": "scrape-shows",
-      "at": "2026-10-12T22:55:45+02:00",
-      "added": 29,
+      "at": "2026-10-13T00:38:46+02:00",
+      "added": 84,
       "updated": 0,
-      "removed": 12,
-      "total": 29,
+      "removed": 0,
+      "total": 84,
       "failed_sources": [
-        "https://www.skalander.ch/ (alte URL – inzwischen auf https://skalender.net/ korrigiert)",
-        "https://www.petzi.ch/ (lädt, aber Genre-Filter per URL nicht anwendbar – nur generische Liste der nächsten 5 Tage)",
-        "https://rotefabrik.ch/programm (Seite liefert keine Events; Kabaka Pyramid via Songkick-Venue-Seite bestätigt)",
-        "https://www.dubtopia.ch/ (DNS)",
-        "https://ra.co/events/2340105 (403)",
-        "https://www.eventim.de/en/cityd/zuerich-75/konzerte-1/hiphop-rnb-3/ (Timeout)",
-        "https://www.guidle.com/de/1Ap7bc (410 Gone)"
+        "https://www.x-tra.ch/de/programm/ (zeigt nur Oktober, «Alle anzeigen» per JavaScript)",
+        "https://www.moods.ch/en/program (Liste nur bis 11.11., Rest per JavaScript – K.O.S-Crew-Termine über Event-URLs verifiziert)",
+        "https://rotefabrik.ch/programm (Programm nur per JavaScript, nicht lesbar)",
+        "https://www.chatnoir.ch/live/ (nur Oktober 2026, Monatsnavigation nur per JavaScript)",
+        "https://www.kiff.ch/programm?f_genre=reggae (Genre-Filter nur clientseitig – ungefiltertes Programm gelesen)",
+        "https://www.petzi.ch/en/search/?q=reggae (nur erste ~54 Treffer, «load more» per JavaScript)",
+        "https://www.seetickets.com/ch/event/kabaka-pyramid/rote-fabrik-aktionshalle/3617065 (403)",
+        "https://www.ticketcorner.ch/artist/gentleman/ (timeout)",
+        "https://www.eventim.ch/artist/gentleman/ (ENOTFOUND)",
+        "https://www.regioactive.de/ (403, mehrere Seiten)",
+        "https://ra.co/ (403 – Resident Advisor blockiert)",
+        "https://www.eventworld.com/ (403, mehrere Seiten)",
+        "https://www.noumatrouff.fr/ (Agenda nur per JavaScript / 404)",
+        "https://spielboden.at/programm (kein Event-Inhalt gerendert)",
+        "https://www.fnacspectacles.com/ Annecy reggae (timeout)",
+        "https://www.talcoska.com/ (Redirect auf fremde Domain – nicht gefolgt)",
+        "https://www.alborosie.com/tour (leere Seite)",
+        "https://gentleman-music.de/live (404)",
+        "https://www.guidle.com/… Dubtopia 15 Years Zentralwäscherei (410 – unbestätigt)",
+        "https://gigora.live/… Dub Pistols Exil (402)"
       ],
       "dropped": [
         {
-          "title": "12 Beispiel-Shows (source: mock), z. B. Roots Night Vol. 12 @ Schüür, Alpine Dub Collective @ Dachstock",
-          "why": "Erfundene Platzhalterdaten ohne source_url; auf keiner Venue-Seite und per Websuche nicht auffindbar – entfernt"
+          "title": "El Flecha Negra @ Kammgarn Schaffhausen 16.10. und @ Sedel Luzern 04.12.",
+          "why": "Mestizo/Cumbia-Band, Reggae und Ska nur Teil des Mixes (criteria.md: Latin ohne klaren Reggae-Bezug)"
         },
         {
-          "title": "Dub Inc @ Bierhübeli Bern, 18.03.2027",
-          "why": "Auf bierhuebeli.ch als «Abgesagt» markiert"
+          "title": "SOUND BWOY – 1 Year Anniversary @ Parterre One Basel 16.10.",
+          "why": "Afrobeat/Dancehall/RnB/Amapiano-Clubnacht – Dancehall nur ein Genre von vielen"
         },
         {
-          "title": "Friday Bash: Balack Jallow @ Cave Club Zürich, 16.10.2026",
-          "why": "Reggae, Dancehall, Soca, Afrobeats und Amapiano – Dancehall nur ein Genre unter vielen (criteria.md)"
+          "title": "EKR – Album Release «Schatzcharte» @ Moods Zürich 17.10.",
+          "why": "Hip-Hop-Plattentaufe, Reggae/Dancehall-Tag stammt nur vom DJ"
         },
         {
-          "title": "Ami Warning «Wellen Tour» @ Rössli Bern 08.04.2027 und @ Exil Zürich 09.04.2027",
-          "why": "Pop-/Soul-Sängerin, Reggae nur ein Tag von vier; Exil beschreibt den Abend als Hip-Hop/Soul – im Zweifel weggelassen. Bitte in bands.md entscheiden"
+          "title": "Sean Koch @ Bierhübeli Bern 18.10.",
+          "why": "Surf-Folk/Indie-Folk-Songwriter, Reggae nur als Beiklang getaggt"
         },
         {
-          "title": "Sean Koch @ Bierhübeli Bern, 18.10.2026",
-          "why": "Surf-Folk/Indie-Folk, Reggae nur als Nebentag"
+          "title": "Kabaka Pyramid @ L'Usine (Le Rez) Genève 23.10.",
+          "why": "Laut Petzi abgesagt («This event is cancelled»)"
         },
         {
-          "title": "FUSE Party @ Bierhübeli Bern, 28.11.2026",
-          "why": "Afrobeats/Dancehall/Trap – Mainstream-Clubnacht (criteria.md)"
+          "title": "Boasty @ ISC Club Bern 30.10.",
+          "why": "Dancehall/Afrobeat/Bass-Music-Clubnacht – gemischt, kein Reggae-Fokus"
         },
         {
-          "title": "JetLag Gang «soirée reggaeton y perreo» @ L'Usine Genève, 24.10.2026",
-          "why": "Reggaeton, kein Reggae-Bezug"
+          "title": "Drink & Draw – Suehiro Commander @ Meck Frick 30.10.",
+          "why": "Surf/Dub/Stonerrock-Instrumentalband an einem Zeichenabend, Dub nur ein Drittel des Sounds"
         },
         {
-          "title": "Modestep @ Dachstock Bern, 09.11.2026",
-          "why": "Dubstep/EDM, nicht Dub"
+          "title": "Elias J. TV Europe Tour @ Stadthalle Bülach 31.10.",
+          "why": "Kein Reggae-Bezug erkennbar, nur Eventfrog-Kategorie"
         },
         {
-          "title": "DIVERCITY BASS @ Salzhaus Winterthur, 21.11.2026",
-          "why": "Drum & Bass"
+          "title": "Chat Noir Carouge: Deejay Greens 16.10., DJ Taloco 30.10., DJ Kenkylla 07.11., DJ Toots & Akrav 20.11., DJ Tasty 21.11., DJ Scalpa 28.11.",
+          "why": "Gratis-DJ-Nächte Hip-Hop/Afro/Dancehall gemischt, Dancehall-Anteil nicht belegbar; Monatsnavigation der Website nur per JavaScript"
         },
         {
-          "title": "Skandal Vol. 20 @ Schüür Luzern, 07.11.2026",
-          "why": "2000er-Hits-Party, kein Ska trotz Name"
+          "title": "10 Years DMB Records: Skaboom & MØNTY & Burning Fuses @ Dynamo Zürich 13.11.",
+          "why": "Punk-Label-Nacht, Ska-Anteil von Skaboom nicht belegbar (keine Quelle gefunden)"
         },
         {
-          "title": "Brushy One String @ Mokka Thun, 15.10.2026",
-          "why": "Jamaikanischer One-String-Blues, kein Reggae"
+          "title": "10 Years DMB Records: Fluffy Machine & Skaboom & KaButt & Mistio @ Kulturhalle Sägegasse Burgdorf 14.11.",
+          "why": "Skate-Punk-Abend (Headliner Fluffy Machine = Surf/Skate-Punk), höchstens ein Act Ska-Punk"
         },
         {
-          "title": "Dubioza Kollektiv @ Club Vaudeville, 30.10.2026",
-          "why": "Lindau (DE), ausserhalb der Schweiz — KORRIGIERT: Lindau ist grenznah (criteria.md → Nearby), Show wurde aufgenommen."
+          "title": "Los Fastidios + Arrested Denial @ Musigburg Aarburg 14.11. und Los Fastidios + Zoo Escape + The Fags @ Sedel 18.12.",
+          "why": "Streetpunk/Oi!-Band (it.wikipedia), Ska nur gelegentlich; Supports Pop-Punk"
         },
         {
-          "title": "Tryo + Sinsemilia + Vanupié @ Château Rouge, 10.12.2026",
-          "why": "Annemasse (FR), ausserhalb der Schweiz"
+          "title": "Dub Inc @ Bierhübeli Bern 18.03.2027",
+          "why": "Abgesagt – auf bierhuebeli.ch «Abgesagt», auf dub-inc.com «ANNULÉ»"
+        },
+        {
+          "title": "Culcha Candela @ X-TRA Zürich 18.03.2027",
+          "why": "Pop-Crossover mit Dancehall-Wurzeln – analog zu Seeed (bands.md Excluded) nicht aufgenommen; bitte in bands.md entscheiden"
+        },
+        {
+          "title": "Ami Warning «Wellen Tour 2027» @ Rössli Bern 08.04.2027",
+          "why": "Indie-Pop-Songwriterin, Reggae nur einer von drei Tags"
+        },
+        {
+          "title": "Gentleman Zürich 10.11. – Zeit/Ort",
+          "why": "Hinweis: X-TRA-Programm rendert nur Oktober (JavaScript); Datum via Skalender und Reggaeville-Tourankündigung bestätigt – aufgenommen"
         }
       ],
       "notes": [
-        "Testlauf auf Branch scrape-test (kein Push). Erster echter Lauf: Mock-Daten durch gescrapte ersetzt.",
-        "Mad Professor @ Kaserne Basel: Event-Seite ohne Datum; 14.11.2026 über Kaserne-Datumsfilter und Songkick bestätigt.",
-        "Gentleman @ X-TRA Zürich 10.11.2026: X-TRA-Programm zeigt nur die nächsten zwei Wochen; Datum aus der offiziellen Tour-Ankündigung (Reggaeville).",
-        "Dubtopia @ Dachstock: Seite nennt nur Titel und Uhrzeit; Reihe ist als Dub-/Soundsystem-Session bekannt (Redubtion).",
-        "Cave Club Zürich (Friday Bash): nur über Guidle-Listings belegt, die Veranstaltertexte wirken teils recycelt – Datumsfeld verwendet.",
-        "Watchlist (6 Bands unter «Dabei»): Dub Inc (Bern abgesagt), Alborosie, Skatalites, Ska-P, Talco ohne Schweizer Termin; Gentleman gefunden.",
-        "Bogen F, Salzhaus, Werkstatt Chur, KiFF: keine passenden Events im Programm."
+        "Erstlauf: shows.json war Mock-Daten – Liste komplett neu aufgebaut (added = total).",
+        "Lokaler Lauf (runner local) mit parallelen Sammel-Agenten; Budget deutlich überschritten (ca. 460 Seitenabrufe, ca. 150 Websuchen), weil ausdrücklich Vollständigkeit über mindestens 4 Monate verlangt war.",
+        "Alle 3 Agenden, alle 28 Venues mit scrape=true, 20 Schweizer und 12 Nachbarregion-Suchen, Watchlist (6 Acts) abgearbeitet.",
+        "Watchlist: Dub Inc Bern 18.03.2027 abgesagt; Alborosie, Skatalites, Ska-P, Talco ohne Schweizer Termine; Gentleman 10.11. X-TRA aufgenommen.",
+        "Dubquake Weekender 2026 (L'Usine Genève, 13.+14.11.) als zwei Tageseinträge mit Genre festival; Samstags-Line-up gemäss Petzi.",
+        "Zwei Events am selben Abend in der Coupole Biel (Cali P Konzert 18:30 Grosser Saal, Afterparty 22:00 Kleiner Saal, separate Tickets) bewusst getrennt.",
+        "Doubtful, aber aufgenommen: Dub Pistols (Dub/Ska gemäss Skalender und Wikipedia), Pon Di Island und Santa Klaus Party (DJ-Nächte mit Reggae/Dancehall-Mehrheit, Afrobeats daneben), DJ SMO Dancehall (Jugglerz), Sondaschule und Dubioza Kolektiv (Ska-Punk/Ska im Zentrum).",
+        "Zeiten sind Türöffnung, wo die Seite beides nennt.",
+        "Ausserhalb des Fensters, vormerken: Groundation – Tribute to Bob Marley, Fri-Son Fribourg 16.05.2027.",
+        "Tessin: alle Suchen ohne kommende Treffer (nur vergangene Events); Reeds Festival 2027 noch nicht angekündigt.",
+        "Neue Venues (23) mit Koordinaten aus OpenStreetMap/Nominatim ergänzt; Nachtzug Aarau und Hacienda Sierre mit Stadtmitte-Koordinaten."
       ]
     }
   ]
