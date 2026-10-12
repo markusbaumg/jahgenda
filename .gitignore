@@ -4,8 +4,12 @@ __pycache__/
 *.pyc
 .ruff_cache/
 
-# Node (prettier / live-server run via npx, nothing is installed)
+# Node (prettier / live-server run via npx, nothing is installed) and the Playwright project in e2e/
 node_modules/
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+e2e/adhoc.png
 
 # macOS / editors
 .DS_Store
