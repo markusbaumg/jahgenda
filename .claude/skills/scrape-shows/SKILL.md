@@ -152,9 +152,21 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
   "added": 3, "updated": 1, "removed": 2, "total": 41,
   "failed_sources": ["https://www.example.ch/programm (timeout)"],
   "dropped": [ { "title": "Afro Night @ Plaza", "why": "Afrobeats, kein Reggae-Bezug (criteria.md)" } ],
-  "notes": ["Exil: Seite blockiert Bots (403), Events via Skalender übernommen"]
+  "notes": ["Exil: Seite blockiert Bots (403), Events via Skalender übernommen"],
+  "sources": [
+    { "name": "Skalender", "url": "https://skalender.net/", "status": "ok", "found": 41, "kept": 23 },
+    { "name": "Exil", "url": "https://exil.club/", "status": "failed", "found": 0, "kept": 0, "error": "403" },
+    { "name": "Bogen F", "url": "https://www.bogenf.ch/", "status": "empty", "found": 0, "kept": 0 }
+  ]
 }
 ```
+
+`sources` has one line for **every** source you touched this run (each agenda, every venue you opened,
+each web-search query as `"search: <query>"`, the watchlist as `"watchlist"`): `status` is `ok` (loaded,
+events read), `empty` (loaded, nothing matching), `failed` (could not load — put the reason in `error`),
+`skipped` (not opened this run, e.g. medium-relevance venue not in this rotation); `found` = candidates
+seen there, `kept` = how many ended up in shows.json. This is what makes the public log honest: a reader
+sees which sources were covered, which failed and where the shows come from.
 
 `dropped` lists every candidate you rejected after looking at it closely (not every unrelated event on a
 page). This log is public — it is shown on `log.html` — so write it in German (the site's language), so
