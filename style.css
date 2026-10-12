@@ -292,6 +292,17 @@ body {
   color: var(--muted);
   font-size: 0.9rem;
 }
+.geo-status a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--gold);
+}
+.geo-status a:hover {
+  color: var(--gold);
+}
+.geo-more {
+  color: var(--muted);
+}
 .geo-status:empty {
   display: none;
 }
