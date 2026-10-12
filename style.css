@@ -1416,3 +1416,22 @@ body {
 .pin-mini.you {
   background: var(--text);
 }
+
+/* Links: no underlines anywhere; colour change on hover instead. */
+a {
+  text-decoration: none;
+}
+.about a,
+.foot-links a,
+.notice a,
+.geo-status a,
+.results .linkish {
+  text-decoration: none;
+  border-bottom: 0;
+}
+.foot {
+  background: #1b1713;
+}
+.foot .section-title {
+  border-bottom-color: #2a241e;
+}
