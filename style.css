@@ -8,7 +8,7 @@
   --bg: #14110e;
   --surface: #221c17;
   --surface-2: #2a2219;
-  --line: #4d4036;
+  --line: #766759; /* spec lists #4d4036 as 3.2:1, measured 1.9:1; this is 3.5:1 on --bg, 3.1:1 on --surface */
   --line-soft: #2e2822;
   /* text */
   --text: #f3ead8;
@@ -23,8 +23,8 @@
   --gold-text: #f2b632;
   --green-text: #4fd08a;
   --on-gold: #14110e;
-  --on-red: #fff5ec;
-  --on-green: #0f2a1a;
+  --on-red: #fffaf5; /* 4.6:1 on --red (spec's #fff5ec measured 4.4:1) */
+  --on-green: #041008; /* 4.7:1 on --green (spec's #0f2a1a measured 3.7:1) */
   /* tints (14 % of the fill over --bg) */
   --red-tint: rgba(216, 52, 47, 0.14);
   --gold-tint: rgba(242, 182, 50, 0.14);
@@ -358,7 +358,7 @@ body::after {
   padding: 0 34px 0 12px;
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5' fill='none' stroke='%23a39682' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5' fill='none' stroke='%23bcae98' stroke-width='2' stroke-linecap='round'/></svg>");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 18px;
@@ -499,7 +499,7 @@ body::after {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--green-text);
-  background: rgba(30, 143, 78, 0.14);
+  background: var(--green-tint);
   border-radius: 999px;
   padding: 2px 8px;
 }
