@@ -6,9 +6,9 @@ layout. The site UI is German; code, docs and config are English.
 
 ## Who owns what
 
-- **Humans own:** `scraper/criteria.md`, `scraper/bands.md` (except the *Suggestions* section),
+- **Humans own:** `scraper/criteria.md`, `scraper/bands.md` (except the _Suggestions_ section),
   `scraper/sources.json`, `index.html`, `style.css`, `app.js`, `pwa.js`, `sw.js`, `README.md`, `CLAUDE.md`.
-  Skills never change these files – with one exception: skills may append lines under *Suggestions* in
+  Skills never change these files – with one exception: skills may append lines under _Suggestions_ in
   `bands.md`.
 - **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
@@ -59,7 +59,7 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   ENOTFOUND (first run failed exactly like that). Fallback: `make cron-install` (launchd 06:10 on the Mac).
 - **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 Zurich): stale
   > 36 h or `status.json` ok:false → issue labelled `scraper-failed`; README badges. Skills write
-  `data/status.json` every run and commit even without changes.
+  > `data/status.json` every run and commit even without changes.
 - **Scraper proof:** a local run (`claude -p "/scrape-shows"`, branch `scrape-test`, worktree
   `../reggae-scrape-test`) found 29 real shows with sources, coordinates and genres — the skill works; the
   cloud run only lacks network access.
@@ -84,7 +84,9 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   design/ui-revamp.md, reactive store, vite-plugin-pwa, Vitest + Playwright mobile tests), still a static build
   on GitHub Pages; everything else (data contract, skills, validator, routines, watchdog) stays. Story #33 —
   starts right after the revamp (#21–#28) and the mobile gate (#32) are merged. Until then no new big vanilla
-  features beyond what is already in flight.
+  features beyond what is already in flight. The migration also moves the page source from the repo root into
+  `src/` (+ `public/` for static files; `data/`, `scraper/`, `scripts/`, `tests/`, `design/` stay) — not
+  earlier, because the in-flight worktree branches edit the root files (Kusi, 2026-10-13).
 - **Working style:** big features are built by background workflows in isolated worktrees
   (`.claude/worktrees/…`, gitignored) with a reviewer, then merged by hand into `main`; `make check` must be
   green before every push; GitHub Pages deploys every push to `main`.
