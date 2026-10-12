@@ -48,6 +48,27 @@ class AllowedGenres(unittest.TestCase):
         text = '{"genres": [{"slug": "reggae"}, {"slug": "ska-punk"}, {"slug": "Not Valid"}, {"label": "x"}]}'
         self.assertEqual(self.parse(text), {"reggae", "ska-punk"})
 
+
+def show(**over):
+    base = {
+        "id": f"{TOMORROW}-dub-inc-bern",
+        "date": TOMORROW,
+        "title": "Dub Inc",
+        "venue": "Dachstock",
+        "city": "Bern",
+        "canton": "BE",
+        "source_url": "https://x.ch/programm",
+    }
+    base.update(over)
+    return base
+
+
+def doc(*items, **head):
+    base = {"updated": "2026-10-13T06:00:00+02:00", "source": "scraper", "shows": list(items)}
+    base.update(head)
+    return base
+
+
 class ShowDetails(unittest.TestCase):
     def errs(self, d, allow_past=False):
         return V.check_shows(d, allow_past, ALLOWED)
