@@ -237,21 +237,21 @@ that would break the page.
 The distance feature asks the browser for your location. It is used only in the browser and never
 stored or sent anywhere. The same goes for the "Meine Shows" marks (localStorage only).
 
-## Meine Shows
+## Meine Shows (personal list)
 
-Der Stern bei jeder Show hat zwei Stufen: einmal tippen = **Interessiert** (goldener Rand), nochmals = **Ich gehe**
-(grüner Rand), ein drittes Mal löscht die Markierung. Sobald etwas markiert ist, erscheint der Chip «★ Meine Shows»
-mit Zähler; er filtert die Liste auf die markierten Shows (vergangene bleiben markiert, werden aber wie üblich
-ausgeblendet). In dieser Ansicht gibt es:
+The star on every show has two levels: tap once = **Interessiert** (gold border), again = **Ich gehe**
+(green border), a third tap clears it. As soon as something is marked, the chip "★ Meine Shows" with a
+counter appears; it filters the list to the marked shows (past ones stay marked but are hidden as usual).
+In that view:
 
-- **Kalender exportieren (.ics)** – eine Datei mit allen markierten Shows («Ich gehe» als bestätigt, «Interessiert» als vorläufig).
-- **Liste teilen** – kopiert einen Link der Form `…/#mine=<id>:g,<id>:i` (g = Ich gehe, i = Interessiert), daneben
-  ein WhatsApp-Knopf mit demselben Link. Wer ihn öffnet, sieht einen Hinweis «Geteilte Liste von einem Freund» mit
-  den Shows und kann sie mit **Alle übernehmen** als «Interessiert» in die eigene Liste holen (eigene «Ich gehe» bleiben)
-  oder die Ansicht schliessen. Eigene Markierungen werden nie stillschweigend überschrieben.
+- **Kalender exportieren (.ics)** – one file with all marked shows ("Ich gehe" as confirmed, "Interessiert" as tentative).
+- **Liste teilen** – copies a link of the form `…/#mine=<id>:g,<id>:i` (g = going, i = interested), plus a
+  WhatsApp button with the same link. Whoever opens it sees a banner "Geteilte Liste von einem Freund" with the
+  shows and can take them over as "Interessiert" with **Alle übernehmen** (own "Ich gehe" marks are kept) or
+  close the banner. Own marks are never overwritten silently.
 
-Die Markierungen liegen nur im Browser (`localStorage`, Schlüssel `jahgenda.marks`) – kein Konto, kein Server,
-nichts wird übertragen. Ohne `localStorage` funktioniert alles, die Markierungen gelten dann bis zum nächsten Laden.
+Marks live only in the browser (`localStorage`, key `jahgenda.marks`) – no account, no server, nothing is
+transmitted. Without `localStorage` everything still works; marks then last until the next reload.
 
 ## Roadmap
 
