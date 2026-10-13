@@ -23,7 +23,6 @@ const SHELL = [
   "style.css",
   "store.js",
   "pwa.js",
-  "callout.js",
   "manifest.webmanifest",
   "img/about.jpg",
   "img/logo/jahgenda.svg",

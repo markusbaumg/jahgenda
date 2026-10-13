@@ -47,7 +47,7 @@ test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contra
 lint: deps ## Syntax and format check (plain scripts via node, Python via ruff – PATH or uvx –, the rest via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.svelte' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=dist || (echo "lint: merge conflict markers found" && exit 1)
 	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
-	node --check public/store.js public/pwa.js public/callout.js public/sw.js
+	node --check public/store.js public/pwa.js public/sw.js
 	@$(RUFF) check scripts tests && $(RUFF) format --check scripts tests
 	$(PRETTIER) --check $(WEB_FILES)
 
