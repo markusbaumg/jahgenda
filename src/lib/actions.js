@@ -9,7 +9,7 @@ import { copyText, shareOr, waLink } from "./share.js";
 // The page link of a show: the short per-show hash (#k3f9zq), the contract of every shared link.
 export const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
 
-export const shareText = (s) =>
+const shareText = (s) =>
   s._end
     ? `${s.title} – ${dateText(s)} · ${s.venue}, ${s.city}` +
       `${s.acts.length ? `\n${t("share.with", { acts: s.acts.slice(0, 4).join(", ") })}${s.acts.length > 4 ? ` +${s.acts.length - 4}` : ""}` : ""}\n${showUrl(s)}`

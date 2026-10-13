@@ -5,7 +5,7 @@
 
 // A clipboard write that never answers (a permission prompt nobody sees, a stalled browser) must not leave
 // the button without feedback: after this long it counts as failed.
-export const COPY_TIMEOUT = 1000;
+const COPY_TIMEOUT = 1000;
 
 /** Copy `text` to the clipboard → "copied" | "failed" (no clipboard, denied, or no answer in time). */
 export async function copyText(text, { timeout = COPY_TIMEOUT } = {}) {

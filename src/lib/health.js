@@ -24,7 +24,7 @@ const fmtH = (ms) => (ms / H).toFixed(1);
 
 /** A status.json or runs.json entry of a scrape-shows run (no `skill` = older entry, it was one); a hand
  * correction logged with runner "manual" is not a run of the scraper. Mirrors is_scrape(). */
-export function isScrape(entry) {
+function isScrape(entry) {
   return (
     !!entry &&
     typeof entry === "object" &&

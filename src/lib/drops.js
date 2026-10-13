@@ -55,7 +55,7 @@ export function dedupeDrops(runs, parseAt = (r) => Date.parse(r.at) || 0) {
   return [...best.values()].map(({ at, run, drop, count }) => ({ at, run, drop, count }));
 }
 
-export const REPO_URL = "https://github.com/markusbaumg/jahgenda";
+const REPO_URL = "https://github.com/markusbaumg/jahgenda";
 
 /** «Gehört rein»: a new GitHub issue (labels quality + scraper) with the candidate prefilled. */
 export function issueUrl(d, when) {

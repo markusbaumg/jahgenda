@@ -26,7 +26,7 @@ async function get(url) {
 /** The parsed JSON; rejects on a network error, a non-2xx answer or broken JSON. */
 export const fetchJson = (url) => get(url).then((r) => r.json());
 /** The body as text; rejects like fetchJson. */
-export const fetchText = (url) => get(url).then((r) => r.text());
+const fetchText = (url) => get(url).then((r) => r.text());
 /** For optional files: the parsed JSON, or null when it cannot be loaded. */
 export const tryJson = (url) => fetchJson(url).catch(() => null);
 /** For optional files: the text, or null when it cannot be loaded. */

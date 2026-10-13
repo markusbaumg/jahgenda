@@ -6,7 +6,7 @@ import { localeFmt, getLocale } from "../i18n/core.js";
 export const monthFmt = localeFmt({ month: "long", year: "numeric" });
 export const monthNameFmt = localeFmt({ month: "long" });
 export const shortMonthFmt = localeFmt({ month: "short" });
-export const dowFmt = localeFmt({ weekday: "short" });
+const dowFmt = localeFmt({ weekday: "short" });
 export const fullDayFmt = localeFmt({
   weekday: "long",
   day: "numeric",
@@ -15,7 +15,7 @@ export const fullDayFmt = localeFmt({
 });
 export const stampFmt = localeFmt({ dateStyle: "medium", timeStyle: "short" });
 // «16.10.» (de-CH, fr-CH) / «16/10» (en-GB); with the year «16.7.2026».
-export const dayMonthFmt = localeFmt({ day: "numeric", month: "numeric" });
+const dayMonthFmt = localeFmt({ day: "numeric", month: "numeric" });
 export const dayMonthYearFmt = localeFmt({ day: "numeric", month: "numeric", year: "numeric" });
 export const dm = (d) => dayMonthFmt.format(d);
 
