@@ -24,15 +24,27 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate data before deploying
         run: python3 scripts/validate_shows.py --allow-past
-      - name: Build calendar feeds (jahgenda.ics + per canton)
-        run: python3 scripts/make_ics.py .
-      - name: Stamp service worker with a hash of the app shell
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      # The build copies data/ into dist/data (the jahgenda-static plugin in vite.config.js) and
+      # vite-plugin-pwa builds dist/sw.js from src/sw.js with the shell list injected – the worker hashes
+      # that list into its cache name, so a new shell gets a new cache – and writes manifest.webmanifest.
+      - name: Build the page (vite build → dist/)
+        run: npm ci --no-fund --no-audit && npm run build
+      - name: Build calendar feeds (jahgenda.ics + per canton) into dist/
+        run: python3 scripts/make_ics.py dist
+      - name: Check the service worker precache was injected
         run: |
-          BUILD=$(cat index.html log.html review.html style.css store.js lib.js app.js pwa.js callout.js sw.js manifest.webmanifest img/about.jpg img/logo/jahgenda.svg img/fonts/*.woff2 img/icons/*.png img/cantons/*.svg | sha256sum | cut -c1-10)
-          sed -i "s/__BUILD__/$BUILD/" sw.js && grep -q "$BUILD" sw.js && echo "build $BUILD"
+          ! grep -q '__WB_MANIFEST' dist/sw.js
+          grep -q '"url":"index.html"' dist/sw.js
+          grep -o '"url":"assets/[^"]*"' dist/sw.js
+          test -s dist/manifest.webmanifest
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -1,10 +1,12 @@
 // Playwright configuration for the Jahgenda end-to-end tests (`make e2e` or `npx playwright test`).
-// A plain python http.server serves the repo root on port 4173 – the page needs no build step.
+// `vite preview` serves the production build (dist/ of the repo root, built by `make build` /
+// `npm run build` first) on port 4173 – the same files GitHub Pages serves.
 // Two projects: a 1280×800 desktop Chrome and an iPhone 13 (emulated in Chromium, so CI needs one browser).
 // @ts-check
 const { defineConfig, devices } = require("@playwright/test");
 
-const PORT = 4173;
+// E2E_PORT lets a second checkout run the suite at the same time (default 4173).
+const PORT = Number(process.env.E2E_PORT) || 4173;
 const BASE = `http://127.0.0.1:${PORT}/`;
 
 module.exports = defineConfig({
@@ -37,11 +39,11 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    // Serves THIS checkout (the parent of e2e/), never the live-server on 5500.
-    command: `python3 -m http.server ${PORT} --bind 127.0.0.1 --directory ..`,
+    // Serves THIS checkout's build (dist/ in the parent of e2e/), never the dev server on 5173. The
+    // preview binds 127.0.0.1 (vite.config.js); the fixture route on data/shows.json works as before.
+    command: `cd .. && npx vite preview --port ${PORT} --strictPort`,
     url: `${BASE}index.html`,
     reuseExistingServer: false,
     timeout: 15_000,
-    stderr: "ignore", // http.server logs every request to stderr
   },
 });

@@ -3,7 +3,7 @@
 // filtering while scrolled, a shared show lands under the bar (not behind it) and stale links say so.
 const { test, expect } = require("@playwright/test");
 const { FIXTURE, useFixture, openList } = require("./helpers");
-const { shortId } = require("../../lib.js");
+const { shortId } = require("../../src/lib/hash.js");
 
 test("typing while the data loads keeps the skeleton; a 500 shows an error with a retry", async ({
   page,

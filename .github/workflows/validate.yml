@@ -1,8 +1,9 @@
 # Runs on every push and pull request: `make ci` = lint (node, ruff, prettier) + validate + test
-# + smoke (headless Chrome, skipped when absent) + data format.
+# + build (vite) + smoke (headless Chrome against dist/, skipped when absent) + data format.
 # Same as `make check` locally. The deploy (pages.yml) validates the data once more before uploading.
-# A second job runs the Playwright end-to-end tests (e2e/, same as `make e2e`) – deliberately not part
-# of `make check`, it needs a browser download and the network (Leaflet, OSM tiles).
+# A second job runs the Playwright end-to-end tests (e2e/, same as `make e2e`) against `vite preview`
+# of the build – deliberately not part of `make check`, it needs a browser download and the network
+# (Leaflet, OSM tiles).
 name: CI
 
 on:
@@ -17,6 +18,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
       - name: Install ruff
         run: pip install --quiet ruff
       - name: make ci
@@ -24,24 +30,28 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: e2e
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: e2e/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            e2e/package-lock.json
+      - name: Build the page (dist/, what vite preview serves)
+        run: npm ci --no-fund --no-audit && npm run build
       - run: npm ci
+        working-directory: e2e
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
       - run: npx playwright install --with-deps chromium
+        working-directory: e2e
       - run: npx playwright test
+        working-directory: e2e
       - name: Upload report and traces
         if: failure()
         uses: actions/upload-artifact@v4

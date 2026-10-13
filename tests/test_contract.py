@@ -1,6 +1,7 @@
 """Drift tests for lists that live in several files and break the PWA silently when they disagree:
-the region codes (validator, app.js, img/cantons/*.svg) and the app-shell file list
-(sw.js SHELL, the BUILD hash input in pages.yml, the Makefile). Stdlib only. Run: make test"""
+the region codes (validator, src/lib/regions.js, public/img/cantons/*.svg) and the app-shell file list
+(the vite-plugin-pwa precache globs in vite.config.js, src/sw.js, pages.yml, the Makefile).
+Stdlib only. Run: make test"""
 
 import importlib.util
 import re
@@ -8,6 +9,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+PUBLIC = ROOT / "public"
 
 
 def load_module(name):
@@ -18,33 +20,33 @@ def load_module(name):
 
 
 V = load_module("validate_shows")
-SW = (ROOT / "sw.js").read_text(encoding="utf-8")
-APP = (ROOT / "app.js").read_text(encoding="utf-8")
+SW = (ROOT / "src" / "sw.js").read_text(encoding="utf-8")
+REGIONS_JS = (ROOT / "src" / "lib" / "regions.js").read_text(encoding="utf-8")
 MAKEFILE = (ROOT / "Makefile").read_text(encoding="utf-8")
+VITE_CONFIG = (ROOT / "vite.config.js").read_text(encoding="utf-8")
 PAGES = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
 
 
 def js_object_keys(src, name):
-    """Keys of `const <name> = { KEY: ..., };` in app.js."""
+    """Keys of `export const <name> = { KEY: ..., };` in src/lib/regions.js."""
     m = re.search(rf"const {name} = \{{(.*?)\n\s*\}};", src, re.S)
-    assert m, f"const {name} = {{...}} not found in app.js"
+    assert m, f"const {name} = {{...}} not found in regions.js"
     return set(re.findall(r"^\s*([A-Z]+):", m.group(1), re.M))
 
 
 def shell_files():
-    m = re.search(r"const SHELL = \[(.*?)\];", SW, re.S)
-    assert m, "const SHELL = [...] not found in sw.js"
-    return [f for f in re.findall(r'"([^"]+)"', m.group(1)) if f != "./"]
+    """The precache globs of the shell (vite.config.js, injectManifest.globPatterns)."""
+    m = re.search(r"globPatterns: \[(.*?)\]", VITE_CONFIG, re.S)
+    assert m, "injectManifest.globPatterns not found in vite.config.js"
+    return re.findall(r'"([^"]+)"', m.group(1))
 
 
-def build_hash_inputs():
-    """The files pages.yml hashes into BUILD (globs expanded), as paths relative to the repo root."""
-    line = next(ln for ln in PAGES.splitlines() if "BUILD=$(cat" in ln)
-    tokens = line.split("cat ", 1)[1].split("|", 1)[0].split()
-    files = set()
-    for t in tokens:
-        files |= {str(p.relative_to(ROOT)) for p in ROOT.glob(t)} if "*" in t else {t}
-    return files
+def built_file(f):
+    """Where a shell file comes from before the build: public/ (static), the repo root (index.html), or
+    the jahgenda-static plugin (style.css, put together from src/styles/index.css)."""
+    if f == "style.css":
+        return (ROOT / "src" / "styles" / "index.css").is_file()
+    return (PUBLIC / f).is_file() or (ROOT / f).is_file()
 
 
 def makefile_var(name):
@@ -56,52 +58,93 @@ def makefile_var(name):
 class Regions(unittest.TestCase):
     def test_validator_app_and_svgs_agree(self):
         # (sw.js no longer lists the flags: they are cached on first use, not precached.)
-        self.assertEqual(js_object_keys(APP, "CANTONS"), V.CANTONS, "app.js CANTONS vs validator")
-        self.assertEqual(js_object_keys(APP, "ABROAD"), V.ABROAD, "app.js ABROAD vs validator")
-        svgs = {p.stem for p in (ROOT / "img" / "cantons").glob("*.svg")}
-        self.assertEqual(svgs, V.REGIONS, "img/cantons/*.svg vs validator")
+        self.assertEqual(js_object_keys(REGIONS_JS, "CANTONS"), V.CANTONS, "regions.js CANTONS vs validator")
+        self.assertEqual(js_object_keys(REGIONS_JS, "ABROAD"), V.ABROAD, "regions.js ABROAD vs validator")
+        svgs = {p.stem for p in (PUBLIC / "img" / "cantons").glob("*.svg")}
+        self.assertEqual(svgs, V.REGIONS, "public/img/cantons/*.svg vs validator")
 
 
 class AppShell(unittest.TestCase):
     def test_every_shell_file_exists(self):
-        missing = [f for f in shell_files() if not (ROOT / f).is_file()]
-        self.assertEqual(missing, [], "sw.js SHELL lists files that do not exist (install would fail)")
+        plain = [f for f in shell_files() if not any(c in f for c in "*{")]
+        missing = [f for f in plain if not built_file(f)]
+        self.assertEqual(missing, [], "precache globs name files that do not exist")
+        self.assertIn("assets/**/*.{js,css}", shell_files(), "the shell must hold the bundle")
+        self.assertFalse(
+            [f for f in shell_files() if f.startswith("data")], "data/ is network-first, never in the shell"
+        )
 
-    def test_shell_and_worker_are_in_the_build_hash(self):
-        hashed = build_hash_inputs()
-        self.assertTrue(hashed, "no BUILD=$(cat ...) line in pages.yml")
-        not_hashed = sorted(set(shell_files()) - hashed)
-        self.assertEqual(not_hashed, [], "shell files missing from the BUILD hash in pages.yml (stale cache)")
-        self.assertIn("sw.js", hashed)
+    def test_build_injects_the_precache(self):
+        # vite-plugin-pwa replaces the injection point with the shell list (the build fails without it);
+        # the worker hashes that list into its cache name, pages.yml checks the injection landed.
+        self.assertEqual(SW.count("self.__WB_MANIFEST"), 1)
+        self.assertIn("jahgenda-shell-${BUILD}", SW)
+        self.assertIn('DATA_CACHE = "jahgenda-data"', SW)
+        self.assertIn("NETWORK_TIMEOUT = 4000", SW)
+        self.assertEqual(SW.count("self.skipWaiting()"), 1, "skipWaiting only on the toast's message")
+        self.assertIn('strategies: "injectManifest"', VITE_CONFIG)
+        self.assertIn('filename: "sw.js"', VITE_CONFIG)
+        self.assertIn("__WB_MANIFEST", PAGES)
+        self.assertIn("path: dist", PAGES)
+        for f in ("data", "design"):
+            self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
+        # mischpult.html fetches scraper/sources.json relative to the page (Portale, Suchen, Festivals).
+        self.assertIn('json("scraper/sources.json")', (PUBLIC / "mischpult.html").read_text(encoding="utf-8"))
+        self.assertIn('["scraper/sources.json", "scraper/sources.json"]', VITE_CONFIG)
+        self.assertIn(
+            'path.join(outDir, "style.css"), plainStylesheet()',
+            VITE_CONFIG,
+            "no style.css for the static pages",
+        )
+
+    def test_every_stylesheet_is_imported_once(self):
+        # src/styles/index.css is the cascade order of the page; a .css file outside it would be dead or
+        # imported by a component at a position the bundle decides (and the static pages would miss it).
+        index = (ROOT / "src" / "styles" / "index.css").read_text(encoding="utf-8")
+        listed = [
+            (ROOT / "src" / "styles" / p).resolve() for p in re.findall(r'^@import "([^"]+)";', index, re.M)
+        ]
+        self.assertEqual(len(listed), len(set(listed)), "a stylesheet is imported twice")
+        on_disk = {p.resolve() for p in (ROOT / "src").rglob("*.css")} - {
+            (ROOT / "src" / "styles" / "index.css").resolve()
+        }
         self.assertEqual(
-            sorted(f for f in hashed if not (ROOT / f).is_file()), [], "pages.yml hashes missing files"
+            sorted(map(str, on_disk - set(listed))), [], "stylesheets missing from src/styles/index.css"
         )
-        self.assertTrue(
-            {f for f in hashed if f.startswith("img/cantons/")} >= {f"img/cantons/{c}.svg" for c in V.REGIONS}
-        )
+        self.assertEqual([p for p in listed if not p.is_file()], [], "index.css imports a missing file")
+        stray = [
+            p
+            for p in (ROOT / "src").rglob("*.svelte")
+            if re.search(r'import "[^"]+\.css"', p.read_text(encoding="utf-8"))
+        ]
+        self.assertEqual(stray, [], "components must not import stylesheets (the order lives in index.css)")
+        self.assertIn('import "./styles/index.css";', (ROOT / "src" / "main.js").read_text(encoding="utf-8"))
 
-    def test_makefile_knows_the_shell_files(self):
+    def test_manifest_icons_exist_and_paths_are_relative(self):
+        icons = re.findall(r'src: "(img/icons/[^"]+)"', VITE_CONFIG)
+        self.assertGreaterEqual(len(icons), 3)
+        self.assertEqual([i for i in icons if not (PUBLIC / i).is_file()], [], "manifest icons missing")
+        for key in ("id", "start_url", "scope"):
+            self.assertIn(f'{key}: "./"', VITE_CONFIG, f"manifest {key} must stay relative (project page)")
+
+    def test_makefile_knows_the_scripts(self):
         web = makefile_var("WEB_FILES")
         # Plain entries must exist; a glob (e2e/*.js) must match at least one file, or prettier gets the
         # literal pattern and fails.
-        missing = [f for f in web if not (ROOT / f).is_file() and not (("*" in f) and list(ROOT.glob(f)))]
+        missing = [f for f in web if not (ROOT / f).exists() and not (("*" in f) and list(ROOT.glob(f)))]
         self.assertEqual(missing, [], "WEB_FILES lists missing files")
         m = re.search(r"^\tnode --check (.+)$", MAKEFILE, re.M)
         self.assertTrue(m, "node --check line not found in the lint target")
         checked = set(m.group(1).split())
-        shell_js = {f for f in shell_files() if f.endswith(".js")}
-        self.assertEqual(sorted(shell_js - checked), [], "shell scripts not syntax-checked by make lint")
-        self.assertIn("sw.js", checked)
-        self.assertEqual(sorted(shell_js - set(web)), [], "shell scripts not in WEB_FILES (prettier)")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        plain = {f"public/{p.name}" for p in PUBLIC.glob("*.js")}
+        self.assertEqual(sorted(plain - checked), [], "plain scripts not syntax-checked by make lint")
+        self.assertIn("src/sw.js", checked)
+        self.assertIn("public/*.js", web, "the plain scripts in public/ must be in WEB_FILES (prettier)")
 
 
 class Slogans(unittest.TestCase):
-    """The tagline list is inline in index.html (picked before the first paint) and in data/slogans.json
-    (stickers, validator): the two must stay the same list."""
+    """The tagline list is inline in index.html (picked by the header before the first paint) and in
+    data/slogans.json (stickers, validator): the two must stay the same list."""
 
     def test_inline_slogans_equal_the_data_file(self):
         import json
@@ -112,8 +155,8 @@ class Slogans(unittest.TestCase):
         inline = json.loads(m.group(1))
         data = json.loads((ROOT / "data" / "slogans.json").read_text(encoding="utf-8"))["slogans"]
         self.assertEqual(inline, data, "index.html #slogans vs data/slogans.json")
-        default = 'id="tagline">' + inline[0].replace("&", "&amp;")
-        self.assertIn(default, html, "the default tagline is the first slogan")
+        header = (ROOT / "src" / "components" / "Header.svelte").read_text(encoding="utf-8")
+        self.assertIn(f'const DEFAULT = "{inline[0]}"', header, "the default tagline is the first slogan")
 
 
 class ReadmeLayout(unittest.TestCase):
@@ -127,6 +170,13 @@ class ReadmeLayout(unittest.TestCase):
         patterns = [
             "*.html",
             "*.js",
+            "public/*.html",
+            "public/*.js",
+            "public/*.webmanifest",
+            "src/*.js",
+            "src/*.svelte",
+            "src/*/*.js",
+            "src/*/*.svelte",
             "scripts/*.py",
             "scripts/*.sh",
             "data/*.json",
@@ -143,14 +193,18 @@ class ReadmeLayout(unittest.TestCase):
 
 
 class SmokeCoverage(unittest.TestCase):
-    """scripts/smoke.sh must load every public page of the repo root, or a new page ships untested."""
+    """scripts/smoke.sh must load every public page of the build, or a new page ships untested."""
 
     def test_every_root_page_is_smoke_tested(self):
         smoke = (ROOT / "scripts" / "smoke.sh").read_text(encoding="utf-8")
         m = re.search(r"^for page in (.+?); do$", smoke, re.M)
         self.assertIsNotNone(m, "smoke.sh has no `for page in … ; do` loop")
         tested = set(m.group(1).split())
-        pages = {p.name for p in ROOT.glob("*.html")}
+        pages = {p.name for p in ROOT.glob("*.html")} | {p.name for p in PUBLIC.glob("*.html")}
         self.assertEqual(
             sorted(pages - tested), [], f"add these pages to the smoke loop: {sorted(pages - tested)}"
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

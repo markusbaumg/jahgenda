@@ -1,9 +1,9 @@
 // The service worker: the agenda is readable offline right after the first visit, and the
-// «Aktualisieren» toast really reloads the page. pwa.js unregisters the worker on 127.0.0.1/localhost,
+// «Aktualisieren» toast really reloads the page. The PWA store (src/stores/pwa.svelte.js) unregisters the worker on 127.0.0.1/localhost,
 // so these tests visit the same server as jah.localhost (Chromium resolves *.localhost to loopback).
 const { test, expect } = require("@playwright/test");
 
-const HOST = "http://jah.localhost:4173/";
+const HOST = `http://jah.localhost:${Number(process.env.E2E_PORT) || 4173}/`; // the preview port (playwright.config.js)
 test.use({ serviceWorkers: "allow", baseURL: HOST });
 
 async function workerReady(page) {
@@ -42,7 +42,7 @@ test("«Aktualisieren» after a new worker installs reloads the page", async ({ 
   await workerReady(page);
 
   // A deploy: the browser treats a worker registered under a new script URL (same scope) as a new
-  // version – it installs it and pwa.js gets its updatefound event, like after a real deploy.
+  // version – it installs it and the PWA store gets its updatefound event, like after a real deploy.
   await page.evaluate(() => navigator.serviceWorker.register("sw.js?e2e=two"));
   // By its text, not by .toast: the (hidden) «Rückgängig» toast of Meine Shows shares the class.
   const toast = page.getByText("Neue Version von Jahgenda");

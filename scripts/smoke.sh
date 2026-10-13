@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Smoke test: load index.html, log.html and review.html in headless Chrome and fail on any uncaught
-# JS error. Used by `make check` when Chrome is available (macOS app path or google-chrome on Linux CI).
+# Smoke test: load the built pages (dist/: index.html, log.html, review.html, mischpult.html) in headless
+# Chrome and fail on any uncaught JS error. Used by `make check` after `make build` when Chrome is
+# available (macOS app path or google-chrome on Linux CI).
 #
 # How it works: Chrome only prints page console messages to stderr with --vmodule='*console*=1'
 # (at --v=0 a thrown TypeError leaves no trace at all), and with that logging on it does not exit by
@@ -17,8 +18,11 @@ for c in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" google-c
 done
 if [ -z "$CHROME" ]; then echo "smoke: no Chrome found, skipped"; exit 0; fi
 
+if [ ! -f dist/index.html ]; then echo "smoke: dist/index.html missing – run make build first"; exit 1; fi
+
 PORT=$((8900 + RANDOM % 90))
-python3 -m http.server "$PORT" --bind 127.0.0.1 >/dev/null 2>&1 &
+# The Vite build, served as GitHub Pages would (dist/ is what pages.yml uploads).
+python3 -m http.server "$PORT" --bind 127.0.0.1 --directory dist >/dev/null 2>&1 &
 SRV=$!
 PROFILE=$(mktemp -d)
 trap 'kill $SRV 2>/dev/null || true; rm -rf "$PROFILE"' EXIT

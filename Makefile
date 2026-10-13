@@ -2,25 +2,36 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-PORT ?= 8000
-WEB_FILES := index.html log.html review.html mischpult.html style.css store.js lib.js app.js pwa.js callout.js sw.js design/logos.html tests/lib.test.mjs e2e/*.js e2e/tests/*.js
+# Prettier targets: the Vite entry, the source tree (JS, Svelte via
+# prettier-plugin-svelte), the plain scripts and static pages in public/, config, tests and the e2e project.
+WEB_FILES := index.html vite.config.js src public/*.html public/*.js design/logos.html tests/*.test.mjs e2e/*.js e2e/tests/*.js
 PY_FILES  := scripts/*.py tests/*.py
 # ruff on PATH, else via uvx (same version as CI); without both, lint fails loudly instead of skipping
 RUFF := $(shell command -v ruff >/dev/null 2>&1 && echo ruff || (command -v uvx >/dev/null 2>&1 && echo "uvx ruff") || echo "python3 -m ruff")
-# A prettier on PATH wins; otherwise npx, which reuses its cache without a registry round-trip
-# once prettier@3.3.3 has been fetched once (so make check also works on a train).
-PRETTIER  := $(shell command -v prettier 2>/dev/null || echo npx --yes --prefer-offline prettier@3.3.3)
+# prettier comes with the root package.json (pinned, with the Svelte plugin): `make deps` installs it.
+PRETTIER := node_modules/.bin/prettier
+VITE     := node_modules/.bin/vite
 
-.PHONY: help serve dev validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke e2e quality-review ics
+.PHONY: help serve dev deps build validate validate-strict test lint fmt fmt-data check scrape harvest deploy status clean cron-install cron-uninstall icons stickers watchdog venues-check ci smoke e2e quality-review ics
 
 help: ## This help
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-12s\033[0m %s\n", $$1, $$2}'
 
-serve: ## View the page locally (http://localhost:$(PORT))
-	python3 -m http.server $(PORT)
+# npm ci only when package-lock.json is newer than the last install (or node_modules is missing).
+node_modules/.package-lock.json: package-lock.json
+	npm ci --no-fund --no-audit
+	@touch node_modules/.package-lock.json
 
-dev: ## Local preview with live reload (npx live-server)
-	npx --yes live-server@1.2.2 --port=5500 --host=127.0.0.1 --no-browser --wait=200 --ignore=.git,tests
+deps: node_modules/.package-lock.json ## Install the pinned node dependencies (npm ci)
+
+build: deps ## Production build into dist/ (npm ci + vite build; data/ is copied, sw.js + manifest via vite-plugin-pwa)
+	$(VITE) build
+
+dev: deps ## Dev server with hot reload (http://127.0.0.1:5173, data/ served from the repo)
+	$(VITE)
+
+serve: build ## View the production build locally (http://127.0.0.1:4173, vite preview)
+	$(VITE) preview
 
 validate: ## Validate data/*.json (past shows allowed, as in CI)
 	python3 scripts/validate_shows.py --allow-past
@@ -28,18 +39,18 @@ validate: ## Validate data/*.json (past shows allowed, as in CI)
 validate-strict: ## Validate strictly (no past shows) – what the scraper runs
 	python3 scripts/validate_shows.py
 
-test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contract) and node (lib.js)
+test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contract) and node (src/lib)
 	python3 -m unittest discover -s tests -v
 	node --test tests/*.test.mjs
 
-lint: ## Syntax and format check (JS via node, Python via ruff – PATH or uvx –, HTML/CSS via prettier)
-	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules || (echo "lint: merge conflict markers found" && exit 1)
+lint: deps ## Syntax and format check (plain scripts via node, Python via ruff – PATH or uvx –, the rest via prettier)
+	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.svelte' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=dist || (echo "lint: merge conflict markers found" && exit 1)
 	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
-	node --check store.js lib.js app.js pwa.js callout.js sw.js
+	node --check public/store.js src/sw.js
 	@$(RUFF) check scripts tests && $(RUFF) format --check scripts tests
 	$(PRETTIER) --check $(WEB_FILES)
 
-fmt: ## Format code (prettier for HTML/CSS/JS, ruff for Python) and normalise data
+fmt: deps ## Format code (prettier for HTML/CSS/JS/Svelte, ruff for Python) and normalise data
 	$(PRETTIER) --write $(WEB_FILES)
 	$(RUFF) format scripts tests && $(RUFF) check --fix scripts tests
 	$(MAKE) fmt-data
@@ -47,13 +58,13 @@ fmt: ## Format code (prettier for HTML/CSS/JS, ruff for Python) and normalise da
 fmt-data: ## Bring data/*.json into canonical form (sorting, indentation)
 	python3 scripts/format_data.py
 
-check: lint validate test smoke ## Run everything (before every commit)
+check: lint validate test build smoke ## Run everything (before every commit): lint, validate, tests, build, smoke
 	python3 scripts/format_data.py --check
 
-smoke: ## Load both pages in headless Chrome and fail on uncaught JS errors
+smoke: ## Load the built pages (dist/) in headless Chrome and fail on uncaught JS errors
 	scripts/smoke.sh
 
-e2e: ## End-to-end tests in a real browser (Playwright, e2e/): desktop Chrome + iPhone; not part of check
+e2e: build ## End-to-end tests in a real browser (Playwright, e2e/, against vite preview of dist/): desktop Chrome + iPhone; not part of check
 	cd e2e && (test -f package-lock.json && npm ci || npm install) && npx playwright install chromium && npx playwright test
 
 ci: check ## What GitHub Actions runs (validate.yml)
@@ -69,7 +80,7 @@ deploy: check ## Check, commit (if needed) and push → GitHub Pages deploys
 	git push origin main
 	@echo "→ https://markusbaumg.github.io/jahgenda/  (status: make status)"
 
-icons: ## Render PWA icons (img/icons/*.png) from img/logo/jahgenda.svg
+icons: ## Render PWA icons (public/img/icons/*.png) from public/img/logo/jahgenda.svg
 	scripts/make_icons.sh
 
 stickers: ## Sticker print files (design/stickers/): SVG + PDF via headless Chrome, QR via segno in .venv-stickers
@@ -90,8 +101,8 @@ cron-uninstall: ## Remove the local launchd job
 venues-check: ## Re-check every venue's coordinates against OpenStreetMap (Nominatim)
 	python3 scripts/check_venues.py
 
-ics: ## Build the subscribable calendar feeds (jahgenda.ics + per canton) into the repo root
-	python3 scripts/make_ics.py .
+ics: ## Build the subscribable calendar feeds (jahgenda.ics + per canton) into dist/ (after make build)
+	python3 scripts/make_ics.py dist
 
 quality-review: ## Preview the weekly quality-review issue (dropped candidates), without touching GitHub
 	DRY_RUN=1 python3 scripts/quality_review.py --days 7
@@ -103,5 +114,5 @@ status: ## Show the last deploys and the last scraper run
 	gh run list -R markusbaumg/jahgenda -L 5
 	@python3 -c "import json; r=json.load(open('data/runs.json'))['runs']; print('Last scraper run:', r[0]['at'] if r else 'none yet', '-', (r[0].get('total','?') if r else ''), 'shows')"
 
-clean: ## Remove temporary files
-	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .ruff_cache
+clean: ## Remove temporary files and the build
+	find . -name '__pycache__' -type d -prune -exec rm -rf {} + ; rm -rf .ruff_cache dist

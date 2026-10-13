@@ -1,0 +1,1171 @@
+/* Filter bar (src/components/filters/): sticky bar, search, chips, results row, note pill, Wo / Wann
+ * panels, view switch. */
+/* Sticky filter bar: two rows of frozen height (--bar-top + --bar-chips = 84 px, 96 px from 768 px).
+ * The height is set explicitly so neither the data nor the stuck state can ever change it. When stuck:
+ * the bar shadow plus a 3 px tricolor rule drawn as an overlay along the bottom edge (no border, no shift). */
+.filters {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: var(--bar-h);
+  margin-bottom: 8px;
+  /* The bar itself covers the status-bar inset of a standalone app, so nothing scrolls through the
+   * clock area; the inset is part of --bar-h (see :root), so month heads and scroll offsets include it. */
+  padding: var(--safe-top) 0 0;
+  background:
+    var(--sun) fixed no-repeat,
+    var(--bg);
+}
+/* The rows bleed 8–10 px past the column (zebra plate, mark fader), so the bar's plate and shadow extend one
+ * gutter beyond it; otherwise a marked row's fader shows beside the bar while scrolling under it. */
+.filters::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(-1 * var(--gutter));
+  background:
+    var(--sun) fixed no-repeat,
+    var(--bg);
+  transition: box-shadow var(--t-2) var(--ease-tape);
+}
+.filters::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%);
+  opacity: 0;
+  transition: opacity var(--t-2) var(--ease-tape);
+  pointer-events: none;
+}
+.filters.stuck::before {
+  box-shadow: var(--sh-bar);
+}
+.filters.stuck::after {
+  opacity: 1;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--bar-top);
+}
+.toolbar input,
+.icon-btn {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  height: var(--tap);
+  min-width: 0;
+}
+.search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  transition: opacity var(--t-2) var(--ease-tape);
+}
+.search input {
+  width: 100%;
+  padding: 0 12px 0 40px;
+  text-overflow: ellipsis; /* the placeholder on a narrow phone: "Band, Cl…" rather than cut mid-word */
+}
+.search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  height: 14px;
+  width: 14px;
+  cursor: pointer;
+  background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z' fill='black'/></svg>")
+    center / contain no-repeat;
+}
+/* Mini-brand: the cross mark takes the place of the magnifier while the bar is stuck (tap = back to top).
+ * It is absolute inside the first row, so the bar never grows a third row. */
+.mini-brand {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  z-index: 1;
+  display: none;
+  width: var(--tap); /* 44 px hit area over the icon slot of the field; the mark itself is 22 px */
+  height: var(--tap);
+  place-items: center;
+  transform: translateY(-50%);
+  border-radius: var(--r-2);
+  -webkit-tap-highlight-color: transparent;
+}
+.mini-brand img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+}
+.filters.stuck .mini-brand {
+  display: grid;
+}
+.filters.stuck .search-icon {
+  opacity: 0;
+}
+.icon-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: var(--tap);
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) {
+  .icon-btn:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+}
+.icon-btn[disabled],
+.chip[disabled] {
+  opacity: 0.5;
+  cursor: progress;
+}
+.icon-btn[aria-pressed="true"] {
+  color: var(--on-gold);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+/* Chip row: one scrollable line of frozen height for the genre chips; arrows appear when there is more to
+ * see. The row keeps its height before the data arrives. */
+.chips-wrap {
+  position: relative;
+  height: var(--bar-chips);
+  /* The chip row scrolls inside .chips; the wrap must not grow past its parent (min-width 0 in a flex/grid
+   * parent). No overflow:hidden here – it would clip the chips' 44 px touch hit areas. */
+  min-width: 0;
+  max-width: 100%;
+}
+.chips {
+  display: flex;
+  align-items: flex-start;
+  height: var(--bar-chips);
+  padding: 1px 0 3px;
+  cursor: grab;
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
+  user-select: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding: 0 8px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 768px) {
+  .chips {
+    padding: 4px 0 4px;
+  }
+}
+.chips::-webkit-scrollbar {
+  display: none;
+}
+.chips-wrap.can-left .chips {
+  mask-image: linear-gradient(90deg, transparent, #000 40px);
+}
+.chips-wrap.can-right .chips {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+}
+.chips-wrap.can-left.can-right .chips {
+  mask-image: linear-gradient(90deg, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+}
+.chip-group {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+/* A thin separator between chip groups. */
+.chip-group:not(:empty) + .chip-group:not(:empty)::before {
+  content: "";
+  flex: 0 0 1px;
+  align-self: center;
+  height: 20px;
+  margin: 0 6px;
+  background: var(--line);
+}
+.chip-group:empty {
+  display: none;
+}
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 0 0 2px;
+  cursor: pointer;
+}
+.scroll-btn.left {
+  left: 0;
+}
+.scroll-btn.right {
+  right: 0;
+}
+@media (hover: hover) {
+  .scroll-btn:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+}
+/* Chips (§3.3): 32 px high, visible 1 px edge, radius --r-1, muted; pressed = gold plate with dark text. */
+.chip {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  font: inherit;
+  font-size: var(--fs-2);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  padding: 0 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--t-1) var(--ease-skank),
+    color var(--t-2) var(--ease-tape),
+    background-color var(--t-2) var(--ease-tape),
+    border-color var(--t-2) var(--ease-tape);
+}
+.chip::after {
+  /* 36 px hit area without changing the drawn box */
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+.chip svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+@media (hover: hover) {
+  .chip:hover {
+    color: var(--text);
+    border-color: var(--muted);
+  }
+}
+.chip.is-empty {
+  opacity: 0.45; /* 0 under the other filters: dimmed, still tappable (updateCounts) */
+}
+.chip:active {
+  transform: scale(0.96);
+}
+.chip[aria-pressed="true"],
+.chip.on {
+  color: var(--on-gold);
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold); /* reads as the 2 px border of the pressed state */
+  font-weight: 600;
+}
+@media (forced-colors: active) {
+  .chip[aria-pressed="true"],
+  .chip.on {
+    border: 3px solid;
+  }
+}
+/* Focus: the chip row is a 36 px scroller that clips the outer double ring, so chips use an inset ring
+ * instead, like .seg; on the gold plate it is the dark text colour. */
+.chip:focus-visible {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+.chip[aria-pressed="true"]:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--on-gold);
+}
+
+.geo-status {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.geo-status a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--gold);
+}
+@media (hover: hover) {
+  .geo-status a:hover {
+    color: var(--gold);
+  }
+}
+.geo-status:empty {
+  display: none;
+}
+.geo-pin {
+  vertical-align: -2px;
+  margin-right: 2px;
+  color: var(--red-text);
+}
+
+/* Results row: note pill on the left, filter buttons, view switch on the right. */
+.results-row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: var(--s-3) 0 0;
+  color: var(--muted);
+  font-size: var(--fs-2);
+}
+/* Active filters (§3.4): removable gold pills on their own line under pill + view switch, one per
+ * dimension («dub ✕ · Bern ✕ · Wochenende ✕»); «Alles zurücksetzen» only from two on. Without a filter
+ * the line is folded away like .sr (not display:none): it stays the focus fallback after a re-render. */
+.results {
+  order: 3;
+  flex: 1 1 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+  margin: 0;
+}
+.results.empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.results:focus-visible {
+  box-shadow: none;
+  outline: 0;
+}
+.fpill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 8px 0 10px;
+  font: inherit;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--on-gold);
+  background: var(--gold);
+  border: 0;
+  border-radius: var(--r-1);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--t-1) var(--ease-skank);
+}
+.fpill::after {
+  /* 44 px hit area on touch without changing the drawn box */
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}
+.fpill,
+.results .clear {
+  max-width: 100%;
+  overflow-wrap: anywhere; /* a pasted search term never pushes the line past the viewport */
+}
+.results .clear {
+  position: relative;
+  min-height: 28px;
+}
+.results .clear::after {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+.fpill .x {
+  font-size: 11px;
+  opacity: 0.75;
+}
+.fpill:active {
+  transform: scale(0.96);
+}
+@media (hover: hover) {
+  .fpill:hover {
+    filter: brightness(1.08);
+  }
+  .fpill:hover .x {
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  .fpill {
+    border: 2px solid;
+  }
+}
+.results .clear {
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.results-row .results-count {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.results-row .results-count:empty {
+  display: none;
+}
+.results .linkish,
+.results-row .share-filters {
+  color: var(--muted);
+}
+@media (hover: hover) {
+  .results .linkish:hover,
+  .results-row .share-filters:hover {
+    color: var(--gold-text);
+  }
+}
+.results-row .seg {
+  margin-left: auto;
+}
+/* Phones: «Link zu dieser Auswahl» sits at the end of the pills line under the switch; the break before
+ * that line is forced only while there are pills (or the link), so an unfiltered row stays one line high.
+ * Desktop has no break – its row is nowrap (below), and a 100 % flex-basis item in a nowrap row ate the
+ * whole line and squeezed the pills into a vertical column (CI screenshot, 2026-10-13). */
+@media (max-width: 767.98px) {
+  .results-row:has(.results:not(.empty), .share-filters:not([hidden]))::after {
+    content: "";
+    order: 2;
+    flex-basis: 100%;
+    height: 0;
+    margin-top: -6px;
+  }
+}
+.results-row .results {
+  flex: 1 1 auto;
+}
+.results-row .share-filters {
+  order: 4;
+  position: relative;
+  font-size: var(--fs-1);
+  min-height: 24px;
+  /* The same dotted rule as «Alles zurücksetzen» right above it: muted text without it read as a caption. */
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.results-row .share-filters::after {
+  content: ""; /* 44 px hit area on touch, like the pills */
+  position: absolute;
+  inset: -10px -4px;
+}
+/* Note pill: the «collected by AI agents» notice as a one-line disclosure. The body opens as a card under
+ * the row (grid-template-rows 0fr → 1fr over --t-3), so nothing around it moves. */
+.note-pill {
+  position: static;
+}
+.note-pill summary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 8px 0 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-2);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  list-style: none;
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.note-pill summary::-webkit-details-marker {
+  display: none;
+}
+.note-pill summary::after {
+  /* 44 px hit area on touch without changing the drawn pill */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6px;
+  bottom: -6px;
+}
+.note-pill[open] summary {
+  color: var(--text);
+  border-color: var(--muted);
+}
+@media (hover: hover) {
+  .note-pill summary:hover {
+    color: var(--text);
+    border-color: var(--muted);
+  }
+}
+.note-pill summary svg:first-child {
+  color: var(--gold-text);
+}
+.note-pill .chev {
+  transition: transform var(--t-2) var(--ease-tape);
+}
+.note-pill[open] .chev {
+  transform: rotate(180deg);
+}
+.note-short {
+  display: none;
+}
+.note-body {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 4;
+  width: min(100%, 480px);
+  display: grid;
+  grid-template-rows: 0fr;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  box-shadow: var(--sh-2);
+  transition: grid-template-rows var(--t-3) var(--ease-tape);
+}
+.note-pill.is-open .note-body {
+  grid-template-rows: 1fr;
+}
+.note-body p {
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0 14px;
+  color: var(--text);
+  line-height: var(--lh-body);
+  transition: padding var(--t-3) var(--ease-tape);
+}
+.note-pill.is-open .note-body p {
+  padding: 12px 14px;
+}
+.note-body a {
+  color: var(--green-text);
+}
+@media (hover: hover) {
+  .note-body a:hover {
+    color: var(--gold-text);
+  }
+}
+.linkish {
+  font: inherit;
+  color: var(--green-text);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none; /* no underlines anywhere; the colour turns gold on hover */
+}
+@media (hover: hover) {
+  .linkish:hover {
+    color: var(--gold);
+  }
+}
+
+@media (max-height: 500px) {
+  /* Unstuck, but still the containing block of the Wo/Wann dropdowns (position: absolute; top: 100%) and
+   * of its own ::before plate – `static` sent the panels to the end of the page and let the plate's
+   * negative inset widen the document by one gutter (16 px sideways scroll in landscape). */
+  .filters {
+    position: relative;
+  }
+}
+
+/* Wann: quick picks and month chips (multi-select). */
+/* Wann button: the active choice sits inside the button as a label (like the Wo button). */
+.icon-btn.when[aria-pressed="true"] {
+  width: auto;
+  flex-basis: auto;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
+  color: var(--bg);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.icon-btn.when b {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+/* Month histogram: one clickable bar per month (count on top, label below); selected = gold, others dim. */
+.when-months {
+  --track: 48px; /* the room a 100 % bar gets (count above, label below) */
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  height: 102px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+/* More months than fit (narrow phones): a fade on the right says so – scrollbars do not show on touch. */
+.when-months.can-scroll {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.when-months .bar {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 40px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 4px;
+  padding: 0 1px;
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.when-months .bar b {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.when-months .bar i {
+  display: block;
+  /* --h is 0…1 (share of the busiest month). A percentage would resolve against the whole button and
+     flex-shrink would then clamp every tall bar to the same height. */
+  flex: 0 0 auto;
+  height: calc(var(--track) * var(--h, 0));
+  min-height: 3px;
+  background: var(--gold);
+  border-radius: 3px 3px 0 0;
+  transition: opacity 0.15s;
+}
+.when-months .bar span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  padding: 4px 0 6px; /* room below for the «today» dot */
+  border-top: 1px solid var(--line);
+}
+.when-months .bar.today span {
+  color: var(--text);
+}
+.when-months .bar.empty i {
+  background: var(--line);
+}
+.when-months .bar.past i {
+  opacity: 0.45;
+}
+.when-months .bar.dim i {
+  opacity: 0.3;
+}
+.when-months .bar.dim b {
+  color: var(--muted);
+}
+.when-months .bar[aria-pressed="true"] span {
+  color: var(--gold);
+  border-top-color: var(--gold);
+}
+.when-months .bar[aria-pressed="true"] i {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .when-months .bar:hover span,
+  .when-months .bar:hover b {
+    color: var(--gold);
+  }
+}
+.when-months .bar:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.when-months .bar.today::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.when-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.when-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.when-foot #when-count {
+  color: var(--text);
+  font-weight: 600;
+}
+.when-past {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  cursor: pointer;
+}
+.when-past input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--gold);
+}
+@media (max-width: 480px) {
+  .when-past {
+    margin-left: 0;
+  }
+}
+
+/* Count inside a genre chip, very light */
+.chip small {
+  margin-left: 5px;
+  min-width: 2ch; /* counts change with the other filters; the chip never moves */
+  text-align: left;
+  font-size: 0.7em;
+  font-weight: 600;
+  opacity: 0.75; /* 0.55 on 9 px read as dust (3.4:1) */
+  font-variant-numeric: tabular-nums;
+}
+.chip[aria-pressed="true"] small {
+  opacity: 0.75;
+}
+
+/* View switch icons (Lucide, MIT) */
+.seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.seg .ico {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+@media (max-width: 420px) {
+  .seg button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .seg .ico {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Filter panels: dropdowns hanging from the sticky bar (so they open wherever you are on the page),
+   one at a time, with a × in the corner. */
+.filters .panel {
+  position: absolute;
+  left: 8px; /* the bar is 8 px wider than .wrap on both sides */
+  right: 8px;
+  top: 100%;
+  z-index: 4;
+  /* The panel hangs from the bar's real bottom edge: --panel-top is written by the filter store when a panel opens
+   * and while the page scrolls under it (the bar sits ~160 px lower while the header is still visible,
+   * so a value fixed to --bar-h would cut the lowest chips off below the fold). */
+  max-height: calc(100vh - var(--panel-top, var(--bar-h, 120px)) - 24px);
+  max-height: calc(100dvh - var(--panel-top, var(--bar-h, 120px)) - 24px); /* iOS: the visible viewport */
+  overflow: auto;
+  padding: 10px 14px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 18px 32px -12px rgba(0, 0, 0, 0.75);
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.panel-head strong {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.panel-close {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  margin-right: -6px;
+  padding: 0;
+  font: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .panel-close:hover {
+    color: var(--text);
+    border-color: var(--gold);
+  }
+}
+.panel-close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.icon-btn[aria-expanded="true"] {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+/* Wo panel: own position, radius, canton chips */
+.where-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.where-locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.where-locate.active {
+  color: var(--bg);
+  background: var(--gold);
+}
+.where-radius {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 4px;
+}
+.where-panel .geo-status {
+  margin: 10px 0 4px;
+}
+.canton-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+/* The chips are grouped like the spec's <optgroup>s: a small tracked label starts each group. */
+.canton-group {
+  display: contents;
+}
+.group-label {
+  flex: 1 1 100%;
+  margin-top: 6px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.canton-group:first-of-type .group-label {
+  margin-top: 2px;
+}
+.canton-chips .chip.abroad {
+  border-style: dashed;
+}
+.canton-chips .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.canton-chips .chip img {
+  width: 14px;
+  height: 16px;
+  object-fit: contain;
+}
+.icon-btn.where:has(b:not([hidden])) {
+  width: auto;
+  flex-basis: auto;
+  padding: 0 10px;
+  gap: 6px;
+  display: inline-flex;
+}
+.icon-btn.where.located {
+  color: var(--gold);
+}
+.icon-btn.where[aria-pressed="true"] {
+  color: var(--bg);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.icon-btn.where b {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+/* Labels inside the Wo / Wann buttons never push the toolbar past the viewport: capped with an ellipsis
+   on tablets and desktop, dropped on phones (the gold button says "something is set", the panel and the
+   result line say what; the search field keeps at least 120 px). Must follow the Wo / Wann rules above. */
+.icon-btn.when[aria-pressed="true"],
+.icon-btn.where:has(b:not([hidden])) {
+  max-width: 150px;
+}
+.icon-btn.when b,
+.icon-btn.where b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 480px) {
+  .icon-btn.when[aria-pressed="true"],
+  .icon-btn.where:has(b:not([hidden])) {
+    width: 44px;
+    flex-basis: 44px;
+    max-width: 44px;
+    padding: 0;
+  }
+  .icon-btn.when b,
+  .icon-btn.where b {
+    display: none;
+  }
+  .search {
+    flex: 1 1 120px;
+    min-width: 120px;
+  }
+}
+/* Phones / touch: the past-shows link gets a thumb-sized hit area without moving the line. */
+@media (max-width: 600px), (hover: none) {
+  .results .linkish {
+    padding: 8px 0;
+    margin: -8px 0;
+  }
+}
+
+/* Touch screens: no hover state can stick after a tap (see the @media (hover: hover) guards above);
+   a press gives short feedback instead. */
+@media (hover: none) {
+  .chip:active,
+  .icon-btn:active,
+  .cal-nav:active,
+  .scroll-btn:active,
+  .panel-close:active {
+    border-color: var(--gold);
+  }
+}
+
+/* Phones (≤ 420): the note pill shows its short label. */
+@media (max-width: 420px) {
+  .note-short {
+    display: inline;
+  }
+  .note-long {
+    display: none;
+  }
+}
+/* Phones (≤ 599): the results row is one line – ⓘ · «98 Konzerte» · Liste|Kalender|Karte (design §3.4
+ * draws one line at 375; the view switch stood alone on a second line with an empty left half, 46 px
+ * of fold lost above the list). The note pill is its icon; the words stay its accessible name. */
+@media (max-width: 599px) {
+  .note-pill summary {
+    padding: 0 8px;
+  }
+  .note-short,
+  .note-long {
+    display: inline;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .note-pill .chev {
+    display: none;
+  }
+}
+@media (max-width: 340px) {
+  .seg button {
+    padding: 0 12px; /* 288 px: ⓘ + «100 Konzerte» + the switch still fit on the line */
+  }
+}
+
+/* View switch: one pill group, flat segments, gold active segment */
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.seg button {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  line-height: 1;
+}
+@media (hover: hover) {
+  .seg button:hover {
+    color: var(--text);
+  }
+}
+.seg button[aria-pressed="true"] {
+  color: var(--on-gold);
+  background: var(--gold);
+  font-weight: 700;
+}
+/* Phones / touch: the segments are 36 px high. */
+@media (max-width: 600px), (hover: none) {
+  .seg button {
+    min-height: 36px;
+    padding: 0 14px;
+  }
+}
+
+/* The word next to the pin and the calendar icon: from tablet width up, until a badge takes its place. */
+.icon-word {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+@media (min-width: 601px) {
+  .icon-btn.where:not(:has(b:not([hidden]))),
+  .icon-btn.when:not(:has(b:not([hidden]))) {
+    flex-basis: auto;
+    grid-auto-flow: column;
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .icon-btn:not(:has(b:not([hidden]))) .icon-word {
+    display: inline;
+  }
+}
+/* Touch: chips and the small text buttons reach a finger-sized height – 36 px drawn, 44 px hit
+ * (design/ui-revamp.md: every target ≥ 44 px on touch). The chips keep their drawn box and their row
+ * pitch grows to 44, so neighbouring hit areas touch but never overlap. */
+@media (hover: none) {
+  .chip {
+    min-height: 36px;
+  }
+  .chip::after {
+    inset: -4px -2px;
+  }
+  /* The genre row is a 36 px scroller that clips the chips' extension: the scroller grows to 44 px
+   * (2 px into the toolbar's gap above, 6 px past the bar's bottom edge – both transparent) while the
+   * bar and the drawn chips stay where they are. */
+  .chips {
+    height: 44px;
+    margin: -2px 0 -6px;
+    padding: 3px 0 5px;
+  }
+  .chips .chip::after {
+    inset: -4px -2px -6px; /* a pixel more than the scroller shows: its clip edge is the 44 px line */
+  }
+  /* Panels: 44 px row pitch for the canton chips and the quick picks (the chips were 6 px apart). */
+  .canton-chips,
+  .when-quick,
+  .where-row,
+  .where-radius {
+    gap: 8px;
+  }
+  .panel-close {
+    position: relative;
+  }
+  .panel-close::after,
+  .seg button::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+  .seg button {
+    position: relative;
+  }
+  .seg button::after {
+    inset: -4px 0;
+  }
+  /* The chip row's scroll arrows (28 px, kept on touch: a swipe is not the only way to the end of the
+   * row) get the chips' 44 px hit band – vertically the scroller's own, 8 px sideways. */
+  .scroll-btn::after {
+    content: "";
+    position: absolute;
+    inset: -7px -9px -11px;
+  }
+  #when-reset {
+    padding: 8px 0;
+    margin: -8px 0;
+  }
+}
+
+/* Owner feedback 2026-10-13 18:30: a tidy results row. The KI note is an icon-only pill on wide screens
+ * (the sentence lives in the card and in «Über Jahgenda»), so count and view switch share one line. */
+@media (min-width: 768px) {
+  /* One line: ⓘ · count · pills · «Link zu dieser Auswahl» · view switch at the right edge. */
+  .results-row {
+    flex-wrap: nowrap;
+  }
+  .results-row .results {
+    order: 1;
+    flex: 0 1 auto;
+  }
+  .results-row .share-filters {
+    order: 2;
+    white-space: nowrap;
+  }
+  .results-row .seg {
+    order: 5;
+  }
+  .note-pill summary .note-long,
+  .note-pill summary .note-short {
+    display: none;
+  }
+  .note-pill summary {
+    padding: 0 7px;
+  }
+}
