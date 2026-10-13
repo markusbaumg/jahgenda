@@ -29,7 +29,7 @@ export const day = (d) =>
 
 export const RUNNER = { cloud: "Cloud-Routine", launchd: "Mac (launchd)", local: "Mac (lokal)" };
 export const SKILL = {
-  "scrape-shows": "Konzerte aktualisiert",
+  "scrape-shows": "Shows aktualisiert",
   "harvest-bands": "Bands aus Festivals gesammelt",
 };
 // Per-source status of a run (runs.json → sources[].status).

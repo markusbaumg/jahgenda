@@ -16,7 +16,7 @@ export default {
   "meta.ogTitle": "Jahgenda – Reggae, Dub & Ska in der Schweiz",
   "meta.description": "Kommende Reggae-, Dub- und Ska-Shows in der Schweiz.",
   "manifest.name": "Jahgenda – Reggae, Dub & Ska in der Schweiz",
-  "manifest.description": "Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz.",
+  "manifest.description": "Kommende Reggae-, Dub- und Ska-Shows in der Schweiz.",
   "skip.agenda": "Zur Agenda",
   "skip.footer": "Zum Seitenende",
   "header.home": "Zum Anfang: Agenda ohne Filter",
