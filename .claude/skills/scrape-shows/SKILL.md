@@ -112,7 +112,8 @@ Rules while collecting:
   `endDate`; an end on the next day (often the placeholder 23:59) is just the night running late. Write ONE
   show on the start date — never one show per night, never a «2. Nacht», and no `end_date` range — unless
   the page itself names separate nights or days (two dates with their own start times, «Day 1 / Day 2»,
-  a festival line-up by day).
+  a festival line-up by day), or calls the event a festival, open air or weekender – that stays one entry
+  with `end_date` as in the detection rule of step 2.5 (Festivals).
 - Time: `HH:MM` (24h), door or start time if shown; otherwise omit.
 - Venue not in `data/venues.json`: add it — `city`, `canton`, `lat`, `lon` (venue website address →
   OpenStreetMap/Nominatim or Google Maps; if the exact spot cannot be found, use the city centre and write

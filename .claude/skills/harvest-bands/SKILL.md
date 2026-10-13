@@ -41,6 +41,11 @@ For each new act (not yet in `data/artists.json`, compare case-insensitively):
    the `maps` column of `data/genres.json` — only those slugs are allowed — max 3, most specific first.
    Use the Wikipedia title / band-site spelling as the key, without trailing punctuation or guest suffixes
    (`feat. …`, `& …`); compare existing keys case-insensitively ignoring punctuation (`DUB INC.` = `Dub Inc`).
+   **One exception: a spelling already in `data/shows.json` wins.** Before you add a key, look for the act in
+   the `acts` and `days` of `data/shows.json`, compared like the validator does (case, punctuation, accents
+   and a trailing Sound System / Sound / HiFi / Int. / Crew ignored). If a show lists it as `Channel One`, the
+   key is `Channel One`, not `Channel One Sound System` – otherwise `validate_shows.py` rejects that show
+   («act … is cached as …») and this run, which must not touch `shows.json`, cannot commit.
 3. Add the entry:
    ```json
    "Alborosie": { "genres": ["reggae", "roots"], "source": "https://en.wikipedia.org/wiki/Alborosie", "checked": "2026-10-13", "festivals": ["Summerjam 2026", "Rototom Sunsplash 2025"] }
