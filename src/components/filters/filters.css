@@ -882,8 +882,11 @@
   color: var(--bg);
   background: var(--gold);
 }
+/* The four radius chips wrap inside the panel: in one line «Alle Distanzen» ran past the panel's right
+ * edge on every phone up to 390 px (only «Alle» was left at 320 px). */
 .where-radius {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-left: 4px;
 }

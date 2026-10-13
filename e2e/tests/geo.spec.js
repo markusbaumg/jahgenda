@@ -5,7 +5,7 @@ const { useFixture, openList, results } = require("./helpers");
 // Bern, a few hundred metres from the fixture's Dachstock.
 test.use({ geolocation: { latitude: 46.9481, longitude: 7.4474 }, permissions: ["geolocation"] });
 
-test("distances appear and the radius chips filter", async ({ page }) => {
+test("distances appear and the radius chips filter", async ({ page, isMobile }) => {
   await useFixture(page);
   await openList(page);
   const dist = page.locator("#list .show .dist");
@@ -19,6 +19,20 @@ test("distances appear and the radius chips filter", async ({ page }) => {
   await expect(page.locator("#geo-status")).toContainText("Am nächsten bei dir");
   await expect(page.locator("#geo-status strong")).toHaveText("Roots Night");
   await expect(page.locator("#where-radius")).toBeVisible();
+  // Every radius chip sits inside the panel – «Alle Distanzen» too, the way back from a radius – on the
+  // narrowest phones (320 px) as on the iPhone 13; nothing hides behind the panel's right edge.
+  for (const width of isMobile ? [320, 375, 390] : [1280]) {
+    if (isMobile) await page.setViewportSize({ width, height: 740 });
+    const panel = await page.locator("#where-panel").evaluate((p) => {
+      const r = p.getBoundingClientRect();
+      return { left: r.left, right: r.left + p.clientWidth };
+    });
+    for (const chip of await page.locator("#where-radius .chip").all()) {
+      const b = await chip.boundingBox();
+      expect(b.x, `radius chip at ${width} px`).toBeGreaterThanOrEqual(panel.left);
+      expect(b.x + b.width, `radius chip at ${width} px`).toBeLessThanOrEqual(panel.right);
+    }
+  }
 
   await page.locator('#where-radius [data-radius="10"]').click();
   await expect(page.locator("#toggle-where b")).toHaveText("≤ 10 km");
