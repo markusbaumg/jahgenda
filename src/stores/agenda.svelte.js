@@ -31,6 +31,11 @@ export function createAgenda() {
   let homeCity = $state("");
   let geoDeclined = $state(false);
   let today = $state.raw(todayStart());
+  // The list mode (★ Meine Shows / a friend's #m=… list, src/stores/marks.svelte.js): a source that
+  // returns null (the agenda) or { ids: { id: state }, shared } – then exactly those shows are the list,
+  // the filters are bypassed (not cleared) and past shows of the list stay in.
+  let listSource = $state.raw(() => null);
+  const list = $derived(listSource());
 
   // Filters: one object, so a later story can bind the toolbar to it and sync it with the hash.
   const filters = $state({
@@ -74,12 +79,14 @@ export function createAgenda() {
     if (format && !s.genres.includes(format)) return false;
     return !q || matchesSearch(s, q);
   }
-  const isVisible = (s, o = {}) => (!s._past || filters.showPast) && inRange(s, o) && matchesFilters(s, o);
+  const isVisible = (s, o = {}) =>
+    list ? Boolean(list.ids[s.id]) : (!s._past || filters.showPast) && inRange(s, o) && matchesFilters(s, o);
 
   const visible = $derived(shows.filter((s) => isVisible(s)));
   const filtered = $derived(
     Boolean(
-      filters.cantons.size ||
+      list ||
+        filters.cantons.size ||
         filters.genre ||
         filters.format ||
         filters.q.trim() ||
@@ -262,6 +269,13 @@ export function createAgenda() {
     },
     get today() {
       return today;
+    },
+    /** null in the agenda, { ids, shared } in the list mode (Meine Shows, a shared list). */
+    get list() {
+      return list;
+    },
+    setListSource(fn) {
+      listSource = typeof fn === "function" ? fn : () => null;
     },
     get pastCount() {
       return pastCount;

@@ -62,9 +62,6 @@ export function createViews() {
     get forceList() {
       return ui.listMode;
     },
-    set forceList(v) {
-      ui.listMode = v;
-    },
     get calMonth() {
       return calMonth;
     },

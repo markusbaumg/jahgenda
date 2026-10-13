@@ -50,6 +50,18 @@ const QUICK_WHEN = {
 };
 const IM = new Set(["AG", "TG", "TI", "VS", "JU"]); // cantons that take «im», the rest take «in»
 
+// "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
+export function monthSpan(visible) {
+  const first = visible[0]._day;
+  const last = visible.reduce(
+    (m, s) => (s._end && s._end > m ? s._end : m),
+    visible[visible.length - 1]._day,
+  );
+  return first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
+    ? monthFmt.format(first)
+    : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
+}
+
 // Quick picks, as [from, to].
 export function quickRange(kind) {
   const today = todayStart();
@@ -94,8 +106,8 @@ function createFilterUi() {
     })(),
   );
   let openPanel = $state(null); // "where" | "when" | null
-  // Set by Meine Shows (the list mode bypasses the filters: no pills, no hash, no counts).
-  let listMode = $state(false);
+  // Meine Shows / a shared list (the list mode bypasses the filters: no pills, no hash, no counts).
+  const listMode = $derived(Boolean(agenda.list));
   let pastAuto = false; // past shows were switched on by a choice that reaches into the past
   let filterTouched = false; // the change follows a filter tap (not a deep-link landing)
   let hashRead = false;
@@ -301,16 +313,6 @@ function createFilterUi() {
   }
 
   // «12 Shows · 1 Festival für diese Auswahl · Juli 2027 · Heute» – the footer line and the live region.
-  function monthSpan(visible) {
-    const first = visible[0]._day;
-    const last = visible.reduce(
-      (m, s) => (s._end && s._end > m ? s._end : m),
-      visible[visible.length - 1]._day,
-    );
-    return first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
-      ? monthFmt.format(first)
-      : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
-  }
   const resultsText = $derived.by(() => {
     const visible = agenda.visible;
     if (agenda.loadState !== "ready" || !visible.length) return "";
@@ -319,6 +321,9 @@ function createFilterUi() {
     const nConc = visible.length - nFest;
     const festNote = nFest ? `${nConc ? " · " : ""}${nFest} ${nFest === 1 ? "Festival" : "Festivals"}` : "";
     const concerts = nConc ? nShows(nConc) : "";
+    // A friend's list says what it is: «Geteilte Liste · 3 Shows · Oktober 2026».
+    if (agenda.list && agenda.list.shared)
+      return `Geteilte Liste · ${nShows(visible.length)} · ${monthSpan(visible)}${rangeNote}`;
     return `${concerts}${festNote}${agenda.filtered ? " für diese Auswahl" : ""} · ${monthSpan(visible)}${rangeNote}`;
   });
 
@@ -579,6 +584,20 @@ function createFilterUi() {
       settle();
     }
   }
+  // A change that re-renders the rows without being a filter (a row leaving Meine Shows): no transition, no
+  // scroll – only the focus is found again by its place (app.js render()).
+  function keepFocus(mutate) {
+    const prev = document.activeElement;
+    const path =
+      prev && prev !== document.body && focusRegions().some((r) => r.contains(prev)) ? focusPath(prev) : "";
+    mutate();
+    flushSync();
+    if (!path || prev.isConnected) return;
+    const next = focusRegions()
+      .map((r) => r.querySelector(path))
+      .find(Boolean);
+    (next || el("results"))?.focus({ preventScroll: true });
+  }
   function removeFilter(kind, value) {
     if (kind === "all") return resetFilters();
     applyFilter(() => removeDim(kind, value));
@@ -665,9 +684,6 @@ function createFilterUi() {
     get listMode() {
       return listMode;
     },
-    set listMode(v) {
-      listMode = v;
-    },
     get monthList() {
       return monthList;
     },
@@ -708,6 +724,7 @@ function createFilterUi() {
     setRadius,
     emptyHeadline,
     applyFilter,
+    keepFocus,
     removeFilter,
     resetFilters,
     readHashOnce,
