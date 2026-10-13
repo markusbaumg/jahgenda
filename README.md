@@ -32,15 +32,34 @@ Made by Kusi & Seraina.
 ## Layout of the repo
 
 ```
-index.html / style.css / app.js        The page. No build step, no framework.
-store.js                               Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
-lib.js                                 Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
-pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
-callout.js                             One callout component for every nudge (install, subscribe): snooze or «Nie mehr zeigen».
-log.html                               Public scraper log (renders data/runs.json).
-review.html                            Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
-mischpult.html                         The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
-img/fonts/jahdisplay.woff2             Display face (Anton subset, OFL): wordmark, day numbers, month heads.
+index.html                             The page: the Vite entry (head, inline slogans, mounts src/main.js). Built into dist/.
+style.css                              The global stylesheet (imported by src/main.js; the static pages link the copy in dist/).
+app.js                                 The vanilla page logic, kept as the port reference for the migration stories (#33); not built.
+vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and stamps sw.js.
+src/main.js / src/App.svelte           Mounts the page: skip links, stripes, header, agenda, footer.
+src/components/Header.svelte           Lockup, tagline and one of the slogans per load.
+src/components/ShowList.svelte         Month sections with festival ghost rows.
+src/components/DayGroup.svelte         One <section class="day"> per date with the shared date cell (HEUTE / MORGEN, weekend rule).
+src/components/Row.svelte              One show: title, acts / line-up, meta line, coat of arms, star, actions.
+src/components/Status.svelte           Loading skeleton, error state with retry, empty states.
+src/components/Footer.svelte           «Über Jahgenda» and the bottom bar (result count, data stamp, links).
+src/components/Icon.svelte             The inline SVG icons of the row actions.
+src/stores/agenda.svelte.js            The reactive store: shows + derived fields, genres, venues, filters, visible list.
+src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
+src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
+src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
+src/lib/dates.js / regions.js          … de-CH formatters and calendar arithmetic; cantons, nearby places, region groups.
+src/lib/search.js                      … search folding, aliases, the haystack per show.
+public/                                Static files, copied as they are into dist/ (img/, fonts, manifest, robots.txt, the pages below).
+public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
+public/pwa.js / sw.js                  Installable app: install banner, offline cache, update toast (sw.js is stamped by the build).
+public/manifest.webmanifest            The web app manifest (name, icons, colours).
+public/callout.js                      One callout component for every nudge (install, subscribe): snooze or «Nie mehr zeigen».
+public/log.html                        Public scraper log (renders data/runs.json).
+public/review.html                     Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
+public/mischpult.html                  The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
+public/img/fonts/jahdisplay.woff2      Display face (Anton subset, OFL): wordmark, day numbers, month heads.
+dist/                                  The build (gitignored): what `make build` writes and GitHub Pages serves.
 data/shows.json                        The shows. Written by the scraper.
 data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag, scraper notes.
 data/venues.web.json                   Derived by format_data.py: the venues trimmed to what the page reads (city, lat, lon, url).
@@ -58,17 +77,17 @@ scripts/validate_shows.py              Validates data/*.json. Runs in CI and at 
 scripts/format_data.py                 Canonical formatting of data/*.json (small diffs); writes data/venues.web.json.
 scripts/check_freshness.py             Watchdog: data stale or last run failed → GitHub issue `scraper-failed`.
 scripts/check_venues.py                Re-checks venue coordinates against OpenStreetMap (make venues-check).
-scripts/smoke.sh                       Loads the pages in headless Chrome, fails on JS errors (make check).
-scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahgenda.svg.
+scripts/smoke.sh                       Loads the built pages (dist/) in headless Chrome, fails on JS errors (make check).
+scripts/make_icons.sh                  Renders the PWA icons from public/img/logo/jahgenda.svg.
 scripts/make_ics.py                    Builds the subscribable calendar feeds (jahgenda.ics + one per region) before deploy.
 scripts/make_stickers.py               Renders the promo stickers in design/stickers/ (make stickers).
 scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
-tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
-e2e/                                   End-to-end tests in a real browser (Playwright; make e2e).
-design/                                Logo variants, festival spec, other design documents.
-.github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
-.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) + e2e job on every push and PR.
+tests/                                 Unit tests (python3 -m unittest, node --test for src/lib).
+e2e/                                   End-to-end tests in a real browser (Playwright against vite preview; make e2e).
+design/                                Logo variants, festival spec, other design documents (the HTML pages are copied into dist/design).
+.github/workflows/pages.yml            Validates data, builds dist/ (vite, stamped service worker, .ics feeds), deploys on every push to main.
+.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, build, smoke, format check) + e2e job on every push and PR.
 .github/workflows/quality-review.yml   Mondays: scripts/quality_review.py opens the review issue (label quality).
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.
 Makefile                               Everything you can run: `make` shows the help.
@@ -323,15 +342,19 @@ Check everything: `make validate` (strict: `make validate-strict`). Format: `mak
 
 ```sh
 make              # help: all targets
-make serve        # http://localhost:8000
-make dev          # live reload on http://127.0.0.1:5500 (npx live-server)
-make check        # lint + validate + test – must be green before every commit
+make dev          # Vite dev server with hot reload on http://127.0.0.1:5173 (data/ served from the repo)
+make build        # npm ci + vite build → dist/ (data/ copied, sw.js stamped)
+make serve        # the production build on http://127.0.0.1:4173 (vite preview)
+make check        # lint + validate + test + build + smoke – must be green before every commit
 make deploy       # check, commit, push → GitHub Pages deploys
-make icons        # re-render PWA icons from img/logo/jahgenda.svg
+make icons        # re-render PWA icons from public/img/logo/jahgenda.svg
 make status       # last deploys and the last scraper run
 ```
 
-No dependencies beyond Python 3, Node (for prettier via npx) and the GitHub CLI.
+The page is Svelte 5 (runes) + Vite 6: the source lives in `src/`, static files in `public/`, the build in
+`dist/` (gitignored). Dependencies are pinned in `package.json` (`npm ci`); beyond Node 22+ you need Python 3
+(scripts, tests, validator) and the GitHub CLI for `make status`. `data/` stays at the repo root as the
+scraper's contract – the build copies it into `dist/data`, the dev server serves it from the repo.
 
 ### End-to-end tests
 
@@ -344,7 +367,7 @@ against a fixture served in place of `data/shows.json` (dates relative to today)
 on what the scraper found; the load and console checks use the real data.
 
 ```sh
-make e2e                                   # npm ci, download Chromium, run the suite (serves the repo on :4173)
+make e2e                                   # build, npm ci, download Chromium, run the suite (vite preview of dist/ on :4173)
 cd e2e && npx playwright test --project="iPhone 13" tests/phone.spec.js   # one project / one file
 cd e2e && npx playwright test --ui          # Playwright's UI mode
 cd e2e && node adhoc.js https://markusbaumg.github.io/jahgenda/ shot.png   # ad-hoc script against any URL
@@ -355,12 +378,12 @@ its own job in `validate.yml` and uploads the report and traces when it fails.
 
 ### Changing the logo
 
-Logo #10 (Swiss cross on red/gold/green stripes) is active: `img/logo/jahgenda.svg` is referenced in the
-header of `index.html` and `log.html`, as favicon, in the sticky bar and in `manifest.webmanifest` / the PWA
-icons (`make icons` re-renders those). All ten variants live in `img/logo/NN-name.svg` (icon) and
-`NN-name-wordmark.svg` (icon + wordmark); the picker page is `design/logos.html`
-(https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen icon over
-`img/logo/jahgenda.svg`, run `make icons`, commit.
+Logo #10 (Swiss cross on red/gold/green stripes) is active: `public/img/logo/jahgenda.svg` is referenced in
+the header (`src/components/Header.svelte`) and `log.html`, as favicon, in the sticky bar and in
+`manifest.webmanifest` / the PWA icons (`make icons` re-renders those). All ten variants live in
+`public/img/logo/NN-name.svg` (icon) and `NN-name-wordmark.svg` (icon + wordmark); the picker page is
+`design/logos.html` (https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen
+icon over `public/img/logo/jahgenda.svg`, run `make icons`, commit.
 
 ### Contributing (for Seraina and everyone else)
 

@@ -4,7 +4,7 @@
  * - data/*.json is network-first with the cached copy as offline fallback, so the agenda is always
  *   fresh when online and still readable offline.
  * - Leaflet from unpkg is cached on first use; map tiles are never cached.
- * BUILD is replaced at deploy time (see .github/workflows/pages.yml) with a hash of the shell files,
+ * BUILD is replaced at build time (vite.config.js, jahgenda-static plugin) with a hash of the shell files,
  * so a new shell gets a new cache and old caches are deleted on activate.
  */
 const BUILD = "__BUILD__";
@@ -12,6 +12,9 @@ const SHELL_CACHE = `jahgenda-shell-${BUILD}`;
 const DATA_CACHE = "jahgenda-data";
 const LIB_CACHE = "jahgenda-lib";
 
+// The hashed bundle files of the Vite build (assets/index-….js, assets/index-….css): inserted at build time
+// by the jahgenda-static plugin in vite.config.js, together with BUILD.
+const BUNDLE = /* __BUNDLE__ */ [];
 const SHELL = [
   "./",
   "index.html",
@@ -19,8 +22,6 @@ const SHELL = [
   "review.html",
   "style.css",
   "store.js",
-  "lib.js",
-  "app.js",
   "pwa.js",
   "callout.js",
   "manifest.webmanifest",
@@ -29,6 +30,7 @@ const SHELL = [
   "img/fonts/jahdisplay.woff2",
   "img/icons/icon-192.png",
   "img/icons/icon-512.png",
+  ...BUNDLE,
 ];
 // The agenda itself: fetched into the data cache on install, so the first visit (whose own data
 // requests ran before this worker controlled the page) already leaves an offline-readable agenda.

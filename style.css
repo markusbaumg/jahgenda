@@ -110,7 +110,7 @@
  * browser ever synthesises a bold; the size-adjusted local fallback keeps the layout stable while it loads. */
 @font-face {
   font-family: "JahDisplay";
-  src: url("img/fonts/jahdisplay.woff2") format("woff2");
+  src: url("/img/fonts/jahdisplay.woff2") format("woff2");
   font-weight: 400 900;
   font-style: normal;
   font-display: swap;
@@ -2384,7 +2384,7 @@ a[href]:focus-visible,
   bottom: -30px;
   width: 96px;
   height: 96px;
-  background: url("img/logo/jahgenda.svg") center / contain no-repeat;
+  background: url("/img/logo/jahgenda.svg") center / contain no-repeat;
   opacity: 0.08;
   pointer-events: none;
 }

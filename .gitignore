@@ -4,8 +4,10 @@ __pycache__/
 *.pyc
 .ruff_cache/
 
-# Node (prettier / live-server run via npx, nothing is installed) and the Playwright project in e2e/
+# Node: the Vite build (root package.json) and the Playwright project in e2e/
 node_modules/
+dist/
+.vite/
 e2e/node_modules/
 e2e/test-results/
 e2e/playwright-report/

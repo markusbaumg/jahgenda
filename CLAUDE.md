@@ -102,7 +102,14 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   design/ui-revamp.md, reactive store, vite-plugin-pwa, Vitest + Playwright mobile tests), still a static build
   on GitHub Pages; everything else (data contract, skills, validator, routines, watchdog) stays. Story #33 —
   starts right after the revamp (#21–#28) and the mobile gate (#32) are merged. Until then no new big vanilla
-  features beyond what is already in flight. The migration also moves the page source from the repo root into
+  features beyond what is already in flight.
+- **Source layout (story #33):** `index.html` at the root is the Vite entry; `src/` holds the page
+  (`main.js`, `App.svelte`, `components/`, `stores/agenda.svelte.js`, `lib/` – the former lib.js split by
+  topic, same exports, tested by `tests/lib.test.mjs`); `public/` holds what is copied unchanged (img/, fonts,
+  manifest, robots.txt, the static pages log/review/mischpult, and the plain scripts store/callout/pwa/sw until
+  later milestones move them); `data/` stays at the root as the scraper's contract (the build copies it into
+  `dist/data`, the dev server serves it); `dist/` is the build (gitignored) that pages.yml uploads. Versions
+  are pinned exactly in `package.json`. `make check` = lint + validate + test + build + smoke. The migration also moves the page source from the repo root into
   `src/` (+ `public/` for static files; `data/`, `scraper/`, `scripts/`, `tests/`, `design/` stay) — not
   earlier, because the in-flight worktree branches edit the root files (Kusi, 2026-10-13).
 - **Working style:** big features are built by background workflows in isolated worktrees

@@ -24,15 +24,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate data before deploying
         run: python3 scripts/validate_shows.py --allow-past
-      - name: Build calendar feeds (jahgenda.ics + per canton)
-        run: python3 scripts/make_ics.py .
-      - name: Stamp service worker with a hash of the app shell
-        run: |
-          BUILD=$(cat index.html log.html review.html style.css store.js lib.js app.js pwa.js callout.js sw.js manifest.webmanifest img/about.jpg img/logo/jahgenda.svg img/fonts/*.woff2 img/icons/*.png img/cantons/*.svg | sha256sum | cut -c1-10)
-          sed -i "s/__BUILD__/$BUILD/" sw.js && grep -q "$BUILD" sw.js && echo "build $BUILD"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      # The build copies data/ into dist/data and stamps sw.js with a hash of the app shell (the
+      # jahgenda-static plugin in vite.config.js), so a new shell gets a new cache.
+      - name: Build the page (vite build → dist/)
+        run: npm ci --no-fund --no-audit && npm run build
+      - name: Build calendar feeds (jahgenda.ics + per canton) into dist/
+        run: python3 scripts/make_ics.py dist
+      - name: Check the service worker stamp
+        run: grep -q 'const BUILD = "__BUILD__"' dist/sw.js && exit 1 || grep -o 'const BUILD = "[0-9a-f]*"' dist/sw.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist
       - id: deployment
         uses: actions/deploy-pages@v4

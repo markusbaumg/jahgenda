@@ -1,11 +1,11 @@
-// Pins the public URL/file contract of lib.js: short hashes in share links, .ics export and the
+// Pins the public URL/file contract of src/lib (the old lib.js): short hashes in share links, .ics export and the
 // Google Calendar link. Run: make test (node --test tests/).
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import * as lib from "../src/lib/index.js";
 
 const require = createRequire(import.meta.url);
-const lib = require("../lib.js");
 const shows = require("../data/shows.json").shows;
 
 const PAGE = "https://markusbaumg.github.io/jahgenda/#1tsjh1k";
