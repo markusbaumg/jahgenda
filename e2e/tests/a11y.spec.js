@@ -14,6 +14,8 @@ test("skip links are the first tab stops and jump to the agenda and the footer",
   await expect(page.locator(".skip").first()).toHaveText("Zur Agenda");
   await page.keyboard.press("Enter");
   await expect(page.locator("#views")).toBeFocused();
+  await expect(page).toHaveURL(/#views$/);
+  await expect(page.locator(".link-note")).toBeHidden(); // an anchor is no stale show link
   await page.keyboard.press("Tab");
   expect(await page.evaluate(() => document.activeElement.closest("#list") !== null)).toBe(true);
 });

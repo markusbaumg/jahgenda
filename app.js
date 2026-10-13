@@ -982,9 +982,11 @@
   function revealFromHash() {
     if (/^#(mine|m)=/.test(location.hash)) return showShared();
     const raw = location.hash.slice(1);
-    if (!raw || raw === "top" || raw.includes("=")) return; // nothing, the «Nach oben» link, filter state
+    if (!raw || raw.includes("=")) return; // nothing, or the filter state
     const target = findShow(decodeHashPart(raw));
     if (!target) {
+      // An in-page anchor (the skip links, «Nach oben») is no show link.
+      if (document.getElementById(raw)) return;
       // A stale or mistyped share link: say so instead of silently showing everything.
       if (loadState === "ready") {
         noteLink("Diese Show ist nicht mehr in der Agenda – hier ist alles, was kommt.");
