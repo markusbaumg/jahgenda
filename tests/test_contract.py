@@ -102,8 +102,11 @@ class AppShell(unittest.TestCase):
             (ROOT / "src" / "styles" / p).resolve() for p in re.findall(r'^@import "([^"]+)";', index, re.M)
         ]
         self.assertEqual(len(listed), len(set(listed)), "a stylesheet is imported twice")
+        # The Mischpult (second entry) has its own sheet, imported by its entry right after index.css.
+        console_css = (ROOT / "src" / "mischpult" / "mischpult.css").resolve()
         on_disk = {p.resolve() for p in (ROOT / "src").rglob("*.css")} - {
-            (ROOT / "src" / "styles" / "index.css").resolve()
+            (ROOT / "src" / "styles" / "index.css").resolve(),
+            console_css,
         }
         self.assertEqual(
             sorted(map(str, on_disk - set(listed))), [], "stylesheets missing from src/styles/index.css"
@@ -116,6 +119,8 @@ class AppShell(unittest.TestCase):
         ]
         self.assertEqual(stray, [], "components must not import stylesheets (the order lives in index.css)")
         self.assertIn('import "./styles/index.css";', (ROOT / "src" / "main.js").read_text(encoding="utf-8"))
+        console_main = (ROOT / "src" / "mischpult" / "main.js").read_text(encoding="utf-8")
+        self.assertIn('import "../styles/index.css";\nimport "./mischpult.css";', console_main)
 
     def test_manifest_icons_exist_and_paths_are_relative(self):
         icons = re.findall(r'src: "(img/icons/[^"]+)"', VITE_CONFIG)

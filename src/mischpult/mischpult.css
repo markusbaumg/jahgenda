@@ -207,8 +207,10 @@
   min-width: 24ch;
   max-width: 46ch;
 }
+/* break-word, not anywhere: «anywhere» lets a cell shrink to one character (a name or URL broken into
+ * letters on a phone); the table scrolls sideways inside .mp-tbl instead. */
 .mp td a {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .mp tr.st-ok .st {
   color: var(--green-text);

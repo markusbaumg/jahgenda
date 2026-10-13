@@ -1,5 +1,5 @@
 {
-  "note": "Log of scraper runs, newest first, max 60 entries. Shown in the Mischpult (mischpult.html#laeufe).",
+  "note": "Log of scraper runs, newest first, max 60 entries. Shown in the owners' console (tabs Läufe and Aussortiert).",
   "runs": [
     {
       "skill": "scrape-shows",

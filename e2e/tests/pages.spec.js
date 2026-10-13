@@ -25,7 +25,9 @@ test("index.html: no console errors with the real data", async ({ page, baseURL 
 // ---- Mischpult -------------------------------------------------------------------------------------
 
 const HOUR = 3600e3;
-const ago = (h) => new Date(Date.now() - h * HOUR).toISOString();
+// One clock for the whole file: the heartbeat and the run it belongs to share the very same stamp.
+const NOW = Date.now();
+const ago = (h) => new Date(NOW - h * HOUR).toISOString();
 const TABS = ["status", "laeufe", "aussortiert", "quellen", "prompt", "genres"];
 
 // Two runs: the newer one dropped «Dub Inc» with all fields, the older one the same candidate as prose –
@@ -224,6 +226,14 @@ test("Mischpult Läufe: newest first, collapsible, with the sources table and th
   await runs.nth(1).locator("summary").click();
   await expect(runs.nth(1)).toHaveAttribute("open", "");
   await expect(runs.nth(1)).toContainText("Mac (lokal)");
+  await expect(panel(page, "laeufe").locator(".mp-chip.bad", { hasText: "fehlgeschlagen" })).toHaveCount(0);
+
+  // runs.json has no ok flag: a failed run is the one status.json (ok: false) carries the stamp of.
+  await page.unrouteAll();
+  await useConsoleFixture(page, { status: statusFixture({ ok: false, error: "ENOTFOUND im Test" }) });
+  await page.reload();
+  await expect(runs.nth(0).locator("summary")).toContainText("fehlgeschlagen");
+  await expect(runs.nth(1).locator("summary")).not.toContainText("fehlgeschlagen");
 });
 
 test("Mischpult Aussortiert: one entry per candidate, «Gehört rein» opens a prefilled quality issue", async ({

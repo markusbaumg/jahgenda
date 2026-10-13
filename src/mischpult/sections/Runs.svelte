@@ -12,7 +12,10 @@
     .sort((a, b) => b.t - a.t || a.i - b.i)
     .map(({ r }) => r);
 
-  const list = (v) => (Array.isArray(v) ? v : []);
+  // runs.json has no ok flag (a failure is a note); status.json marks the run it belongs to.
+  const status = files.status && typeof files.status === "object" ? files.status : null;
+  const failed = (r) => r.ok === false || (status?.ok === false && parseTs(status.at) === parseTs(r.at));
+  const list = (v) => (Array.isArray(v) ? v.filter((x) => x != null) : []);
   const sourceSummary = (sources) => {
     const c = {};
     for (const s of sources) c[s.status] = (c[s.status] || 0) + 1;
@@ -41,7 +44,7 @@
       <span class="mp-run-title">{SKILL[r.skill] || r.skill || "Lauf"}</span>
       <time datetime={r.at}>{stamp(r.at)}</time>
       <span class="mp-chips">
-        {#if r.ok === false}<span class="mp-chip bad">fehlgeschlagen</span>{/if}
+        {#if failed(r)}<span class="mp-chip bad">fehlgeschlagen</span>{/if}
         {#if r.runner}<span class="mp-chip">{RUNNER[r.runner] || r.runner}</span>{/if}
         {#if r.added}<span class="mp-chip ok">+{r.added} neu</span>{/if}
         {#if r.updated}<span class="mp-chip">~{r.updated} geändert</span>{/if}
