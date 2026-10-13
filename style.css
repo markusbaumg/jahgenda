@@ -533,6 +533,7 @@ a[href]:focus-visible,
   height: var(--bar-chips);
   padding: 1px 0 3px;
   cursor: grab;
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
   user-select: none;
   overflow-x: auto;
   overflow-y: hidden;
@@ -736,9 +737,13 @@ a[href]:focus-visible,
   opacity: 1;
 }
 .geo-ask {
-  padding: 0;
+  position: relative;
+  display: inline-block;
+  min-height: 24px; /* WCAG 2.5.8: a 24 px target, not an 18 px text line */
+  padding: 2px 0;
   font: inherit;
-  font-size: 0.85em;
+  font-size: 0.9em;
+  line-height: 1.4;
   color: var(--muted);
   background: none;
   border: 0;
@@ -748,7 +753,7 @@ a[href]:focus-visible,
 /* Separator and button fade in together on hover (nothing is left dangling while hidden). */
 .geo-hint {
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--t-2) var(--ease-tape);
 }
 .show:hover .geo-hint,
 .geo-hint:focus-within {
@@ -763,6 +768,12 @@ a[href]:focus-visible,
 @media (hover: none) {
   .geo-hint {
     opacity: 0.7;
+  }
+  /* Touch: the hit area grows upwards into the meta line (downwards the icon row is next). */
+  .geo-ask::after {
+    content: "";
+    position: absolute;
+    inset: -10px -6px -2px;
   }
 }
 /* SBB timetable: a small red badge next to the distance, revealed on hover (always on touch screens). */
@@ -959,6 +970,7 @@ a[href]:focus-visible,
   white-space: nowrap;
   cursor: pointer;
   list-style: none;
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -2038,7 +2050,10 @@ a[href]:focus-visible,
   }
   .foot-row {
     grid-column: 1 / -1;
-    margin-top: -4px;
+    /* 4 px (not −4): 8 px of dead space between the star's 44 px box in the side column and the «Infos»
+     * link under it (a low tap on the star opened the organiser's page), and between the «Distanz & Zug»
+     * text and the icon row. Costs ~11 px per row. */
+    margin-top: 7px;
     min-height: 38px;
   }
   .actions {
@@ -2048,12 +2063,24 @@ a[href]:focus-visible,
     gap: 0;
     margin-left: -13px; /* the icon (18 px, centred in 44 px) lines up with the title */
   }
+  /* A tap on a row of a hidden view (the calendar's day list) must never widen the layout viewport. */
+  .cal-day,
+  .foot-row {
+    overflow-x: clip;
+  }
   .show .actions .act {
     margin: -3px 0;
   }
   /* The star tucks 6 px under the coat-of-arms button, so the side column stays within a short row. */
   .side .star {
     margin-top: -6px;
+  }
+}
+/* The narrowest phones (320 px): six 44 px targets are 264 px, the line has 243 – the targets shrink to
+ * 40 px so the last one («Infos») is not cut by the viewport edge. */
+@media (max-width: 339px) {
+  .show .actions .act {
+    width: 40px;
   }
 }
 /* The star in the side column: 44 × 44, icon only (the word lives in the tooltip and for screen readers);
@@ -2618,6 +2645,7 @@ a[href]:focus-visible,
 /* --- Meine Shows (§7 S5): star = Merken on/off, state toggle in marked rows, echo, undo toast, panel --- */
 .act.star {
   -webkit-touch-callout: none; /* the long press (= Ich gehe) must not open the touch menu */
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
   user-select: none;
 }
 .act.star svg path {

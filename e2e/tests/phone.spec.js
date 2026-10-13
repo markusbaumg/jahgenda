@@ -56,6 +56,13 @@ test("every row action is reachable inline: icon-only 44 px targets with names",
   const [cw, ch] = await size(row.locator(".side .canton"));
   expect(cw).toBeGreaterThanOrEqual(TAP);
   expect(ch).toBeGreaterThanOrEqual(TAP);
+  // The star and the external «Infos» link share the side column: at least 8 px of dead space between
+  // their hit boxes, so a low tap on the star never opens the organiser's page.
+  const starBox = await star.boundingBox();
+  const infos = await row.locator('.actions a[href*="example.org/event"]').boundingBox();
+  expect(infos.y - (starBox.y + starBox.height)).toBeGreaterThanOrEqual(8);
+  // Nothing in the row widens the layout viewport (the 320 px phones shrink the targets instead).
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(page.viewportSize().width);
 });
 
 test("the star marks the row; the state toggle and the ★ count mirror it; a second tap un-marks with Rückgängig", async ({
