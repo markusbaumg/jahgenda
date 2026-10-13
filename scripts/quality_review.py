@@ -9,27 +9,15 @@ Usage: python3 scripts/quality_review.py [--days 7]
 """
 
 import json
-import os
 import re
 import sys
-import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from ghapi import DRY_RUN, REPO, SITE, TOKEN, gh, parse_ts
+
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "data" / "runs.json"
-REPO = os.environ.get("GITHUB_REPOSITORY", "markusbaumg/jahgenda")
-TOKEN = os.environ.get("GITHUB_TOKEN", "")
-DRY_RUN = os.environ.get("DRY_RUN") == "1"
-SITE = "https://markusbaumg.github.io/jahgenda/"
-
-
-def parse_ts(value):
-    try:
-        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
 def collect(days):
@@ -110,22 +98,6 @@ def body_for(items, days):
     return "\n".join(lines)
 
 
-def gh(method, path, body=None):
-    req = urllib.request.Request(
-        "https://api.github.com" + path,
-        data=json.dumps(body).encode() if body is not None else None,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {TOKEN}",
-            "Accept": "application/vnd.github+json",
-            "Content-Type": "application/json",
-            "User-Agent": "jahgenda-quality-review",
-        },
-    )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode() or "{}")
-
-
 def main(argv):
     days = 7
     if "--days" in argv:
@@ -140,9 +112,15 @@ def main(argv):
         print(title)
         print(body)
         return 0
-    created = gh(
-        "POST", f"/repos/{REPO}/issues", {"title": title, "body": body, "labels": ["quality", "scraper"]}
+    code, created = gh(
+        "POST",
+        f"/repos/{REPO}/issues",
+        {"title": title, "body": body, "labels": ["quality", "scraper"]},
+        agent="jahgenda-quality-review",
     )
+    if code != 201:
+        print(f"ERROR cannot open the issue: HTTP {code} {created}")
+        return 1
     print(f"opened issue #{created.get('number')}")
     return 0
 

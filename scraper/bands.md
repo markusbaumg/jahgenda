@@ -104,3 +104,63 @@ Setting: **Search suggestions automatically: yes**
 - Boundless Vibes Hifi — soundsystem, reggae, found via Kuppel
 - Ironworks Dread — dub, roots, found via Le Groove
 - Radio Rhum Reggae — soundsystem, reggae, dub, found via Bikini Test
+- Queen Omega — reggae, roots, dancehall · No Logo 2026, Reggae Jam 2026, Rototom 2026, Summerjam 2026, Plein-les-Watts 2025, Reeds 2024, Summerjam 2024
+- Burning Spear — roots, reggae · Chiemsee 2026, Mighty Sounds 2026, Plein-les-Watts 2026, Summerjam 2026, Rototom 2025, Reggae Jam 2024
+- Ky-Mani Marley — reggae · Chiemsee 2026, Summerjam 2026, Rototom 2025, Plein-les-Watts 2024, Summerjam 2024
+- Little Lion Sound — soundsystem, reggae, dancehall · Reggae Jam 2026, Ruhr Reggae Summer 2026, Plein-les-Watts 2024, Rototom 2024
+- Mr. Vegas — dancehall, reggae · Chiemsee 2026, Rototom 2026, Summerjam 2025, Plein-les-Watts 2024
+- Romain Virgo — reggae · Ruhr Reggae Summer 2026, Reggae Jam 2024, Rototom 2024, Summerjam 2024
+- Samora — reggae, dancehall · Reeds 2026, Reggae Jam 2026, Summerjam 2026, Reggae Jam 2024, Summerjam 2024
+- Busy Signal — dancehall, reggae · Reggae Jam 2024, Rototom 2024, Summerjam 2024
+- Culture — roots, reggae · Plein-les-Watts 2026, Summerjam 2026, Rototom 2025
+- Etana — reggae · Summerjam 2025, Reggae Jam 2024, Rototom 2024
+- Jah Lil — reggae, roots · Reggae Jam 2024, Rototom 2024, Summerjam 2024
+- Jesse Royal — reggae, roots · Reeds 2025, Rototom 2024, Summerjam 2024
+- Khalia — reggae, dancehall · Reggae Jam 2024, Rototom 2024, Summerjam 2024
+- L'Entourloop — reggae, dub, dancehall · Reeds 2025, Rototom 2025, Summerjam 2024
+- Luciano — roots, reggae · Rototom 2026, Summerjam 2026, Reggae Jam 2024
+- Nattali Rize — reggae · No Logo 2026, Plein-les-Watts 2026, Rototom 2024
+- Pow Pow Movement — soundsystem, dancehall, reggae · Reggae Jam 2026, Ruhr Reggae Summer 2026, Summerjam 2025
+- Protoje — reggae · Rototom 2026, Ruhr Reggae Summer 2026, Summerjam 2026
+- Silly Walks Discotheque — soundsystem, reggae, dancehall · Chiemsee 2026, Reggae Jam 2026, Rototom 2025
+- Spice — dancehall · Chiemsee 2026, Summerjam 2026, Rototom 2025
+- Steel Pulse — roots, reggae · Rototom 2025, Plein-les-Watts 2024, Summerjam 2024
+- Tarrus Riley — reggae · Reeds 2026, Reggae Jam 2026, Rototom 2025
+- Treesha — reggae · Chiemsee 2026, Plein-les-Watts 2026, Summerjam 2026
+- Warrior Sound — soundsystem, dancehall, reggae · Reggae Jam 2026, Ruhr Reggae Summer 2026, Rototom 2025
+- Beenie Man — dancehall · Summerjam 2025, Rototom 2024, Summerjam 2024
+- Julian Marley — reggae · Summerjam 2026, Rototom 2025, Summerjam 2024
+- Lila Iké — reggae · Chiemsee 2026, Summerjam 2026, Summerjam 2024
+- Miwata — reggae · Ruhr Reggae Summer 2026, Summerjam 2025, Summerjam 2024
+- Barrington Levy — reggae, dancehall · Plein-les-Watts 2026, Summerjam 2026
+- Bazil — reggae, dancehall · No Logo 2026, Reggae Jam 2026
+- Charly Black — dancehall · Rototom 2026, Summerjam 2026
+- Collie Buddz — reggae, dancehall · Plein-les-Watts 2024, Summerjam 2024
+- The Congos — roots, reggae · Summerjam 2026, Rototom 2024
+- Eesah — reggae · Reeds 2025, Summerjam 2025
+- General Levy — dancehall · Reggae Jam 2026, Rototom 2024
+- Inner Circle — reggae · Reggae Jam 2026, Summerjam 2025
+- Irie Révoltés — reggae, ska, dancehall · Mighty Sounds 2025, Summerjam 2025
+- Israel Vibration — roots, reggae · Plein-les-Watts 2026, Rototom 2026
+- Johnny Clarke — roots, reggae · Plein-les-Watts 2024, Rototom 2024
+- Kumar Fyah — reggae, roots · Rototom 2025, Summerjam 2025
+- Macka B — reggae, roots · Chiemsee 2026, Rototom 2026
+- Marcus Gad — roots, reggae · No Logo 2026, Rototom 2024
+- Morgan Heritage — reggae, roots · Rototom 2025, Summerjam 2025
+- Nadia McAnuff — roots, reggae · Rototom 2025, Plein-les-Watts 2024
+- Nosliw — reggae, dancehall · Reggae Jam 2026, Summerjam 2026
+- Omar Perry — reggae, dub · Rototom 2026, Plein-les-Watts 2025
+- Original Koffee — reggae · Summerjam 2026, Rototom 2025
+- Samory I — roots, reggae · Reggae Jam 2024, Summerjam 2024
+- Sara Lugo — reggae · Lakesplash 2026, Reggae Jam 2024
+- Shenseea — dancehall · Rototom 2026, Summerjam 2025
+- Sika Rlion — dancehall, reggae · Plein-les-Watts 2025, Rototom 2024
+- Stylo G — dancehall · Reggae Jam 2026, Rototom 2024
+- Third World — reggae · Rototom 2025, Summerjam 2025
+- Tiken Jah Fakoly — reggae · Ruhr Reggae Summer 2026, Rototom 2025
+- Fast Food Orchestra — ska, reggae, rocksteady · Mighty Sounds 2026, Mighty Sounds 2025, Mighty Sounds 2024
+- Alpha Blondy — reggae · Rototom 2026, Rototom 2024
+- Ganjaman — reggae · Reggae Jam 2026, Reggae Jam 2024
+- Iration Steppas — dub, soundsystem · Rototom 2026, Rototom 2025
+- Junior Kelly — reggae, roots · Summerjam 2026, Summerjam 2025
+- Twinkle Brothers — roots, reggae · Rototom 2026, Rototom 2024

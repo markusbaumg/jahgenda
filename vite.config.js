@@ -10,9 +10,12 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Files beside the bundle that the build copies into dist/ (and the dev server serves from the root):
-// the data contract and the design pages (design/logos.html is a recorded URL on the live site).
+// the data contract, the scraper's source list (mischpult.html reads scraper/sources.json for its Portale,
+// Suchen and Festivals tables, as on the vanilla site that published the whole repo) and the design pages
+// (design/logos.html is a recorded URL on the live site).
 const COPIES = [
   ["data", "data", (f) => f.endsWith(".json")],
+  ["scraper/sources.json", "scraper/sources.json"],
   ["design", "design", (f) => /\.(html|png)$/.test(f)],
 ];
 

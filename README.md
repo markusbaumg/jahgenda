@@ -33,7 +33,7 @@ Made by Kusi & Seraina.
 
 ```
 index.html                             The page: the Vite entry (head, inline slogans, mounts src/main.js). Built into dist/.
-vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and writes dist/style.css; vite-plugin-pwa writes sw.js + manifest.
+vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and scraper/sources.json (for the Mischpult) and writes dist/style.css; vite-plugin-pwa writes sw.js + manifest.
 src/styles/index.css                   The stylesheets in cascade order (imported by src/main.js; concatenated into dist/style.css for the static pages).
 src/styles/tokens.css / base.css       Design tokens and the display face; reset, atmosphere, focus ring, stripes, column, skip links.
 src/styles/links.css / motion.css      Link colours (late on purpose); motion, performance and the reduced-motion / contrast / forced-colours rules.
@@ -110,11 +110,12 @@ scripts/make_icons.sh                  Renders the PWA icons from public/img/log
 scripts/make_ics.py                    Builds the subscribable calendar feeds (jahgenda.ics + one per region) before deploy.
 scripts/make_stickers.py               Renders the promo stickers in design/stickers/ (make stickers).
 scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
+scripts/ghapi.py                       Shared by the two above: repo/token env, ISO timestamp parser, GitHub REST call.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for src/lib).
 e2e/                                   End-to-end tests in a real browser (Playwright against vite preview; make e2e).
 design/                                Logo variants, festival spec, other design documents (the HTML pages are copied into dist/design).
-.github/workflows/pages.yml            Validates data, builds dist/ (vite, stamped service worker, .ics feeds), deploys on every push to main.
+.github/workflows/pages.yml            Validates data, builds dist/ (vite, service worker with the injected shell list, .ics feeds), deploys on every push to main.
 .github/workflows/validate.yml         CI: `make ci` (lint, validate, test, build, smoke, format check) + e2e job on every push and PR.
 .github/workflows/quality-review.yml   Mondays: scripts/quality_review.py opens the review issue (label quality).
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.

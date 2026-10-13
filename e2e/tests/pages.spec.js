@@ -288,3 +288,10 @@ test("the hidden Mischpult: not linked from the agenda, noindex, not in robots.t
   for (const file of ["/robots.txt", "/sw.js"])
     expect(await (await request.get(file)).text(), file).not.toContain("mischpult");
 });
+
+test("the Mischpult lists the portals from scraper/sources.json (the build publishes it)", async ({
+  page,
+}) => {
+  await page.goto("/mischpult.html");
+  await expect(page.locator("#agendas-tbl tbody tr").first()).toBeVisible();
+});
