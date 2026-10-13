@@ -88,9 +88,9 @@ class AppShell(unittest.TestCase):
         self.assertIn("path: dist", PAGES)
         for f in ("data", "design"):
             self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
-        # mischpult.html fetches scraper/sources.json relative to the page (Portale, Suchen, Festivals).
-        self.assertIn('json("scraper/sources.json")', (PUBLIC / "mischpult.html").read_text(encoding="utf-8"))
-        self.assertIn('["scraper/sources.json", "scraper/sources.json"]', VITE_CONFIG)
+        # The console's Quellen tab reads scraper/sources.json from GitHub raw (the file is not in dist/).
+        sources = (ROOT / "src" / "mischpult" / "sections" / "Sources.svelte").read_text(encoding="utf-8")
+        self.assertIn("tryJson(`${RAW}scraper/sources.json`)", sources)
         self.assertIn(
             'path.join(outDir, "style.css"), plainStylesheet()',
             VITE_CONFIG,
@@ -105,8 +105,11 @@ class AppShell(unittest.TestCase):
             (ROOT / "src" / "styles" / p).resolve() for p in re.findall(r'^@import "([^"]+)";', index, re.M)
         ]
         self.assertEqual(len(listed), len(set(listed)), "a stylesheet is imported twice")
+        # The Mischpult (second entry) has its own sheet, imported by its entry right after index.css.
+        console_css = (ROOT / "src" / "mischpult" / "mischpult.css").resolve()
         on_disk = {p.resolve() for p in (ROOT / "src").rglob("*.css")} - {
-            (ROOT / "src" / "styles" / "index.css").resolve()
+            (ROOT / "src" / "styles" / "index.css").resolve(),
+            console_css,
         }
         self.assertEqual(
             sorted(map(str, on_disk - set(listed))), [], "stylesheets missing from src/styles/index.css"
@@ -119,6 +122,8 @@ class AppShell(unittest.TestCase):
         ]
         self.assertEqual(stray, [], "components must not import stylesheets (the order lives in index.css)")
         self.assertIn('import "./styles/index.css";', (ROOT / "src" / "main.js").read_text(encoding="utf-8"))
+        console_main = (ROOT / "src" / "mischpult" / "main.js").read_text(encoding="utf-8")
+        self.assertIn('import "../styles/index.css";\nimport "./mischpult.css";', console_main)
 
     def test_manifest_icons_exist_and_paths_are_relative(self):
         icons = re.findall(r'src: "(img/icons/[^"]+)"', VITE_CONFIG)
@@ -204,6 +209,39 @@ class SmokeCoverage(unittest.TestCase):
         self.assertEqual(
             sorted(pages - tested), [], f"add these pages to the smoke loop: {sorted(pages - tested)}"
         )
+        # The console and the two old pages that now redirect into it stay in the loop.
+        self.assertTrue({"index.html", "mischpult.html", "log.html", "review.html"} <= tested)
+
+
+class Mischpult(unittest.TestCase):
+    """The owners' console (story #55): a second Vite entry, hidden; log/review redirect to it."""
+
+    def test_second_vite_entry(self):
+        self.assertTrue((ROOT / "mischpult.html").is_file())
+        self.assertFalse((PUBLIC / "mischpult.html").exists(), "a public/ copy would clash with the entry")
+        self.assertRegex(VITE_CONFIG, r'input: \{ index: "index\.html", mischpult: "mischpult\.html" \}')
+        html = (ROOT / "mischpult.html").read_text(encoding="utf-8")
+        self.assertIn('<meta name="robots" content="noindex, nofollow" />', html)
+        self.assertIn('src="/src/mischpult/main.js"', html)
+
+    def test_hidden(self):
+        self.assertNotIn("mischpult", (PUBLIC / "robots.txt").read_text(encoding="utf-8").lower())
+        self.assertNotIn("mischpult", (ROOT / "index.html").read_text(encoding="utf-8").lower())
+        self.assertFalse([f for f in shell_files() if "mischpult" in f], "never precache the console")
+        self.assertIn('"mischpult.html"', VITE_CONFIG.split("globIgnores")[1].split("]")[0])
+        self.assertIn('"assets/mischpult-*"', VITE_CONFIG.split("globIgnores")[1].split("]")[0])
+        public_src = [p for p in (ROOT / "src").rglob("*") if p.is_file() and "mischpult" not in p.parts]
+        leaks = [
+            str(p.relative_to(ROOT)) for p in public_src if "mischpult.html" in p.read_text(encoding="utf-8")
+        ]
+        self.assertEqual(leaks, [], "the agenda's source must not link the console")
+
+    def test_old_pages_redirect_to_their_tab(self):
+        for page, tab in (("log.html", "laeufe"), ("review.html", "aussortiert")):
+            html = (PUBLIC / page).read_text(encoding="utf-8")
+            self.assertIn(f'content="0; url=mischpult.html#{tab}"', html, page)
+            self.assertIn(f'location.replace("mischpult.html#{tab}")', html, page)
+            self.assertIn("noindex", html, page)
 
 
 if __name__ == "__main__":

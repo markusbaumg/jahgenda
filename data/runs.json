@@ -1,5 +1,5 @@
 {
-  "note": "Log of scraper runs, newest first, max 60 entries. Shown on log.html.",
+  "note": "Log of scraper runs, newest first, max 60 entries. Shown in the owners' console (tabs Läufe and Aussortiert).",
   "runs": [
     {
       "skill": "harvest-bands",

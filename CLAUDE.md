@@ -28,7 +28,7 @@ layout. The site UI is German; code, docs and config are English.
    pass. Otherwise commit nothing.
 4. **Every run leaves a trace:** an entry in `data/runs.json` (what was found, what was dropped and why,
    which sources could not be loaded) and the heartbeat `data/status.json`. Commit even when nothing
-   changed; on failure commit `status.json` with `"ok": false`. This is what `log.html` and the watchdog show.
+   changed; on failure commit `status.json` with `"ok": false`. This is what the Mischpult and the watchdog show.
 5. **Commit only `data/*` and `scraper/bands.md` (Suggestions).** Everything else is off limits.
 6. **When in doubt, leave it out.** One show too few beats one invented or wrong show.
 7. **Do not work around bot protection.** A blocked source is skipped and logged.
@@ -98,9 +98,13 @@ headline at 200 % text size).
   language switch (DE · FR · EN, #48) lives in the footer, discreet — browser language picks on the first visit, the
   choice is remembered; #55 turns Mischpult into the one owners' console (Status · Läufe · Aussortiert · Quellen ·
   Prompt · Genres), log.html/review.html become redirects.
-- **Mischpult (owners' page):** `mischpult.html` is hidden (no links, noindex, not in robots.txt — a Disallow line would
-  advertise it) — the overview of sources, prompt, rules and runs, plus the links to `log.html` and `review.html`.
-  Never call it «admin» (scanners try that path first). Keep it unlinked from the public pages.
+- **Mischpult (owners' console, story #55):** `mischpult.html` is the second Vite entry (`src/mischpult/`) and the
+  one tool for the owners: tabs Status (heartbeat + watchdog verdict), Läufe (the run log), Aussortiert (dropped
+  candidates, deduped like quality_review.py, «Gehört rein»), Quellen & Venues, Prompt & Regeln, Genres — each by
+  hash (`#status`, `#laeufe`, `#aussortiert`, `#quellen`, `#prompt`, `#genres`). `log.html` / `review.html` are
+  only redirects to `#laeufe` / `#aussortiert`. Hidden: no links from the public pages, noindex, not in robots.txt
+  (a Disallow line would advertise it), not in the service worker's precache. Never call it «admin» (scanners
+  try that path first).
 - **Design documents:** `design/logos.html` (picker), `design/festival-spec.md`, `design/pwa-spec.md`,
   `design/promo-plan.md` (domain jahgenda.ch is free; stickers; QR), `design/monitoring-plan.md`,
   `design/ui-revamp.md` (when the panel delivers). Promo concept for Seraina as a Claude artifact:
@@ -120,7 +124,7 @@ headline at 200 % text size).
   reactive state that replaced the app.js IIFE –, `lib/` – the former lib.js split by topic, same exports,
   tested by `tests/*.test.mjs` –, `styles/` – tokens, base, links, motion and `index.css`, the one list of
   stylesheets in cascade order – and `sw.js`, the service-worker source for vite-plugin-pwa); `public/` holds
-  what is copied unchanged (img/, fonts, robots.txt, the static pages log/review/mischpult and `store.js`);
+  what is copied unchanged (img/, fonts, robots.txt, the log/review redirects to the Mischpult and `store.js`);
   `data/` stays at the root as the scraper's contract (the build copies it into `dist/data`, the dev server
   serves it); `dist/` is the build (gitignored) that pages.yml uploads, with `dist/style.css` (the stylesheets
   concatenated) for the static pages. The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,

@@ -234,7 +234,8 @@ sees which sources were covered, which failed and where the shows come from.
 
 `dropped` lists every candidate you rejected after looking at it closely (not every unrelated event on a
 page) — always with `date`, `venue`, `city` and the `url` you looked at, so a human can re-check the
-decision on `review.html` and flag false negatives. This log is public — it is shown on `log.html` — so write it in German (the site's language), so
+decision in the Mischpult (tab «Aussortiert») and flag false negatives. `data/runs.json` is public and the owners read it in the
+Mischpult (tab «Läufe») — so write it in German (the site's language), so
 a reader understands the decision.
 
 Also overwrite `data/status.json` — the heartbeat the watchdog (`.github/workflows/watchdog.yml`) reads:
@@ -265,7 +266,7 @@ not validate.** If you cannot make it pass, or anything else stops the run: reve
 (`git checkout -- data/shows.json data/artists.json data/venues.json scraper/bands.md`), write
 `data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with the same
 error in `notes`, validate, and commit + push only those two files — so the failure is visible on
-`log.html` and the watchdog, and the site keeps the last good data.
+the Mischpult (tab «Status») and the watchdog, and the site keeps the last good data.
 If the push is rejected because `main` moved: `git pull --rebase origin main`, then push again (once).
 
 ## 8. Report
