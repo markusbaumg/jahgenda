@@ -42,10 +42,7 @@ def shell_files():
 
 
 def built_file(f):
-    """Where a shell file comes from before the build: public/ (static), the repo root (index.html), or
-    the jahgenda-static plugin (style.css, put together from src/styles/index.css)."""
-    if f == "style.css":
-        return (ROOT / "src" / "styles" / "index.css").is_file()
+    """Where a shell file comes from before the build: public/ (static) or the repo root (index.html)."""
     return (PUBLIC / f).is_file() or (ROOT / f).is_file()
 
 
@@ -86,6 +83,18 @@ class AppShell(unittest.TestCase):
         self.assertIn('filename: "sw.js"', VITE_CONFIG)
         self.assertIn("__WB_MANIFEST", PAGES)
         self.assertIn("path: dist", PAGES)
+        for f in ("data", "design"):
+            self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
+        # The console's Quellen tab reads scraper/sources.json from GitHub raw (the file is not in dist/).
+        sources = (ROOT / "src" / "mischpult" / "sections" / "Sources.svelte").read_text(encoding="utf-8")
+        self.assertIn("tryJson(`${RAW}scraper/sources.json`)", sources)
+        self.assertIn(
+            'path.join(outDir, "style.css"), plainStylesheet()',
+            VITE_CONFIG,
+            "no style.css for design/logos.html",
+        )
+        # …but no visitor loads it (the pages bundle assets/*.css): it is never precached.
+        self.assertNotIn("style.css", shell_files())
 
     def test_deploy_waits_for_make_check(self):
         # Every commit on main must pass make check (CLAUDE.md): pages.yml deploys only after the CI
@@ -100,20 +109,10 @@ class AppShell(unittest.TestCase):
         self.assertIn('select(.name == "ci") | .conclusion', PAGES)
         self.assertIn("needs: gate", PAGES)
         self.assertIn("ref: ${{ needs.gate.outputs.sha }}", PAGES)
-        for f in ("data", "design"):
-            self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
-        # The console's Quellen tab reads scraper/sources.json from GitHub raw (the file is not in dist/).
-        sources = (ROOT / "src" / "mischpult" / "sections" / "Sources.svelte").read_text(encoding="utf-8")
-        self.assertIn("tryJson(`${RAW}scraper/sources.json`)", sources)
-        self.assertIn(
-            'path.join(outDir, "style.css"), plainStylesheet()',
-            VITE_CONFIG,
-            "no style.css for the static pages",
-        )
 
     def test_every_stylesheet_is_imported_once(self):
         # src/styles/index.css is the cascade order of the page; a .css file outside it would be dead or
-        # imported by a component at a position the bundle decides (and the static pages would miss it).
+        # imported by a component at a position the bundle decides (and dist/style.css would miss it).
         index = (ROOT / "src" / "styles" / "index.css").read_text(encoding="utf-8")
         listed = [
             (ROOT / "src" / "styles" / p).resolve() for p in re.findall(r'^@import "([^"]+)";', index, re.M)

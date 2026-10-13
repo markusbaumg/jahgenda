@@ -22,8 +22,10 @@ const COPIES = [
   ["design", "design", (f) => /\.(html|png)$/.test(f)],
 ];
 
-// The static pages (design/logos.html; log/review are bare redirects) link one plain style.css: the page's own
+// The design page design/logos.html (a recorded live URL) links one plain style.css: the page's own
 // stylesheets, concatenated in the order src/styles/index.css imports them – the same cascade as the bundle.
+// No page a visitor opens uses it (index.html and mischpult.html load assets/*.css; log/review are bare
+// redirects), so it is not in the precache list below.
 // The sources say url("/img/…") so Vite finds the files in public/; next to img/ the plain copy needs relative
 // urls (an absolute /img/… would miss the /jahgenda/ prefix on GitHub Pages).
 const STYLE_INDEX = path.resolve("src/styles/index.css");
@@ -58,7 +60,7 @@ function jahgendaStatic() {
     configResolved(config) {
       outDir = config.build.outDir;
     },
-    // Dev: /data/*.json straight from the repo (no-cache, as the page fetches it) and the static pages'
+    // Dev: /data/*.json straight from the repo (no-cache, as the page fetches it) and the design page's
     // style.css put together on every request; the design pages are plain files under the root, which Vite
     // serves by itself.
     configureServer(server) {
@@ -78,8 +80,8 @@ function jahgendaStatic() {
         fs.createReadStream(file).pipe(res);
       });
     },
-    // Build: copy the data and the static extras and write style.css – before vite-plugin-pwa globs dist/
-    // for the shell (style.css is a shell file), hence order "pre".
+    // Build: copy the data and the static extras and write style.css (for design/logos.html) – before
+    // vite-plugin-pwa globs dist/ for the shell, hence order "pre".
     closeBundle: {
       order: "pre",
       sequential: true,
@@ -160,7 +162,6 @@ const pwa = VitePWA({
   injectManifest: {
     globPatterns: [
       "index.html",
-      "style.css",
       "*.js",
       "assets/**/*.{js,css}",
       "img/about.jpg",

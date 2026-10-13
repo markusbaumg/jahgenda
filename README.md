@@ -34,7 +34,7 @@ Made by Kusi & Seraina.
 ```
 index.html                             The page: the Vite entry (head, inline slogans, mounts src/main.js). Built into dist/.
 vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and scraper/sources.json (for the Mischpult) and writes dist/style.css; vite-plugin-pwa writes sw.js + manifest.
-src/styles/index.css                   The stylesheets in cascade order (imported by src/main.js; concatenated into dist/style.css for the static pages).
+src/styles/index.css                   The stylesheets in cascade order (imported by src/main.js; concatenated into dist/style.css for design/logos.html).
 src/styles/tokens.css / base.css       Design tokens and the display face; reset, atmosphere, focus ring, stripes, column, skip links.
 src/styles/links.css / motion.css      Link colours (late on purpose); motion, performance and the reduced-motion / contrast / forced-colours rules.
 src/components/**/*.css                One stylesheet per part of the page, next to its components (header, filters, status, list, footer, mine, toast, festival, views).

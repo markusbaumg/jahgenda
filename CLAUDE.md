@@ -128,7 +128,7 @@ headline at 200 % text size).
   what is copied unchanged (img/, fonts, robots.txt, the log/review redirects to the Mischpult and `store.js`);
   `data/` stays at the root as the scraper's contract (the build copies it into `dist/data`, the dev server
   serves it); `dist/` is the build (gitignored) that pages.yml uploads, with `dist/style.css` (the stylesheets
-  concatenated) for the static pages. The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,
+  concatenated) for design/logos.html (not precached). The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,
   sw.js) are gone. Versions are pinned exactly in `package.json`. `make check` = lint + validate + test + build
   + smoke.
 - **Languages (story #48):** the agenda is DE · FR · EN – German default, first visit follows the browser
