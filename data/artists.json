@@ -438,6 +438,14 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-13"
     },
+    "Groundation": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Groundation_(band)",
+      "checked": "2026-10-13"
+    },
     "Hanna Mercy": {
       "genres": [],
       "source": "",
@@ -899,6 +907,14 @@
         "ska"
       ],
       "source": "https://fr.wikipedia.org/wiki/Skarface",
+      "checked": "2026-10-13"
+    },
+    "Skarra Mucci": {
+      "genres": [
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://www.petzi.ch/en/events/65141-ajz-caj-ragga-blasta-tour/",
       "checked": "2026-10-13"
     },
     "Sondaschule": {
