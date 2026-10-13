@@ -1785,7 +1785,7 @@
               : ""
         }</p>`;
     const legend =
-      `<p class="cal-legend" aria-hidden="true"><span><i style="background:var(--red)"></i>Ska, Rocksteady</span>` +
+      `<p class="cal-legend" aria-hidden="true"><span><i style="background:var(--red)"></i>Ska, Ska-Punk, Rocksteady</span>` +
       `<span><i style="background:var(--green-text)"></i>Dub, Soundsystem</span><span><i style="background:var(--gold)"></i>Reggae &amp; mehr</span></p>`;
     calendarEl.innerHTML = `
       <div class="cal-head">

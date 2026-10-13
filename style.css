@@ -252,9 +252,6 @@ a[href]:focus-visible,
   opacity: 0.5;
   cursor: progress;
 }
-.icon-btn[hidden] {
-  display: none;
-}
 .icon-btn.active {
   color: var(--bg);
   background: var(--gold);
@@ -937,9 +934,6 @@ a[href]:focus-visible,
   border-left: 3px solid var(--gold);
   background: rgba(242, 182, 50, 0.08);
   border-radius: 0 8px 8px 0;
-}
-.link-note[hidden] {
-  display: none;
 }
 .status {
   margin: 20px 0 8px;
@@ -2161,11 +2155,6 @@ a {
   display: inline-flex;
   gap: 6px;
   margin-left: 4px;
-}
-/* Without a known position there is no radius to pick (the display rule above would otherwise win
-   over the UA's [hidden]). */
-.where-radius[hidden] {
-  display: none;
 }
 .where-panel .geo-status {
   margin: 10px 0 4px;
