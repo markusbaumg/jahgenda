@@ -4,6 +4,7 @@
  * the rows, so these live beside the row component, not inside it. */
 import { icsFor, dateText } from "../../lib/index.js";
 import { t } from "../../i18n/core.js";
+import { copyText, shareOr, waLink } from "../../lib/share.js";
 
 // The page link of a show: the short per-show hash (#k3f9zq), the contract of every shared link.
 export const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
@@ -14,7 +15,7 @@ export const shareText = (s) =>
       `${s.acts.length ? `\n${t("share.with", { acts: s.acts.slice(0, 4).join(", ") })}${s.acts.length > 4 ? ` +${s.acts.length - 4}` : ""}` : ""}\n${showUrl(s)}`
     : `${s.title} – ${dateText(s)}${s.time ? ` ${s.time}` : ""} · ${s.venue}, ${s.city}\n${showUrl(s)}`;
 
-export const waUrl = (s) => `https://wa.me/?text=${encodeURIComponent(shareText(s))}`;
+export const waUrl = (s) => waLink(shareText(s));
 
 // Hand a text to the browser as a file download (an .ics for one show or for Meine Shows).
 export function downloadIcs(text, name) {
@@ -33,25 +34,15 @@ export function saveIcs(s) {
   return t("fb.saved");
 }
 
+// Cancelled: nothing to say. Not possible here: the WhatsApp link opens, like everywhere without share().
 export async function shareShow(s) {
-  try {
-    await navigator.share({ title: s.title, text: shareText(s).split("\n")[0], url: showUrl(s) });
-    return t("fb.shared");
-  } catch (err) {
-    // Cancelled: nothing to do. Not possible here: the WhatsApp link, like everywhere without share().
-    if (!err || err.name !== "AbortError") window.open(waUrl(s), "_blank", "noopener");
-    return "";
-  }
+  const r = await shareOr({ title: s.title, text: shareText(s).split("\n")[0], url: showUrl(s) }, waUrl(s));
+  return r === "shared" ? t("fb.shared") : "";
 }
 
 // The show's short hash goes into the address bar (no navigation, no hashchange) and the link to the
 // clipboard; without clipboard access the address bar is where the link is.
 export async function copyLink(s) {
   history.replaceState(history.state, "", `#${s._short}`);
-  try {
-    await navigator.clipboard.writeText(showUrl(s));
-    return t("fb.copied");
-  } catch {
-    return t("fb.inAddressBar");
-  }
+  return (await copyText(showUrl(s))) === "copied" ? t("fb.copied") : t("fb.inAddressBar");
 }

@@ -20,6 +20,7 @@ import { regionName } from "../../lib/regions.js";
 import { parseHash } from "../../lib/hash.js";
 import { quietScroll, isQuietScroll } from "../views/scroll.js";
 import { t } from "../../i18n/core.js";
+import { copyText } from "../../lib/share.js";
 
 const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
 const feedUrl = (region) => FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
@@ -82,13 +83,10 @@ export function showSubscribe(force) {
       {
         label: () => t("sub.copy"),
         title: () => t("sub.copyTitle"),
+        // The feed URL is in no address bar: without the clipboard the visitor copies it from a prompt.
         onClick: async () => {
-          try {
-            await navigator.clipboard.writeText(url);
-            callout.relabel(2, () => t("fb.copied"));
-          } catch {
-            prompt(t("sub.prompt"), url);
-          }
+          if ((await copyText(url)) === "copied") callout.relabel(2, () => t("fb.copied"));
+          else prompt(t("sub.prompt"), url);
         },
       },
     ],

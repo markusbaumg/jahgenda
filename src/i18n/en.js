@@ -263,7 +263,6 @@ export default {
   "fb.shared": "Shared",
   "fb.copied": "Copied",
   "fb.inAddressBar": "Link in the address bar",
-  "fb.shareFailed": "Couldn't share",
   "share.with": "with {acts}",
 
   // --- My shows -------------------------------------------------------------------------------------

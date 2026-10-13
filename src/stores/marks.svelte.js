@@ -20,6 +20,7 @@ import { reveal } from "./reveal.svelte.js";
 import { vevent, icsWrap, safeDecode } from "../lib/index.js";
 import { dayShort } from "../lib/dates.js";
 import { showUrl, downloadIcs } from "../components/list/actions.js";
+import { copyText, shareOr, waLink } from "../lib/share.js";
 import { FLASH_MS } from "./feedback.svelte.js";
 import { t } from "../i18n/core.js";
 
@@ -366,6 +367,8 @@ export function createMarks() {
     return lines;
   };
   const listShareText = () => `${listTitle()}\n${listShareLines().join("\n")}\n${listUrl()}`;
+  // The WhatsApp link of the list: Teilen where navigator.share is missing, and its fallback.
+  const listWaUrl = () => waLink(listShareText());
   function saveListIcs() {
     downloadIcs(
       icsWrap(
@@ -376,34 +379,22 @@ export function createMarks() {
       t(shared ? "mine.icsFileShared" : "mine.icsFile"),
     );
   }
-  // Teilen (navigator.share) of the list; the #m= link goes into the address bar first.
+  // Teilen (navigator.share) of the list; the #m= link goes into the address bar first. Not possible:
+  // the WhatsApp link opens, as for a row.
   async function shareList() {
     const url = listUrl();
     if (!shared) history.replaceState(history.state, "", url);
-    try {
-      await navigator.share({
-        title: listTitle(),
-        text: `${listTitle()}\n${listShareLines().join("\n")}`,
-        url,
-      });
-      return t("fb.shared");
-    } catch (err) {
-      return !err || err.name !== "AbortError" ? t("fb.shareFailed") : "";
-    }
+    const r = await shareOr(
+      { title: listTitle(), text: `${listTitle()}\n${listShareLines().join("\n")}`, url },
+      listWaUrl(),
+    );
+    return r === "shared" ? t("fb.shared") : "";
   }
   // Link: the #m= link is the shareable artefact – it goes to the clipboard and into the address bar.
   async function copyListLink() {
     const url = listUrl();
     if (!shared) history.replaceState(history.state, "", url);
-    try {
-      await Promise.race([
-        navigator.clipboard.writeText(url),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
-      ]);
-      return t("fb.copied");
-    } catch {
-      return t("fb.inAddressBar");
-    }
+    return (await copyText(url)) === "copied" ? t("fb.copied") : t("fb.inAddressBar");
   }
 
   // --- Wiring: Back closes ★ Meine Shows, Esc closes the list, #m= links open a list. ------------------
@@ -488,6 +479,7 @@ export function createMarks() {
     showShared,
     takeAll,
     listShareText,
+    listWaUrl,
     saveListIcs,
     shareList,
     copyListLink,

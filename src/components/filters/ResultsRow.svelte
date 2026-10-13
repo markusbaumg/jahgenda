@@ -7,6 +7,7 @@
   import { ui, nShows } from "../../stores/filters.svelte.js";
   import ViewSwitch from "./ViewSwitch.svelte";
   import { t } from "../../i18n/i18n.svelte.js";
+  import { copyText } from "../../lib/share.js";
 
   const dims = $derived(ui.dims);
   const count = $derived(
@@ -61,12 +62,7 @@
   let shareTimer = 0;
   async function share() {
     ui.syncFilterHash();
-    try {
-      await navigator.clipboard.writeText(location.href);
-      shareLabel = "fb.copied";
-    } catch {
-      shareLabel = "fb.inAddressBar";
-    }
+    shareLabel = (await copyText(location.href)) === "copied" ? "fb.copied" : "fb.inAddressBar";
     clearTimeout(shareTimer);
     shareTimer = setTimeout(() => (shareLabel = "share.filters"), 1500);
   }
