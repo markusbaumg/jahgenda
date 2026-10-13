@@ -40,6 +40,28 @@
       `<button type="button" class="callout-close" title="Später wieder zeigen (30 Tage)" aria-label="Schliessen">&times;</button>`;
     document.body.appendChild(host);
     host.querySelector(".callout-close").addEventListener("click", () => close("snooze"));
+    // Swipe down to dismiss (touch, §3.9): the sticker follows the finger and snaps away past 40 px.
+    let swipe = null;
+    host.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch" || !current || e.target.closest("button, a")) return;
+      swipe = { y: e.clientY, dy: 0 };
+      host.classList.add("drag");
+    });
+    host.addEventListener("pointermove", (e) => {
+      if (!swipe) return;
+      swipe.dy = Math.max(0, e.clientY - swipe.y);
+      host.style.setProperty("--drag", `${swipe.dy}px`);
+    });
+    const endSwipe = () => {
+      if (!swipe) return;
+      const away = swipe.dy > 40;
+      swipe = null;
+      host.classList.remove("drag");
+      host.style.removeProperty("--drag");
+      if (away) close("snooze");
+    };
+    host.addEventListener("pointerup", endSwipe);
+    host.addEventListener("pointercancel", endSwipe);
     host.addEventListener("click", (e) => {
       const a = e.target.closest("[data-callout-action]");
       if (!a || !current) return;
@@ -76,6 +98,7 @@
     h.hidden = false;
     // The callout floats over the page end: tell CSS how much room the footer bar needs below it.
     document.documentElement.style.setProperty("--callout-h", `${h.offsetHeight + 12}px`);
+    document.body.classList.add("has-banner");
     requestAnimationFrame(() => h.classList.add("show"));
     if (c.force) {
       opener = document.activeElement;
@@ -87,6 +110,7 @@
   function hideHost() {
     host.classList.remove("show");
     document.documentElement.style.removeProperty("--callout-h");
+    document.body.classList.remove("has-banner");
     const h = host;
     setTimeout(() => {
       if (!current) h.hidden = true;
@@ -142,6 +166,7 @@
         host.classList.remove("show");
         host.hidden = true;
         document.documentElement.style.removeProperty("--callout-h");
+        document.body.classList.remove("has-banner");
       }
       queue.unshift(c);
       next();

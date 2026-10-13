@@ -18,7 +18,8 @@ Jahgenda collects them in a single fast list (UI in German, docs in English):
 - filters by canton (click a coat of arms to filter) and genre, full-text search
 - genre chips per show, acts line for multi-band bills, canton coats of arms / country flags
 - "In Kalender" (.ics), WhatsApp share and direct link per show; nearest-show hint from your location
-- installable as an app on the phone (PWA: offline, own icon, update toast)
+- installable as an app on the phone (PWA: offline, own icon, update toast; the install sticker shows from
+  the second visit and never over a panel or the map)
 - subscribable calendar feeds: `webcal://markusbaumg.github.io/jahgenda/jahgenda.ics` (all shows) and
   `jahgenda-<canton>.ics` per canton — built by CI from `data/shows.json` on every deploy (`make ics`)
 - no login, no ads, no tracking
@@ -114,14 +115,26 @@ calendar export and Google link span the whole range, calendar dots and map pins
 
 ### Views
 
-The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list, next to
-«Filter zurücksetzen»; the browser remembers the choice and the Back button returns from a switch; the result
-count stands next to the switch and, with the month span and the data stamp, in the footer bar). The calendar
-is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
-on the phone it becomes a compact grid with dots and the list of the tapped day below. The map loads Leaflet
-1.9.4 and OpenStreetMap tiles on first open only, shows one marker per venue (popup with the shows there),
-your own location on request, and shows without coordinates below under "Ohne Standort". A tap on a show in
-the calendar or the map jumps to its row in the list.
+The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list; the browser
+remembers the choice and the Back button returns from a switch; the result count stands next to the switch
+and, with the month span and the data stamp, in the footer bar). The calendar is a month grid (Mo–So, ‹ ›
+and "Heute", the month in the display face on the tricolor rule, today with a gold ring) with one pill per
+show (genre colour, «★» and green for «Ich gehe»); on the phone it becomes a compact grid with dots and the
+list of the tapped day below. The map (rounded frame) loads Leaflet 1.9.4 and OpenStreetMap tiles on first
+open only – offline it says «Karte braucht Netz» and points to the list – shows one striped pin per venue
+(popup with the shows there; gold centre = festival, star = «Ich gehe»), your own location on request, and
+shows without coordinates below under "Ohne Standort". A tap on a show in the calendar or the map jumps to
+its row in the list.
+
+**Motion and performance** (`design/ui-revamp.md` §4): every duration is a token (`--t-1` … `--t-4`,
+`--ease-tape`, `--ease-skank`, `--stagger`), all set to 0 ms under `prefers-reduced-motion` – the top
+stripe draws in once on load, the first ten rows enter staggered after a filter change (inside a view
+transition where the browser has one, else an opacity dip), the fader / echo on marking, a gold hairline
+under a stuck month head, the pulsing ring while the position is being located, the install sticker that
+slides in with the skank ease and can be swiped away. Month sections use `content-visibility: auto`; the
+canton coats of arms are svgo-optimised and the service worker precaches only the ones that occur in
+`data/shows.json`; the display face is a 9 KB self-hosted subset, preloaded. `prefers-contrast: more` and
+`forced-colors` get their own rules, and at 200 % zoom (viewports under 500 px high) the bar unsticks.
 
 ## Scraper
 

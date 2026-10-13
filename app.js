@@ -582,10 +582,11 @@
     return `${escape(text.slice(0, i))}<mark>${escape(text.slice(i, i + q.length))}</mark>${escape(text.slice(i + q.length))}`;
   }
   // Accessible name of the canton button in a row (§5): «Nur Bern anzeigen», abroad «Deutschland, grenznah».
+  // The visible code is part of the name, so what is read matches what is seen (Lighthouse).
   const cantonLabel = (c) =>
     ABROAD[c]
-      ? `${ABROAD[c].replace(" (grenznah)", ", grenznah")} – nur diese Shows anzeigen`
-      : `Nur ${CANTONS[c] || c} anzeigen`;
+      ? `${ABROAD[c].replace(" (grenznah)", ", grenznah")} – nur diese Shows anzeigen (${c})`
+      : `Nur ${CANTONS[c] || c} anzeigen (${c})`;
 
   // One row inside a day group (see renderDays), §3.6: the 3-line stack (title, acts, meta), the side column
   // (coat of arms + abbreviation as a filter button, the star) and the actions line under the stack.
@@ -884,31 +885,31 @@
   // change, the chips do not move (reserved width in CSS).
   function updateCounts() {
     if (listMode()) return;
-    const konzerte = (n) => (n === 1 ? "1 Konzert" : `${n} Konzerte`);
+    // Screen readers hear «Reggae, 75 Konzerte»: the unit sits in the count as sr text, so the accessible
+    // name still contains the visible words (an aria-label with the same words would not).
+    const count = (n) =>
+      `<span class="sr">, </span>${n}<span class="sr"> ${n === 1 ? "Konzert" : "Konzerte"}</span>`;
     for (const c of genreBar.querySelectorAll(".chip[data-genre]")) {
       const n = countWith({ genre: c.dataset.genre });
       const sm = c.querySelector("small");
-      if (sm) sm.textContent = n;
+      if (sm) sm.innerHTML = count(n);
       const name = genreLabel[c.dataset.genre] || c.dataset.genre;
       c.title = c.dataset.genre ? `Nur ${name} anzeigen (${n})` : `Alle Genres anzeigen (${n})`;
-      // Screen readers hear «Reggae, 75 Konzerte» – the count is part of the chip's name.
-      c.setAttribute("aria-label", `${c.dataset.genre ? name : "Alle Genres"}, ${konzerte(n)}`);
     }
     for (const c of formatBar.querySelectorAll(".chip[data-format]")) {
       const n = countWith({ format: c.dataset.format });
       const sm = c.querySelector("small");
-      if (sm) sm.textContent = n;
+      if (sm) sm.innerHTML = count(n);
       c.title = `Nur Festivals anzeigen (${n})`;
     }
     for (const c of cantonChips.querySelectorAll(".chip[data-canton]")) {
       const code = c.dataset.canton;
       const n = countWith({ cantons: new Set(code ? [code] : []) });
       const sm = c.querySelector("small");
-      if (sm) sm.textContent = n;
+      if (sm) sm.innerHTML = count(n);
       c.title = code
         ? `${regionName(code)}: ${nShows(n)} – anklicken zum Ein-/Ausschalten`
         : `Alle Kantone anzeigen (${n})`;
-      c.setAttribute("aria-label", `${code ? shortRegion(code) : "Alle Kantone"}, ${konzerte(n)}`);
     }
   }
 
@@ -1085,6 +1086,29 @@
         </section>`;
       })
       .join("");
+    // Motion (§4): the first ten rows enter one --stagger apart (CSS: .enter + --i); the distances in every
+    // row fade in with the same rhythm.
+    list.querySelectorAll(".show").forEach((row, i) => {
+      row.style.setProperty("--i", String(Math.min(i, 9)));
+      if (i < 10) row.classList.add("enter");
+    });
+    observeMonths();
+  }
+  // Sticky month heads: a 1 px gold hairline draws in while a head is stuck under the bar (§4). The
+  // observer looks at the heads of the current render; a head is stuck once its top meets the bar.
+  let monthObserver = null;
+  function observeMonths() {
+    if (!("IntersectionObserver" in window)) return;
+    if (monthObserver) monthObserver.disconnect();
+    const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bar-h")) || 84;
+    monthObserver = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries)
+          e.target.classList.toggle("stuck", e.intersectionRatio < 1 && e.boundingClientRect.top <= bar + 1);
+      },
+      { threshold: [1], rootMargin: `-${Math.round(bar) + 1}px 0px 0px 0px` },
+    );
+    for (const h of list.querySelectorAll(".month")) monthObserver.observe(h);
   }
   // «So 1. Aug.» – the last day of a festival for the ghost row (non-breaking, so it never wraps to «Aug.»).
   const endLabel = (s) =>
@@ -1704,9 +1728,11 @@
     locating = true;
     if (!silent) geoStatus.textContent = "Suche dich …";
     locateBtn.disabled = true;
+    locateBtn.classList.add("locating"); // the ring pulses until a fix (§4)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         locating = false;
+        locateBtn.classList.remove("locating");
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         geoDeclined = false;
         updateHomeCity();
@@ -1735,6 +1761,7 @@
       },
       (err) => {
         locating = false;
+        locateBtn.classList.remove("locating");
         locateBtn.disabled = false;
         // 1 = the browser (or the visitor) blocks the position: the row placeholders go, the panel says how
         // to get it back. Anything else (timeout, no fix) is transient: the row placeholders stay.
@@ -2477,12 +2504,15 @@
           }
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
-            .map((s) => `<i style="background:${genreColor(s)}"></i>`)
+            .map(
+              (s) =>
+                `<i class="${marks[s.id] === "going" ? "going" : ""}" style="background:${genreColor(s)}"></i>`,
+            )
             .join("")}</span>
           <div class="cal-pills">${items
             .map(
               (s) =>
-                `<button type="button" class="pill" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)} – zur Show in der Liste springen">${escape(s.title)}</button>`,
+                `<button type="button" class="pill${marks[s.id] === "going" ? " going" : ""}" data-id="${escape(s.id)}" style="--pill:${genreColor(s)}" title="${escape(`${s.title} · ${s.venue}, ${s.city}`)} – zur Show in der Liste springen">${marks[s.id] === "going" ? "★ " : ""}${escape(s.title)}</button>`,
             )
             .join("")}</div>
         </div>`);
@@ -2509,9 +2539,10 @@
         }</p>`;
     const legend =
       `<p class="cal-legend" aria-hidden="true"><span><i style="background:var(--red)"></i>Ska, Ska-Punk, Rocksteady</span>` +
-      `<span><i style="background:var(--green-text)"></i>Dub, Soundsystem</span><span><i style="background:var(--gold)"></i>Reggae &amp; mehr</span></p>`;
+      `<span><i style="background:var(--green-text)"></i>Dub, Soundsystem</span><span><i style="background:var(--gold)"></i>Reggae &amp; mehr, Festival</span>` +
+      `${visible.some((s) => marks[s.id] === "going") ? `<span><i class="going" style="background:var(--green-text)"></i>★ Ich gehe</span>` : ""}</p>`;
     calendarEl.innerHTML = `
-      <div class="cal-head">
+      <div class="cal-head rule-tri">
         <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat"${prevOk ? "" : " disabled"}>&lsaquo;</button>
         <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
         <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat"${nextOk ? "" : " disabled"}>&rsaquo;</button>
@@ -2612,14 +2643,31 @@
   }
 
   const shortDate = (d) => `${dowFmt.format(d).replace(".", "")} ${d.getDate()}.${d.getMonth() + 1}.`;
+  mapEl.addEventListener("click", (e) => {
+    const a = e.target.closest("[data-view-link]");
+    if (!a) return;
+    e.preventDefault();
+    setView(a.dataset.viewLink, { push: true });
+  });
+  // Back online while the offline note shows: the map loads now.
+  window.addEventListener("online", () => {
+    if (view === "map" && !window.L && !views.hidden) render();
+  });
 
+  // «Karte braucht Netz» (§3.12): offline, or Leaflet could not be fetched – with the way to the list.
+  const mapOfflineNote = () =>
+    `<p class="map-note offline"><strong>Karte braucht Netz</strong>Ohne Verbindung gibt es keine Karte – die Shows stehen alle in der <a href="#" data-view-link="list">Liste</a>.</p>`;
   function renderMap(visible) {
     if (!window.L) {
+      if (navigator.onLine === false) {
+        mapEl.innerHTML = mapOfflineNote();
+        return;
+      }
       mapEl.innerHTML = `<p class="map-note">Karte wird geladen …</p>`;
       loadLeaflet().then(
         () => view === "map" && render(),
         () => {
-          mapEl.innerHTML = `<p class="map-note">Die Karte konnte nicht geladen werden.</p>`;
+          mapEl.innerHTML = mapOfflineNote();
         },
       );
       return;
@@ -2930,8 +2978,23 @@
   function renderAndKeepInView() {
     nudgeQuietUntil = Date.now() + 3000; // mid-task: no sticker over the result
     filterTouched = true;
-    render();
-    filterTouched = false;
+    // Filter change (§4): the swap runs inside a view transition where the browser has one (a --t-2
+    // cross-fade; the rows then enter staggered); elsewhere #list dips in opacity over --t-2.
+    const swap = () => {
+      render();
+      filterTouched = false;
+    };
+    if (document.startViewTransition && !reducedMotion.matches) {
+      document.startViewTransition(swap).updateCallbackDone.then(keepInView, keepInView);
+    } else {
+      list.classList.remove("dip");
+      void list.offsetWidth; // restart the dip
+      list.classList.add("dip");
+      swap();
+      keepInView();
+    }
+  }
+  function keepInView() {
     // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
     // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.
     const target = views.hidden ? status : views;

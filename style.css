@@ -1063,16 +1063,20 @@ a[href]:focus-visible,
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 10px;
+  margin-bottom: var(--s-3);
+  padding-bottom: var(--s-1);
 }
 .cal-title {
   margin: 0 4px;
   min-width: 0;
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+  line-height: var(--lh-tight);
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-text);
 }
 .cal-nav {
   width: 32px;
@@ -1100,9 +1104,9 @@ a[href]:focus-visible,
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 1px;
-  background: var(--line);
+  background: var(--line-soft);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-2);
   overflow: hidden;
 }
 .cal-dow {
@@ -1154,9 +1158,18 @@ a[href]:focus-visible,
 .cal-cell.weekend:not(.past) .cal-num {
   color: var(--red-text);
 }
+.cal-cell.today {
+  box-shadow: inset 0 0 0 2px var(--gold); /* the gold ring marks today */
+}
 .cal-cell.today .cal-num {
-  color: var(--on-gold);
-  background: var(--gold);
+  color: var(--gold-text);
+}
+/* «Ich gehe» (§3.11): the pill carries a star and the green role; a dot gets a cream ring. */
+.cal-pills .pill.going {
+  --pill: var(--green-text);
+}
+.cal-dots i.going {
+  box-shadow: 0 0 0 1.5px var(--text);
 }
 .cal-dots {
   display: none;
@@ -1171,8 +1184,8 @@ a[href]:focus-visible,
   display: block;
   width: 100%;
   font: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: var(--fs-0);
+  font-weight: 700;
   text-align: left;
   color: var(--text);
   background: rgba(255, 255, 255, 0.07);
@@ -1201,6 +1214,9 @@ a[href]:focus-visible,
 .cal-empty {
   margin: 12px 0 0;
   color: var(--muted);
+}
+.cal-legend {
+  font-size: var(--fs-1);
 }
 @media (max-width: 600px) {
   /* Compact calendar: one square per day with dots, the selected day's shows below.
@@ -1252,7 +1268,13 @@ a[href]:focus-visible,
     border-radius: 50%;
   }
   .cal-cell.selected {
-    box-shadow: inset 0 0 0 2px var(--gold);
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 2px var(--text);
+  }
+  .cal-cell.selected.today {
+    box-shadow:
+      inset 0 0 0 2px var(--text),
+      inset 0 0 0 4px var(--gold);
   }
   .cal-day {
     display: block;
@@ -1269,7 +1291,7 @@ a[href]:focus-visible,
   height: min(70vh, calc(100dvh - var(--bar-h, 64px) - 24px));
   min-height: 320px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-3);
   overflow: hidden;
   background: var(--surface);
   z-index: 0; /* keep Leaflet's panes below the sticky filter bar */
@@ -1280,7 +1302,15 @@ a[href]:focus-visible,
 }
 .map-note {
   margin: 0;
+  padding: 0 var(--s-5);
   color: var(--muted);
+  text-align: center;
+}
+/* Offline: «Karte braucht Netz» in the frame, with the way to the list (no Leaflet is fetched). */
+.map-note.offline strong {
+  display: block;
+  margin-bottom: var(--s-1);
+  color: var(--text);
 }
 .map-tiles {
   filter: brightness(0.75) contrast(1.1) saturate(0.8);
@@ -1343,6 +1373,10 @@ a[href]:focus-visible,
 @media (max-height: 500px) {
   .map {
     min-height: 240px;
+  }
+  .filters,
+  #list .month {
+    position: static;
   }
 }
 .popup-shows {
@@ -1462,7 +1496,11 @@ a[href]:focus-visible,
     filter: brightness(1.08);
   }
 }
-/* Loading: six skeleton rows in the final row grid; only their opacity shimmers (1.2 s). */
+/* Loading: six skeleton rows in the final row grid; only their opacity shimmers (1.2 s). The box keeps the
+ * footer below the fold until the data is in, so the first paint never shifts (CLS 0.12 came from there). */
+.status.loading {
+  min-height: calc(100vh - var(--bar-h, 84px) - 160px);
+}
 .status.loading {
   margin: var(--s-4) 0 0;
   padding: 0;
@@ -1539,6 +1577,22 @@ a[href]:focus-visible,
     var(--bg);
   padding-top: var(--s-3);
   margin-top: var(--s-6);
+}
+#list .month::after {
+  /* a 1 px gold hairline along the rule, drawn from the left once the head is stuck (§4) */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-2) var(--ease-tape);
+}
+#list .month.stuck::after {
+  transform: scaleX(1);
 }
 #list .month::before {
   /* same bleed as the bar: rows scrolling under the stuck head must not peek out beside it */
@@ -2933,116 +2987,7 @@ a[href]:focus-visible,
   }
 }
 
-/* Install banner (PWA) and update toast */
-.install {
-  position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  z-index: 20;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 14px 10px 14px 14px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-top: 3px solid var(--gold);
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-  transform: translateY(20px);
-  opacity: 0;
-  transition:
-    transform 0.3s,
-    opacity 0.3s;
-}
-.install.show {
-  transform: none;
-  opacity: 1;
-}
-.install[hidden] {
-  display: none;
-}
-.install-icon img {
-  display: block;
-  border-radius: 9px;
-  margin-top: 2px;
-}
-.install-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px 10px;
-  font-size: 0.9rem;
-  line-height: 1.35;
-}
-.install-body strong {
-  display: block;
-  width: 100%;
-  line-height: 1.25;
-  margin-bottom: 2px;
-}
-.install-body span {
-  color: var(--muted);
-}
-.install-body svg {
-  width: 16px;
-  height: 16px;
-  vertical-align: -3px;
-  color: var(--text);
-}
-.install-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  margin-top: 8px;
-}
-.install-never {
-  font: inherit;
-  font-size: 0.82rem;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline dotted;
-}
-@media (hover: hover) {
-  .install-never:hover {
-    color: var(--text);
-  }
-}
-.install-btn {
-  font: inherit;
-  font-weight: 700;
-  color: var(--on-gold);
-  background: var(--gold);
-  border: 0;
-  border-radius: 999px;
-  padding: 6px 14px;
-  cursor: pointer;
-}
-.install-close {
-  font: inherit;
-  font-size: 1.4rem;
-  line-height: 1;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  padding: 0 6px;
-  margin-top: -2px;
-  cursor: pointer;
-  align-self: flex-start;
-}
-@media (hover: hover) {
-  .install-close:hover {
-    color: var(--text);
-  }
-}
+/* Update toast (pwa.js); the install nudge is a callout (callout.js, below). */
 .toast {
   position: fixed;
   left: 50%;
@@ -3098,7 +3043,7 @@ a[href]:focus-visible,
   gap: 4px 14px;
   margin: 10px 0 0;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: var(--fs-1);
 }
 .legend-item {
   display: inline-flex;
@@ -3462,39 +3407,6 @@ a {
     background: rgba(242, 182, 50, 0.1);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .genres {
-    scroll-behavior: auto;
-  }
-  .show.highlight {
-    animation: none;
-  }
-  .install,
-  .callout,
-  .filters,
-  .shows .show {
-    transition: none;
-  }
-}
-
-/* Reduced motion: colour states stay, nothing moves (the duration tokens are already 0 ms). */
-@media (prefers-reduced-motion: reduce) {
-  html,
-  .chips {
-    scroll-behavior: auto;
-  }
-  .show.highlight::after {
-    animation: none;
-    background: var(--gold-tint);
-  }
-  .install,
-  .callout {
-    transition: none;
-  }
-  .sk {
-    animation: none;
-  }
-}
 
 /* Phones (≤ 420): the note pill shows its short label. */
 @media (max-width: 420px) {
@@ -3684,15 +3596,19 @@ a {
   border-top: 3px solid var(--gold);
   border-radius: 14px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-  transform: translateY(20px);
+  transform: translateY(24px);
   opacity: 0;
+  touch-action: pan-x; /* a vertical swipe on the sticker is ours (swipe down = close) */
   transition:
-    transform 0.3s,
-    opacity 0.3s;
+    transform var(--t-3) var(--ease-skank),
+    opacity var(--t-3) var(--ease-tape);
 }
 .callout.show {
-  transform: none;
+  transform: translateY(var(--drag, 0px));
   opacity: 1;
+}
+.callout.drag {
+  transition: none;
 }
 .callout[hidden] {
   display: none;
@@ -4013,11 +3929,6 @@ a:visited {
     display: none; /* phones: "✕ Zurück", "Liste von Kusi", no month span; wider: "✕ Zurück zur Agenda", "Geteilte Liste von Kusi · Oktober 2026" */
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .list-head {
-    animation: none;
-  }
-}
 
 /* The word next to the pin and the calendar icon: from tablet width up, until a badge takes its place. */
 .icon-word {
@@ -4045,13 +3956,6 @@ a:visited {
   #when-reset {
     padding: 8px 0;
     margin: -8px 0;
-  }
-}
-/* Last word on motion: the callout rule above sits before its base rule and lost the cascade. */
-@media (prefers-reduced-motion: reduce) {
-  .callout {
-    transition: none;
-    transform: none;
   }
 }
 
@@ -4111,5 +4015,141 @@ a:visited {
 @media (max-width: 520px) {
   .about-body p:not(.about-head):not(.authors) {
     text-align: left;
+  }
+}
+
+/* ---------- S8: motion system, performance and preference rules (design/ui-revamp.md §4, §5) ---------- */
+
+/* Switch-on (§4, gesture 3): the top stripe draws in once, scaleX 0 → 1 over 450 ms. */
+.stripe:first-child {
+  transform-origin: left;
+  animation: switch-on 450ms var(--ease-tape) both;
+}
+@keyframes switch-on {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Filter change: the first ten rows enter with --stagger (translateY 6 px → 0 + opacity); app.js marks
+ * them .enter and numbers them with --i. The fallback without view transitions is a --t-2 opacity dip. */
+#list .show.enter {
+  animation: row-in var(--t-3) var(--ease-tape) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+#list.dip {
+  animation: dip var(--t-2) var(--ease-tape);
+}
+@keyframes dip {
+  from {
+    opacity: 0.4;
+  }
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--t-2);
+}
+
+/* Locate: the button's ring expands over --t-4, repeating until a fix (app.js sets .locating); the
+ * distances then fade in per row with --stagger. */
+.where-locate.locating {
+  animation: locate-pulse var(--t-4) var(--ease-tape) infinite;
+}
+@keyframes locate-pulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(242, 182, 50, 0.7);
+  }
+  to {
+    box-shadow: 0 0 0 12px rgba(242, 182, 50, 0);
+  }
+}
+#list .dist {
+  animation: fade-in var(--t-3) var(--ease-tape) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Performance (§4): a month section off screen is neither laid out nor painted. Paint containment clips
+ * at the section box, so the section takes the gutter (the rows' zebra plates and the stuck month head
+ * bleed into it by design). */
+#list > section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter);
+}
+
+/* Preferences (§5). Reduced motion: colour states stay, nothing moves (the duration tokens are 0 ms;
+ * what has a fixed duration or loops is switched off here – one block for the whole sheet). */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  .chips,
+  .genres {
+    scroll-behavior: auto;
+  }
+  .show.highlight::after {
+    animation: none;
+    background: var(--gold-tint); /* a static 3 s gold edge instead of the flash */
+  }
+  .callout,
+  .filters,
+  .shows .show {
+    transition: none;
+  }
+  .callout {
+    transform: none;
+  }
+  .sk,
+  .list-head,
+  .stripe:first-child,
+  #list .show.enter,
+  #list.dip,
+  #list .dist,
+  .where-locate.locating,
+  .toast {
+    animation: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+/* More contrast: the muted text becomes text, the lines become the muted colour. */
+@media (prefers-contrast: more) {
+  :root {
+    --muted: #f3ead8;
+    --faint: #bcae98;
+    --line: #bcae98;
+    --line-soft: #766759;
+  }
+}
+/* Forced colours (Windows high contrast): a pressed or marked thing gets a solid border, icons follow the
+ * text colour (the per-component rules above do the chips, pills, cantons, marked rows and the toggle). */
+@media (forced-colors: active) {
+  .show.going .mark-seg,
+  .seg [aria-pressed="true"],
+  .icon-btn[aria-pressed="true"],
+  .bar[aria-pressed="true"] {
+    border: 3px solid;
+  }
+  svg {
+    forced-color-adjust: auto;
+    fill: currentColor;
+  }
+  .stripe span,
+  .cal-dots i,
+  .pin-icon {
+    forced-color-adjust: none;
   }
 }
