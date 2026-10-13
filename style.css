@@ -328,8 +328,10 @@ body {
   text-decoration: none;
   border-bottom: 1px dotted var(--gold);
 }
-.geo-status a:hover {
-  color: var(--gold);
+@media (hover: hover) {
+  .geo-status a:hover {
+    color: var(--gold);
+  }
 }
 .geo-status:empty {
   display: none;
@@ -371,9 +373,11 @@ body {
 .geo-ask:focus-visible {
   opacity: 1;
 }
-.geo-ask:hover {
-  color: var(--gold);
-  border-bottom-color: var(--gold);
+@media (hover: hover) {
+  .geo-ask:hover {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
 }
 @media (hover: none) {
   .geo-ask {
@@ -397,8 +401,10 @@ body {
   opacity: 0;
   transition: opacity 0.15s;
 }
-.sbb:hover {
-  color: #fff;
+@media (hover: hover) {
+  .sbb:hover {
+    color: #fff;
+  }
 }
 .show:hover .sbb,
 .dist:hover .sbb,
@@ -736,8 +742,8 @@ body {
   .cal-subscribe {
     padding: 10px 8px;
   }
-  .cal-subscribe {
-    margin-left: auto;
+  .cal-head .cal-subscribe {
+    margin-left: auto; /* beats the general .cal-subscribe margin below */
   }
   .cal-pills {
     display: none;
@@ -801,8 +807,10 @@ body {
   color: var(--text);
   border-bottom-color: var(--line);
 }
-.map-view .leaflet-container .leaflet-bar a:hover {
-  color: var(--gold);
+@media (hover: hover) {
+  .map-view .leaflet-container .leaflet-bar a:hover {
+    color: var(--gold);
+  }
 }
 .map-view .leaflet-container .leaflet-bar a.leaflet-disabled {
   color: var(--line);
@@ -834,9 +842,11 @@ body {
   color: var(--text);
   text-decoration: none;
 }
-.map-view .leaflet-container .popup-shows a:hover {
-  color: var(--gold);
-  text-decoration: underline;
+@media (hover: hover) {
+  .map-view .leaflet-container .popup-shows a:hover {
+    color: var(--gold);
+    text-decoration: underline;
+  }
 }
 .popup-shows time {
   margin-right: 4px;
@@ -882,8 +892,10 @@ body {
   padding: 8px 18px;
   cursor: pointer;
 }
-.status button.primary:hover {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .status button.primary:hover {
+    filter: brightness(1.08);
+  }
 }
 .status button.primary:focus-visible {
   outline: 2px solid var(--text);
@@ -2395,6 +2407,14 @@ a {
 .results #results-text {
   grid-column: 1;
 }
+/* Phones: "✕ Filter zurücksetzen" does not fit beside the view switch – one line under it. */
+@media (max-width: 720px) {
+  .results .clear {
+    grid-column: 1 / -1;
+    justify-self: center;
+    white-space: nowrap;
+  }
+}
 
 /* Row actions never overflow the card: wrap to a second line, right-aligned */
 .foot-row {
@@ -2427,8 +2447,10 @@ a {
     0 2px 0 var(--red),
     0 4px 0 var(--green);
 }
-.sub-sticker:hover {
-  transform: rotate(0deg) scale(1.03);
+@media (hover: hover) {
+  .sub-sticker:hover {
+    transform: rotate(0deg) scale(1.03);
+  }
 }
 .sub-sticker svg {
   width: 14px;
@@ -2519,8 +2541,10 @@ a {
 .foot a {
   color: var(--muted);
 }
-.foot a:hover {
-  color: var(--gold);
+@media (hover: hover) {
+  .foot a:hover {
+    color: var(--gold);
+  }
 }
 
 /* Callout: one sticker style for every nudge (install, calendar subscription, …) */
@@ -2651,8 +2675,10 @@ a {
   transform: none;
   box-shadow: none;
 }
-.sub-sticker:hover {
-  transform: none;
+@media (hover: hover) {
+  .sub-sticker:hover {
+    transform: none;
+  }
 }
 
 /* Actions always on their own line under the tags (consistent across rows; the revamp restyles this). */
