@@ -1,5 +1,5 @@
 /* The Mischpult's own stylesheet (src/mischpult/). Tokens, the header lockup, the stripes and the footer
- * bar come from the global style.css; everything here is prefixed mp- so it never reaches the agenda. */
+ * bar come from the agenda's stylesheets (src/styles/index.css); everything here is prefixed mp- so it never reaches the agenda. */
 
 .mp-head,
 .mp-foot .wrap,

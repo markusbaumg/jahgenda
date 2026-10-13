@@ -1,0 +1,154 @@
+/* ---------- S8: motion system, performance and preference rules (design/ui-revamp.md §4, §5) ---------- */
+
+/* Switch-on (§4, gesture 3): the top stripe draws in once, scaleX 0 → 1 over 450 ms. */
+.stripe:not(.bottom) {
+  transform-origin: left;
+  animation: switch-on 450ms var(--ease-tape) both;
+}
+@keyframes switch-on {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Filter change: the first ten rows enter with --stagger (translateY 6 px → 0 + opacity); ShowList.svelte marks
+ * them .enter and numbers them with --i. The fallback without view transitions is a --t-2 opacity dip. */
+#list .show.enter {
+  animation: row-in var(--t-3) var(--ease-tape) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+#list.dip {
+  animation: dip var(--t-2) var(--ease-tape);
+}
+@keyframes dip {
+  from {
+    opacity: 0.4;
+  }
+}
+/* Only the list takes part in the cross-fade. The root is opted out: a root transition snapshots the whole
+ * page and, pointer-events or not, every tap in those 200 ms lands on <html> (measured in Chromium) – the
+ * next chip after a filter tap was lost. Named, only #list is swapped as an image; the bar, chips, pills and
+ * panels stay live and tappable while the rows fade. */
+html {
+  view-transition-name: none;
+}
+#list {
+  view-transition-name: list;
+}
+::view-transition-group(list),
+::view-transition-old(list),
+::view-transition-new(list) {
+  animation-duration: var(--t-2);
+}
+::view-transition {
+  pointer-events: none;
+}
+
+/* Locate: the button's ring expands over --t-4, repeating until a fix (WherePanel.svelte sets .locating); the
+ * distances then fade in per row with --stagger. */
+.where-locate.locating {
+  animation: locate-pulse var(--t-4) var(--ease-tape) infinite;
+}
+@keyframes locate-pulse {
+  from {
+    box-shadow: 0 0 0 0 rgba(242, 182, 50, 0.7);
+  }
+  to {
+    box-shadow: 0 0 0 12px rgba(242, 182, 50, 0);
+  }
+}
+#list .dist {
+  animation: fade-in var(--t-3) var(--ease-tape) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Performance (§4): a month section off screen is neither laid out nor painted. Paint containment clips
+ * at the section box, so the section takes the gutter (the rows' zebra plates and the stuck month head
+ * bleed into it by design). */
+#list > section {
+  content-visibility: auto;
+  /* The placeholder height of a skipped month follows its row count (ShowList.svelte writes --rows per section:
+   * ~145 px per phone row, ~108 px on desktop, plus the head), so a fast flick to the footer does not
+   * grow the document by a thousand pixels on the way; `auto` keeps the real size once laid out. */
+  --row-est: 145px;
+  contain-intrinsic-size: auto calc(var(--rows, 4) * var(--row-est) + 60px);
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter);
+}
+@media (min-width: 768px) {
+  #list > section {
+    --row-est: 108px;
+  }
+}
+
+/* Preferences (§5). Reduced motion: colour states stay, nothing moves (the duration tokens are 0 ms;
+ * what has a fixed duration or loops is switched off here – one block for the whole sheet). */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  .chips,
+  .genres {
+    scroll-behavior: auto;
+  }
+  .show.highlight::after {
+    animation: none;
+    background: var(--gold-tint); /* a static 3 s gold edge instead of the flash */
+  }
+  .filters,
+  .shows .show {
+    transition: none;
+  }
+  .sk,
+  .list-head,
+  .stripe:not(.bottom),
+  #list .show.enter,
+  #list.dip,
+  #list .dist,
+  .where-locate.locating,
+  .toast {
+    animation: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+/* More contrast: the muted text becomes text, the lines become the muted colour. */
+@media (prefers-contrast: more) {
+  :root {
+    --muted: #f3ead8;
+    --faint: #bcae98;
+    --line: #bcae98;
+    --line-soft: #766759;
+  }
+}
+/* Forced colours (Windows high contrast): a pressed or marked thing gets a solid border, icons follow the
+ * text colour (the per-component rules above do the chips, pills, cantons, marked rows and the toggle). */
+@media (forced-colors: active) {
+  .show.going .mark-seg,
+  .seg [aria-pressed="true"],
+  .icon-btn[aria-pressed="true"],
+  .bar[aria-pressed="true"] {
+    border: 3px solid;
+  }
+  svg {
+    forced-color-adjust: auto;
+    fill: currentColor;
+  }
+  .stripe span,
+  .cal-dots i,
+  .pin-icon {
+    forced-color-adjust: none;
+  }
+}

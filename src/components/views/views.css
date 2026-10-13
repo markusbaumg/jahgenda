@@ -1,7 +1,6 @@
-/* Kalender and Karte (story #33 M4): the calendar grid, the map frame, Leaflet's controls and popups, the
- * pins, clusters and legends – moved out of style.css in their original order. Rules that mix these with
- * other parts of the page (touch hit areas, forced colours, the low-landscape unstick) stay in style.css.
- * Imported by Calendar.svelte / MapView.svelte, so the bundle puts it after style.css. */
+/* Kalender and Karte (src/components/views/): the calendar grid, the map frame, Leaflet's controls and popups,
+ * the pins, clusters and legends. Rules that mix these with other parts of the page (touch hit areas, forced
+ * colours) live in src/styles/motion.css. Imported in its place by src/styles/index.css. */
 /* Kalender: month grid, Monday first */
 .calendar {
   margin-top: 18px;
@@ -167,7 +166,7 @@
 }
 @media (max-width: 600px) {
   /* Compact calendar: one square per day with dots, the selected day's shows below.
-     The whole cell is the tap target (app.js), not only the number. */
+     The whole cell is the tap target (Calendar.svelte), not only the number. */
   .cal-cell {
     aspect-ratio: 1;
     min-height: 0;
@@ -242,6 +241,12 @@
   overflow: hidden;
   background: var(--surface);
   z-index: 0; /* keep Leaflet's panes below the sticky filter bar */
+}
+/* Low landscape phones: a smaller floor, so the map still fits under the bar (vanilla order: after .map). */
+@media (max-height: 500px) {
+  .map {
+    min-height: 240px;
+  }
 }
 .map:not(.leaflet-container) {
   display: grid;
@@ -564,7 +569,7 @@
   }
 }
 
-/* Touch: «Heute» gets the 44 px hit band (after the phone layout above, as it was in style.css). */
+/* Touch: «Heute» gets the 44 px hit band (after the phone layout above, as in the former single stylesheet). */
 @media (hover: none) {
   .cal-today {
     display: inline-flex;

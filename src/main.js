@@ -1,6 +1,6 @@
-/* Entry of the Vite build (index.html → src/main.js). The global stylesheet is still the one style.css
- * for now (story #33, M0); it is split per component in the later stories. */
-import "../style.css";
+/* Entry of the Vite build (index.html → src/main.js). The styles: src/styles/index.css lists every
+ * stylesheet in cascade order (tokens, base, one file per part of the page, motion and preferences). */
+import "./styles/index.css";
 import { mount } from "svelte";
 import App from "./App.svelte";
 

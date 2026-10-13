@@ -1,0 +1,175 @@
+/* Footer (src/components/Footer.svelte): «Über uns» band and the bottom bar; secondary pages too. */
+/* Footer: a lighter full-width band for "Über uns", then a slim bottom bar with the data stamp. */
+.foot {
+  margin-top: 72px;
+  color: var(--muted);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.foot > .wrap {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+.foot-bar {
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+.foot-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 16px;
+  padding-top: 14px;
+  /* --callout-h: height of the visible callout (stores/callout.svelte.js), so the bar is never hidden behind it. */
+  padding-bottom: calc(14px + var(--callout-h, 0px));
+  font-size: 0.82rem;
+}
+.foot-bar-inner p {
+  margin: 0;
+}
+/* Footer links: inline text, but with a padded hit area (the padding is taken back by the margin, so
+   the layout does not move) and a wider line pitch so two wrapped lines are not 3 px apart. */
+.foot-links {
+  line-height: 1.6;
+}
+.foot-links a {
+  display: inline-block;
+  padding: 8px 4px;
+  margin: -8px -4px;
+  color: var(--muted);
+}
+@media (hover: hover) {
+  .foot-links a:hover {
+    color: var(--gold);
+  }
+}
+/* Section title on the tricolor rule, with the cross mark stamped behind it (96 px, 12 %). */
+.section-title {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  padding-bottom: var(--s-2);
+  font-size: var(--fs-1);
+  font-weight: 800;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+.about-body {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  margin-top: 18px;
+}
+.about-photo {
+  flex: 0 0 auto;
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gold);
+  box-shadow:
+    0 0 0 4px var(--bg),
+    0 0 0 6px var(--green),
+    0 0 0 8px var(--bg),
+    0 0 0 10px var(--red);
+}
+.about p {
+  margin: 0 0 12px;
+  max-width: 58ch;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.about-body p:first-child {
+  margin-top: 0;
+}
+@media (max-width: 520px) {
+  .about-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .about p {
+    max-width: none;
+  }
+}
+.about .about-head {
+  margin: 0 0 10px;
+  max-width: none;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--text);
+}
+.about .about-head::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--red) 0 33%, var(--gold) 33% 66%, var(--green) 66%);
+}
+.about .authors {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.about .authors strong {
+  color: var(--text);
+}
+/* The one-line headline only fits next to the photo from tablet width up; below that it wraps
+   (it was the one element that made 521–640 px pages scroll sideways). */
+@media (max-width: 720px) {
+  .about .about-head {
+    white-space: normal;
+  }
+}
+@media (max-width: 520px) {
+  .about .about-head::after {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+.about a {
+  color: var(--green-text);
+}
+.updated {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+/* The separator belongs to the second item and only when both share a line (from 480 px up). */
+@media (min-width: 480px) {
+  #updated:not(:empty)::before {
+    content: "· ";
+  }
+}
+
+/* Secondary pages: footer bar only (no About band) */
+.foot:not(:has(.about)) {
+  margin-top: 48px;
+  background: var(--bg);
+  border-top: 0;
+}
+.foot a {
+  color: var(--muted);
+}
+@media (hover: hover) {
+  .foot a:hover {
+    color: var(--gold);
+  }
+}
+
+/* About: the photo lines up with the first line of text; on phones the running text is left-aligned
+   (centred paragraphs with a ragged left edge are hard to read). */
+.about-body {
+  align-items: flex-start;
+}
+@media (max-width: 520px) {
+  .about-body p:not(.about-head):not(.authors) {
+    text-align: left;
+  }
+}

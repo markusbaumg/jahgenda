@@ -7,13 +7,14 @@ layout. The site UI is German; code, docs and config are English.
 ## Who owns what
 
 - **Humans own:** `scraper/criteria.md`, `scraper/bands.md` (except the _Suggestions_ section),
-  `scraper/sources.json`, `index.html`, `style.css`, `app.js`, `pwa.js`, `sw.js`, `README.md`, `CLAUDE.md`.
+  `scraper/sources.json`, `index.html`, `src/` (the page: components, stores, styles, `src/sw.js`), `public/`,
+  `vite.config.js`, `package.json`, `README.md`, `CLAUDE.md`.
   Skills never change these files – with one exception: skills may append lines under _Suggestions_ in
   `bands.md`.
 - **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
 - **Humans also own:** `data/genres.json` (allowed genre slugs, labels, filter order — single source of truth
-  for validator, scraper and page) and `store.js` (every client-side persistence goes through `window.jahStore`;
+  for validator, scraper and page) and `public/store.js` (every client-side persistence goes through `window.jahStore`;
   never call localStorage directly, so the backend can be swapped later).
 - **Shared:** `data/venues.json` – humans maintain venues (coordinates, programme URL, `scrape` flag),
   skills add new venues they encounter but do not change existing ones.
@@ -37,14 +38,15 @@ layout. The site UI is German; code, docs and config are English.
 ```sh
 make              # help: all targets
 make check        # lint + validate + test – must be green before every commit
-make serve        # view the page locally (http://localhost:8000)
+make dev          # dev server with hot reload (http://127.0.0.1:5173)
+make serve        # build and view the production build locally (http://127.0.0.1:4173)
 make scrape       # run the scraper now (Claude Code, subscription)
 make e2e          # Playwright end-to-end tests (e2e/, desktop + iPhone) – own CI job, not part of check
 ```
 
 Skills: `/scrape-shows` (update shows), `/harvest-bands` (suggest bands from festival line-ups).
 Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `main` must pass `make check`.
-Before pushing a change to `index.html`, `app.js` or `style.css`, also run `make e2e` (Playwright, ~30 s) — CI runs it
+Before pushing a change to `index.html`, `src/` or `public/`, also run `make e2e` (Playwright, ~30 s) — CI runs it
 on Linux, whose wider fonts have caught overflow that a Mac run missed (2026-10-13: a `white-space: nowrap`
 headline at 200 % text size).
 
@@ -111,14 +113,16 @@ headline at 200 % text size).
   starts right after the revamp (#21–#28) and the mobile gate (#32) are merged. Until then no new big vanilla
   features beyond what is already in flight.
 - **Source layout (story #33):** `index.html` at the root is the Vite entry; `src/` holds the page
-  (`main.js`, `App.svelte`, `components/`, `stores/agenda.svelte.js`, `lib/` – the former lib.js split by
-  topic, same exports, tested by `tests/lib.test.mjs`); `public/` holds what is copied unchanged (img/, fonts,
-  manifest, robots.txt, the log/review redirects, and the plain scripts store/callout/pwa/sw until
-  later milestones move them); `data/` stays at the root as the scraper's contract (the build copies it into
-  `dist/data`, the dev server serves it); `dist/` is the build (gitignored) that pages.yml uploads. Versions
-  are pinned exactly in `package.json`. `make check` = lint + validate + test + build + smoke. The migration also moves the page source from the repo root into
-  `src/` (+ `public/` for static files; `data/`, `scraper/`, `scripts/`, `tests/`, `design/` stay) — not
-  earlier, because the in-flight worktree branches edit the root files (Kusi, 2026-10-13).
+  (`main.js`, `App.svelte`, `components/` with a stylesheet next to each part of the page, `stores/` – the
+  reactive state that replaced the app.js IIFE –, `lib/` – the former lib.js split by topic, same exports,
+  tested by `tests/*.test.mjs` –, `styles/` – tokens, base, links, motion and `index.css`, the one list of
+  stylesheets in cascade order – and `sw.js`, the service-worker source for vite-plugin-pwa); `public/` holds
+  what is copied unchanged (img/, fonts, robots.txt, the log/review redirects to the Mischpult and `store.js`);
+  `data/` stays at the root as the scraper's contract (the build copies it into `dist/data`, the dev server
+  serves it); `dist/` is the build (gitignored) that pages.yml uploads, with `dist/style.css` (the stylesheets
+  concatenated) for the static pages. The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,
+  sw.js) are gone. Versions are pinned exactly in `package.json`. `make check` = lint + validate + test + build
+  + smoke.
 - **Working style:** big features are built by background workflows in isolated worktrees
   (`.claude/worktrees/…`, gitignored) with a reviewer, then merged by hand into `main`; `make check` must be
   green before every push; GitHub Pages deploys every push to `main`.

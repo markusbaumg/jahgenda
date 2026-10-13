@@ -114,7 +114,7 @@ test("a show link that replaces a friend's list lands in the agenda without clea
   const ska = page.locator("#list .show").first();
   await expect(ska).toContainText("Ska");
   const skaId = await ska.getAttribute("data-id");
-  // The friend's list is dropped before the landing (app.js revealFromHash), so the search stays.
+  // The friend's list is dropped before the landing (src/App.svelte, as app.js revealFromHash did), so the search stays.
   await page.evaluate((h) => (location.hash = h), `m=${encodeURIComponent(first)}:i`);
   await expect(page.locator("body")).toHaveClass(/list-shared/);
   await page.evaluate((h) => (location.hash = h), skaId);

@@ -33,9 +33,11 @@ Made by Kusi & Seraina.
 
 ```
 index.html                             The page: the Vite entry (head, inline slogans, mounts src/main.js). Built into dist/.
-style.css                              The global stylesheet (imported by src/main.js; the static pages link the copy in dist/).
-app.js                                 The vanilla page logic, kept as the port reference for the migration stories (#33); not built.
-vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/; vite-plugin-pwa writes sw.js + manifest.
+vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and writes dist/style.css; vite-plugin-pwa writes sw.js + manifest.
+src/styles/index.css                   The stylesheets in cascade order (imported by src/main.js; concatenated into dist/style.css for the static pages).
+src/styles/tokens.css / base.css       Design tokens and the display face; reset, atmosphere, focus ring, stripes, column, skip links.
+src/styles/links.css / motion.css      Link colours (late on purpose); motion, performance and the reduced-motion / contrast / forced-colours rules.
+src/components/**/*.css                One stylesheet per part of the page, next to its components (header, filters, status, list, footer, mine, toast, festival, views).
 src/main.js / src/App.svelte           Mounts the page: skip links, stripes, header, agenda, footer.
 src/components/Header.svelte           Lockup, tagline and one of the slogans per load.
 src/components/ShowList.svelte         Month sections with festival ghost rows.
@@ -44,7 +46,7 @@ src/components/Row.svelte              One show: title, acts / line-up, meta lin
 src/components/Status.svelte           Loading skeleton, error state with retry, empty states.
 src/components/Footer.svelte           «Über Jahgenda» and the bottom bar (result count, data stamp, links).
 src/components/Icon.svelte             The inline SVG icons of the row actions.
-src/components/festival/               Festival card parts: range date cell (LÄUFT), line-up by day, ghost row, festival.css.
+src/components/festival/               Festival card parts: range date cell (LÄUFT), line-up by day, ghost row.
 src/stores/agenda.svelte.js            The reactive store: shows + derived fields, genres, venues, filters, visible list.
 src/stores/filters.svelte.js           Filter UI state: open panel, view, Wann range, position, active-filter pills, the URL hash.
 src/components/filters/                The filter bar (search, Wo / Wann toggles, genre chips, panels), results row, empty state, past footer, URL / history glue.

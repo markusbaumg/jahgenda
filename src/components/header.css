@@ -1,0 +1,111 @@
+/* Header (src/components/Header.svelte): lockup, tagline, slogan, notice. */
+.head {
+  padding-top: var(--s-6);
+  padding-bottom: var(--s-5);
+}
+/* Standalone app: the filter bar carries the status-bar inset as padding; give some of it back here. */
+@media (display-mode: standalone) {
+  .head {
+    padding-bottom: max(0px, calc(24px - env(safe-area-inset-top, 0px)));
+  }
+}
+/* Lockup: mark + JAHGENDA in the display face, «Jah» cream / «genda» gold, one unbreakable word.
+ * Both words are .logo-word spans with gap 0, so no flex gap can split them; the mark sits on the type
+ * baseline (an image's flex baseline is its bottom edge) at cap height × 1.15 ≈ 1em. */
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-display);
+  /* Never wider than the column: mark (1em) + gap + JAHGENDA (≈3.9em) ≤ 100vw − 2 gutters, so a 200 %
+   * text size does not push the one unbreakable word past the edge (sideways page scroll). */
+  font-size: min(var(--fs-d3), calc((100vw - 42px) / 5));
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.wordmark {
+  display: inline-flex;
+  gap: 0;
+  white-space: nowrap;
+}
+.logo-word {
+  display: inline-block;
+}
+.logo-word.genda {
+  color: var(--gold-text);
+}
+.logo-mark {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  border-radius: 0.2em;
+}
+/* Tagline, one line: REGGAE · DUB · SKA — SCHWEIZ with three tiny tricolor dots as separators. */
+.tag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--s-1);
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tri-dots {
+  display: inline-flex;
+  gap: 3px;
+  margin: 0 var(--s-1);
+}
+.tri-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.tri-dots i:nth-child(2) {
+  background: var(--gold);
+}
+.tri-dots i:nth-child(3) {
+  background: var(--green);
+}
+/* Slogan under the tagline: one of data/slogans.json per page load. */
+.slogan {
+  margin: var(--s-2) 0 0;
+  font-size: var(--fs-3);
+  color: var(--muted);
+}
+.notice {
+  margin: 20px 0 0;
+  padding: 10px 12px;
+  font-size: var(--fs-2);
+  color: var(--muted);
+  background: var(--surface);
+  border-radius: var(--r-2);
+}
+.notice strong {
+  color: var(--gold-text);
+}
+.notice a {
+  color: var(--green-text);
+}
+
+/* The header lockup is a link back to the start (owner request 2026-10-13): plain «./» resets filters and hash. */
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  color: inherit;
+  text-decoration: none;
+}
+.logo-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+  border-radius: 6px;
+}

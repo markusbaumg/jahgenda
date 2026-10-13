@@ -5,7 +5,7 @@
 
   let toast = $state(null);
 
-  // A callout that appears later docks above the toast instead of underneath it (--toast-h, style.css).
+  // A callout that appears later docks above the toast instead of underneath it (--toast-h, read by Callout.svelte).
   $effect(() => {
     if (!toast) return;
     const root = document.documentElement.style;
