@@ -2721,6 +2721,61 @@
   let leafletLoading = null;
   let map = null;
   let markerLayer = null;
+  let pins = []; // { lat, lon, marker, shows } – every venue pin of the current render, clustered by zoom
+  let pinSignature = ""; // the grouping of the last layoutPins(): unchanged → the layers (and an open popup) stay
+  let clusterLayer = null;
+  const touch = matchMedia("(hover: none)").matches; // zoom control bottom right, popups sized for a thumb
+
+  // Pins that would sit on top of each other at the current zoom (the whole Mittelland at the start view
+  // of a portrait phone: 57 pins in a 160 px patch, 42 of them unreachable) are folded into one cluster
+  // badge; a tap on it zooms into that group until the pins come apart. Re-run on every zoom.
+  const CLUSTER_PX = 50;
+  function layoutPins() {
+    if (!map || !pins.length) return;
+    const zoom = map.getZoom();
+    const groups = [];
+    for (const p of [...pins].sort((a, b) => b.shows - a.shows)) {
+      const px = map.project([p.lat, p.lon], zoom);
+      const g = groups.find((x) => x.px.distanceTo(px) < CLUSTER_PX);
+      if (g) g.members.push(p);
+      else groups.push({ px, members: [p] });
+    }
+    const signature = groups.map((g) => g.members.map((p) => `${p.lat},${p.lon}`).join("|")).join(";");
+    if (signature === pinSignature) return;
+    pinSignature = signature;
+    if (clusterLayer) clusterLayer.remove();
+    clusterLayer = L.layerGroup().addTo(map);
+    for (const p of pins) p.marker.remove();
+    for (const g of groups) {
+      if (g.members.length === 1) {
+        g.members[0].marker.addTo(markerLayer);
+        continue;
+      }
+      const n = g.members.reduce((sum, p) => sum + p.shows, 0);
+      const lat = g.members.reduce((sum, p) => sum + p.lat, 0) / g.members.length;
+      const lon = g.members.reduce((sum, p) => sum + p.lon, 0) / g.members.length;
+      const title = `${g.members.length} Clubs mit ${n} Shows: hineinzoomen`;
+      const cluster = L.marker([lat, lon], {
+        icon: L.divIcon({
+          className: "cluster-icon",
+          html: `<span><b>${g.members.length}</b></span>`,
+          iconSize: [44, 44],
+          iconAnchor: [22, 40], // sits on its spot like a pin, so pin heads and badges share one height
+        }),
+        title,
+        zIndexOffset: 500,
+      });
+      cluster.on("add", () => cluster.getElement().setAttribute("aria-label", title));
+      cluster.on("click", () => {
+        // (Enter on the focused badge arrives as a click: Leaflet's keyboard handling for markers.)
+        map.fitBounds(
+          g.members.map((p) => [p.lat, p.lon]),
+          { padding: [48, 48], maxZoom: 16 },
+        );
+      });
+      cluster.addTo(clusterLayer);
+    }
+  }
 
   function loadLeaflet() {
     if (window.L) return Promise.resolve();
@@ -2782,10 +2837,9 @@
     }
     if (!map) {
       mapEl.innerHTML = "";
-      map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
+      map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false, zoomSnap: 0.5 }); // half steps: the start view fits the country one notch closer on a portrait phone
       // Leaflet's own controls get German tooltips. On touch screens the zoom buttons sit bottom right,
       // where no popup is ever panned underneath them (popups open at the top left).
-      const touch = matchMedia("(hover: none)").matches;
       L.control
         .zoom({
           zoomInTitle: "Hineinzoomen",
@@ -2796,13 +2850,19 @@
       map.attributionControl.setPrefix(
         '<a href="https://leafletjs.com" title="Leaflet-Website öffnen" target="_blank" rel="noopener">Leaflet</a>',
       );
+      // Until the first tiles are painted the frame is a plain dark square with pins floating on it: a
+      // «Karte lädt …» corner note (CSS .map.tiles-pending) says that the map is still on its way.
+      mapEl.classList.add("tiles-pending");
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         className: "map-tiles",
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
-      }).addTo(map);
+      })
+        .once("load", () => mapEl.classList.remove("tiles-pending"))
+        .addTo(map);
       markerLayer = L.layerGroup().addTo(map);
+      map.on("zoomend", layoutPins);
       // Leaflet stops clicks inside popups from bubbling up to the page, so the
       // show links are handled on the popup element itself (bound once per popup).
       // Keyboard: the focus moves into the popup (first show), Escape closes it, the pin gets it back.
@@ -2838,6 +2898,8 @@
       });
     }
     markerLayer.clearLayers();
+    pins = [];
+    pinSignature = "";
 
     const hasPos = (s) => typeof s.lat === "number" && typeof s.lon === "number";
     // One marker per venue; its popup lists the venue's shows. Venues at (almost) the same spot – the
@@ -2911,29 +2973,30 @@
         riseOnHover: true,
         zIndexOffset: items.length * 10, // the busier pin on top where pins still overlap
         title,
-      })
-        .bindPopup(
-          vs.length === 1
-            ? `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}${showList(items)}`
-            : `<strong>${escape(s.city)}</strong>` +
-                vs
-                  .map(
-                    (v) =>
-                      `<p class="popup-venue"><strong>${escape(v.s.venue)}</strong></p>${showList(v.items)}`,
-                  )
-                  .join(""),
-          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone; the top-left
-          // padding keeps a tall popup clear of the zoom control.
-          {
-            maxWidth: Math.min(320, mapEl.clientWidth - 70),
-            autoPanPaddingTopLeft: [60, 24],
-            autoPanPaddingBottomRight: [24, 24],
-          },
-        )
-        .addTo(markerLayer);
+      }).bindPopup(
+        vs.length === 1
+          ? `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}${showList(items)}`
+          : `<strong>${escape(s.city)}</strong>` +
+              vs
+                .map(
+                  (v) =>
+                    `<p class="popup-venue"><strong>${escape(v.s.venue)}</strong></p>${showList(v.items)}`,
+                )
+                .join(""),
+        // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone: the wrapper
+        // (content + 2 × 14 px margin + 2 px) stays one gutter inside the frame on both sides, and the
+        // auto-pan padding never asks for more room than that. On a pointer screen the zoom control
+        // sits top left, so a tall popup keeps clear of it.
+        {
+          maxWidth: Math.min(320, mapEl.clientWidth - 62),
+          autoPanPaddingTopLeft: [touch ? 16 : 60, 24],
+          autoPanPaddingBottomRight: [16, 24],
+        },
+      );
       // Leaflet names a pin by its text (the count badge): give it the venue instead. The element exists
       // once the marker is on the map, which happens after fitBounds() below (the map has no view yet).
       marker.on("add", () => marker.getElement().setAttribute("aria-label", title));
+      pins.push({ lat: s.lat, lon: s.lon, marker, shows: items.length });
       points.push([s.lat, s.lon]);
       if (CANTONS[s.canton]) swiss.push([s.lat, s.lon]);
     }
@@ -2949,6 +3012,7 @@
     const frame = swiss.length ? swiss.concat(here ? [[here.lat, here.lon]] : []) : points;
     if (frame.length) map.fitBounds(frame, { padding: [40, 40], maxZoom: 12 });
     else map.setView([46.8, 8.2], 7);
+    layoutPins();
 
     const rest = visible.filter((s) => !hasPos(s));
     mapRest.innerHTML =
