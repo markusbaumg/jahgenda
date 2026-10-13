@@ -98,11 +98,22 @@ test("at 200 % text size nothing overlaps and the page does not scroll sideways 
 }) => {
   await page.addStyleTag({ content: "html { font-size: 200% }" });
   await page.waitForTimeout(100);
-  const [sw, cw] = await page.evaluate(() => [
-    document.documentElement.scrollWidth,
-    document.documentElement.clientWidth,
-  ]);
-  expect(sw).toBe(cw);
+  // Name the culprits in the failure message: the three widest elements that reach past the viewport
+  // (a bare «1426 ≠ 1280» from CI took a probe to decode).
+  const { sw, cw, over } = await page.evaluate(() => {
+    const cw = document.documentElement.clientWidth;
+    const over = [...document.querySelectorAll("body *")]
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ r }) => r.width && r.right > cw + 1)
+      .sort((a, b) => b.r.right - a.r.right)
+      .slice(0, 3)
+      .map(
+        ({ el, r }) =>
+          `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}.${String(el.className).split(" ")[0]} right=${Math.round(r.right)}`,
+      );
+    return { sw: document.documentElement.scrollWidth, cw, over };
+  });
+  expect(sw, `page scrolls sideways at 200 %: ${over.join(", ") || "no element found"}`).toBe(cw);
   // The HEUTE pill (the fixture has a show today) stays inside the date column, left of the title.
   const date = page.locator("#list .day.today time.date").first();
   const [clientW, scrollW] = await date.evaluate((d) => [d.clientWidth, d.scrollWidth]);

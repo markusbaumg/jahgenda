@@ -44,6 +44,9 @@ make e2e          # Playwright end-to-end tests (e2e/, desktop + iPhone) – own
 
 Skills: `/scrape-shows` (update shows), `/harvest-bands` (suggest bands from festival line-ups).
 Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `main` must pass `make check`.
+Before pushing a change to `index.html`, `app.js` or `style.css`, also run `make e2e` (Playwright, ~30 s) — CI runs it
+on Linux, whose wider fonts have caught overflow that a Mac run missed (2026-10-13: a `white-space: nowrap`
+headline at 200 % text size).
 
 ## Setup and decisions (so nothing gets lost)
 
