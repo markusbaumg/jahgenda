@@ -67,6 +67,10 @@ src/lib/calendar.js                    … .ics / Google Calendar / SBB links, f
 src/lib/dates.js / regions.js          … de-CH formatters and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
+src/lib/load.js                        … the one fetch helper (data/*.json paths, raw.githubusercontent.com) for the agenda and the Mischpult.
+src/lib/health.js / drops.js           … Mischpult: the watchdog verdict (mirrors check_freshness.py), the dropped-candidate dedupe
+                                       (mirrors quality_review.py) and the «Gehört rein» issue link.
+src/lib/markdown.js                    … minimal, escaping Markdown renderer for the repo files the Mischpult shows.
 public/                                Static files, copied as they are into dist/ (img/, fonts, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 src/sw.js                              Service worker source (vite-plugin-pwa injectManifest → dist/sw.js): shell precache, data network-first (4 s).
