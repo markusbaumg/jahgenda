@@ -4107,9 +4107,18 @@ html {
  * bleed into it by design). */
 #list > section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 600px;
+  /* The placeholder height of a skipped month follows its row count (app.js writes --rows per section:
+   * ~145 px per phone row, ~108 px on desktop, plus the head), so a fast flick to the footer does not
+   * grow the document by a thousand pixels on the way; `auto` keeps the real size once laid out. */
+  --row-est: 145px;
+  contain-intrinsic-size: auto calc(var(--rows, 4) * var(--row-est) + 60px);
   margin: 0 calc(-1 * var(--gutter));
   padding: 0 var(--gutter);
+}
+@media (min-width: 768px) {
+  #list > section {
+    --row-est: 108px;
+  }
 }
 
 /* Preferences (§5). Reduced motion: colour states stay, nothing moves (the duration tokens are 0 ms;

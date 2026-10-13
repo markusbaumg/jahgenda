@@ -117,7 +117,7 @@
   }
   // Write a hash without a navigation (empty = none); path and query stay as they are.
   const setHash = (h) =>
-    history.replaceState(null, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
+    history.replaceState(history.state, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
   let view = "list";
   {
     // #view= in the link wins over the view this browser remembers.
@@ -1084,7 +1084,7 @@
           )
           .join("");
         return `
-        <section>
+        <section style="--rows: ${items.length}">
           <h2 class="month">${escape(monthNameFmt.format(first))} <span class="year">${first.getFullYear()}</span></h2>
           <div class="shows">${ghostRows}${renderDays(items, { weekendRule })}</div>
         </section>`;
@@ -1384,6 +1384,11 @@
       }
       status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
+      if (savedScrollY && !parseHash().id && !parseHash().mine) {
+        quietScrollUntil = Date.now() + 1500;
+        window.scrollTo(0, savedScrollY); // back to the rows the visitor was looking at (history, above)
+      }
+      savedScrollY = 0;
       revealFromHash();
       loadVenues();
       autoLocate();
@@ -1483,7 +1488,7 @@
       }
     }
     if (act === "link") {
-      history.replaceState(null, "", `#${s._short}`);
+      history.replaceState(history.state, "", `#${s._short}`);
       try {
         await navigator.clipboard.writeText(showUrl(s));
         flashWord(btn, "Kopiert");
@@ -1609,7 +1614,36 @@
   // Overlays and view switches push one entry each; filters never do (they live in the hash, see
   // syncFilterHash, written with replaceState so a filter click does not flood the history).
   const histState = (extra) => ({ jah: 1, view, ...extra });
+  // Reload, tab restore (iOS evicts tabs freely) and Back from log.html: left to the browser, the scroll
+  // offset is restored into the skeleton page (clamped to its bottom, footer in view) and scroll anchoring
+  // then keeps the footer in view while the list is inserted above it – the visitor lands in April. So the
+  // offset travels in the history entry (written when the page goes away) and is restored after the
+  // first render, before a show link (if any) takes over.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  let savedScrollY = history.state && history.state.jah ? Number(history.state.sy) || 0 : 0;
   history.replaceState(histState(), "");
+  const rememberScroll = () => {
+    if (!history.state || !history.state.jah || history.state.sy === Math.round(window.scrollY)) return;
+    try {
+      history.replaceState({ ...history.state, sy: Math.round(window.scrollY) }, "");
+    } catch {
+      /* Safari caps replaceState at 100 per 30 s – then the last written offset stands */
+    }
+  };
+  // Written once the scrolling stops (a reload discards what pagehide writes) and when the tab goes away.
+  let scrollMemo = 0;
+  window.addEventListener(
+    "scroll",
+    () => {
+      clearTimeout(scrollMemo);
+      scrollMemo = setTimeout(rememberScroll, 400);
+    },
+    { passive: true },
+  );
+  window.addEventListener("pagehide", rememberScroll);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") rememberScroll();
+  });
   let overlayEntry = false; // the current entry is one we pushed for an overlay
   let pendingBack = 0; // history.back() calls of our own: their popstate must not close what opened since
   let fromHistory = false; // closing because the visitor went back, not by ×/Esc/outside click
@@ -2095,7 +2129,7 @@
       );
     if (btn.dataset.mine === "share") {
       const url = listUrl();
-      if (!shared) history.replaceState(null, "", url);
+      if (!shared) history.replaceState(history.state, "", url);
       try {
         await navigator.share({ title: listTitle(), text: listTitle(), url });
         flashWord(btn, "Geteilt");
@@ -2106,7 +2140,7 @@
     if (btn.dataset.mine === "link") {
       // The #m= link is the shareable artefact: it goes to the clipboard and into the address bar.
       const url = listUrl();
-      if (!shared) history.replaceState(null, "", url);
+      if (!shared) history.replaceState(history.state, "", url);
       try {
         await Promise.race([
           navigator.clipboard.writeText(url),
