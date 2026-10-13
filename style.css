@@ -35,8 +35,9 @@
 
   /* typography (16 px base; nothing in the agenda below --fs-1) */
   --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "JahDisplay", "JahDisplay Fallback", "JahDisplay Fallback Condensed",
-    "JahDisplay Fallback Sans", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+  --font-display:
+    "JahDisplay", "JahDisplay Fallback", "JahDisplay Fallback Condensed", "JahDisplay Fallback Sans", Impact,
+    "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
   --fs-0: 0.78rem;
   --fs-1: 0.8125rem;
   --fs-2: 0.875rem;
@@ -140,7 +141,8 @@
 }
 @font-face {
   font-family: "JahDisplay Fallback Sans";
-  src: local("Roboto Bold"), local("Roboto-Bold"), local("Arial Bold"), local("Arial-BoldMT"),
+  src:
+    local("Roboto Bold"), local("Roboto-Bold"), local("Arial Bold"), local("Arial-BoldMT"),
     local("Helvetica Neue Bold"), local("HelveticaNeue-Bold");
   font-weight: 400 900;
   size-adjust: 69%;
@@ -964,14 +966,18 @@ a[href]:focus-visible,
 .results-row .seg {
   margin-left: auto;
 }
-/* «Link zu dieser Auswahl» sits at the end of the pills line; the break before that line is forced only
- * while there are pills (or the link), so an unfiltered row stays one line high. */
-.results-row:has(.results:not(.empty), .share-filters:not([hidden]))::after {
-  content: "";
-  order: 2;
-  flex-basis: 100%;
-  height: 0;
-  margin-top: -6px;
+/* Phones: «Link zu dieser Auswahl» sits at the end of the pills line under the switch; the break before
+ * that line is forced only while there are pills (or the link), so an unfiltered row stays one line high.
+ * Desktop has no break – its row is nowrap (below), and a 100 % flex-basis item in a nowrap row ate the
+ * whole line and squeezed the pills into a vertical column (CI screenshot, 2026-10-13). */
+@media (max-width: 767.98px) {
+  .results-row:has(.results:not(.empty), .share-filters:not([hidden]))::after {
+    content: "";
+    order: 2;
+    flex-basis: 100%;
+    height: 0;
+    margin-top: -6px;
+  }
 }
 .results-row .results {
   flex: 1 1 auto;
@@ -4474,8 +4480,20 @@ html {
   display: none;
 }
 @media (min-width: 768px) {
+  /* One line: ⓘ · count · pills · «Link zu dieser Auswahl» · view switch at the right edge. */
   .results-row {
     flex-wrap: nowrap;
+  }
+  .results-row .results {
+    order: 1;
+    flex: 0 1 auto;
+  }
+  .results-row .share-filters {
+    order: 2;
+    white-space: nowrap;
+  }
+  .results-row .seg {
+    order: 5;
   }
   .note-pill summary .note-long,
   .note-pill summary .note-short {

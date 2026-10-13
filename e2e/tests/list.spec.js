@@ -1,6 +1,6 @@
 // The list: loads with month headings (real data), search and genre chips filter (fixture).
 const { test, expect } = require("@playwright/test");
-const { FIXTURE, useFixture, openList, results, chipCount, pill } = require("./helpers");
+const { FIXTURE, useFixture, openList, results, chipCount, pill, clickChip } = require("./helpers");
 
 test("loads the real data and groups shows by month", async ({ page }) => {
   await page.goto("/");
@@ -86,13 +86,13 @@ test.describe("with fixture data", () => {
     const ska = page.locator('#genres .chip[data-genre="ska"]');
     await expect(ska.locator("small")).toHaveText(chipCount(FIXTURE.ska));
 
-    await ska.click();
+    await clickChip(page, '#genres .chip[data-genre="ska"]');
     await expect(ska).toHaveAttribute("aria-pressed", "true");
     await expect(chips.first()).toHaveAttribute("aria-pressed", "false");
     await expect(page.locator("#list .show")).toHaveCount(FIXTURE.ska);
     await expect(results(page)).toHaveText(new RegExp(`^${FIXTURE.ska} Shows für diese Auswahl`));
 
-    await ska.click(); // same chip again = off
+    await clickChip(page, '#genres .chip[data-genre="ska"]'); // same chip again = off
     await expect(chips.first()).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
   });
