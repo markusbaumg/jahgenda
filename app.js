@@ -183,7 +183,7 @@
     if (!here)
       return geoDeclined
         ? ""
-        : ` · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button>`;
+        : `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
     return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
@@ -373,13 +373,15 @@
           ruleDue = false;
           rule = `<p class="rule-weekend"><span>Wochenende</span></p>`;
         }
-        const dow =
-          fresh && (isToday || isTomorrow)
-            ? `<span class="dow now">${isToday ? "Heute" : "Morgen"}</span>`
-            : `<span class="dow">${dowFmt.format(d).replace(".", "")}</span>`;
+        const pill = fresh && (isToday || isTomorrow) ? (isToday ? "Heute" : "Morgen") : "";
+        const dow = pill
+          ? `<span class="dow now">${pill}</span>`
+          : `<span class="dow">${dowFmt.format(d).replace(".", "")}</span>`;
+        // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
+        const label = `${pill ? `${pill}, ` : ""}${fullDayFmt.format(d)}`;
         return `${rule}
         <section class="${cls.join(" ")}" data-date="${escape(date)}">
-          <time class="date" datetime="${escape(date)}" aria-label="${escape(fullDayFmt.format(d))}">${dow}<span class="num">${d.getDate()}</span></time>
+          <time class="date" datetime="${escape(date)}" aria-label="${escape(label)}">${dow}<span class="num">${d.getDate()}</span></time>
           <ul class="day-shows">${rows.map(renderShow).join("")}</ul>
         </section>`;
       })
@@ -440,7 +442,7 @@
     // filters would bring back, so «Heute» never offers past shows it cannot show. The list mode shows its
     // past shows anyway, and the other views keep the switch in the Wann panel.
     const past = listMode() ? 0 : shows.filter((s) => s._past && inRange(s) && matchesFilters(s)).length;
-    listFoot.hidden = !past || v !== "list" || (!visible.length && !showPast);
+    listFoot.hidden = !past || v !== "list"; // also under the empty state: the match may lie in the past
     pastFoot.innerHTML = showPast
       ? `<span class="arrow" aria-hidden="true">↓</span> Vergangene ausblenden`
       : `<span class="arrow" aria-hidden="true">↑</span> ${past} vergangene ${past === 1 ? "Show" : "Shows"} anzeigen`;
