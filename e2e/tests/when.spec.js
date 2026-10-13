@@ -13,7 +13,7 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
   const badge = page.locator("#toggle-when b");
   const count = page.locator("#when-count");
   await expect(badge).toBeHidden();
-  await expect(count).toHaveText(new RegExp(`^${FIXTURE.upcoming} Konzerte, alle kommenden`));
+  await expect(count).toHaveText(`Alle ${FIXTURE.upcoming} kommenden Konzerte`);
 
   const heute = page.locator('#when-panel [data-quick="today"]');
   await heute.click();
@@ -37,9 +37,7 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
 
   await page.click("#when-reset");
   await expect(badge).toBeHidden();
-  // app.js writes aria-pressed="null" here (String(null) in updateWhen) – a bug to fix on the page
-  // side; until then only "true" would be wrong.
-  await expect(weekend).not.toHaveAttribute("aria-pressed", "true");
+  await expect(weekend).toHaveAttribute("aria-pressed", "false");
   await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
 });
 
@@ -47,6 +45,22 @@ test("month histogram: a bar per month, click selects the month", async ({ page 
   const bars = page.locator("#when-months .bar");
   expect(await bars.count()).toBeGreaterThanOrEqual(2);
   await expect(page.locator("#when-months .bar.today")).toHaveCount(1);
+  // Bar heights follow the counts (4 shows this month, 2 next month: half as tall, not clamped alike).
+  const heights = await bars.evaluateAll((els) =>
+    els.map((b) => [
+      Number(b.querySelector("b").textContent),
+      b.querySelector("i").getBoundingClientRect().height,
+    ]),
+  );
+  const [, hMax] = heights.find(([n]) => n === Math.max(...heights.map(([n]) => n)));
+  for (const [n, h] of heights)
+    if (n && n < Math.max(...heights.map(([n]) => n))) expect(h).toBeLessThan(hMax - 4);
+  // Every bar has an accessible name with the unit, e.g. «Oktober 2026, 4 Konzerte».
+  await expect(bars.first()).toHaveAttribute("aria-label", /^\S+ \d{4}, \d+ Konzerte?$/);
+  // The year suffix appears at most once per year in the labels.
+  const labels = await bars.locator("span").allTextContents();
+  const years = labels.filter((l) => /’\d\d/.test(l)).map((l) => l.slice(-2));
+  expect(new Set(years).size).toBe(years.length);
 
   const bar = page.locator(`#when-months .bar[data-month="${FIXTURE.nextMonthKey}"]`);
   await expect(bar).toBeVisible();

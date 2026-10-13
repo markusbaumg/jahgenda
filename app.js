@@ -596,7 +596,7 @@
           .map((c) => {
             const name = ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c);
             const title = `${regionName(c)}: ${perCanton.get(c)} ${perCanton.get(c) === 1 ? "Show" : "Shows"} – anklicken zum Ein-/Ausschalten`;
-            return `<button type="button" class="chip${ABROAD[c] ? " abroad" : ""}" data-canton="${escape(c)}" aria-pressed="false" title="${escape(title)}"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(name)}<small>${perCanton.get(c)}</small></button>`;
+            return `<button type="button" class="chip${ABROAD[c] ? " abroad" : ""}" data-canton="${escape(c)}" aria-pressed="false" aria-label="${escape(`${name}, ${perCanton.get(c)} ${perCanton.get(c) === 1 ? "Konzert" : "Konzerte"}`)}" title="${escape(title)}"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(name)}<small>${perCanton.get(c)}</small></button>`;
           })
           .join("");
       updateWhere();
@@ -612,7 +612,7 @@
           .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
           .map(
             ([g, n]) =>
-              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false" title="Nur ${escape(genreLabel[g] || g)} anzeigen (${n})">${escape(genreLabel[g] || g)}<small>${n}</small></button>`,
+              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false" aria-label="${escape(`${genreLabel[g] || g}, ${n === 1 ? "1 Konzert" : `${n} Konzerte`}`)}" title="Nur ${escape(genreLabel[g] || g)} anzeigen (${n})">${escape(genreLabel[g] || g)}<small>${n}</small></button>`,
           )
           .join("");
       updateChipArrows();
@@ -1347,9 +1347,16 @@
   const monthKey = (d) => `${d.getFullYear()}-${d.getMonth() + 1}`;
   const monthStart = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
   const shortMonthFmt = new Intl.DateTimeFormat("de-CH", { month: "short" });
-  // "Okt" this year, "Jan ’27" in another year.
-  const monthLabel = (d) =>
-    `${shortMonthFmt.format(d).replace(".", "")}${d.getFullYear() === todayStart().getFullYear() ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
+  // "Okt" this year, "Jan ’27" in another year. In the histogram the year is only on the first month of
+  // a new year (the labels sit 40 px apart; «Jan ’27 Feb ’27 Mär ’27» ran into each other).
+  const monthLabel = (d, i) => {
+    const name = shortMonthFmt.format(d).replace(".", "");
+    const year = ` ’${String(d.getFullYear()).slice(2)}`;
+    if (d.getFullYear() === todayStart().getFullYear()) return name;
+    if (i === undefined) return name + year;
+    const prev = monthList[i - 1];
+    return !prev || prev.getFullYear() !== d.getFullYear() ? name + year : name;
+  };
   const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
   const inRange = (s) => {
     if (months.size) return months.has(monthKey(s._day));
@@ -1429,7 +1436,7 @@
     const thisMonth = monthStart(todayStart());
     const max = Math.max(1, ...counts.values());
     whenMonths.innerHTML = monthList
-      .map((d) => {
+      .map((d, i) => {
         const k = monthKey(d);
         const n = counts.get(k) || 0;
         const cls = ["bar"];
@@ -1437,21 +1444,28 @@
         if (d < thisMonth) cls.push("past");
         if (months.size && !months.has(k)) cls.push("dim");
         if (monthKey(d) === monthKey(thisMonth)) cls.push("today");
-        const title = `${monthFmt.format(d)}: ${n === 1 ? "1 Konzert" : `${n} Konzerte`}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
-        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}" style="--h:${Math.round((n / max) * 100)}%"><b>${n || ""}</b><i></i><span>${monthLabel(d)}</span></button>`;
+        const count = n === 1 ? "1 Konzert" : `${n} Konzerte`;
+        const title = `${monthFmt.format(d)}: ${count}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
+        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" aria-label="${escape(`${monthFmt.format(d)}, ${count}`)}" title="${escape(title)}" style="--h:${(n / max).toFixed(2)}"><b>${n || ""}</b><i></i><span>${monthLabel(d, i)}</span></button>`;
       })
       .join("");
+    whenMonths.classList.toggle("can-scroll", whenMonths.scrollWidth > whenMonths.clientWidth + 2);
     for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
       const [qa, qb] = quickRange(chip.dataset.quick);
       chip.setAttribute(
         "aria-pressed",
-        String(!months.size && rangeFrom && sameDay(qa, rangeFrom) && sameDay(qb, rangeTo)),
+        String(Boolean(!months.size && rangeFrom && sameDay(qa, rangeFrom) && sameDay(qb, rangeTo))),
       );
+      // The weekend chip means this weekend from Friday on, the next one before: the tooltip says which.
+      if (chip.dataset.quick === "weekend")
+        chip.title = `Wochenende ${dm(qa)}–${dm(qb)} (Freitag bis Sonntag)`;
     }
     const n = shows.filter(isVisible).length;
     whenCount.textContent = active
       ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
-      : `${n} ${n === 1 ? "Konzert" : "Konzerte"}, alle kommenden`;
+      : n === 1
+        ? "1 kommendes Konzert"
+        : `Alle ${n} kommenden Konzerte`;
   }
 
   toggleWhen.addEventListener("click", () => setPanel(openPanel === "when" ? null : "when"));

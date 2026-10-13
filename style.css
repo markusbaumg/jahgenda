@@ -1361,24 +1361,31 @@ body {
 }
 /* Month histogram: one clickable bar per month (count on top, label below); selected = gold, others dim. */
 .when-months {
+  --track: 48px; /* the room a 100 % bar gets (count above, label below) */
   display: flex;
   align-items: stretch;
   gap: 4px;
-  height: 96px;
+  height: 102px;
   margin-top: 12px;
   overflow-x: auto;
   scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+/* More months than fit (narrow phones): a fade on the right says so – scrollbars do not show on touch. */
+.when-months.can-scroll {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
 }
 .when-months .bar {
   position: relative;
   flex: 1 1 0;
-  min-width: 44px;
+  min-width: 40px;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: stretch;
   gap: 4px;
-  padding: 0 2px;
+  padding: 0 1px;
   font: inherit;
   color: var(--muted);
   background: none;
@@ -1395,19 +1402,25 @@ body {
 }
 .when-months .bar i {
   display: block;
-  height: var(--h, 0%);
+  /* --h is 0…1 (share of the busiest month). A percentage would resolve against the whole button and
+     flex-shrink would then clamp every tall bar to the same height. */
+  flex: 0 0 auto;
+  height: calc(var(--track) * var(--h, 0));
   min-height: 3px;
   background: var(--gold);
   border-radius: 3px 3px 0 0;
   transition: opacity 0.15s;
 }
 .when-months .bar span {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   text-align: center;
   white-space: nowrap;
-  padding-top: 4px;
+  padding: 4px 0 6px; /* room below for the «today» dot */
   border-top: 1px solid var(--line);
+}
+.when-months .bar.today span {
+  color: var(--text);
 }
 .when-months .bar.empty i {
   background: var(--line);
@@ -1442,7 +1455,7 @@ body {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -2px;
+  bottom: 0;
   width: 6px;
   height: 6px;
   margin-left: -3px;
