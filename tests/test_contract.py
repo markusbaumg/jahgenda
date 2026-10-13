@@ -88,9 +88,9 @@ class AppShell(unittest.TestCase):
         self.assertIn("path: dist", PAGES)
         for f in ("data", "design"):
             self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
-        # mischpult.html fetches scraper/sources.json relative to the page (Portale, Suchen, Festivals).
-        self.assertIn('json("scraper/sources.json")', (PUBLIC / "mischpult.html").read_text(encoding="utf-8"))
-        self.assertIn('["scraper/sources.json", "scraper/sources.json"]', VITE_CONFIG)
+        # The console's Quellen tab reads scraper/sources.json from GitHub raw (the file is not in dist/).
+        sources = (ROOT / "src" / "mischpult" / "sections" / "Sources.svelte").read_text(encoding="utf-8")
+        self.assertIn("tryJson(`${RAW}scraper/sources.json`)", sources)
         self.assertIn(
             'path.join(outDir, "style.css"), plainStylesheet()',
             VITE_CONFIG,
