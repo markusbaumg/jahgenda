@@ -42,9 +42,28 @@ test("the map loads Leaflet and places pins", async ({ page }) => {
   expect(await pins.count()).toBeGreaterThan(0);
   await expect(page.locator("#map-rest .map-legend")).toBeVisible();
 
-  // A pin opens a popup listing the venue's shows.
+  // Every pin is named after its venue (not after the count badge Leaflet would read out).
+  await expect(pins.first()).toHaveAttribute("aria-label", /^[^,]+, [^:]+: \d Shows? anzeigen$/);
+  await expect(page.locator("#map")).toHaveAttribute("role", "region");
+
+  // A pin opens a popup listing the venue's shows; from the keyboard the focus lands in the popup,
+  // Escape closes it and the pin has the focus again.
   await pins.first().click();
   await expect(page.locator("#map .leaflet-popup .popup-shows li").first()).toBeVisible();
+  await expect(page.locator("#map .leaflet-popup-close-button")).toHaveAttribute("aria-label", "Schliessen");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#map .leaflet-popup")).toHaveCount(0);
+  await pins.first().focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#map .leaflet-popup")).toBeVisible();
+  expect(await page.evaluate(() => document.activeElement.closest(".leaflet-popup") !== null)).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#map .leaflet-popup")).toHaveCount(0);
+  expect(await page.evaluate(() => document.activeElement.classList.contains("pin-icon"))).toBe(true);
+  await expect(page.locator("#map .leaflet-control-attribution a").first()).toHaveAttribute(
+    "title",
+    "Leaflet-Website öffnen",
+  );
 });
 
 test("the chosen view survives a reload", async ({ page }) => {

@@ -774,7 +774,9 @@ body {
   margin-top: 18px;
 }
 .map {
-  height: 70vh;
+  /* Never taller than what fits under the bar (dvh: the real viewport on iOS, vh as the fallback). */
+  height: min(70vh, calc(100vh - var(--bar-h, 64px) - 24px));
+  height: min(70vh, calc(100dvh - var(--bar-h, 64px) - 24px));
   min-height: 320px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -835,6 +837,23 @@ body {
 }
 .map-view .leaflet-container a.leaflet-popup-close-button {
   color: var(--muted);
+}
+/* Several venues in one house share a pin: the popup lists them one after the other. */
+.map-view .popup-venue {
+  margin: 8px 0 0;
+}
+/* Touch screens: finger-sized zoom buttons, and a map that fits a phone held sideways. */
+@media (hover: none) {
+  .map-view .leaflet-touch .leaflet-bar a {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+  }
+}
+@media (max-height: 500px) {
+  .map {
+    min-height: 240px;
+  }
 }
 .popup-shows {
   list-style: none;

@@ -55,6 +55,11 @@
   const mapView = el("map-view");
   const viewSwitch = el("view-switch");
   const VIEWS = ["list", "calendar", "map"];
+  // Leaflet 1.9.4 from unpkg: pinned by hash, so a tampered CDN copy never runs (and never gets cached).
+  const LEAFLET_SRI = {
+    js: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+    css: "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=",
+  };
   const store = window.jahStore;
   let view = "list";
   {
@@ -67,6 +72,7 @@
     l.rel = "preload";
     l.as = "script";
     l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    l.integrity = LEAFLET_SRI.js;
     l.crossOrigin = "";
     document.head.appendChild(l);
   }
@@ -1671,12 +1677,14 @@
         const css = document.createElement("link");
         css.rel = "stylesheet";
         css.href = `${LEAFLET}.css`;
+        css.integrity = LEAFLET_SRI.css;
         css.crossOrigin = "";
         css.onload = css.onerror = done;
         document.head.appendChild(css);
       });
       const js = document.createElement("script");
       js.src = `${LEAFLET}.js`;
+      js.integrity = LEAFLET_SRI.js;
       js.crossOrigin = "";
       js.onload = () => cssReady.then(resolve);
       js.onerror = () => {
@@ -1704,25 +1712,44 @@
     if (!map) {
       mapEl.innerHTML = "";
       map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
-      // Leaflet's own controls get German tooltips.
-      L.control.zoom({ zoomInTitle: "Hineinzoomen", zoomOutTitle: "Herauszoomen" }).addTo(map);
+      // Leaflet's own controls get German tooltips. On touch screens the zoom buttons sit bottom right,
+      // where no popup is ever panned underneath them (popups open at the top left).
+      const touch = matchMedia("(hover: none)").matches;
+      L.control
+        .zoom({
+          zoomInTitle: "Hineinzoomen",
+          zoomOutTitle: "Herauszoomen",
+          position: touch ? "bottomright" : "topleft",
+        })
+        .addTo(map);
+      map.attributionControl.setPrefix(
+        '<a href="https://leafletjs.com" title="Leaflet-Website öffnen" target="_blank" rel="noopener">Leaflet</a>',
+      );
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         className: "map-tiles",
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
       }).addTo(map);
-      for (const a of mapEl.querySelectorAll(".leaflet-control-attribution a"))
-        if (/leafletjs/.test(a.href)) a.title = "Leaflet-Website öffnen";
       markerLayer = L.layerGroup().addTo(map);
       // Leaflet stops clicks inside popups from bubbling up to the page, so the
       // show links are handled on the popup element itself (bound once per popup).
+      // Keyboard: the focus moves into the popup (first show), Escape closes it, the pin gets it back.
+      let popupPin = null;
       map.on("popupopen", (e) => {
         const popup = e.popup.getElement();
-        if (!popup || popup.dataset.bound) return;
-        popup.dataset.bound = "1";
+        popupPin = e.popup._source && e.popup._source.getElement ? e.popup._source.getElement() : null;
+        if (!popup) return;
         const close = popup.querySelector(".leaflet-popup-close-button");
-        if (close) close.title = "Schliessen";
+        if (close) {
+          close.title = "Schliessen";
+          close.setAttribute("aria-label", "Schliessen");
+        }
+        const first = popup.querySelector("a[data-id]");
+        if (first && popupPin && popupPin.contains(document.activeElement))
+          first.focus({ preventScroll: true });
+        if (popup.dataset.bound) return;
+        popup.dataset.bound = "1";
         popup.addEventListener("click", (ev) => {
           const a = ev.target.closest("a[data-id]");
           if (!a) return;
@@ -1731,18 +1758,34 @@
           goToShow(a.dataset.id);
         });
       });
+      map.on("popupclose", () => {
+        if (popupPin && popupPin.isConnected && mapEl.contains(document.activeElement)) popupPin.focus();
+        popupPin = null;
+      });
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape" && view === "map" && mapEl.querySelector(".leaflet-popup")) map.closePopup();
+      });
     }
     markerLayer.clearLayers();
 
     const hasPos = (s) => typeof s.lat === "number" && typeof s.lon === "number";
-    // One marker per venue; its popup lists the venue's shows.
+    // One marker per venue; its popup lists the venue's shows. Venues at (almost) the same spot – the
+    // rooms of one house, like the Reitschule in Bern – share one pin, otherwise the lower pin could
+    // never be tapped.
     const venues = new Map();
     for (const s of visible.filter(hasPos)) {
       const key = `${s.venue}|${s.city}`;
       if (!venues.has(key)) venues.set(key, { s, items: [] });
       venues.get(key).items.push(s);
     }
+    const places = [];
+    for (const v of venues.values()) {
+      const near = places.find((p) => distanceKm(p.s, v.s) < 0.12);
+      if (near) near.venues.push(v);
+      else places.push({ s: v.s, venues: [v] });
+    }
     const points = [];
+    const swiss = [];
     // Google-Maps-style pins, filled with the red/gold/green stripes. Default: dark centre dot.
     // "Ich gehe": a gold star in the centre (like a saved place). Count badge = shows at this venue.
     let pinSeq = 0;
@@ -1777,24 +1820,47 @@
       popupAnchor: [0, -12],
     });
     const pinKind = (items) => (items.some((x) => marks[x.id] === "going") ? "going" : "venue");
-    for (const { s, items } of venues.values()) {
-      L.marker([s.lat, s.lon], {
+    const showList = (items) =>
+      `<ul class="popup-shows">${items
+        .map(
+          (x) =>
+            `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+        )
+        .join("")}</ul>`;
+    for (const { s, venues: vs } of places) {
+      const items = vs.flatMap((v) => v.items);
+      const names = vs.map((v) => v.s.venue).join(", ");
+      const title = `${names}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`;
+      const marker = L.marker([s.lat, s.lon], {
         icon: pinIcon(pinKind(items), items.length),
         riseOnHover: true,
-        title: `${s.venue}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`,
+        zIndexOffset: items.length * 10, // the busier pin on top where pins still overlap
+        title,
       })
         .bindPopup(
-          `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
-            .map(
-              (x) =>
-                `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
-            )
-            .join("")}</ul>`,
-          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone.
-          { maxWidth: Math.min(300, mapEl.clientWidth - 70), autoPanPadding: [24, 24] },
+          vs.length === 1
+            ? `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}${showList(items)}`
+            : `<strong>${escape(s.city)}</strong>` +
+                vs
+                  .map(
+                    (v) =>
+                      `<p class="popup-venue"><strong>${escape(v.s.venue)}</strong></p>${showList(v.items)}`,
+                  )
+                  .join(""),
+          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone; the top-left
+          // padding keeps a tall popup clear of the zoom control.
+          {
+            maxWidth: Math.min(320, mapEl.clientWidth - 70),
+            autoPanPaddingTopLeft: [60, 24],
+            autoPanPaddingBottomRight: [24, 24],
+          },
         )
         .addTo(markerLayer);
+      // Leaflet names a pin by its text (the count badge): give it the venue instead. The element exists
+      // once the marker is on the map, which happens after fitBounds() below (the map has no view yet).
+      marker.on("add", () => marker.getElement().setAttribute("aria-label", title));
       points.push([s.lat, s.lon]);
+      if (CANTONS[s.canton]) swiss.push([s.lat, s.lon]);
     }
     if (here) {
       L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000, title: "Dein Standort" })
@@ -1803,12 +1869,15 @@
       points.push([here.lat, here.lon]);
     }
     map.invalidateSize();
-    if (points.length) map.fitBounds(points, { padding: [32, 32], maxZoom: 12 });
+    // The frame fits Switzerland (plus the own position); the few venues just across the border are
+    // still on the map, but they do not zoom the whole country out to Strasbourg and Munich.
+    const frame = swiss.length ? swiss.concat(here ? [[here.lat, here.lon]] : []) : points;
+    if (frame.length) map.fitBounds(frame, { padding: [40, 40], maxZoom: 12 });
     else map.setView([46.8, 8.2], 7);
 
     const rest = visible.filter((s) => !hasPos(s));
     mapRest.innerHTML =
-      `<p class="map-legend"><span class="legend-item"><span class="pin-mini"></span>Venue mit Shows (Zahl = Anzahl)</span> ` +
+      `<p class="map-legend"><span class="legend-item"><span class="pin-mini"></span>Club mit Shows (Zahl = Anzahl Shows)</span> ` +
       `<span class="legend-item"><span class="pin-mini star">★</span>«Ich gehe»</span>` +
       `${here ? ` <span class="legend-item"><span class="pin-mini you"></span>du</span>` : ""}</p>` +
       (rest.length
