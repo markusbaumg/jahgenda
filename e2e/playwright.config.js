@@ -5,7 +5,8 @@
 // @ts-check
 const { defineConfig, devices } = require("@playwright/test");
 
-const PORT = 4173;
+// E2E_PORT lets a second checkout run the suite at the same time (default 4173).
+const PORT = Number(process.env.E2E_PORT) || 4173;
 const BASE = `http://127.0.0.1:${PORT}/`;
 
 module.exports = defineConfig({
