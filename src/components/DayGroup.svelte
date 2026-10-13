@@ -47,9 +47,13 @@
       // A festival's range cell is FestivalDate.svelte (M5).
       if (!s0._end) {
         g.pill = fresh && (isToday || isTomorrow) ? t(isToday ? "day.today" : "day.tomorrow") : "";
-        // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
+        // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it
+        // (the full word: the pill may be cut short to fit the 48 px column, «Tmrw»).
         g.label = g.pill
-          ? t("day.label", { pill: g.pill, date: fullDayFmt.format(d) })
+          ? t("day.label", {
+              pill: t(isToday ? "day.todayFull" : "day.tomorrowFull"),
+              date: fullDayFmt.format(d),
+            })
           : fullDayFmt.format(d);
       }
       return g;

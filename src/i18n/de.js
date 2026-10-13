@@ -172,6 +172,8 @@ export default {
   // --- List: month heads, day cells, rows -----------------------------------------------------------
   "day.today": "Heute",
   "day.tomorrow": "Morgen",
+  "day.todayFull": "Heute",
+  "day.tomorrowFull": "Morgen",
   "day.weekend": "Wochenende",
   "day.label": "{pill}, {date}",
   "festival.running": "Läuft",
