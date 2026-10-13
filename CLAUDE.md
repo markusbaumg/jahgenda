@@ -50,17 +50,20 @@ headline at 200 % text size).
 
 ## Setup and decisions (so nothing gets lost)
 
-- **Owners:** Kusi (markus.baumgartner@gmail.com, GitHub `markusbaumg`) and Seraina. Site UI German, everything
+- **Owners:** Kusi (markus.baumgartner@gmail.com / markus.baumgartner@amaise.com for the cloud routines, GitHub `markusbaumg`) and Seraina. Site UI German, everything
   else English. Kusi is called "Kusi" on the site, never "Markus".
 - **Repo / live / board:** github.com/markusbaumg/jahgenda · https://markusbaumg.github.io/jahgenda/ ·
   project board https://github.com/users/markusbaumg/projects/2 (public; columns Backlog / Let's Build /
   In progress / In review / Done; every story has an area prefix `scraper:` `data:` `ui:` `ops:` `docs:`
   and matching labels; keep it in sync with real work).
-- **Routines (Claude Code cloud, personal Max subscription, not the API):** "Jahgenda – Shows (täglich)"
-  `trig_01P5hw7jkjp8WJuw1tDH4Djx`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-sonnet-5-5, prompt runs
-  `/scrape-shows`; "Jahgenda – Bands (monatlich)" `trig_01XcTRA8vUt2huXiva3SSP1K`, cron `0 5 1 * *`. Environment
-  `env_01DjniiwyKBnsHAzi1ECBn9P` ("Default") must have **Network access = Full**, otherwise WebFetch fails with
-  ENOTFOUND (first run failed exactly like that). Fallback: `make cron-install` (launchd 06:10 on the Mac).
+- **Routines (Claude Code cloud, amaise Max subscription since 2026-10-13 21:49, not the API):** "Jahgenda – Shows
+  (täglich)" `trig_01T3UeEu5A1ephmttuEze6zE`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-sonnet-5-5, prompt runs
+  `/scrape-shows` with `JAHGENDA_RUNNER=cloud`; "Jahgenda – Bands (monatlich)" `trig_016XrTCAAPkSTLmGb4m32HSv`, cron
+  `0 5 1 * *`. Environment "kusi" `env_018Ddh8jfs94xvRyvnKSShEx` on the amaise account (markus.baumgartner@amaise.com) —
+  it must have **Network access = Full**, otherwise WebFetch fails with ENOTFOUND. The earlier routines on the personal
+  gmail account (`trig_01P5hw7jkjp8WJuw1tDH4Djx`, `trig_01XcTRA8vUt2huXiva3SSP1K`, env `env_01DjniiwyKBnsHAzi1ECBn9P`)
+  are to be paused there by Kusi (claude.ai/code/routines) so the scrape does not run twice. Fallback:
+  `make cron-install` (launchd 06:10 on the Mac).
 - **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 and 14:17 Zurich — GitHub dropped both cron fires on 2026-10-13; when no run shows up,
   `gh workflow run watchdog.yml` fires it by hand, `make watchdog` runs the check locally): stale
   > 36 h or `status.json` ok:false → issue labelled `scraper-failed`; README badges. Skills write
