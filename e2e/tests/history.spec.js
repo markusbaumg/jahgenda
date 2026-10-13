@@ -39,9 +39,10 @@ test("Back after a calendar pill jump returns to the calendar", async ({ page, i
   await page.goBack();
   await expect(page.locator("#calendar")).toBeVisible();
   await expect(page.locator('#view-switch [data-view="calendar"]')).toHaveAttribute("aria-pressed", "true");
-  await expect(page).not.toHaveURL(/#/);
+  await expect(page).toHaveURL(/#view=calendar$/); // the view travels in the hash, like the filters
   await page.goBack();
   await expect(page.locator("#list")).toBeVisible();
+  await expect(page).not.toHaveURL(/#/);
   await onSite(page);
 });
 

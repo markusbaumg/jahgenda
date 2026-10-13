@@ -1131,12 +1131,13 @@
     `${dowFmt.format(s._end).replace(".", "")} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
 
   // --- Filter state in the URL: #q=…&g=…&wo=ZH,BE&r=25&wann=weekend|today|7|2026-10,2026-11&past=1 ---
-  // Written with replaceState (a filter tap never adds a history entry), read once on load. A filtered
-  // view can thus be reloaded, bookmarked and sent as a link; show links (#<short>) and list links
-  // (#m=…) keep the hash for themselves and are never overwritten.
-  const FILTER_HASH = /^#?[a-z]+=/;
-  // A list link (#m=…) or a view link (#view=…) is not a filter hash, even when combined with "&".
-  const isFilterHash = (h) => FILTER_HASH.test(h) && !/(^#?|&)(mine|m|view)=/.test(h);
+  // Written with replaceState (a filter tap never adds a history entry), read on load and whenever such
+  // a hash arrives on the open page (applyStateHash). A filtered view can thus be reloaded, bookmarked
+  // and sent as a link; the view travels in the same hash (view=calendar|map, nothing for the list); show
+  // links (#<short>) and list links (#m=…) keep the hash for themselves and are never overwritten.
+  const STATE_HASH = /^#?[a-z]+=[^&]*(&[a-z]+=[^&]*)*$/;
+  // Only key=value parts and no list link (#m=…), even when combined with "&".
+  const isStateHash = (h) => STATE_HASH.test(h) && !/(^#?|&)(mine|m)=/.test(h);
   function filterParams() {
     const p = new URLSearchParams();
     const q = search.value.trim();
@@ -1163,18 +1164,23 @@
     if (showPast && !pastAuto) p.set("past", "1");
     return p.toString().replace(/%2C/g, ",");
   }
+  // The filters plus the view (#g=dub&view=map); "" for the plain list without a filter.
+  const stateParams = () => [filterParams(), view !== "list" ? `view=${view}` : ""].filter(Boolean).join("&");
+  const stateUrl = () => {
+    const p = stateParams();
+    return p ? `#${p}` : location.pathname + location.search;
+  };
   let filterTouched = false; // the render follows a filter tap (not a deep-link landing re-render)
   function syncFilterHash() {
     if (loadState !== "ready" || listMode()) return;
     const h = location.hash;
     // A show link (#<short>) stays while the page lands on it; a filter tap afterwards replaces it.
-    if (h && !isFilterHash(h) && !filterTouched) return;
-    const next = filterParams();
-    if (next === h.slice(1)) return;
-    history.replaceState(history.state, "", next ? `#${next}` : location.pathname + location.search);
+    if (h && !isStateHash(h) && !filterTouched) return;
+    if (stateParams() === h.slice(1)) return;
+    history.replaceState(history.state, "", stateUrl());
   }
   function readFilterHash() {
-    if (!isFilterHash(location.hash)) return;
+    if (!isStateHash(location.hash)) return;
     const p = new URLSearchParams(location.hash.slice(1));
     search.value = (p.get("q") || "").slice(0, 80);
     const g = p.get("g") || "";
@@ -1195,6 +1201,28 @@
     }
     if (p.get("past") === "1") showPast = true;
     updateWhere();
+  }
+  // A state hash arriving on the open page – a bookmark or a friend's «Link zu dieser Auswahl» tapped
+  // in this tab, a URL typed over the page, the plain address to start afresh – wins over the filters in
+  // memory, as on load. Before, the popstate handler wrote the old filters back over it and the link was
+  // silently lost. Show and list links are revealFromHash's business; the list mode keeps its own hash.
+  function applyStateHash() {
+    if (loadState !== "ready" || listMode()) return;
+    const h = location.hash;
+    if (h && !isStateHash(h)) return;
+    if (h.replace(/^#/, "") === stateParams()) return;
+    cantons.clear();
+    radiusKm = 0;
+    search.value = "";
+    setGenre("");
+    setFormat("");
+    clearRange();
+    showPast = false;
+    pastAuto = false;
+    readFilterHash();
+    const v = parseHash().view || "list";
+    if (v !== view) setView(v);
+    renderAndKeepInView();
   }
   // «Link zu dieser Auswahl»: the address bar already holds it – into the clipboard it goes.
   el("share-filters").addEventListener("click", async (e) => {
@@ -1694,6 +1722,8 @@
     }
     fromHistory = false;
     if (st && st.view && st.view !== view && !listMode()) setView(st.view);
+    // An entry without our state is a navigation the page did not make: the hash in it is applied.
+    if (!st) applyStateHash();
     syncFilterHash();
   });
 
@@ -2526,8 +2556,12 @@
     view = next;
     store.set(store.KEYS.VIEW, view);
     markView();
-    if (opts.push) history.pushState(histState(), "");
-    else history.replaceState(histState(), "");
+    // The view is written into the hash next to the filters (#view=calendar, nothing for the list), so a
+    // reload or a shared link shows what the visitor saw; a show or list link in the hash stays as it is.
+    const h = location.hash;
+    const url = loadState === "ready" && (!h || isStateHash(h)) ? stateUrl() : undefined;
+    if (opts.push) history.pushState(histState(), "", url);
+    else history.replaceState(histState(), "", url);
     if (callout() && opts.push) {
       callout().suspend(); // a nudge steps aside (the map must stay tappable)
       callout().hide(); // a callout opened on purpose closes with the view it belonged to
