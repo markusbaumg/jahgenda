@@ -57,7 +57,7 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   `/scrape-shows`; "Jahgenda – Bands (monatlich)" `trig_01XcTRA8vUt2huXiva3SSP1K`, cron `0 5 1 * *`. Environment
   `env_01DjniiwyKBnsHAzi1ECBn9P` ("Default") must have **Network access = Full**, otherwise WebFetch fails with
   ENOTFOUND (first run failed exactly like that). Fallback: `make cron-install` (launchd 06:10 on the Mac).
-- **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 Zurich): stale
+- **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 and 14:17 Zurich): stale
   > 36 h or `status.json` ok:false → issue labelled `scraper-failed`; README badges. Skills write
   > `data/status.json` every run and commit even without changes.
 - **Scraper proof:** a local run (`claude -p "/scrape-shows"`, branch `scrape-test`, worktree
