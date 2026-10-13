@@ -12,7 +12,7 @@
     .sort((a, b) => b.t - a.t || a.i - b.i)
     .map(({ r }) => r);
 
-  // runs.json has no ok flag (a failure is a note); status.json marks the run it belongs to.
+  // A failed run carries ok: false (since review #50); older ones only a note, and status.json marks them.
   const status = files.status && typeof files.status === "object" ? files.status : null;
   const failed = (r) => r.ok === false || (status?.ok === false && parseTs(status.at) === parseTs(r.at));
   const list = (v) => (Array.isArray(v) ? v.filter((x) => x != null) : []);
