@@ -2,13 +2,24 @@
   /* The page: skip links, the tricolor stripes, header, the agenda (list + status) and the footer.
    * M0 scaffold (story #33): the filter bar, the panels, Meine Shows, the calendar and map views follow
    * in the next stories – their ids and copy stay those of the vanilla index.html (the e2e contract). */
+  import { untrack } from "svelte";
   import Header from "./components/Header.svelte";
   import ShowList from "./components/ShowList.svelte";
   import Status from "./components/Status.svelte";
   import Footer from "./components/Footer.svelte";
   import { agenda } from "./stores/agenda.svelte.js";
+  import LinkNote from "./components/list/LinkNote.svelte";
+  import PastFoot from "./components/list/PastFoot.svelte";
+  import { feedback } from "./stores/feedback.svelte.js";
+  import { initReveal } from "./stores/reveal.svelte.js";
+  import { autoLocate } from "./stores/geo.svelte.js";
 
   agenda.load();
+  // Rows & deep links (M2): #<short> lands on the row; a granted position silently comes in after the data.
+  initReveal();
+  $effect(() => {
+    if (agenda.loadState === "ready") untrack(autoLocate);
+  });
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
   // The screen reader hears the result count after every filter change (the visible count is in the footer).
@@ -34,9 +45,10 @@
 
 <main class="wrap">
   <div id="stuck-sentinel" aria-hidden="true"></div>
+  <LinkNote />
   <p class="sr" id="results-live" role="status" aria-live="polite">{resultsLive}</p>
   <!-- Feedback words of the row actions («Kopiert», «Gespeichert» …) for screen readers. -->
-  <p class="sr" id="feedback" role="status" aria-live="polite"></p>
+  <p class="sr" id="feedback" role="status" aria-live="polite">{feedback.text}</p>
   <div
     id="views"
     tabindex="-1"
@@ -54,6 +66,7 @@
     </div>
   </div>
   <Status onretry={() => agenda.load()} />
+  <PastFoot />
 </main>
 
 <Footer />

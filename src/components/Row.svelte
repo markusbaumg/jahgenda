@@ -1,22 +1,24 @@
+<script module>
+  // The line-up disclosures stay open across re-renders (a row that leaves and comes back with a filter
+  // change is a new component, so the set lives at module level, like in app.js).
+  const openIds = new Set();
+</script>
+
 <script>
   /* One row inside a day group (DayGroup.svelte), §3.6: the 3-line stack (title, acts, meta), the side
    * column (coat of arms + abbreviation as a filter button, the star) and the actions line under the
    * stack. The markup is the row template of app.js renderShow(), element for element. */
   import Icon from "./Icon.svelte";
   import { agenda } from "../stores/agenda.svelte.js";
-  import {
-    safeUrl,
-    venueKey,
-    gcalUrl,
-    sbbUrl,
-    dateText,
-    distanceKm,
-    formatKm,
-    parseDay,
-  } from "../lib/index.js";
+  import { safeUrl, venueKey, gcalUrl, sbbUrl, distanceKm, formatKm, parseDay } from "../lib/index.js";
   import { fold } from "../lib/search.js";
   import { ABROAD, regionName, cantonLabel } from "../lib/regions.js";
   import { dow } from "../lib/dates.js";
+  import { createFlasher } from "../stores/feedback.svelte.js";
+  import { highlighted } from "../stores/reveal.svelte.js";
+  import { locate } from "../stores/geo.svelte.js";
+  import { showUrl as linkOf, waUrl as waOf, saveIcs, shareShow, copyLink } from "./list/actions.js";
+  import { keepInView } from "./list/keepInView.js";
 
   // Line-up block (festival-spec.md §3.1): with more than 5 acts (festival or not) the acts line shows
   // the first 4 and a <details class="lineup"> holds the rest – by day when `days` exists, else the flat
@@ -30,8 +32,6 @@
     interested: "Nicht mehr merken",
     going: "Nicht mehr merken",
   };
-  // The line-up disclosures stay open across re-renders.
-  const openIds = new Set();
 
   let {
     show: s,
@@ -86,14 +86,23 @@
   const hasGeo = $derived(typeof s.lat === "number" && typeof s.lon === "number");
   const km = $derived(here && hasGeo ? formatKm(distanceKm(here, s)) : "");
   const sbb = $derived(sbbUrl(s, agenda.homeCity));
-  const showUrl = () => `${location.origin}${location.pathname}#${s._short}`;
-  const shareText = () =>
-    s._end
-      ? `${s.title} – ${dateText(s)} · ${s.venue}, ${s.city}` +
-        `${s.acts.length ? `\nmit ${s.acts.slice(0, 4).join(", ")}${s.acts.length > 4 ? ` +${s.acts.length - 4}` : ""}` : ""}\n${showUrl()}`
-      : `${s.title} – ${dateText(s)}${s.time ? ` ${s.time}` : ""} · ${s.venue}, ${s.city}\n${showUrl()}`;
-  const waUrl = () => `https://wa.me/?text=${encodeURIComponent(shareText())}`;
+  const showUrl = () => linkOf(s);
+  const waUrl = () => waOf(s);
   const canShare = typeof navigator !== "undefined" && Boolean(navigator.share);
+  const isHighlighted = $derived(highlighted() === s.id);
+
+  // Feedback words next to the icons (§3.6): { act: word } for 1.2 s, plus the live region.
+  const { flashes, flash } = createFlasher();
+  // Kalender (.ics) · Teilen · Link: each resolves to the word the button says afterwards.
+  const ACTIONS = { cal: saveIcs, share: shareShow, link: copyLink };
+  async function act(name) {
+    flash(name, await ACTIONS[name](s));
+  }
+  // The coat of arms toggles that canton in the Wo filter; the results row (with its pill) comes into view.
+  function toggleCanton() {
+    agenda.toggleCanton(s.canton);
+    keepInView();
+  }
 
   // Text with the search hit split out (first occurrence, case-insensitive) for a <mark>.
   function hitParts(text, q) {
@@ -102,15 +111,50 @@
     if (i < 0) return null;
     return [text.slice(0, i), text.slice(i, i + q.length), text.slice(i + q.length)];
   }
+  // Line-up disclosure (§4: grid-template-rows 0fr → 1fr over --t-3). Opening: the browser opens the
+  // <details>, the is-open class animates the body in on the next frame. Closing: the click is intercepted,
+  // the body animates out, then the <details> closes. Reduced motion: 0 ms transitions fire no
+  // transitionend, so it closes at once.
+  let animOpen = $state(false);
+  $effect.pre(() => {
+    if (lineupOpen) animOpen = true;
+  });
+  let closing = false;
   function onToggle(e) {
-    if (e.currentTarget.open) openIds.add(s.id);
-    else openIds.delete(s.id);
+    if (e.currentTarget.open) {
+      openIds.add(s.id);
+      requestAnimationFrame(() => (animOpen = true));
+    } else {
+      openIds.delete(s.id);
+      animOpen = false;
+    }
+  }
+  function onSummary(e) {
+    const d = e.currentTarget.parentElement;
+    if (!d.open || closing) return;
+    e.preventDefault();
+    closing = true;
+    animOpen = false;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      closing = false;
+      d.open = false;
+    };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
+    d.querySelector(".lineup-body").addEventListener("transitionend", finish, { once: true });
+    setTimeout(finish, 450); // safety net should the transition be interrupted
   }
 </script>
 
 {#snippet marked(text)}
   {@const p = hitParts(text, q)}
   {#if p}{p[0]}<mark>{p[1]}</mark>{p[2]}{:else}{text}{/if}
+{/snippet}
+
+{#snippet fbWord(name)}
+  {#if flashes[name]}<span class="fb" aria-hidden="true">{flashes[name]}</span>{/if}
 {/snippet}
 
 {#snippet extNote()}
@@ -127,6 +171,7 @@
           >{" · "}<button
             type="button"
             class="geo-ask"
+            onclick={() => locate({ fromRow: true })}
             title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung"
             >Distanz &amp; Zug anzeigen</button
           ></span
@@ -157,7 +202,7 @@
   class="show{s._past ? ' past' : ''}{s._end ? ' festival' : ''}{mark ? ` ${mark}` : ''}{shared &&
   shared[s.id]
     ? ' shared-row'
-    : ''}{index < 10 ? ' enter' : ''}"
+    : ''}{index < 10 ? ' enter' : ''}{isHighlighted ? ' highlight' : ''}"
   id={s.id}
   data-id={s.id}
   style="--i: {Math.min(index, 9)}"
@@ -177,8 +222,8 @@
       </p>
     {/if}
     {#if long}
-      <details class="lineup{lineupOpen ? ' is-open' : ''}" open={lineupOpen} ontoggle={onToggle}>
-        <summary title={lineupLabel}
+      <details class="lineup{animOpen ? ' is-open' : ''}" open={lineupOpen} ontoggle={onToggle}>
+        <summary title={lineupLabel} onclick={onSummary}
           ><span class="open">{lineupLabel}</span><span class="close">Weniger</span></summary
         >
         <div class="lineup-body">
@@ -221,6 +266,7 @@
       class="canton{ABROAD[s.canton] ? ' abroad' : ''}"
       data-canton={s.canton}
       aria-pressed={agenda.filters.cantons.has(s.canton)}
+      onclick={toggleCanton}
       aria-label={cantonLabel(s.canton)}
       title="{regionName(s.canton)} als Filter ein-/ausschalten"
       ><img src="img/cantons/{s.canton}.svg" alt="" loading="lazy" decoding="async" />{s.canton}</button
@@ -264,11 +310,12 @@
     <div class="actions">
       <button
         type="button"
-        class="act"
+        class="act{flashes.cal ? ' fb-on' : ''}"
         data-act="cal"
+        onclick={() => act("cal")}
         aria-label="In Kalender speichern (.ics)"
         title="Als .ics speichern (Apple, Outlook …)"
-        ><Icon name="cal" /><span class="lbl">Kalender</span></button
+        ><Icon name="cal" /><span class="lbl">Kalender</span>{@render fbWord("cal")}</button
       ><a
         class="act"
         href={gcalUrl(s, { url: showUrl() })}
@@ -278,10 +325,12 @@
         title="In Google Kalender eintragen"><Icon name="gcal" /><span class="lbl">Google</span></a
       >{#if canShare}<button
           type="button"
-          class="act"
+          class="act{flashes.share ? ' fb-on' : ''}"
           data-act="share"
+          onclick={() => act("share")}
           aria-label="Show teilen"
-          title="Teilen (WhatsApp, Mail, …)"><Icon name="share" /><span class="lbl">Teilen</span></button
+          title="Teilen (WhatsApp, Mail, …)"
+          ><Icon name="share" /><span class="lbl">Teilen</span>{@render fbWord("share")}</button
         >{:else}<a
           class="act"
           href={waUrl()}
@@ -291,10 +340,12 @@
           title="Per WhatsApp teilen"><Icon name="wa" /><span class="lbl">Teilen</span></a
         >{/if}<button
         type="button"
-        class="act"
+        class="act{flashes.link ? ' fb-on' : ''}"
         data-act="link"
+        onclick={() => act("link")}
         aria-label="Link zu dieser Show kopieren"
-        title="Link zu dieser Show kopieren"><Icon name="link" /><span class="lbl">Link</span></button
+        title="Link zu dieser Show kopieren"
+        ><Icon name="link" /><span class="lbl">Link</span>{@render fbWord("link")}</button
       >{#if tickets}<a
           class="act tickets"
           href={tickets}

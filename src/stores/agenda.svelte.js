@@ -195,6 +195,15 @@ export function createAgenda() {
     shows = [...shows];
   }
 
+  // A canton badge in a row (and the Wo chips) toggle one canton / region in the filter. The Set is
+  // replaced, not mutated: `filters` is a $state proxy, a Set inside it is not reactive by itself.
+  function toggleCanton(code) {
+    const next = new Set(filters.cantons);
+    if (next.has(code)) next.delete(code);
+    else next.add(code);
+    filters.cantons = next;
+  }
+
   return {
     get shows() {
       return shows;
@@ -269,6 +278,7 @@ export function createAgenda() {
     findShow,
     load,
     refreshDay,
+    toggleCanton,
   };
 }
 
