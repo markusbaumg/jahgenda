@@ -1,6 +1,6 @@
 // The Wo panel: opens under the sticky bar, cantons multi-select, «Alle», closing, one panel at a time.
 const { test, expect } = require("@playwright/test");
-const { FIXTURE, useFixture, openList, results } = require("./helpers");
+const { FIXTURE, useFixture, openList, results, chipCount, pill } = require("./helpers");
 
 test.beforeEach(async ({ page }) => {
   await useFixture(page);
@@ -39,8 +39,8 @@ test("cantons are a multi-select with counts; «Alle» resets", async ({ page })
   await page.click("#toggle-where");
   const chip = (c) => page.locator(`#canton-chips .chip[data-canton="${c}"]`);
   const badge = page.locator("#toggle-where b");
-  await expect(chip("ZH").locator("small")).toHaveText(String(ZH));
-  await expect(chip("BE").locator("small")).toHaveText(String(BE));
+  await expect(chip("ZH").locator("small")).toHaveText(chipCount(ZH));
+  await expect(chip("BE").locator("small")).toHaveText(chipCount(BE));
 
   await chip("ZH").click();
   await expect(chip("ZH")).toHaveAttribute("aria-pressed", "true");
@@ -63,11 +63,19 @@ test("cantons are a multi-select with counts; «Alle» resets", async ({ page })
 });
 
 test("a canton badge in a row toggles the same filter", async ({ page }) => {
-  await page.locator("#list .show .canton").first().click();
-  await expect(page.locator("#toggle-where b")).toHaveText(/^[A-Z]{1,2}$/);
+  const badge = page.locator("#list .show .canton").first();
+  const code = await badge.getAttribute("data-canton");
+  await badge.click();
+  await expect(page.locator("#toggle-where b")).toHaveText(code);
+  await expect(page.locator("#list .show .canton").first()).toHaveAttribute("aria-pressed", "true");
   await expect(results(page)).toHaveText(/für diese Auswahl/);
-  await page.click("#clear-filters");
+  // One active filter = one gold pill on the results row; its ✕ removes exactly that filter.
+  await expect(pill(page, "canton", code)).toBeVisible();
+  await expect(page.locator('#results [data-remove="all"]')).toHaveCount(0); // «Alles zurücksetzen» needs two
+  await pill(page, "canton", code).click();
   await expect(page.locator("#toggle-where b")).toBeHidden();
+  await expect(page.locator("#list .show .canton").first()).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
 });
 
 test("only one panel is open at a time", async ({ page }) => {

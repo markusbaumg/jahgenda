@@ -106,4 +106,11 @@ function watchErrors(page, origin) {
 
 const results = (page) => page.locator("#results-text");
 
-module.exports = { FIXTURE, useFixture, openList, watchErrors, results };
+// The count on a chip («Ska 2») carries its unit as screen-reader text (", 2 Konzerte"), so the
+// accessible name still contains the visible words. Matches the whole <small>.
+const chipCount = (n) => new RegExp(`^, ${n} Konzert${n === 1 ? "" : "e"}$`);
+// The active-filter pill of one dimension (q, genre, format, canton, radius, month, range) on the results row.
+const pill = (page, kind, value) =>
+  page.locator(`#results .fpill[data-remove="${kind}"]${value ? `[data-value="${value}"]` : ""}`);
+
+module.exports = { FIXTURE, useFixture, openList, watchErrors, results, chipCount, pill };
