@@ -1,5 +1,5 @@
-// Back button: closes an open panel or the action sheet, returns from a view switch and from a
-// calendar-pill jump – never leaves the site with an overlay still open (the reflex on phones).
+// Back button: closes an open panel, returns from a view switch and from a calendar-pill jump – never
+// leaves the site with an overlay still open or a view still switched (the reflex on phones).
 const { test, expect } = require("@playwright/test");
 const { useFixture, openList } = require("./helpers");
 
@@ -45,11 +45,19 @@ test("Back after a calendar pill jump returns to the calendar", async ({ page, i
   await onSite(page);
 });
 
-test("Back closes the action sheet on the phone", async ({ page, isMobile }) => {
+test("Back returns from a view switch on the phone", async ({ page, isMobile }) => {
   test.skip(!isMobile, "phone only");
-  await page.locator("#list .show .act.more").first().click();
-  await expect(page.locator(".sheet")).toBeVisible();
+  // The row actions are inline on the phone (no sheet to close, see phone.spec.js); the one overlay-like
+  // step left on a phone is the view switch, which pushes an entry of its own.
+  await page.locator('#view-switch [data-view="calendar"]').click();
+  await expect(page.locator("#calendar .cal-grid")).toBeVisible();
+  await expect(page.locator("#list")).toBeHidden();
   await page.goBack();
-  await expect(page.locator(".sheet")).toBeHidden();
+  await expect(page.locator("#list .show").first()).toBeVisible();
+  await expect(page.locator("#calendar")).toBeHidden();
+  await expect(page.locator('#view-switch [data-view="list"]')).toHaveAttribute("aria-pressed", "true");
   await onSite(page);
+  // One more Back now leaves (the switch's entry was the only one).
+  await page.goBack();
+  await expect(page).toHaveURL("about:blank");
 });
