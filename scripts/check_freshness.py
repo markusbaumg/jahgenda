@@ -20,10 +20,11 @@ Usage: python3 scripts/check_freshness.py [--max-age-hours 36]
 import json
 import os
 import sys
-import urllib.error
-import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+from ghapi import DRY_RUN, REPO, SITE, TOKEN, parse_ts  # noqa: F401 (parse_ts is part of this module's API)
+from ghapi import gh as _gh
 
 try:
     from zoneinfo import ZoneInfo
@@ -34,14 +35,10 @@ except Exception:  # pragma: no cover
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
-REPO = os.environ.get("GITHUB_REPOSITORY", "markusbaumg/jahgenda")
-TOKEN = os.environ.get("GITHUB_TOKEN", "")
-DRY_RUN = os.environ.get("DRY_RUN") == "1"
 LABEL = "scraper-failed"
 LABEL_COLOR = "d73a4a"
 ISSUE_TITLE = "Scraper is not delivering (watchdog)"
 MENTION = "@" + REPO.split("/")[0]  # an @-mention always notifies, whatever the watch settings
-API = "https://api.github.com"
 
 
 def load(path):
@@ -51,19 +48,6 @@ def load(path):
         return None
     except (OSError, ValueError) as e:
         return {"__error__": f"{path.name}: {e}"}
-
-
-def parse_ts(value):
-    """ISO 8601 -> aware datetime (UTC). Naive timestamps are taken as UTC. None if unparsable."""
-    if not isinstance(value, str) or not value:
-        return None
-    try:
-        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
 
 
 def fmt(dt):
@@ -150,24 +134,7 @@ def assess(now, max_age):
 
 
 def gh(method, path, body=None):
-    req = urllib.request.Request(
-        API + path,
-        data=json.dumps(body).encode() if body is not None else None,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {TOKEN}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "Content-Type": "application/json",
-            "User-Agent": "jahgenda-watchdog",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            raw = resp.read()
-            return resp.status, (json.loads(raw) if raw else None)
-    except urllib.error.HTTPError as e:
-        return e.code, (json.loads(e.read() or b"null") if e.fp else None)
+    return _gh(method, path, body, agent="jahgenda-watchdog")
 
 
 def open_issue():
@@ -199,7 +166,7 @@ def report(healthy, lines, now):
     bullets = "\n".join(f"- {line}" for line in lines)
     links = (
         f"\n\nCheck: https://claude.ai/code/routines (last run and its log) · "
-        f"https://markusbaumg.github.io/jahgenda/log.html · "
+        f"{SITE}log.html · "
         f"[watchdog run]({run_url})"
         if run_url
         else ""
