@@ -6,8 +6,10 @@ description: Research upcoming reggae, dub and ska shows in Switzerland (and jus
 # Scrape shows
 
 You update the concert data of Jahgenda. The result of this run is one commit on `main` that changes
-`data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only), `data/runs.json` and — only
-new lines under **Suggestions** — `scraper/bands.md`. Nothing else in the repo is touched.
+`data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only) with its derived
+`data/venues.web.json` (written by `scripts/format_data.py`, never by hand), `data/runs.json`,
+`data/status.json` and — only new lines under **Suggestions** — `scraper/bands.md`. Nothing else in the
+repo is touched.
 
 Work from the repository root. Today's date is what `TZ=Europe/Zurich date +%F` prints — use it, do not
 guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
@@ -262,7 +264,7 @@ Run exactly this, as one command, so nothing is committed when validation fails:
 
 ```sh
 python3 scripts/format_data.py && python3 scripts/validate_shows.py \
-  && git add data/shows.json data/artists.json data/venues.json data/runs.json data/status.json scraper/bands.md \
+  && git add data/shows.json data/artists.json data/venues.json data/venues.web.json data/runs.json data/status.json scraper/bands.md \
   && git commit -m "Update shows: +<added> ~<updated> -<removed> (<total> total)" \
   && git push origin main
 ```
@@ -272,7 +274,7 @@ Commit even when no show changed (message `Scraper run: no changes (<total> tota
 
 If the validator reports problems, fix the data and run the command again. **Never commit data that does
 not validate.** If you cannot make it pass, or anything else stops the run: revert the data
-(`git checkout -- data/shows.json data/artists.json data/venues.json scraper/bands.md`), write
+(`git checkout -- data/shows.json data/artists.json data/venues.json data/venues.web.json scraper/bands.md`), write
 `data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with the same
 error in `notes`, validate, and commit + push only those two files — so the failure is visible on
 the Mischpult (tab «Status») and the watchdog, and the site keeps the last good data.

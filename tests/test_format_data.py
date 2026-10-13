@@ -257,3 +257,27 @@ class WebVenues(unittest.TestCase):
         self.assertIn('venuesWeb: "data/venues.web.json"', load)
         self.assertIn("tryJson(DATA.venuesWeb)", store)
         self.assertIn('"data/venues.web.json"', (ROOT / "src" / "sw.js").read_text(encoding="utf-8"))
+
+
+class SkillCommitsWhatFormatDataWrites(unittest.TestCase):
+    """scrape-shows runs format_data.py right before its commit: every file the formatter may write
+    (FORMATTERS + DERIVED targets) must be staged by that commit and reverted by its failure path –
+    otherwise the first new venue leaves data/venues.web.json unstaged and main fails `make check`."""
+
+    SKILL = (ROOT / ".claude" / "skills" / "scrape-shows" / "SKILL.md").read_text(encoding="utf-8")
+
+    def written(self):
+        files = {f"data/{name}" for name in F.FORMATTERS}
+        return files | {f"data/{target}" for target, _ in F.DERIVED.values()}
+
+    def command_files(self, verb):
+        lines = [ln for ln in self.SKILL.splitlines() if verb in ln]
+        self.assertTrue(lines, f"no `{verb}` line in scrape-shows SKILL.md")
+        return {tok.strip("`()\\") for ln in lines for tok in ln.split(verb, 1)[1].split()}
+
+    def test_commit_stages_every_file_format_data_writes(self):
+        self.assertEqual(self.written() - self.command_files("git add"), set())
+
+    def test_failure_path_reverts_every_written_data_file_but_the_run_log(self):
+        # runs.json (and status.json) carry the failure itself, so they are written, not reverted.
+        self.assertEqual(self.written() - {"data/runs.json"} - self.command_files("git checkout --"), set())

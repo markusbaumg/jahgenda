@@ -11,7 +11,8 @@ layout. The site UI is German; code, docs and config are English.
   `vite.config.js`, `package.json`, `README.md`, `CLAUDE.md`.
   Skills never change these files – with one exception: skills may append lines under _Suggestions_ in
   `bands.md`.
-- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
+- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat),
+  `data/venues.web.json` (derived from `venues.json` by `scripts/format_data.py`; a skill that adds a venue commits it too). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
 - **Humans also own:** `data/genres.json` (allowed genre slugs, labels, filter order — single source of truth
   for validator, scraper and page) and `public/store.js` (every client-side persistence goes through `window.jahStore`;
