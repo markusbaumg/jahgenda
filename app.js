@@ -532,6 +532,16 @@
       });
   }
 
+  // "Offline · Stand: …": the service worker serves the last copy without a connection; the stamp
+  // says so, so the visitor knows the list may have moved on.
+  let stampText = "";
+  function updateStamp() {
+    if (!stampText) return;
+    el("updated").textContent = `${navigator.onLine === false ? "Offline · " : ""}${stampText}`;
+  }
+  window.addEventListener("online", updateStamp);
+  window.addEventListener("offline", updateStamp);
+
   async function init() {
     try {
       const [res, gres] = await Promise.all([
@@ -603,7 +613,12 @@
 
       if (data.updated) {
         const note = data.source === "mock" ? " · Beispieldaten" : "";
-        el("updated").textContent = `Stand: ${stampFmt.format(new Date(data.updated))}${note}`;
+        // The scraper runs every night; a stamp older than two days means the data may be stale
+        // (a cached copy, or the routine failed – the watchdog knows, the visitor should too).
+        const old =
+          Date.now() - new Date(data.updated).getTime() > 48 * 3600e3 ? " · evtl. nicht aktuell" : "";
+        stampText = `Stand: ${stampFmt.format(new Date(data.updated))}${note}${old}`;
+        updateStamp();
       }
       render();
       revealFromHash();

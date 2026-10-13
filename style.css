@@ -1677,8 +1677,8 @@ body {
 .toast button {
   font: inherit;
   font-weight: 700;
-  color: var(--text);
-  background: var(--green);
+  color: var(--bg); /* dark on green: 8:1 (cream on green was 3.45:1) */
+  background: var(--green-text);
   border: 0;
   border-radius: 999px;
   padding: 5px 12px;
@@ -2560,7 +2560,8 @@ a {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  /* --toast-h: a visible update toast (pwa.js) sits at the bottom edge; the callout docks above it. */
+  bottom: calc(12px + var(--toast-h, 0px) + env(safe-area-inset-bottom, 0px));
   z-index: 20;
   display: flex;
   gap: 14px;

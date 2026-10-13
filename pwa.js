@@ -2,6 +2,12 @@
  * Kept separate from app.js so the agenda works without it. */
 (() => {
   const store = window.jahStore;
+  // Reload only after the user pressed "Aktualisieren": clients.claim() in the freshly installed
+  // worker also fires controllerchange on the very first visit, which must not reload the page.
+  // Declared here, at the level of showUpdateToast(): inside the block below the assignment in the
+  // click handler would silently create a global and the controllerchange listener would never reload.
+  let wantReload = false;
+  let reloading = false;
   const standalone =
     window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
@@ -30,10 +36,6 @@
         console.warn("Service worker not registered:", err);
       }
     });
-    // Reload only after the user pressed "Aktualisieren": clients.claim() in the freshly installed
-    // worker also fires controllerchange on the very first visit, which must not reload the page.
-    let wantReload = false;
-    let reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (!wantReload || reloading) return;
       reloading = true;
@@ -52,8 +54,15 @@
       wantReload = true;
       if (reg.waiting) reg.waiting.postMessage("skipWaiting");
       t.remove();
+      document.documentElement.style.removeProperty("--toast-h");
+      // The new worker took over before the click (or never will): reload anyway after a moment.
+      setTimeout(() => {
+        if (!reloading) location.reload();
+      }, 3000);
     });
     document.body.appendChild(t);
+    // A callout that appears later docks above the toast instead of underneath it.
+    document.documentElement.style.setProperty("--toast-h", `${t.offsetHeight + 12}px`);
   }
 
   // ---- Install nudge (via the shared callout) ---------------------------------------------------
