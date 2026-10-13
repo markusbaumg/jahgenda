@@ -201,3 +201,15 @@ for (const lang of ["de", "fr", "en"]) {
     await expectNoRawKeys(page);
   });
 }
+
+test("the map's «loading» corner note speaks the page language", async ({ page }) => {
+  await useFixture(page);
+  await page.route("**/tile.openstreetmap.org/**", () => {}); // the tiles never arrive: the note stays
+  await page.addInitScript(() => localStorage.setItem("jahgenda.lang", JSON.stringify("fr")));
+  await openList(page);
+  await page.click('#view-switch [data-view="map"]');
+  const map = page.locator("#map.tiles-pending");
+  await expect(map).toBeVisible({ timeout: 20_000 });
+  const note = await map.evaluate((m) => getComputedStyle(m, "::after").content);
+  expect(note).toBe('"Chargement de la carte …"');
+});

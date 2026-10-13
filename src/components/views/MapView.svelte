@@ -148,7 +148,7 @@
       `<a href="https://leafletjs.com" title="${t("map.leafletTitle")}" target="_blank" rel="noopener">Leaflet</a>`,
     );
     // Until the first tiles are painted the frame is a plain dark square with pins floating on it: a
-    // «Karte lädt …» corner note (CSS .map.tiles-pending) says that the map is still on its way.
+    // «Karte wird geladen …» corner note (CSS .map.tiles-pending, text from data-loading) says that the map is still on its way.
     mapEl.classList.add("tiles-pending");
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -369,7 +369,15 @@
 
 <div id="map-view" class="map-view" hidden={!active}>
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions (only the «Liste» link inside the offline note) -->
-  <div id="map" class="map" role="region" aria-label={t("map.label")} bind:this={mapEl} {onclick}></div>
+  <div
+    id="map"
+    class="map"
+    role="region"
+    aria-label={t("map.label")}
+    data-loading={t("map.loading")}
+    bind:this={mapEl}
+    {onclick}
+  ></div>
   <div id="map-rest">
     {#if active && leafletReady}
       <p class="map-legend">

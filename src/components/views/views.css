@@ -380,7 +380,7 @@
 }
 /* While the first tiles are on their way the frame says so (the pins float on a plain square until then). */
 .map.tiles-pending::after {
-  content: "Karte lädt …";
+  content: attr(data-loading); /* t("map.loading"), in the page language */
   position: absolute;
   left: 12px;
   bottom: 12px;
