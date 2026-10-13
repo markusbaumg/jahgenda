@@ -30,12 +30,15 @@ test("distances appear and the radius chips filter", async ({ page }) => {
   await expect(page.locator("#list .show")).toHaveCount(6);
 });
 
-test("without permission the rows offer to show the distance", async ({ page, context }) => {
+test("without permission the rows offer to show the distance", async ({ page, context, isMobile }) => {
   await context.clearPermissions();
   await useFixture(page);
   await openList(page);
   await expect(page.locator("#list .show .dist")).toHaveCount(0);
-  await expect(page.locator("#list .show .geo-ask")).toHaveCount(6);
+  // Hover placeholder in every row on a pointer screen; a touch screen (always visible) gets one, in
+  // the first row, so the rows stay three lines.
+  await expect(page.locator("#list .show .geo-ask")).toHaveCount(isMobile ? 1 : 6);
+  await expect(page.locator("#list .show").first().locator(".geo-ask")).toHaveCount(1);
 });
 
 // A browser that has never been asked gets no permission prompt on arrival: the position is requested

@@ -2471,6 +2471,17 @@ a[href]:focus-visible,
   color: var(--text);
   overflow-wrap: anywhere;
 }
+/* 320 px: the acts column had 107 px next to the day label (2–3 words per line, an 800 px card); the
+ * label goes above its acts. From 360 px the side-by-side grid of design/festival-spec.md §3.5 stands. */
+@media (max-width: 359px) {
+  .days {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .days .d:not(:first-child) {
+    padding-top: 8px;
+  }
+}
 .days .d {
   padding-top: 2px;
   font-size: var(--fs-1);
@@ -3588,6 +3599,31 @@ a {
   }
   .note-long {
     display: none;
+  }
+}
+/* Phones (≤ 599): the results row is one line – ⓘ · «98 Konzerte» · Liste|Kalender|Karte (design §3.4
+ * draws one line at 375; the view switch stood alone on a second line with an empty left half, 46 px
+ * of fold lost above the list). The note pill is its icon; the words stay its accessible name. */
+@media (max-width: 599px) {
+  .note-pill summary {
+    padding: 0 8px;
+  }
+  .note-short,
+  .note-long {
+    display: inline;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .note-pill .chev {
+    display: none;
+  }
+}
+@media (max-width: 340px) {
+  .seg button {
+    padding: 0 12px; /* 288 px: ⓘ + «100 Konzerte» + the switch still fit on the line */
   }
 }
 

@@ -318,14 +318,18 @@
     if (!url) return "";
     return `<a class="sbb" href="${url}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show" aria-label="SBB-Fahrplan nach ${escape(s.city)}">SBB</a>`;
   }
+  const coarse = matchMedia("(hover: none)"); // touch screens: the placeholder below cannot wait for a hover
+  let geoHints = 0; // placeholders rendered in this pass (renderInner resets it)
   function distanceLabel(s) {
     if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
     // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
     // The separator travels with the button (both only show on hover), so no lone «·» ends the line.
-    if (!here)
-      return geoDeclined
-        ? ""
-        : `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
+    // On a touch screen it is always visible, so it stands once, in the first row: 98 identical
+    // lines made most rows a line longer (the Wo panel has «Mein Standort» for everyone else).
+    if (!here) {
+      if (geoDeclined || (coarse.matches && geoHints++)) return "";
+      return `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
+    }
     return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
@@ -956,6 +960,7 @@
 
   function renderInner() {
     if (loadState !== "ready") return; // data not in yet (or an error): the skeleton / message stays
+    geoHints = 0;
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter((s) => isVisible(s));
 
