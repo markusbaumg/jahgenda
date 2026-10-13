@@ -51,6 +51,8 @@ src/components/filters/                The filter bar (search, Wo / Wann toggles
 src/stores/reveal.svelte.js            Deep links #<short>: scroll under the bar, highlight, stale-link note.
 src/stores/feedback.svelte.js          Feedback words of the row actions («Kopiert» …) for 1.2 s; announced through live.svelte.js.
 src/components/list/                   Row actions (.ics, Teilen, Link) and the stale-link note (LinkNote).
+src/stores/marks.svelte.js             Meine Shows: marks (jahStore), star / state / undo, list mode, #m= links, list share + .ics.
+src/components/mine/                   ★ toolbar toggle, list head («Zurück zur Agenda»), list panel, undo toast.
 src/stores/views.svelte.js             Kalender / Karte state on top of ui.view: calendar month/day, list mode, pill/popup jumps.
 src/components/views/                  Calendar (month grid, day list), MapView (Leaflet on demand, pins, clusters),
                                        scroll.js (scrolls the page makes itself).

@@ -4,6 +4,7 @@
    * («Kein Dub im Tessin» with the fixes) is filters/EmptyState.svelte. */
   import { agenda } from "../stores/agenda.svelte.js";
   import EmptyState from "./filters/EmptyState.svelte";
+  import { mine } from "../stores/marks.svelte.js";
 
   let { onretry } = $props();
   const offline = $derived(agenda.loadState === "error" && navigator.onLine === false);
@@ -72,7 +73,25 @@
       >Nochmals versuchen</button
     >
   {:else if !agenda.visible.length}
-    {#if !agenda.hasUpcoming}
+    {#if agenda.list}
+      <p class="state-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"
+          ><path
+            fill="currentColor"
+            d="M10 2a8 8 0 1 0 4.9 14.3l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z"
+          /></svg
+        >
+      </p>
+      <p class="big">Diese Liste ist leer</p>
+      <p>Keine der Shows ist mehr in der Agenda.</p>
+      <button
+        type="button"
+        class="primary"
+        id="reset"
+        title="Zurück zur Agenda"
+        onclick={() => mine.closeListMode()}>Zurück zur Agenda</button
+      >
+    {:else if !agenda.hasUpcoming}
       <p class="state-icon">
         <svg viewBox="0 0 24 24" aria-hidden="true"
           ><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 2h3v3H8v-3z" /></svg

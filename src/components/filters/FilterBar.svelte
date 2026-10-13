@@ -11,6 +11,9 @@
   import WhenPanel from "./WhenPanel.svelte";
   import WhereToggle from "./WhereToggle.svelte";
   import WhenToggle from "./WhenToggle.svelte";
+  import MineToggle from "../mine/MineToggle.svelte";
+  import ListHead from "../mine/ListHead.svelte";
+  import { mine } from "../../stores/marks.svelte.js";
 
   let form;
 
@@ -54,8 +57,15 @@
 
 <!-- Sticky filter bar: two rows of frozen height. Wo and Wann are dropdown panels hanging from the bar
      (one open at a time). -->
-<form class="filters" id="filters" role="search" onsubmit={(e) => e.preventDefault()} bind:this={form}>
-  <div id="list-head" class="list-head" hidden></div>
+<form
+  class="filters"
+  id="filters"
+  role={mine.listMode ? "region" : "search"}
+  aria-labelledby={mine.listMode ? "list-title" : undefined}
+  onsubmit={(e) => e.preventDefault()}
+  bind:this={form}
+>
+  <ListHead />
   <div class="toolbar">
     <label class="sr" for="q">Suche</label>
     <div class="search">
@@ -84,20 +94,7 @@
     </div>
     <WhereToggle />
     <WhenToggle />
-    <button
-      type="button"
-      id="toggle-mine"
-      class="icon-btn mine empty"
-      aria-pressed="false"
-      aria-disabled="true"
-      title="Shows merken · nur in diesem Browser"
-      aria-label="Meine Shows anzeigen"
-    >
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-        <path fill="currentColor" d="m12 2 3 6.6 7 .8-5.2 4.9 1.4 7.1L12 17.8 5.8 21.4l1.4-7.1L2 9.4l7-.8z" />
-      </svg>
-      <b>0</b>
-    </button>
+    <MineToggle />
   </div>
   <GenreChips />
   <WherePanel />

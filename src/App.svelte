@@ -32,11 +32,16 @@
   import { nav } from "./stores/history.js";
   import { live } from "./stores/live.svelte.js";
   import { parseHash } from "./lib/hash.js";
+  // M3: Meine Shows – the list panel, the undo toast; the ★ and the list head sit in the filter bar.
+  import MinePanel from "./components/mine/MinePanel.svelte";
+  import UndoToast from "./components/mine/UndoToast.svelte";
+  import { mine } from "./stores/marks.svelte.js";
 
   nav.start(); // before the data: the saved scroll offset is read off the entry the browser restored
   agenda.load();
   // Rows & deep links (M2): #<short> lands on the row.
   initReveal();
+  mine.start();
   views.start();
   startNudges();
   pwa.start();
@@ -83,6 +88,7 @@
   <p class="sr" id="results-live" role="status" aria-live="polite">{live.resultsText}</p>
   <!-- Feedback words of the row actions («Kopiert», «Gespeichert» …) for screen readers. -->
   <p class="sr" id="feedback" role="status" aria-live="polite">{live.feedback}</p>
+  <MinePanel />
   <div
     id="views"
     tabindex="-1"
@@ -95,9 +101,10 @@
         <ShowList shows={agenda.visible} />
       {/if}
     </div>
-    <Calendar shows={agenda.visible} active={hasRows && views.current === "calendar"} />
-    <MapView shows={agenda.visible} active={hasRows && views.current === "map"} />
+    <Calendar shows={agenda.visible} marks={mine.marks} active={hasRows && views.current === "calendar"} />
+    <MapView shows={agenda.visible} marks={mine.marks} active={hasRows && views.current === "map"} />
   </div>
+  <UndoToast />
   <Status onretry={() => agenda.load()} />
   <PastFoot />
 </main>

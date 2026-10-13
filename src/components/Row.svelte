@@ -15,26 +15,22 @@
   import Lineup from "./festival/Lineup.svelte";
   import { LINEUP_PREVIEW, LINEUP_FROM, dayCount } from "../lib/festival.js";
 
-  const MARK_LABEL = { "": "Merken", interested: "Gemerkt: Interessiert", going: "Gemerkt: Ich gehe" };
-  const MARK_TITLE = {
-    "": "Merken (lang drücken: Ich gehe)",
-    interested: "Nicht mehr merken",
-    going: "Nicht mehr merken",
-  };
+  // Meine Shows (M3): the star, the state toggle and the friend's «geht hin» come from the marks store.
+  import { mine, MARK_LABEL, MARK_TITLE, LONG_PRESS } from "../stores/marks.svelte.js";
 
   let {
     show: s,
     index = 0, // position in the list: the first ten rows enter one --stagger apart (§4)
     geoHint = true, // may this row carry the «Distanz & Zug anzeigen» placeholder (one per pass on touch)
-    marks = {}, // { id: "interested" | "going" } – Meine Shows (a later story fills it)
-    shared = null, // { id: state } from a #m=… link
   } = $props();
 
   const url = $derived(safeUrl(s.url));
   const tickets = $derived(safeUrl(s.tickets));
   const q = $derived(agenda.filters.q.trim().toLowerCase());
   const here = $derived(agenda.here);
-  const mark = $derived(marks[s.id] || "");
+  const mark = $derived(mine.mark(s.id));
+  const shared = $derived(mine.shared);
+  const starWord = $derived(mine.starWord(s.id));
   // Genres are muted words at the end of the meta line; the active genre chip is not repeated.
   const genreWords = $derived(
     s.genres
@@ -70,6 +66,44 @@
   async function act(name) {
     flash(name, await ACTIONS[name](s));
   }
+  // The star: Merken on / off. A long press (500 ms) is «Ich gehe» in one go; the click that follows the
+  // release is swallowed. A touch screen may not send that click at all, so the flag is a timestamp that
+  // expires by itself instead of swallowing the next tap or Enter.
+  let longAt = 0;
+  let pressTimer = 0;
+  let pressing = false;
+  function onStarClick() {
+    if (longAt && Date.now() - longAt < 1000) {
+      longAt = 0;
+      return;
+    }
+    mine.toggleStar(s);
+  }
+  function endPress() {
+    clearTimeout(pressTimer);
+    pressTimer = 0;
+    pressing = false;
+    window.removeEventListener("pointerup", endPress);
+    window.removeEventListener("pointercancel", endPress);
+  }
+  function onStarDown(e) {
+    if (e.button !== 0) return;
+    longAt = 0;
+    pressing = true;
+    clearTimeout(pressTimer);
+    window.addEventListener("pointerup", endPress);
+    window.addEventListener("pointercancel", endPress);
+    pressTimer = setTimeout(() => {
+      pressTimer = 0;
+      longAt = Date.now(); // consumed by the click handler
+      mine.longPress(s);
+    }, LONG_PRESS);
+  }
+  // The press must not open the browser's context menu on a touch screen.
+  function onStarMenu(e) {
+    if (pressing) e.preventDefault();
+  }
+
   // The coat of arms (toggles that canton in the Wo filter, results kept in view) and «Distanz & Zug
   // anzeigen» (asks for the position) are handled by one delegated listener on #list (UrlState.svelte).
 
@@ -180,10 +214,17 @@
     >
     <button
       type="button"
-      class="act star"
+      class="act star{starWord ? ' fb-on' : ''}"
       data-act="mark"
       aria-pressed={Boolean(mark)}
-      title={MARK_TITLE[mark]}><Icon name="star" /><span class="lbl">{MARK_LABEL[mark]}</span></button
+      title={MARK_TITLE[mark]}
+      onclick={onStarClick}
+      onpointerdown={onStarDown}
+      oncontextmenu={onStarMenu}
+      ><Icon name="star" /><span class="lbl">{MARK_LABEL[mark]}</span>{#if starWord}<span
+          class="fb"
+          aria-hidden="true">{starWord}</span
+        >{/if}</button
     >
   </div>
   <div class="foot-row">
@@ -199,6 +240,7 @@
             data-act="state"
             data-state="interested"
             aria-pressed={mark === "interested"}
+            onclick={() => mine.setState(s, "interested")}
             title="Vielleicht – ich schaue es mir an">Interessiert</button
           ><button
             type="button"
@@ -206,6 +248,7 @@
             data-act="state"
             data-state="going"
             aria-pressed={mark === "going"}
+            onclick={() => mine.setState(s, "going")}
             title="Ich bin dabei">Ich gehe</button
           >
         </div>
