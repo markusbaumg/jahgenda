@@ -1666,6 +1666,7 @@
     }
     if (name === "when") updateWhen();
     if (name) {
+      fitPanel();
       pushOverlay(name);
       if (callout()) callout().suspend(); // a sticker never covers the panel's last rows
       // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
@@ -1673,6 +1674,15 @@
       if (first) first.focus({ preventScroll: true });
     } else if (was) popOverlay();
   }
+  // The panel's max-height counts from the bar's real bottom edge (style.css .filters .panel): at the top
+  // of the page the bar is not stuck yet and sits under the header, so the panel would otherwise run
+  // ~135 px past the fold with its last chips unreachable.
+  function fitPanel() {
+    const bottom = Math.max(0, filtersForm.getBoundingClientRect().bottom);
+    filtersForm.style.setProperty("--panel-top", `${Math.round(bottom)}px`);
+  }
+  window.addEventListener("scroll", () => openPanel && fitPanel(), { passive: true });
+  window.addEventListener("resize", () => openPanel && fitPanel());
   filtersForm.addEventListener("click", (e) => {
     const close = e.target.closest(".panel-close");
     if (!close) return;

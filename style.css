@@ -1375,9 +1375,14 @@ a[href]:focus-visible,
   .map {
     min-height: 240px;
   }
-  .filters,
   #list .month {
     position: static;
+  }
+  /* Unstuck, but still the containing block of the Wo/Wann dropdowns (position: absolute; top: 100%) and
+   * of its own ::before plate – `static` sent the panels to the end of the page and let the plate's
+   * negative inset widen the document by one gutter (16 px sideways scroll in landscape). */
+  .filters {
+    position: relative;
   }
 }
 .popup-shows {
@@ -3215,8 +3220,11 @@ a {
   right: 8px;
   top: 100%;
   z-index: 4;
-  max-height: calc(100vh - var(--bar-h, 120px) - 24px);
-  max-height: calc(100dvh - var(--bar-h, 120px) - 24px); /* iOS: the visible viewport, not the full one */
+  /* The panel hangs from the bar's real bottom edge: --panel-top is written by app.js when a panel opens
+   * and while the page scrolls under it (the bar sits ~160 px lower while the header is still visible,
+   * so a value fixed to --bar-h would cut the lowest chips off below the fold). */
+  max-height: calc(100vh - var(--panel-top, var(--bar-h, 120px)) - 24px);
+  max-height: calc(100dvh - var(--panel-top, var(--bar-h, 120px)) - 24px); /* iOS: the visible viewport */
   overflow: auto;
   padding: 10px 14px 14px;
   background: var(--surface);
