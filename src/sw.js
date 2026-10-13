@@ -1,6 +1,9 @@
 /* Jahgenda service worker – the source of dist/sw.js (vite-plugin-pwa, strategy injectManifest; story #33 M7).
- * - App shell (HTML/CSS/JS/icons) is precached and served cache-first; other same-origin files
- *   (canton flags, …) are cached on first use.
+ * - App shell (HTML/CSS/JS/icons) is precached and served cache-first; other same-origin images
+ *   (canton flags, …) are cached on first use. Every other same-origin file (pages and chunks outside
+ *   the shell, e.g. the owners' console, which is never precached) goes to the network untouched: a
+ *   file outside the precache list never changes BUILD, so caching it would pin an old copy until the
+ *   public shell happens to change.
  * - data/*.json is network-first with the cached copy as offline fallback, so the agenda is always
  *   fresh when online and still readable offline.
  * - Leaflet from unpkg is cached on first use; map tiles are never cached.
@@ -29,6 +32,9 @@ const LIB_CACHE = "jahgenda-lib";
 
 // "./" first: the start URL of the installed app is the directory, not index.html.
 const SHELL = ["./", ...MANIFEST.map((e) => (typeof e === "string" ? e : e.url))];
+// The same list as paths, to tell a shell request (cache-first) from any other same-origin file.
+const SHELL_PATHS = new Set(SHELL.map((u) => new URL(u, self.location.href).pathname));
+const IMG_PREFIX = new URL("img/", self.location.href).pathname;
 // The agenda itself: fetched into the data cache on install, so the first visit (whose own data
 // requests ran before this worker controlled the page) already leaves an offline-readable agenda.
 // The slogans are inline in index.html (no request any more). venues.web.json is the venue database
@@ -111,7 +117,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   if (url.hostname.endsWith("openstreetmap.org") || url.hostname.endsWith("cartocdn.com")) return; // tiles: always live
-  if (url.origin === location.origin) {
+  if (url.origin !== location.origin) return;
+  // The shell, and images (canton flags, …) on first use: cache-first. Anything else (pages and chunks
+  // outside the precache list) is network-only, so it is always as fresh as the last deploy.
+  if (SHELL_PATHS.has(url.pathname) || url.pathname.startsWith(IMG_PREFIX)) {
     event.respondWith(cacheFirst(req, SHELL_CACHE));
   }
 });
