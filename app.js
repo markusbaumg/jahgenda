@@ -784,7 +784,11 @@
   }
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these). `o` replaces
   // single filters for what-if counts (countWith): { q, cantons, radius, genre }.
-  function matchesFilters(s, o = {}) {
+  // o: overrides for the facet counts ({q, cantons, radius, genre, format, months, range}); anything that is
+  // not an object (Array.prototype.filter passes the index) means "the current filters".
+  const opt = (o) => (o && typeof o === "object" ? o : {});
+  function matchesFilters(s, o) {
+    o = opt(o);
     const q = fold("q" in o ? o.q : search.value.trim());
     const cs = "cantons" in o ? o.cantons : cantons;
     const radius = "radius" in o ? o.radius : radiusKm;
@@ -798,8 +802,8 @@
     if (format && !s.genres.includes(format)) return false;
     return !q || matchesSearch(s, q);
   }
-  const isVisible = (s, o = {}) =>
-    listMode() ? inList(s) : (!s._past || showPast) && inRange(s, o) && matchesFilters(s, o);
+  const isVisible = (s, o) =>
+    listMode() ? inList(s) : (!s._past || showPast) && inRange(s, opt(o)) && matchesFilters(s, opt(o));
 
   // --- Counts helper (§7 S6): how many shows a choice would show, with every other filter as it is. The
   // chips («dub 4», «Bern 2»), the empty state («Tessin entfernen → 4 Shows») and the month histogram
@@ -2226,7 +2230,8 @@
   const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
   // `o` replaces the time filters for what-if counts: { months: Set, range: [from, to] | null }.
   // A festival counts for every month and every quick range it touches.
-  const inRange = (s, o = {}) => {
+  const inRange = (s, o) => {
+    o = opt(o);
     const ms = "months" in o ? o.months : months;
     const end = s._end || s._day;
     if (ms.size) {
