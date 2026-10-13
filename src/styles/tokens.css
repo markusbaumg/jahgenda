@@ -71,7 +71,6 @@
   --bar-h: calc(
     var(--bar-top) + var(--bar-chips) + var(--safe-top)
   ); /* 84 px (+ inset), frozen: the bar never changes height */
-  --month-h: 32px;
   --r-1: 4px;
   --r-2: 8px;
   --r-3: 12px;

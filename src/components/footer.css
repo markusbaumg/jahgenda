@@ -150,7 +150,7 @@
 
 /* Secondary pages: footer bar only (no About band) */
 .foot:not(:has(.about)) {
-  margin-top: 48px;
+  margin-top: var(--s-7);
   background: var(--bg);
   border-top: 0;
 }
