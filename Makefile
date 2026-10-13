@@ -5,7 +5,7 @@ SHELL := /bin/bash
 PORT ?= 8000
 # Prettier targets: the Vite entry, the global stylesheet, the source tree (JS + Svelte, via
 # prettier-plugin-svelte), the plain scripts and static pages in public/, config, tests and the e2e project.
-WEB_FILES := index.html style.css vite.config.js src public/*.html public/*.js design/logos.html tests/*.test.mjs e2e/*.js e2e/tests/*.js
+WEB_FILES := index.html mischpult.html style.css vite.config.js src public/*.html public/*.js design/logos.html tests/*.test.mjs e2e/*.js e2e/tests/*.js
 PY_FILES  := scripts/*.py tests/*.py
 # ruff on PATH, else via uvx (same version as CI); without both, lint fails loudly instead of skipping
 RUFF := $(shell command -v ruff >/dev/null 2>&1 && echo ruff || (command -v uvx >/dev/null 2>&1 && echo "uvx ruff") || echo "python3 -m ruff")

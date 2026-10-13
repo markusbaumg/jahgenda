@@ -6,7 +6,7 @@ A static site, kept up to date by AI agents, hosted on GitHub Pages.
 [![Deploy](https://github.com/markusbaumg/jahgenda/actions/workflows/pages.yml/badge.svg)](https://github.com/markusbaumg/jahgenda/actions/workflows/pages.yml)
 [![Scraper watchdog](https://github.com/markusbaumg/jahgenda/actions/workflows/watchdog.yml/badge.svg)](https://github.com/markusbaumg/jahgenda/actions/workflows/watchdog.yml)
 
-**Live:** https://markusbaumg.github.io/jahgenda/ · **Board:** https://github.com/users/markusbaumg/projects/2 · **Scraper log:** https://markusbaumg.github.io/jahgenda/log.html
+**Live:** https://markusbaumg.github.io/jahgenda/ · **Board:** https://github.com/users/markusbaumg/projects/2
 
 ## What it is
 
@@ -76,9 +76,14 @@ public/store.js                        Client storage abstraction (marks, view, 
 src/sw.js                              Service worker source (vite-plugin-pwa injectManifest → dist/sw.js): shell precache, data network-first (4 s).
 src/stores/pwa.svelte.js               PWA glue: worker registration and the «Neue Version» state; the manifest is in vite.config.js.
 src/components/pwa/UpdateToast.svelte  The «Neue Version von Jahgenda · Aktualisieren» toast.
-public/log.html                        Public scraper log (renders data/runs.json).
-public/review.html                     Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
-public/mischpult.html                  The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
+mischpult.html                         The Mischpult, the owners' console (second Vite entry, hidden, noindex): Status, Läufe,
+                                       Aussortiert, Quellen & Venues, Prompt & Regeln, Genres – tabs by hash (#status …).
+src/mischpult/main.js                  Its entry: mounts Mischpult.svelte, imports style.css (tokens) + mischpult.css (its own).
+src/mischpult/Mischpult.svelte         The tab shell (WAI-ARIA tablist, hash routing, old anchors) and the data loading.
+src/mischpult/sections/                One component per tab (Status, Runs, Dropped, Sources, Prompt, Genres).
+src/mischpult/format.js                de-CH stamps, «vor 3 h», runner / skill / source-status wording.
+public/log.html                        Redirect to mischpult.html#laeufe (the scraper log moved into the Mischpult).
+public/review.html                     Redirect to mischpult.html#aussortiert (the dropped candidates moved there too).
 public/img/fonts/jahdisplay.woff2      Display face (Anton subset, OFL): wordmark, day numbers, month heads.
 dist/                                  The build (gitignored): what `make build` writes and GitHub Pages serves.
 data/shows.json                        The shows. Written by the scraper.
@@ -257,15 +262,25 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
   and turns the badge above red; when healthy again it closes the issue. `make watchdog` runs the same check
   locally without touching GitHub.
-- **Where to look:** the badge, the `scraper-failed` issue, `log.html`, and the routine's own run log at
-  https://claude.ai/code/routines.
-- **Mischpult (the owners' control panel, hidden):** https://markusbaumg.github.io/jahgenda/mischpult.html shows
-  sources, venues, prompt, rules, runs and links to the log and the review page. It is not linked from any public
-  page, carries `noindex`, and is deliberately _not_ listed in `robots.txt` (a `Disallow` line would advertise the
-  URL to scanners). The name is Swiss German for «mixing desk» — we avoid `admin`, the first path every automated
-  scanner tries. Rename = move the file and update Makefile `WEB_FILES`, `scripts/smoke.sh`, this section and CLAUDE.md.
-- **Quality (false positives/negatives):** `review.html` (reachable from `mischpult.html` only, like `log.html`) lists every candidate the scraper looked at and
-  dropped, with date, venue, source link and reason; «Gehört rein» opens a prefilled GitHub issue. Every
+- **Where to look:** the badge, the `scraper-failed` issue, the Mischpult (below), and the routine's own run
+  log at https://claude.ai/code/routines.
+- **Mischpult (the owners' console, hidden):** https://markusbaumg.github.io/jahgenda/mischpult.html is one
+  Svelte page (second Vite entry, `src/mischpult/`) with six tabs, each reachable by hash: **Status** (`#status`:
+  the heartbeat, the watchdog verdict mirrored from `check_freshness.py` – red when the data is older than 36 h or
+  the last run said `ok: false` – the data stamp, links to the routines and the `scraper-failed` issues),
+  **Läufe** (`#laeufe`: every run of `runs.json`, collapsible, with the per-source table), **Aussortiert**
+  (`#aussortiert`), **Quellen & Venues** (`#quellen`), **Prompt & Regeln** (`#prompt`: SKILL.md, criteria.md,
+  bands.md and sources.json read from raw.githubusercontent.com) and **Genres** (`#genres`). `log.html` and
+  `review.html` are redirects to `#laeufe` / `#aussortiert`, so old links and issues still land. The console is
+  not linked from any public page, carries `noindex` (and `no-referrer`), is never precached by the service
+  worker, and is deliberately _not_ listed in `robots.txt` (a `Disallow` line would advertise the URL to
+  scanners). The name is Swiss German for «mixing desk» — we avoid `admin`, the first path every automated
+  scanner tries. Rename = move the entry and update `vite.config.js` (input, globIgnores), `scripts/smoke.sh`,
+  the redirects, `tests/test_contract.py`, this section and CLAUDE.md.
+- **Quality (false positives/negatives):** the Mischpult's «Aussortiert» tab lists every candidate the scraper
+  looked at and dropped, with date, venue, source link and reason – once per candidate, deduped across runs like
+  the weekly issue (`src/lib/drops.js` mirrors `quality_review.py`; «Jeden Lauf einzeln zeigen» lists every run);
+  «Gehört rein» opens a prefilled GitHub issue. Every
   Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped
   candidates and failed sources, so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
 
@@ -355,7 +370,7 @@ scraper reads this venue's programme on every run; `hint` tells it where the eve
 may be `manual` for hand corrections, which the scraper then never changes.
 
 `data/runs.json`: one entry per scraper run (counts, failed sources, dropped candidates with reasons). Shown
-on `log.html`.
+in the Mischpult (tabs Läufe and Aussortiert).
 
 Check everything: `make validate` (strict: `make validate-strict`). Format: `make fmt-data`.
 
@@ -382,8 +397,9 @@ scraper's contract – the build copies it into `dist/data`, the dev server serv
 `e2e/` is a small [Playwright](https://playwright.dev) project that drives the real page in a browser:
 desktop Chrome (1280×800) and an iPhone 13 emulated in Chromium. One spec per area – list, search and
 genre chips, the Wo and Wann panels, the three views (the map really loads Leaflet), Meine Shows with
-share link and `.ics` download, the phone layout of the row actions, mocked geolocation, and every page (`index.html`,
-`log.html`, `review.html`, `mischpult.html`) loading without console errors. The interaction tests run
+share link and `.ics` download, the phone layout of the row actions, mocked geolocation, every page loading without console errors, and the
+Mischpult (`pages.spec.js`: tabs by hash and keyboard, the watchdog colours, deduped «Aussortiert» and the
+«Gehört rein» link, the log/review redirects, hidden from the public page). The interaction tests run
 against a fixture served in place of `data/shows.json` (dates relative to today), so they do not depend
 on what the scraper found; the load and console checks use the real data.
 

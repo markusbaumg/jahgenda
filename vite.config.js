@@ -1,5 +1,6 @@
-/* Vite build of the Jahgenda page (story #33). Static files live in public/ (img, fonts, the three
- * static pages and the plain scripts); the manifest and dist/sw.js come from vite-plugin-pwa; data/ stays at
+/* Vite build of the Jahgenda page (story #33) and of the Mischpult, the owners' console (story #55) – two
+ * entries, index.html and mischpult.html. Static files live in public/ (img, fonts, the log/review
+ * redirects to the Mischpult and the plain scripts); the manifest and dist/sw.js come from vite-plugin-pwa; data/ stays at
  * the repo root as the scraper's contract and is copied into dist/data by the plugin below. */
 import fs from "node:fs";
 import path from "node:path";
@@ -58,7 +59,7 @@ function jahgendaStatic() {
       handler() {
         for (const [from, to, keep] of COPIES) copyInto(outDir, from, to, keep);
         // style.css says url("/img/…") so Vite finds the files in public/ for the bundled copy; the plain copy
-        // the static pages link (log/review/mischpult, design/logos.html) sits next to img/, and an absolute
+        // design/logos.html links sits next to img/, and an absolute
         // /img/… would miss the /jahgenda/ prefix on GitHub Pages – so it gets relative urls.
         const cssPath = path.join(outDir, "style.css");
         if (fs.existsSync(cssPath)) {
@@ -104,8 +105,6 @@ const pwa = VitePWA({
   injectManifest: {
     globPatterns: [
       "index.html",
-      "log.html",
-      "review.html",
       "style.css",
       "*.js",
       "assets/**/*.{js,css}",
@@ -114,7 +113,8 @@ const pwa = VitePWA({
       "img/fonts/jahdisplay.woff2",
       "img/icons/icon-{192,512}.png",
     ],
-    globIgnores: ["sw.js", "data/**", "design/**"],
+    // The Mischpult is never precached: the worker's list is public and would advertise it (CLAUDE.md).
+    globIgnores: ["sw.js", "data/**", "design/**", "mischpult.html", "assets/mischpult-*"],
   },
 });
 
@@ -122,7 +122,13 @@ export default defineConfig({
   base: "./",
   publicDir: "public",
   plugins: [svelte(), jahgendaStatic(), pwa],
-  build: { outDir: "dist", emptyOutDir: true },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    // Two pages: the agenda and the hidden owners' console (its chunks are named mischpult-*, which the
+    // precache globs above leave out).
+    rollupOptions: { input: { index: "index.html", mischpult: "mischpult.html" } },
+  },
   // 127.0.0.1, not "localhost" (which may bind IPv6 only): the e2e suite, smoke.sh and the screenshots all
   // talk to 127.0.0.1; *.localhost names still reach it (pwa.spec.js uses jah.localhost).
   server: { host: "127.0.0.1", port: 5173 },

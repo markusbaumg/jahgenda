@@ -171,6 +171,39 @@ class SmokeCoverage(unittest.TestCase):
         self.assertEqual(
             sorted(pages - tested), [], f"add these pages to the smoke loop: {sorted(pages - tested)}"
         )
+        # The console and the two old pages that now redirect into it stay in the loop.
+        self.assertTrue({"index.html", "mischpult.html", "log.html", "review.html"} <= tested)
+
+
+class Mischpult(unittest.TestCase):
+    """The owners' console (story #55): a second Vite entry, hidden; log/review redirect to it."""
+
+    def test_second_vite_entry(self):
+        self.assertTrue((ROOT / "mischpult.html").is_file())
+        self.assertFalse((PUBLIC / "mischpult.html").exists(), "a public/ copy would clash with the entry")
+        self.assertRegex(VITE_CONFIG, r'input: \{ index: "index\.html", mischpult: "mischpult\.html" \}')
+        html = (ROOT / "mischpult.html").read_text(encoding="utf-8")
+        self.assertIn('<meta name="robots" content="noindex, nofollow" />', html)
+        self.assertIn('src="/src/mischpult/main.js"', html)
+
+    def test_hidden(self):
+        self.assertNotIn("mischpult", (PUBLIC / "robots.txt").read_text(encoding="utf-8").lower())
+        self.assertNotIn("mischpult", (ROOT / "index.html").read_text(encoding="utf-8").lower())
+        self.assertFalse([f for f in shell_files() if "mischpult" in f], "never precache the console")
+        self.assertIn('"mischpult.html"', VITE_CONFIG.split("globIgnores")[1].split("]")[0])
+        self.assertIn('"assets/mischpult-*"', VITE_CONFIG.split("globIgnores")[1].split("]")[0])
+        public_src = [p for p in (ROOT / "src").rglob("*") if p.is_file() and "mischpult" not in p.parts]
+        leaks = [
+            str(p.relative_to(ROOT)) for p in public_src if "mischpult.html" in p.read_text(encoding="utf-8")
+        ]
+        self.assertEqual(leaks, [], "the agenda's source must not link the console")
+
+    def test_old_pages_redirect_to_their_tab(self):
+        for page, tab in (("log.html", "laeufe"), ("review.html", "aussortiert")):
+            html = (PUBLIC / page).read_text(encoding="utf-8")
+            self.assertIn(f'content="0; url=mischpult.html#{tab}"', html, page)
+            self.assertIn(f'location.replace("mischpult.html#{tab}")', html, page)
+            self.assertIn("noindex", html, page)
 
 
 if __name__ == "__main__":

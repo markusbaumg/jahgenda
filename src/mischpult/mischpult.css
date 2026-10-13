@@ -1,0 +1,449 @@
+/* The Mischpult's own stylesheet (src/mischpult/). Tokens, the header lockup, the stripes and the footer
+ * bar come from the global style.css; everything here is prefixed mp- so it never reaches the agenda. */
+
+.mp-head,
+.mp-foot .wrap,
+.mp {
+  max-width: 1080px; /* tables need more room than the agenda column */
+}
+.mp-head {
+  padding-bottom: var(--s-3);
+}
+.mp-head .logo {
+  font-size: min(var(--fs-d2), calc((100vw - 42px) / 5));
+}
+.mp-title {
+  margin: var(--s-3) 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-d1);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+.mp-sub {
+  margin: var(--s-1) 0 0;
+  color: var(--muted);
+  font-size: var(--fs-2);
+}
+
+/* The tabs: pills that wrap on a phone; the selected one is gold. */
+.mp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: var(--s-4) 0 0;
+}
+.mp-tabs [role="tab"] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 13px;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  text-decoration: none;
+}
+.mp-tabs [role="tab"]:hover {
+  color: var(--gold-text);
+  border-color: var(--gold);
+}
+.mp-tabs [role="tab"][aria-selected="true"] {
+  color: var(--on-gold);
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+.mp {
+  padding-bottom: var(--s-6);
+}
+.mp-panel:focus-visible {
+  outline: none; /* the panel takes focus after the tab list; no ring around the whole page */
+}
+.mp .section-title {
+  margin-top: var(--s-6);
+}
+.mp-panel > .section-title:first-child {
+  margin-top: var(--s-4);
+}
+.mp .section-title small {
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.mp-h3 {
+  margin: var(--s-5) 0 var(--s-2);
+  font-size: var(--fs-4);
+  color: var(--gold-text);
+}
+.mp-muted {
+  color: var(--muted);
+}
+.mp .ok {
+  color: var(--green-text);
+  font-weight: 700;
+}
+.mp .bad {
+  color: var(--red-text);
+  font-weight: 700;
+}
+.mp code {
+  font-size: 0.85em;
+  background: var(--surface);
+  padding: 1px 5px;
+  border-radius: var(--r-1);
+}
+.mp a {
+  color: var(--green-text);
+}
+.mp a:hover {
+  color: var(--gold-text);
+}
+.mp .num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status: the verdict card and the key/value grid. */
+.mp-verdict {
+  margin: var(--s-3) 0 var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--green);
+  border-radius: var(--r-3);
+  background: var(--green-tint);
+}
+.mp-verdict.is-bad {
+  border-left-color: var(--red);
+  background: var(--red-tint);
+}
+.mp-verdict p,
+.mp-verdict ul {
+  margin: var(--s-1) 0 0;
+}
+.mp-verdict-head {
+  font-weight: 800;
+  font-size: var(--fs-5);
+}
+.mp-verdict.is-ok .mp-verdict-head {
+  color: var(--green-text);
+}
+.mp-verdict.is-bad .mp-verdict-head {
+  color: var(--red-text);
+}
+.mp-kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.mp-kv div {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.mp-kv .mp-kv-wide {
+  grid-column: 1 / -1;
+}
+.mp-kv dt {
+  font-size: 0.7rem;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.mp-kv dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.mp-kv small {
+  font-weight: 400;
+  color: var(--muted);
+}
+.mp-links li {
+  margin: 4px 0;
+  color: var(--muted);
+}
+
+/* Tables (sources, venues, festivals, genres, per-run sources): scroll sideways inside their box. */
+.mp-tbl {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 10px 0 18px;
+}
+.mp table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--fs-2);
+}
+.mp th,
+.mp td {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+.mp th {
+  font-size: 0.7rem;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+}
+.mp th.num,
+.mp td.num {
+  text-align: right;
+}
+.mp tr:last-child td {
+  border-bottom: 0;
+}
+.mp td.hint {
+  color: var(--muted);
+  min-width: 24ch;
+  max-width: 46ch;
+}
+.mp td a {
+  overflow-wrap: anywhere;
+}
+.mp tr.st-ok .st {
+  color: var(--green-text);
+}
+.mp tr.st-failed .st {
+  color: var(--red-text);
+}
+.mp tr.st-empty .st,
+.mp tr.st-skipped .st {
+  color: var(--muted);
+}
+
+/* Chips: counts and badges. */
+.mp-chips,
+.mp-stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.mp-stats {
+  display: flex;
+  margin: var(--s-3) 0 0;
+}
+.mp-chip {
+  display: inline-block;
+  font-size: var(--fs-0);
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  padding: 2px 9px;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.mp-chip.ok {
+  color: var(--green-text);
+}
+.mp-chip.bad {
+  color: var(--red-text);
+}
+.mp-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: var(--fs-2);
+  color: var(--muted);
+  cursor: pointer;
+}
+.mp-check input {
+  accent-color: var(--gold);
+  width: 18px;
+  height: 18px;
+}
+
+/* Läufe: one <details> per run. */
+.mp-run {
+  border-bottom: 1px solid var(--line);
+}
+.mp-run > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  padding: 14px 0;
+  cursor: pointer;
+  list-style-position: outside;
+}
+.mp-run > summary::marker,
+.mp-run > summary::-webkit-details-marker {
+  color: var(--gold);
+}
+.mp-run-title {
+  font-weight: 700;
+}
+.mp-run time {
+  color: var(--muted);
+  font-size: var(--fs-2);
+  font-variant-numeric: tabular-nums;
+}
+.mp-run-body {
+  padding: 0 0 var(--s-4);
+}
+.mp-run h4 {
+  margin: var(--s-3) 0 var(--s-1);
+  font-size: var(--fs-2);
+  color: var(--gold-text);
+}
+.mp-run ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: var(--fs-2);
+}
+.mp-run li {
+  overflow-wrap: anywhere; /* a long source URL must not widen a 320 px page */
+}
+.mp-run li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Aussortiert: the candidates, the «Gehört rein» button on the right. */
+.mp-run-head {
+  margin: 28px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 6px;
+}
+.mp-rv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 14px;
+  align-items: start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.mp-rv h4 {
+  margin: 0;
+  font-size: var(--fs-4);
+  overflow-wrap: anywhere;
+}
+.mp-meta {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: var(--fs-2);
+}
+.mp-why {
+  margin: 6px 0 0;
+  font-size: var(--fs-2);
+}
+.mp-why b {
+  color: var(--gold-text);
+}
+.mp .mp-flag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font-size: var(--fs-1);
+  font-weight: 700;
+  color: var(--red-text);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.mp .mp-flag:hover {
+  border-color: var(--red-text);
+  color: var(--red-text);
+}
+
+/* Quellen & Venues, Prompt & Regeln. */
+.mp-filter {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  padding: 6px 10px;
+  margin: var(--s-2) 0 0;
+  width: 100%;
+  max-width: 320px;
+}
+.mp-filter::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.mp-md {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-3);
+  padding: 16px 18px;
+  max-width: 80ch;
+  overflow-wrap: anywhere;
+}
+.mp-md h1,
+.mp-md h2,
+.mp-md h3,
+.mp-md h4 {
+  font-size: var(--fs-4);
+  margin: 18px 0 6px;
+  color: var(--gold-text);
+}
+.mp-md h1 {
+  font-size: var(--fs-5);
+}
+.mp-md > :first-child {
+  margin-top: 0;
+}
+.mp-md p,
+.mp-md li {
+  font-size: var(--fs-2);
+}
+.mp-md code {
+  background: var(--bg);
+}
+.mp-md pre {
+  background: var(--bg);
+  padding: 10px 12px;
+  border-radius: var(--r-2);
+  overflow-x: auto;
+  font-size: 0.8rem;
+}
+.mp-edit {
+  margin: var(--s-2) 0;
+  font-size: var(--fs-2);
+  color: var(--muted);
+}
+.mp-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: var(--s-4) 0 0;
+}
+.mp-jump a {
+  font-size: var(--fs-1);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  text-decoration: none;
+}
+
+@media (max-width: 560px) {
+  .mp-rv {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mp-rv .mp-flag {
+    justify-self: start;
+  }
+  .mp-check {
+    margin-left: 0;
+  }
+}
