@@ -60,6 +60,10 @@
         color: var(--muted);
         font-size: 0.9rem;
       }
+      .run li,
+      .run summary {
+        overflow-wrap: anywhere; /* a long source URL must not widen a 320 px page */
+      }
       .run li strong {
         color: var(--text);
         font-weight: 600;
@@ -99,7 +103,7 @@
         font-variant-numeric: tabular-nums;
       }
       tr.st-failed td:nth-child(2) {
-        color: var(--red);
+        color: var(--red-text);
       }
       tr.st-ok td:nth-child(2) {
         color: var(--green-text);

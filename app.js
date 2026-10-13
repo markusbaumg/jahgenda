@@ -86,6 +86,11 @@
   const mapView = el("map-view");
   const viewSwitch = el("view-switch");
   const VIEWS = ["list", "calendar", "map"];
+  // Leaflet 1.9.4 from unpkg: pinned by hash, so a tampered CDN copy never runs (and never gets cached).
+  const LEAFLET_SRI = {
+    js: "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+    css: "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=",
+  };
   const store = window.jahStore;
   // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
   const decodeHashPart = (t) => {
@@ -106,7 +111,7 @@
       else if (part.startsWith("view=")) {
         const v = part.slice(5);
         if (VIEWS.includes(v)) out.view = v;
-      } else if (part && !out.id) out.id = decodeHashPart(part);
+      } else if (part && !part.includes("=") && !out.id) out.id = decodeHashPart(part); // q=… is a filter
     }
     return out;
   }
@@ -126,11 +131,17 @@
     l.rel = "preload";
     l.as = "script";
     l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    l.integrity = LEAFLET_SRI.js;
     l.crossOrigin = "";
     document.head.appendChild(l);
   }
   let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
+  let revealUntil = 0; // a deep-linked row may be scrolled to again while the rows above still shift
+  // "loading" | "ready" | "error": while loading or after an error a filter tap must not replace the
+  // skeleton or the error message with a false «Noch nichts im Kalender».
+  let loadState = "loading";
+  const SKELETON = status.innerHTML; // the skeleton day groups (index.html), shown again on a retry
   const resultsText = el("results-text");
   const resultsLive = el("results-live"); // screen readers: the count after every filter change
   let showPast = false;
@@ -220,6 +231,57 @@
   const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "");
   const regionName = (c) => CANTONS[c] || ABROAD[c] || c;
 
+  // Search folding: accents and umlauts go (geneve = Genève, zurich = Zürich), typographic apostrophes
+  // become plain ones (L’Usine = L'Usine), ß → ss. A query spelt with ae/oe/ue is tried both ways
+  // (zuerich = Zürich). Every whitespace-separated word must match somewhere ("ska punk", "Busters Fette").
+  const fold = (t) =>
+    String(t)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[’‘`´]/g, "'")
+      .replace(/ß/g, "ss")
+      .toLowerCase();
+  const deUmlaut = (t) => t.replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u");
+  // Spoken short names of the big towns (keys folded like the query); a canton's code or its French /
+  // Italian name finds its shows too.
+  const SEARCH_ALIASES = { winti: "winterthur", barn: "bern", lozarn: "luzern", zuri: "zurich" };
+  const CANTON_ALIASES = {
+    BE: "Berne",
+    BL: "Bâle-Campagne",
+    BS: "Bâle-Ville",
+    FR: "Fribourg",
+    GE: "Genève Geneva",
+    GR: "Grigioni Grischun",
+    LU: "Lucerne",
+    NE: "Neuchâtel",
+    TI: "Ticino",
+    VD: "Vaud",
+    VS: "Valais",
+    ZH: "Zurich",
+  };
+  const searchText = (s) =>
+    fold(
+      [
+        s.title,
+        s.venue,
+        s.city,
+        regionName(s.canton),
+        CANTON_ALIASES[s.canton] || "",
+        ...s.genres,
+        ...s.genres.map((g) => genreLabel[g] || ""),
+        ...s.acts,
+      ].join(" "),
+    );
+  function matchesSearch(s, q) {
+    for (const raw of q.split(/\s+/).filter(Boolean)) {
+      const t = SEARCH_ALIASES[raw] || raw;
+      if (s._hay.includes(t) || s._hay.includes(deUmlaut(t)) || String(s.canton).toLowerCase() === raw)
+        continue;
+      return false;
+    }
+    return true;
+  }
+
   let shows = [];
   let here = null; // { lat, lon } once the visitor shares their location
 
@@ -232,7 +294,8 @@
     return 2 * 6371 * Math.asin(Math.sqrt(h));
   }
 
-  const formatKm = (km) => (km < 1 ? "gleich ums Eck" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`);
+  const formatKm = (km) =>
+    km < 1 ? "gleich um die Ecke" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
 
   // The town nearest to the user's position (from the venue list) – the "von" of the SBB timetable link.
   let homeCity = "";
@@ -259,6 +322,7 @@
   function distanceLabel(s) {
     if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
     // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
+    // The separator travels with the button (both only show on hover), so no lone «·» ends the line.
     if (!here)
       return geoDeclined
         ? ""
@@ -287,6 +351,8 @@
     star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.6 6 21l1.3-6.8-5-4.7 6.8-.8z"/></svg>',
     share:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg>',
+    train:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c-4 0-8 .5-8 4v9.5A3.5 3.5 0 0 0 7.5 19L6 20.5V21h2l2-2h4l2 2h2v-.5L16.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-4-4-8-4zm-5.5 4c.2-1 2.6-2 5.5-2s5.3 1 5.5 2H6.5zM6 8h12v4H6V8zm1.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>',
   };
 
   // Short, stable hash per show for links: FNV-1a over the id, base36 (6-7 chars), e.g. #k3f9zq.
@@ -302,6 +368,19 @@
   const findShow = (token) => shows.find((s) => s._short === token) || shows.find((s) => s.id === token);
 
   const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
+  // callout.js loads after this file: always look it up when needed.
+  const callout = () => window.jahCallout;
+  let nudgeQuietUntil = 0; // no nudge for a moment after a filter interaction or a deep-link landing
+  // A nudge (install, subscribe) waits while the visitor is busy with a panel, the map, a filter they
+  // just touched, or has just landed on a shared show. callout.js is the last script on the page, and
+  // the agenda can be in before it has run (a cached or fixture response beats a busy server): the
+  // blocker is handed over once both are there, whichever comes last.
+  const nudgeBlocked = () => Boolean(openPanel) || view === "map" || Date.now() < nudgeQuietUntil;
+  function armCallout() {
+    if (callout()) callout().setBlocker(nudgeBlocked);
+    else if (document.readyState === "loading")
+      document.addEventListener("DOMContentLoaded", armCallout, { once: true });
+  }
 
   // «Fr 16.7.2026» for a show, «Fr 16.7. – So 18.7.2027» for a festival (same as lib.dateText).
   const dmy = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
@@ -338,7 +417,28 @@
   const calDescription = (s) =>
     [...(s._end ? lineupLines(s) : []), safeUrl(s.url) || "", showUrl(s)].filter(Boolean).join("\n");
 
-  // One VEVENT for a show (floating local time, so it lands at the right hour in Switzerland).
+  // Europe/Zurich with its EU summer-time rules, as in the subscription feed (scripts/make_ics.py):
+  // a timed show carries DTSTART;TZID=…, so a phone set to another zone still shows the Swiss hour.
+  const TZID = "Europe/Zurich";
+  const VTIMEZONE = [
+    "BEGIN:VTIMEZONE",
+    `TZID:${TZID}`,
+    "BEGIN:STANDARD",
+    "DTSTART:19701025T030000",
+    "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU",
+    "TZOFFSETFROM:+0200",
+    "TZOFFSETTO:+0100",
+    "END:STANDARD",
+    "BEGIN:DAYLIGHT",
+    "DTSTART:19700329T020000",
+    "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU",
+    "TZOFFSETFROM:+0100",
+    "TZOFFSETTO:+0200",
+    "END:DAYLIGHT",
+    "END:VTIMEZONE",
+  ];
+  // One VEVENT for a show (Zurich time with TZID – floating time landed at 22:00 of whatever zone
+  // the importing phone was set to).
   function vevent(s, status) {
     // RFC 5545 text escaping; a bare CR would end the content line, so it is dropped.
     const esc = (t) =>
@@ -354,7 +454,7 @@
       when = `DTSTART;VALUE=DATE:${s.date.replace(/-/g, "")}\r\nDTEND;VALUE=DATE:${nextDayStamp(s._end)}`;
     } else if (s.time) {
       const [start, end] = showSpan(s);
-      when = `DTSTART:${localStamp(start)}\r\nDTEND:${localStamp(end)}`;
+      when = `DTSTART;TZID=${TZID}:${localStamp(start)}\r\nDTEND;TZID=${TZID}:${localStamp(end)}`;
     } else {
       when = `DTSTART;VALUE=DATE:${s.date.replace(/-/g, "")}`;
     }
@@ -373,7 +473,16 @@
   }
 
   const icsWrap = (events) =>
-    ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Jahgenda//DE", ...events, "END:VCALENDAR", ""].join("\r\n");
+    [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Jahgenda//DE",
+      `X-WR-TIMEZONE:${TZID}`,
+      ...VTIMEZONE,
+      ...events,
+      "END:VCALENDAR",
+      "",
+    ].join("\r\n");
 
   // Build an .ics file for one show.
   const icsFor = (s) => icsWrap(vevent(s));
@@ -517,6 +626,12 @@
       `<div class="lineup-body"><div><div class="days">${body}</div></div></div></details>`
     );
   }
+  // The acts line only names who is not in the title already («The Slackers (US)» / «The Slackers»
+  // doubled most rows; «Scorchers feat. Capital Soul Sinners» names its guests in the title).
+  const extraActs = (s) => {
+    const t = fold(s.title);
+    return s.acts.filter((a) => !t.includes(fold(a)));
+  };
   function renderShow(s) {
     const url = safeUrl(s.url);
     // A title with a URL is recognisable as a link: dotted gold underline, «↗» and sr text.
@@ -536,12 +651,13 @@
     // asks for the position goes last, so its invisible width leaves no hole in the line.
     const dist = distanceLabel(s);
     const past = s._past ? ` · <span class="vorbei">vorbei</span>` : "";
-    const hasActs = s.acts.length > 1 || (s.acts.length === 1 && s.acts[0] !== s.title);
+    const extra = extraActs(s);
+    const hasActs = extra.length > 0;
     // A search hit inside the line-up is highlighted, and the line (clamped to 2 lines on phones) opens up.
     const q = search.value.trim().toLowerCase();
     const hit = hasActs && Boolean(q) && s.acts.some((a) => a.toLowerCase().includes(q));
     const long = s.acts.length >= LINEUP_FROM;
-    const preview = long ? s.acts.slice(0, LINEUP_PREVIEW) : s.acts;
+    const preview = long ? extra.slice(0, LINEUP_PREVIEW) : extra;
     let acts = hasActs
       ? `<p class="acts${hit ? " hit" : ""}">${preview.map((a) => `<span>${markHit(a, q)}</span>`).join("")}</p>`
       : "";
@@ -658,12 +774,17 @@
       url
         ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" aria-label="Infos beim Veranstalter (öffnet externe Seite)" title="Event-Seite des Veranstalters öffnen">${ICONS.event}<span class="lbl">Infos</span>${extNote}</a>`
         : "",
+      // The timetable is also an action (the SBB badge in the meta line only shows on hover – touch
+      // screens have none).
+      sbbUrl(s)
+        ? `<a class="act sbb-act" href="${escape(sbbUrl(s))}" target="_blank" rel="noopener" aria-label="SBB-Fahrplan nach ${escape(s.city)} (öffnet externe Seite)" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show">${ICONS.train}<span class="lbl">SBB</span>${extNote}</a>`
+        : "",
     ].join("");
   }
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these). `o` replaces
   // single filters for what-if counts (countWith): { q, cantons, radius, genre }.
   function matchesFilters(s, o = {}) {
-    const q = "q" in o ? o.q : search.value.trim().toLowerCase();
+    const q = fold("q" in o ? o.q : search.value.trim());
     const cs = "cantons" in o ? o.cantons : cantons;
     const radius = "radius" in o ? o.radius : radiusKm;
     const genre = "genre" in o ? o.genre : activeGenre;
@@ -674,11 +795,7 @@
     if (radius && here && typeof s.lat === "number" && distanceKm(here, s) > radius) return false;
     if (genre && !s.genres.includes(genre)) return false;
     if (format && !s.genres.includes(format)) return false;
-    if (!q) return true;
-    return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
-      .join(" ")
-      .toLowerCase()
-      .includes(q);
+    return !q || matchesSearch(s, q);
   }
   const isVisible = (s, o = {}) =>
     listMode() ? inList(s) : (!s._past || showPast) && inRange(s, o) && matchesFilters(s, o);
@@ -767,13 +884,15 @@
   // change, the chips do not move (reserved width in CSS).
   function updateCounts() {
     if (listMode()) return;
+    const konzerte = (n) => (n === 1 ? "1 Konzert" : `${n} Konzerte`);
     for (const c of genreBar.querySelectorAll(".chip[data-genre]")) {
       const n = countWith({ genre: c.dataset.genre });
       const sm = c.querySelector("small");
       if (sm) sm.textContent = n;
-      c.title = c.dataset.genre
-        ? `Nur ${genreLabel[c.dataset.genre] || c.dataset.genre} anzeigen (${n})`
-        : `Alle Genres anzeigen (${n})`;
+      const name = genreLabel[c.dataset.genre] || c.dataset.genre;
+      c.title = c.dataset.genre ? `Nur ${name} anzeigen (${n})` : `Alle Genres anzeigen (${n})`;
+      // Screen readers hear «Reggae, 75 Konzerte» – the count is part of the chip's name.
+      c.setAttribute("aria-label", `${c.dataset.genre ? name : "Alle Genres"}, ${konzerte(n)}`);
     }
     for (const c of formatBar.querySelectorAll(".chip[data-format]")) {
       const n = countWith({ format: c.dataset.format });
@@ -789,6 +908,7 @@
       c.title = code
         ? `${regionName(code)}: ${nShows(n)} – anklicken zum Ein-/Ausschalten`
         : `Alle Kantone anzeigen (${n})`;
+      c.setAttribute("aria-label", `${code ? shortRegion(code) : "Alle Kantone"}, ${konzerte(n)}`);
     }
   }
 
@@ -821,7 +941,7 @@
   }
 
   function renderInner() {
-    if (status.classList.contains("loading")) return; // data not in yet: the skeleton stays, init() renders
+    if (loadState !== "ready") return; // data not in yet (or an error): the skeleton / message stays
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter((s) => isVisible(s));
 
@@ -837,10 +957,12 @@
     );
     renderPills();
     updateCounts();
+    el("share-filters").hidden = !filtered || listMode();
     updateMine();
     updateWhen();
     renderedStamp = renderStamp();
     lastVisible = visible;
+    if (!visible.length) syncFilterHash();
     const v = listMode() ? "list" : view; // the list mode always shows the list; the stored view returns on close
     // «↑ n vergangene Shows anzeigen»: the last row under the list (§3.10). n counts only what the current
     // filters would bring back, so «Heute» never offers past shows it cannot show. The list mode shows its
@@ -856,6 +978,7 @@
       mapRest.innerHTML = "";
       views.hidden = true;
       resultsText.textContent = "";
+      el("results-count").textContent = "";
       resultsLive.textContent = ""; // #status (role=status) announces the empty state itself
       if (listMode()) {
         status.innerHTML = `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Diese Liste ist leer</p><p>Keine der Shows ist mehr in der Agenda.</p><button type="button" class="primary" id="reset" title="Zurück zur Agenda">Zurück zur Agenda</button>`;
@@ -890,6 +1013,7 @@
     }
     status.innerHTML = "";
     views.hidden = false;
+    syncFilterHash();
     const span = monthSpan(visible);
     const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
     // Festivals are counted apart from the concerts: «12 Konzerte · 1 Festival · Juli 2027».
@@ -901,6 +1025,8 @@
       ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
       : `${concerts}${festNote}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
     resultsLive.textContent = resultsText.textContent;
+    // The count where the list begins (the full line with the span is in the footer bar).
+    el("results-count").textContent = `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}`;
 
     list.hidden = v !== "list";
     calendarEl.hidden = v !== "calendar";
@@ -964,6 +1090,86 @@
   const endLabel = (s) =>
     `${dowFmt.format(s._end).replace(".", "")} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
 
+  // --- Filter state in the URL: #q=…&g=…&wo=ZH,BE&r=25&wann=weekend|today|7|2026-10,2026-11&past=1 ---
+  // Written with replaceState (a filter tap never adds a history entry), read once on load. A filtered
+  // view can thus be reloaded, bookmarked and sent as a link; show links (#<short>) and list links
+  // (#m=…) keep the hash for themselves and are never overwritten.
+  const FILTER_HASH = /^#?[a-z]+=/;
+  // A list link (#m=…) or a view link (#view=…) is not a filter hash, even when combined with "&".
+  const isFilterHash = (h) => FILTER_HASH.test(h) && !/(^#?|&)(mine|m|view)=/.test(h);
+  function filterParams() {
+    const p = new URLSearchParams();
+    const q = search.value.trim();
+    if (q) p.set("q", q);
+    if (activeGenre) p.set("g", activeGenre);
+    if (activeFormat) p.set("f", activeFormat);
+    if (cantons.size) p.set("wo", [...cantons].join(","));
+    if (here && radiusKm) p.set("r", String(radiusKm));
+    if (months.size)
+      p.set(
+        "wann",
+        monthList
+          .filter((d) => months.has(monthKey(d)))
+          .map(monthKey)
+          .join(","),
+      );
+    else if (rangeFrom && rangeTo) {
+      const kind = Object.keys(QUICK).find((k) => {
+        const [a, b] = quickRange(k);
+        return sameDay(a, rangeFrom) && sameDay(b, rangeTo);
+      });
+      if (kind) p.set("wann", kind);
+    }
+    if (showPast && !pastAuto) p.set("past", "1");
+    return p.toString().replace(/%2C/g, ",");
+  }
+  let filterTouched = false; // the render follows a filter tap (not a deep-link landing re-render)
+  function syncFilterHash() {
+    if (loadState !== "ready" || listMode()) return;
+    const h = location.hash;
+    // A show link (#<short>) stays while the page lands on it; a filter tap afterwards replaces it.
+    if (h && !isFilterHash(h) && !filterTouched) return;
+    const next = filterParams();
+    if (next === h.slice(1)) return;
+    history.replaceState(history.state, "", next ? `#${next}` : location.pathname + location.search);
+  }
+  function readFilterHash() {
+    if (!isFilterHash(location.hash)) return;
+    const p = new URLSearchParams(location.hash.slice(1));
+    search.value = (p.get("q") || "").slice(0, 80);
+    const g = p.get("g") || "";
+    activeGenre = genreBar.querySelector(`.chip[data-genre="${CSS.escape(g)}"]`) ? g : "";
+    for (const c of genreBar.querySelectorAll(".chip"))
+      c.setAttribute("aria-pressed", String(c.dataset.genre === activeGenre));
+    const f = p.get("f") || "";
+    setFormat(formatBar.querySelector(`.chip[data-format="${CSS.escape(f)}"]`) ? f : "");
+    for (const c of (p.get("wo") || "").split(",")) if (CANTONS[c] || ABROAD[c]) cantons.add(c);
+    const r = Number(p.get("r"));
+    if ([10, 25, 50].includes(r)) radiusKm = r; // applies once the position is known
+    const wann = p.get("wann") || "";
+    if (QUICK[wann]) setRange(...quickRange(wann));
+    else if (wann) {
+      const keys = new Set(monthList.map(monthKey));
+      for (const k of wann.split(",")) if (keys.has(k)) months.add(k);
+      syncPast();
+    }
+    if (p.get("past") === "1") showPast = true;
+    updateWhere();
+  }
+  // «Link zu dieser Auswahl»: the address bar already holds it – into the clipboard it goes.
+  el("share-filters").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    const label = btn.querySelector("span");
+    syncFilterHash();
+    try {
+      await navigator.clipboard.writeText(location.href);
+      label.textContent = "Kopiert";
+    } catch {
+      label.textContent = "Link in Adresszeile";
+    }
+    setTimeout(() => (label.textContent = "Link zu dieser Auswahl"), 1500);
+  });
+
   // "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
   function monthSpan(visible) {
     const first = visible[0]._day;
@@ -1020,15 +1226,22 @@
         updateHomeCity();
         if (!shows.length) return;
         render();
-        // A deep-linked row was rebuilt just now: keep its highlight.
-        const target = findShow(parseHash().id);
-        const row = target && document.getElementById(target.id);
-        if (row) row.classList.add("highlight");
+        keepRevealed();
       })
       .catch(() => {
         /* venues.json is optional for the page */
       });
   }
+
+  // "Offline · Stand: …": the service worker serves the last copy without a connection; the stamp
+  // says so, so the visitor knows the list may have moved on.
+  let stampText = "";
+  function updateStamp() {
+    if (!stampText) return;
+    el("updated").textContent = `${navigator.onLine === false ? "Offline · " : ""}${stampText}`;
+  }
+  window.addEventListener("online", updateStamp);
+  window.addEventListener("offline", updateStamp);
 
   async function init() {
     try {
@@ -1062,12 +1275,13 @@
           genres: Array.isArray(s.genres) ? s.genres.map((g) => String(g).toLowerCase()) : [],
           acts: Array.isArray(s.acts) ? s.acts.map(String).filter(Boolean) : [],
         }))
-        .map((s) => ({ ...s, _short: shortId(s.id) }))
-        .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
+        .map((s) => ({ ...s, _short: shortId(s.id), _hay: searchText(s) }))
+        .sort((a, b) => a._day - b._day || (a.time || "99:99").localeCompare(b.time || "99:99")); // unknown time last
       for (const s of shows) setTimeFlags(s, today);
 
       pastCount = shows.filter((s) => s._past).length;
       dataUpdated = data.updated ? Date.parse(data.updated) || 0 : 0;
+      loadState = "ready";
       setupWhen();
       // Canton chips (multi-select, with counts) inside the Wo panel, grouped like the spec's <optgroup>s:
       // Deutschschweiz · Romandie · Ticino · Grenznah, A–Z inside a group; cantons without an upcoming
@@ -1120,10 +1334,16 @@
         .join("");
       chipRow.scrollLeft = 0; // the row starts at «Alle», whatever snapped before the chips existed
       updateChipArrows();
+      readFilterHash(); // a reloaded, bookmarked or shared filtered view
 
       if (data.updated) {
         const note = data.source === "mock" ? " · Beispieldaten" : "";
-        el("updated").textContent = `Stand: ${stampFmt.format(new Date(data.updated))}${note}`;
+        // The scraper runs every night; a stamp older than two days means the data may be stale
+        // (a cached copy, or the routine failed – the watchdog knows, the visitor should too).
+        const old =
+          Date.now() - new Date(data.updated).getTime() > 48 * 3600e3 ? " · evtl. nicht aktuell" : "";
+        stampText = `Stand: ${stampFmt.format(new Date(data.updated))}${note}${old}`;
+        updateStamp();
       }
       status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
@@ -1133,11 +1353,27 @@
     } catch (err) {
       console.error(err);
       status.classList.remove("loading");
+      loadState = "error";
       // The skeleton rows go, so the message is the first thing under the bar (not below the fold).
       list.innerHTML = "";
       views.hidden = true;
-      status.innerHTML = `<p class="state-icon">${STATE_ICONS.offline}</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
+      // «Kein Empfang» only when the browser is really offline; a server or data error while online
+      // gets a title that matches, and both get a retry that needs no reload.
+      const offline = navigator.onLine === false;
+      status.innerHTML =
+        `<p class="state-icon">${STATE_ICONS.offline}</p>` +
+        `<p class="big">${offline ? "Kein Empfang" : "Daten konnten nicht geladen werden"}</p>` +
+        `<p>${offline ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es." : "Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen."}</p>` +
+        `<button type="button" class="primary" id="retry" title="Konzerte nochmals laden">Nochmals versuchen</button>`;
     }
+  }
+  function retry() {
+    loadState = "loading";
+    status.innerHTML = SKELETON; // the skeleton rows again, until the data is in
+    status.classList.add("loading");
+    views.hidden = false;
+    list.hidden = false;
+    init();
   }
 
   // Canton badge in a row: toggles that canton in the Wo filter.
@@ -1249,9 +1485,31 @@
       search.focus();
       return;
     }
+    if (e.target.id === "retry") return retry();
     const b = e.target.closest("[data-remove]");
     if (b) removeFilter(b.dataset.remove, b.dataset.value);
   });
+
+  // A re-render in the seconds after a deep-link jump (venues.json arrived, the position came in) rebuilds
+  // the rows: keepRevealed() puts the highlight back and, while the rows above may still be shifting,
+  // scrolls to the row again – otherwise the row ends up under the sticky bar.
+  function keepRevealed() {
+    const target = findShow(parseHash().id);
+    const row = target && document.getElementById(target.id);
+    if (!row) return;
+    row.classList.add("highlight");
+    if (Date.now() < revealUntil) row.scrollIntoView({ block: "start" });
+  }
+  // «Diese Show ist nicht mehr in der Agenda …»: a line under the results row for a stale link.
+  const linkNote = document.createElement("p");
+  linkNote.className = "link-note";
+  linkNote.setAttribute("role", "status");
+  linkNote.hidden = true;
+  resultsEl.closest(".results-row").after(linkNote);
+  function noteLink(text) {
+    linkNote.textContent = text;
+    linkNote.hidden = !text;
+  }
 
   // Direct links (one parser, §7 S6): #m=… opens a shared list, #view=… switches the view, #<short hash or
   // id> scrolls to the show and highlights it (clearing filters if needed).
@@ -1259,13 +1517,26 @@
     const h = parseHash();
     if (h.mine) return showShared(h.mine);
     if (h.view && h.view !== view && !listMode()) setView(h.view);
+    if (!h.id) return; // nothing, or the filter state
     const target = findShow(h.id);
-    if (!target) return;
+    if (!target) {
+      // An in-page anchor (the skip links, «Nach oben») is no show link.
+      if (document.getElementById(h.id)) return;
+      // A stale or mistyped share link: say so instead of silently showing everything.
+      if (loadState === "ready") {
+        noteLink("Diese Show ist nicht mehr in der Agenda – hier ist alles, was kommt.");
+        history.replaceState(history.state, "", location.pathname + location.search);
+      }
+      return;
+    }
+    noteLink("");
     const id = target.id;
     if (target._past && !showPast) showPast = true;
     if (target._past) pastAuto = false; // the link asked for it, so a later range reset keeps it
-    // Rows only exist in the list view; the calendar and the map link here.
+    // Rows only exist in the list view; the calendar and the map link here. An open panel would
+    // cover the row (the «Am nächsten bei dir» link sits inside the Wo panel).
     if (view !== "list") setView("list");
+    if (openPanel) setPanel(null);
     if (!document.getElementById(id)) resetFilters();
     const row = document.getElementById(id);
     if (!row) return;
@@ -1279,23 +1550,71 @@
       lineup.classList.add("is-open");
       openIds.add(id);
     }
+    quietScrollUntil = Date.now() + 2000;
+    revealUntil = Date.now() + 3000;
+    nudgeQuietUntil = Date.now() + 8000; // a friend's link lands on the show, not on a sticker
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     row.scrollIntoView({ block: "start", behavior: motion });
+    row.tabIndex = -1;
+    row.focus({ preventScroll: true }); // the next Tab starts at the show, screen readers announce it
   }
   window.addEventListener("hashchange", revealFromHash);
 
+  // --- History: the Back button (or swipe) closes an open Wo/Wann panel and returns
+  // from a view switch or a calendar/map → list jump, instead of leaving the site – the reflex on phones.
+  // Overlays and view switches push one entry each; filters never do (they live in the hash, see
+  // syncFilterHash, written with replaceState so a filter click does not flood the history).
+  const histState = (extra) => ({ jah: 1, view, ...extra });
+  history.replaceState(histState(), "");
+  let overlayEntry = false; // the current entry is one we pushed for an overlay
+  let pendingBack = 0; // history.back() calls of our own: their popstate must not close what opened since
+  let fromHistory = false; // closing because the visitor went back, not by ×/Esc/outside click
+  function pushOverlay(name) {
+    if (overlayEntry) history.replaceState(histState({ overlay: name }), "");
+    else history.pushState(histState({ overlay: name }), "");
+    overlayEntry = true;
+  }
+  function popOverlay() {
+    if (fromHistory || !overlayEntry) return;
+    overlayEntry = false;
+    pendingBack++;
+    history.back();
+  }
+  window.addEventListener("popstate", (e) => {
+    if (pendingBack > 0) {
+      pendingBack--;
+      syncFilterHash(); // a filter picked while the panel was open lived on the entry just left
+      return;
+    }
+    overlayEntry = false;
+    fromHistory = true;
+    if (openPanel) setPanel(null);
+    fromHistory = false;
+    const st = e.state && e.state.jah ? e.state : null;
+    if (st && st.view && st.view !== view && !listMode()) setView(st.view);
+    syncFilterHash();
+  });
+
   // --- Filter panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ---
-  // Open with the toolbar button, close with ×, Escape, the button again or a click/tap outside.
+  // Open with the toolbar button, close with ×, Escape, the button again, a click/tap outside or Back.
   const filtersForm = el("filters");
   const PANELS = { where: ["toggle-where", "where-panel"], when: ["toggle-when", "when-panel"] };
   let openPanel = null;
   function setPanel(name) {
+    const was = openPanel;
     openPanel = name;
     for (const [key, [btn, panel]] of Object.entries(PANELS)) {
       el(panel).hidden = key !== name;
       el(btn).setAttribute("aria-expanded", String(key === name));
     }
     if (name === "when") updateWhen();
+    if (name) {
+      pushOverlay(name);
+      if (callout()) callout().suspend(); // a sticker never covers the panel's last rows
+      // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
+      const first = el(PANELS[name][1]).querySelector(".chip:not([hidden])");
+      if (first) first.focus({ preventScroll: true });
+    } else if (was) popOverlay();
   }
   filtersForm.addEventListener("click", (e) => {
     const close = e.target.closest(".panel-close");
@@ -1340,7 +1659,8 @@
     toggleWhere.classList.toggle("located", Boolean(here));
     toggleWhere.setAttribute("aria-pressed", String(Boolean(cantons.size || (here && radiusKm))));
     toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kantone wählen oder meinen Standort verwenden";
-    for (const c of cantonChips.querySelectorAll(".chip"))
+    toggleWhere.setAttribute("aria-label", `Wo: ${label || "alle Orte"}`); // the badge alone would be the name
+    for (const c of el("canton-chips").querySelectorAll(".chip"))
       c.setAttribute(
         "aria-pressed",
         String(c.dataset.canton ? cantons.has(c.dataset.canton) : !cantons.size),
@@ -1373,21 +1693,25 @@
 
   if (!("geolocation" in navigator)) locateBtn.hidden = true;
 
-  // Ask the browser for the position. Used by the Wo button, by the placeholder in every row and –
-  // once per visit, when the browser already allows it or has never been asked – right on start.
+  // Ask the browser for the position. Used by the Wo button and by the placeholder in every row; on
+  // start only silently, when the browser already allows it (never a permission prompt the visitor did
+  // not ask for – a reflexive «Block» would kill the feature for good).
   // The position is only used in this browser tab; it is never stored or sent anywhere.
   let locating = false;
-  function locate() {
+  function locate(opts = {}) {
+    const silent = Boolean(opts.silent);
     if (locating || !("geolocation" in navigator)) return;
     locating = true;
-    geoStatus.textContent = "Suche dich …";
+    if (!silent) geoStatus.textContent = "Suche dich …";
     locateBtn.disabled = true;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         locating = false;
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        geoDeclined = false;
         updateHomeCity();
         locateBtn.disabled = false;
+        locateBtn.classList.add("active");
         locateBtn.setAttribute("aria-pressed", "true");
         // Closest upcoming show (never a past one), as a link into the list.
         const near = shows
@@ -1400,40 +1724,48 @@
           const n = near[0];
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
-            `<svg class="geo-pin" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span class="sr">Standort gefunden. </span>Nächste Show: ` +
+            `<svg class="geo-pin" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span class="sr">Standort gefunden. </span>Am nächsten bei dir: ` +
             `<a href="#${n.s._short}" title="Zur Show in der Liste springen"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
             `<span class="dist" title="Luftlinie von deinem Standort">${formatKm(n.km)}${sbbLink(n.s)}</span>`;
         } else {
           geoStatus.textContent = "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
         }
         render();
+        keepRevealed();
       },
-      () => {
+      (err) => {
         locating = false;
         locateBtn.disabled = false;
-        geoStatus.textContent = "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
-        geoDeclined = true;
+        // 1 = the browser (or the visitor) blocks the position: the row placeholders go, the panel says how
+        // to get it back. Anything else (timeout, no fix) is transient: the row placeholders stay.
+        const blocked = err && err.code === 1;
+        if (blocked) geoDeclined = true;
+        if (!silent)
+          geoStatus.textContent = blocked
+            ? "Standort im Browser blockiert. In den Website-Einstellungen freigeben, dann nochmals «Mein Standort» tippen."
+            : "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
         render();
+        keepRevealed();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
   }
-  locateBtn.addEventListener("click", locate);
+  locateBtn.addEventListener("click", () => locate());
   list.addEventListener("click", (e) => {
     if (e.target.closest(".geo-ask")) locate();
   });
-  // On start: silently when permission was granted before; with the browser's own question when it
-  // has never been asked; never when it was denied (the browser would not ask again anyway).
+  // On start: silently when permission was granted before – nothing else. A browser that has never been
+  // asked waits for a tap on «Mein Standort» or «Distanz & Zug anzeigen»; one that said no is left alone.
   function autoLocate() {
     if (!("geolocation" in navigator) || !shows.length) return;
-    if (!navigator.permissions || !navigator.permissions.query) return locate();
+    if (!navigator.permissions || !navigator.permissions.query) return;
     navigator.permissions
       .query({ name: "geolocation" })
       .then((p) => {
-        if (p.state !== "denied") locate();
-        else geoDeclined = true;
+        if (p.state === "granted") locate({ silent: true });
+        else if (p.state === "denied") geoDeclined = true;
       })
-      .catch(() => locate());
+      .catch(() => {});
   }
 
   // --- Meine Shows (§7 S5): the star is Merken on / off, the state «Interessiert | Ich gehe» is a separate
@@ -1507,9 +1839,14 @@
     const n = markedShows().length;
     toggleMine.classList.toggle("empty", n === 0);
     toggleMine.setAttribute("aria-disabled", String(n === 0));
-    toggleMine.title = n === 0 ? "Shows merken · nur in diesem Browser" : "Meine Shows";
     toggleMine.setAttribute("aria-pressed", String(mineOnly));
-    toggleMine.title = mineOnly ? "Wieder alle Shows anzeigen" : "Nur meine Shows anzeigen";
+    toggleMine.title =
+      n === 0
+        ? "Shows merken · nur in diesem Browser"
+        : mineOnly
+          ? "Wieder alle Shows anzeigen"
+          : "Nur meine Shows anzeigen";
+    toggleMine.setAttribute("aria-label", `Meine Shows (${n})`); // aria-pressed carries the state
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !listMode() || !listShows().length;
     if (!minePanel.hidden) {
@@ -1519,11 +1856,16 @@
       take.hidden = !shared;
       take.disabled = Boolean(shared) && Object.keys(shared).every((id) => marks[id]);
       take.querySelector("span").textContent = take.disabled ? "Alle gemerkt ✓" : "Alle merken";
-      minePanel.querySelector(".mine-note").innerHTML = !shared
-        ? `<b>Nur in diesem Browser.</b> Aufs andere Handy oder zu Freunden: «Teilen» und dort «Alle merken».`
-        : take.disabled
-          ? "Diese Shows sind in deinen Shows (★) gespeichert."
-          : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.";
+      const gone = sharedMissing
+        ? ` ${sharedMissing === 1 ? "1 Show aus dem Link ist" : `${sharedMissing} Shows aus dem Link sind`} vorbei oder nicht mehr in der Agenda.`
+        : "";
+      minePanel.querySelector(".mine-note").textContent =
+        (!shared
+          ? "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken»."
+          : take.disabled
+            ? "Diese Shows sind in deinen Shows (★) gespeichert."
+            : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.") +
+        gone;
     }
     syncListMode();
   }
@@ -1656,6 +1998,7 @@
     if (!markedShows().length) return; // nothing marked yet: the tooltip says what the star does
     mineOnly = !mineOnly;
     renderAndKeepInView();
+    if (mineOnly) scrollViewsUnderBar(); // the list of marked shows comes up, not just the gold star
   });
 
   minePanel.addEventListener("click", async (e) => {
@@ -1695,6 +2038,7 @@
       for (const id of Object.keys(shared)) if (!marks[id]) marks[id] = "interested";
       saveMarks();
       render();
+      el("list-title").focus({ preventScroll: true }); // the button turned into text: announce the list
     }
   });
 
@@ -1703,6 +2047,7 @@
   function showShared(raw) {
     shared = {};
     sharedBy = "";
+    sharedMissing = 0;
     // New form #m=<short><g|i>,…[,von:<Name>] ; old form #mine=<id>:<g|i>,… still accepted.
     for (const part of raw.split(",")) {
       if (part.startsWith("von:")) {
@@ -1714,12 +2059,22 @@
       else [token, st] = [decodeHashPart(part.slice(0, -1)), part.slice(-1)];
       const show = token && findShow(token);
       if (show) shared[show.id] = st === "g" ? "going" : "interested";
+      else if (token) sharedMissing++;
     }
     const ids = Object.keys(shared);
     if (!ids.length) {
       shared = null;
+      if (sharedMissing) {
+        // Shows pass and are removed daily: an old list link ends up here. Say so, show everything.
+        noteLink(
+          "Die Shows aus diesem Link sind vorbei oder nicht mehr in der Agenda – hier ist alles, was kommt.",
+        );
+        history.replaceState(history.state, "", location.pathname + location.search);
+      }
+      render(); // a list that was on screen before (hashchange) goes
       return;
     }
+    noteLink("");
     // The visitor's own link (every marked show, nothing else): that is simply "Meine Shows".
     if (ids.length === markedShows().length && ids.every((id) => marks[id])) {
       shared = null;
@@ -1741,6 +2096,7 @@
   const listHead = el("list-head");
   const BASE_TITLE = document.title;
   let sharedBy = ""; // optional "von:<Name>" token in a #m= link
+  let sharedMissing = 0; // ids in a #m= link that no show matches any more (passed, removed)
   listHead.innerHTML =
     `<button type="button" class="list-close" id="list-close" title="Zurück zur Agenda (Esc)" aria-label="Zurück zur Agenda"><b aria-hidden="true">✕</b><span>Zurück<i> zur Agenda</i></span></button>` +
     `<h2 class="list-title" id="list-title" tabindex="-1"></h2>`;
@@ -1782,6 +2138,7 @@
     mineOnly = false;
     shared = null;
     sharedBy = "";
+    sharedMissing = 0;
     renderAndKeepInView(); // → syncListMode strips a #m= hash
     (toggleMine.hidden ? search : toggleMine).focus({ preventScroll: true });
   }
@@ -1820,9 +2177,16 @@
   const monthKey = (d) => `${d.getFullYear()}-${d.getMonth() + 1}`;
   const monthStart = (d) => new Date(d.getFullYear(), d.getMonth(), 1);
   const shortMonthFmt = new Intl.DateTimeFormat("de-CH", { month: "short" });
-  // "Okt" this year, "Jan ’27" in another year.
-  const monthLabel = (d) =>
-    `${shortMonthFmt.format(d).replace(".", "")}${d.getFullYear() === todayStart().getFullYear() ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
+  // "Okt" this year, "Jan ’27" in another year. In the histogram the year is only on the first month of
+  // a new year (the labels sit 40 px apart; «Jan ’27 Feb ’27 Mär ’27» ran into each other).
+  const monthLabel = (d, i) => {
+    const name = shortMonthFmt.format(d).replace(".", "");
+    const year = ` ’${String(d.getFullYear()).slice(2)}`;
+    if (d.getFullYear() === todayStart().getFullYear()) return name;
+    if (i === undefined) return name + year;
+    const prev = monthList[i - 1];
+    return !prev || prev.getFullYear() !== d.getFullYear() ? name + year : name;
+  };
   const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
   // `o` replaces the time filters for what-if counts: { months: Set, range: [from, to] | null }.
   // A festival counts for every month and every quick range it touches.
@@ -1916,6 +2280,7 @@
     const active = rangeActive();
     toggleWhen.setAttribute("aria-pressed", String(active));
     toggleWhen.title = active ? `Wann: ${rangeLabel()} (ändern)` : "Wann: Zeitraum wählen";
+    toggleWhen.setAttribute("aria-label", `Wann: ${active ? rangeLabel() : "alle kommenden"}`);
     const badge = toggleWhen.querySelector("b");
     badge.hidden = !active;
     badge.textContent = active ? rangeLabel() : "";
@@ -1931,7 +2296,7 @@
     const thisMonth = monthStart(todayStart());
     const max = Math.max(1, ...counts.values());
     whenMonths.innerHTML = monthList
-      .map((d) => {
+      .map((d, i) => {
         const k = monthKey(d);
         const n = counts.get(k) || 0;
         const cls = ["bar"];
@@ -1939,17 +2304,28 @@
         if (d < thisMonth) cls.push("past");
         if (months.size && !months.has(k)) cls.push("dim");
         if (monthKey(d) === monthKey(thisMonth)) cls.push("today");
-        const title = `${monthFmt.format(d)}: ${n === 1 ? "1 Konzert" : `${n} Konzerte`}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
-        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}" style="--h:${Math.round((n / max) * 100)}%"><b>${n || ""}</b><i></i><span>${monthLabel(d)}</span></button>`;
+        const count = n === 1 ? "1 Konzert" : `${n} Konzerte`;
+        const title = `${monthFmt.format(d)}: ${count}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
+        return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" aria-label="${escape(`${monthFmt.format(d)}, ${count}`)}" title="${escape(title)}" style="--h:${(n / max).toFixed(2)}"><b>${n || ""}</b><i></i><span>${monthLabel(d, i)}</span></button>`;
       })
       .join("");
-    const quick = quickActive();
-    for (const chip of whenPanel.querySelectorAll("[data-quick]"))
-      chip.setAttribute("aria-pressed", String(chip.dataset.quick === quick));
-    const n = shows.filter((s) => isVisible(s)).length;
+    whenMonths.classList.toggle("can-scroll", whenMonths.scrollWidth > whenMonths.clientWidth + 2);
+    for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
+      const [qa, qb] = quickRange(chip.dataset.quick);
+      chip.setAttribute(
+        "aria-pressed",
+        String(Boolean(!months.size && rangeFrom && sameDay(qa, rangeFrom) && sameDay(qb, rangeTo))),
+      );
+      // The weekend chip means this weekend from Friday on, the next one before: the tooltip says which.
+      if (chip.dataset.quick === "weekend")
+        chip.title = `Wochenende ${dm(qa)}–${dm(qb)} (Freitag bis Sonntag)`;
+    }
+    const n = shows.filter(isVisible).length;
     whenCount.textContent = active
       ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
-      : `${n} ${n === 1 ? "Konzert" : "Konzerte"}, alle kommenden`;
+      : n === 1
+        ? "1 kommendes Konzert"
+        : `Alle ${n} kommenden Konzerte`;
   }
 
   toggleWhen.addEventListener("click", () => setPanel(openPanel === "when" ? null : "when"));
@@ -1989,12 +2365,21 @@
 
   // --- Views: Liste | Kalender | Karte ---
   // All three show the same filtered shows (`lastVisible`); render() dispatches to them.
-  function setView(next) {
+  function setView(next, opts = {}) {
     if (!VIEWS.includes(next)) return;
     view = next;
     store.set(store.KEYS.VIEW, view);
     markView();
+    if (opts.push) history.pushState(histState(), "");
+    else history.replaceState(histState(), "");
+    if (callout() && opts.push) {
+      callout().suspend(); // a nudge steps aside (the map must stay tappable)
+      callout().hide(); // a callout opened on purpose closes with the view it belonged to
+    }
     render();
+    // A switch to the calendar or the map brings that view up under the bar (on a phone it would
+    // otherwise start two thirds down the screen, behind the hero).
+    if (opts.push && next !== "list") scrollViewsUnderBar();
   }
   function markView() {
     for (const b of viewSwitch.querySelectorAll("[data-view]"))
@@ -2005,14 +2390,15 @@
   // linked; a show link in the hash is consumed by the switch. Not in the list mode, whose #m= link stays.
   viewSwitch.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-view]");
-    if (!btn || btn.dataset.view === view) return;
-    setView(btn.dataset.view);
-    if (!listMode()) setHash(view === "list" ? "" : `view=${view}`);
+    if (btn && btn.dataset.view !== view) setView(btn.dataset.view, { push: true });
   });
 
-  // Calendar pills and map popups link to the show's row in the list.
+  // Calendar pills and map popups link to the show's row in the list – with the same short hash the
+  // share links use, as a history entry of its own (Back returns to the calendar or the map).
   function goToShow(id) {
-    setHash(encodeURIComponent(id));
+    const s = shows.find((x) => x.id === id);
+    if (!s) return;
+    history.pushState(histState({ view: "list" }), "", `#${s._short}`);
     revealFromHash();
   }
 
@@ -2081,9 +2467,14 @@
       if (d < today) cls.push("past");
       if (dow === 0 || dow === 5 || dow === 6) cls.push("weekend");
       const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Konzert" : "Konzerte"}` : ""}`;
+      const other = d.getMonth() !== m;
       cells.push(`
         <div class="${cls.join(" ")}" data-day="${key}">
-          <button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>
+          ${
+            other
+              ? `<span class="cal-num" aria-hidden="true">${d.getDate()}</span>`
+              : `<button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>`
+          }
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
             .map((s) => `<i style="background:${genreColor(s)}"></i>`)
@@ -2098,11 +2489,32 @@
     }
 
     const selected = byDay.get(calDay) || [];
+    // The arrows stop at the months that have shows (plus today's); an empty month says so and points
+    // to the next show.
+    const firstMonth = monthList[0];
+    const lastMonth = monthList[monthList.length - 1];
+    const prevOk = firstMonth && calMonth > firstMonth;
+    const nextOk = lastMonth && calMonth < lastMonth;
+    const inThisMonth = [...byDay.keys()].some(inMonth);
+    const after = visible.find((s) => s._day >= new Date(y, m + 1, 1));
+    const before = [...visible].reverse().find((s) => s._day < new Date(y, m, 1));
+    const emptyNote = inThisMonth
+      ? ""
+      : `<p class="cal-empty cal-month-empty">Keine Konzerte im ${escape(monthFmt.format(calMonth))}.${
+          after
+            ? ` Nächste Show: <a href="#${after._short}" data-id="${escape(after.id)}">${escape(after.title)}</a>, ${escape(shortDate(after._day))}`
+            : before
+              ? ` Letzte Show: <a href="#${before._short}" data-id="${escape(before.id)}">${escape(before.title)}</a>, ${escape(shortDate(before._day))}`
+              : ""
+        }</p>`;
+    const legend =
+      `<p class="cal-legend" aria-hidden="true"><span><i style="background:var(--red)"></i>Ska, Ska-Punk, Rocksteady</span>` +
+      `<span><i style="background:var(--green-text)"></i>Dub, Soundsystem</span><span><i style="background:var(--gold)"></i>Reggae &amp; mehr</span></p>`;
     calendarEl.innerHTML = `
       <div class="cal-head">
-        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat">&lsaquo;</button>
+        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat"${prevOk ? "" : " disabled"}>&lsaquo;</button>
         <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
-        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat">&rsaquo;</button>
+        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat"${nextOk ? "" : " disabled"}>&rsaquo;</button>
         <button type="button" class="linkish cal-today" data-cal="0" title="Zum aktuellen Monat springen">Heute</button>
         <button type="button" class="linkish cal-subscribe" data-subscribe title="Alle Shows als Kalender abonnieren – aktualisiert sich von selbst">${ICONS.rss} Abonnieren</button>
       </div>
@@ -2110,6 +2522,7 @@
         ${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w) => `<span class="cal-dow">${w}</span>`).join("")}
         ${cells.join("")}
       </div>
+      ${emptyNote}${legend}
       <section class="cal-day">
         <h2 class="month">${escape(longDayFmt.format(parseDay(calDay)))}</h2>
         ${
@@ -2121,8 +2534,11 @@
   }
 
   calendarEl.addEventListener("click", (e) => {
-    const pill = e.target.closest(".pill");
-    if (pill) return goToShow(pill.dataset.id);
+    const pill = e.target.closest(".pill, .cal-month-empty a[data-id]");
+    if (pill) {
+      e.preventDefault();
+      return goToShow(pill.dataset.id);
+    }
     const nav = e.target.closest("[data-cal]");
     if (nav) {
       const step = Number(nav.dataset.cal);
@@ -2136,11 +2552,26 @@
       renderCalendar(lastVisible);
       return;
     }
-    // The whole day cell selects the day (the number button stays for keyboard and screen readers).
+    // The whole day cell selects the day (the number button stays for keyboard and screen readers);
+    // a day of the neighbouring month turns the page to that month.
     const cell = e.target.closest("[data-day]");
     if (cell) {
       calDay = cell.dataset.day;
+      if (cell.classList.contains("other")) {
+        const d = parseDay(calDay);
+        calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      }
       renderCalendar(lastVisible);
+      // On the phone the day's shows are listed under the grid – below the fold: bring them up.
+      const day = calendarEl.querySelector(".cal-day");
+      if (
+        day &&
+        getComputedStyle(day).display !== "none" &&
+        day.getBoundingClientRect().top > innerHeight - 120
+      ) {
+        quietScrollUntil = Date.now() + 1500;
+        day.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
     }
   });
 
@@ -2161,12 +2592,14 @@
         const css = document.createElement("link");
         css.rel = "stylesheet";
         css.href = `${LEAFLET}.css`;
+        css.integrity = LEAFLET_SRI.css;
         css.crossOrigin = "";
         css.onload = css.onerror = done;
         document.head.appendChild(css);
       });
       const js = document.createElement("script");
       js.src = `${LEAFLET}.js`;
+      js.integrity = LEAFLET_SRI.js;
       js.crossOrigin = "";
       js.onload = () => cssReady.then(resolve);
       js.onerror = () => {
@@ -2194,25 +2627,44 @@
     if (!map) {
       mapEl.innerHTML = "";
       map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
-      // Leaflet's own controls get German tooltips.
-      L.control.zoom({ zoomInTitle: "Hineinzoomen", zoomOutTitle: "Herauszoomen" }).addTo(map);
+      // Leaflet's own controls get German tooltips. On touch screens the zoom buttons sit bottom right,
+      // where no popup is ever panned underneath them (popups open at the top left).
+      const touch = matchMedia("(hover: none)").matches;
+      L.control
+        .zoom({
+          zoomInTitle: "Hineinzoomen",
+          zoomOutTitle: "Herauszoomen",
+          position: touch ? "bottomright" : "topleft",
+        })
+        .addTo(map);
+      map.attributionControl.setPrefix(
+        '<a href="https://leafletjs.com" title="Leaflet-Website öffnen" target="_blank" rel="noopener">Leaflet</a>',
+      );
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         className: "map-tiles",
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
       }).addTo(map);
-      for (const a of mapEl.querySelectorAll(".leaflet-control-attribution a"))
-        if (/leafletjs/.test(a.href)) a.title = "Leaflet-Website öffnen";
       markerLayer = L.layerGroup().addTo(map);
       // Leaflet stops clicks inside popups from bubbling up to the page, so the
       // show links are handled on the popup element itself (bound once per popup).
+      // Keyboard: the focus moves into the popup (first show), Escape closes it, the pin gets it back.
+      let popupPin = null;
       map.on("popupopen", (e) => {
         const popup = e.popup.getElement();
-        if (!popup || popup.dataset.bound) return;
-        popup.dataset.bound = "1";
+        popupPin = e.popup._source && e.popup._source.getElement ? e.popup._source.getElement() : null;
+        if (!popup) return;
         const close = popup.querySelector(".leaflet-popup-close-button");
-        if (close) close.title = "Schliessen";
+        if (close) {
+          close.title = "Schliessen";
+          close.setAttribute("aria-label", "Schliessen");
+        }
+        const first = popup.querySelector("a[data-id]");
+        if (first && popupPin && popupPin.contains(document.activeElement))
+          first.focus({ preventScroll: true });
+        if (popup.dataset.bound) return;
+        popup.dataset.bound = "1";
         popup.addEventListener("click", (ev) => {
           const a = ev.target.closest("a[data-id]");
           if (!a) return;
@@ -2221,18 +2673,34 @@
           goToShow(a.dataset.id);
         });
       });
+      map.on("popupclose", () => {
+        if (popupPin && popupPin.isConnected && mapEl.contains(document.activeElement)) popupPin.focus();
+        popupPin = null;
+      });
+      document.addEventListener("keydown", (ev) => {
+        if (ev.key === "Escape" && view === "map" && mapEl.querySelector(".leaflet-popup")) map.closePopup();
+      });
     }
     markerLayer.clearLayers();
 
     const hasPos = (s) => typeof s.lat === "number" && typeof s.lon === "number";
-    // One marker per venue; its popup lists the venue's shows.
+    // One marker per venue; its popup lists the venue's shows. Venues at (almost) the same spot – the
+    // rooms of one house, like the Reitschule in Bern – share one pin, otherwise the lower pin could
+    // never be tapped.
     const venues = new Map();
     for (const s of visible.filter(hasPos)) {
       const key = `${s.venue}|${s.city}`;
       if (!venues.has(key)) venues.set(key, { s, items: [] });
       venues.get(key).items.push(s);
     }
+    const places = [];
+    for (const v of venues.values()) {
+      const near = places.find((p) => distanceKm(p.s, v.s) < 0.12);
+      if (near) near.venues.push(v);
+      else places.push({ s: v.s, venues: [v] });
+    }
     const points = [];
+    const swiss = [];
     // Google-Maps-style pins, filled with the red/gold/green stripes. Default: dark centre dot.
     // "Ich gehe": a gold star in the centre (like a saved place). Count badge = shows at this venue.
     let pinSeq = 0;
@@ -2271,24 +2739,47 @@
     });
     const pinKind = (items) =>
       items.some((x) => marks[x.id] === "going") ? "going" : items.some(isFestival) ? "festival" : "venue";
-    for (const { s, items } of venues.values()) {
-      L.marker([s.lat, s.lon], {
+    const showList = (items) =>
+      `<ul class="popup-shows">${items
+        .map(
+          (x) =>
+            `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+        )
+        .join("")}</ul>`;
+    for (const { s, venues: vs } of places) {
+      const items = vs.flatMap((v) => v.items);
+      const names = vs.map((v) => v.s.venue).join(", ");
+      const title = `${names}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`;
+      const marker = L.marker([s.lat, s.lon], {
         icon: pinIcon(pinKind(items), items.length),
         riseOnHover: true,
-        title: `${s.venue}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`,
+        zIndexOffset: items.length * 10, // the busier pin on top where pins still overlap
+        title,
       })
         .bindPopup(
-          `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}<ul class="popup-shows">${items
-            .map(
-              (x) =>
-                `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
-            )
-            .join("")}</ul>`,
-          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone.
-          { maxWidth: Math.min(300, mapEl.clientWidth - 70), autoPanPadding: [24, 24] },
+          vs.length === 1
+            ? `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}${showList(items)}`
+            : `<strong>${escape(s.city)}</strong>` +
+                vs
+                  .map(
+                    (v) =>
+                      `<p class="popup-venue"><strong>${escape(v.s.venue)}</strong></p>${showList(v.items)}`,
+                  )
+                  .join(""),
+          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone; the top-left
+          // padding keeps a tall popup clear of the zoom control.
+          {
+            maxWidth: Math.min(320, mapEl.clientWidth - 70),
+            autoPanPaddingTopLeft: [60, 24],
+            autoPanPaddingBottomRight: [24, 24],
+          },
         )
         .addTo(markerLayer);
+      // Leaflet names a pin by its text (the count badge): give it the venue instead. The element exists
+      // once the marker is on the map, which happens after fitBounds() below (the map has no view yet).
+      marker.on("add", () => marker.getElement().setAttribute("aria-label", title));
       points.push([s.lat, s.lon]);
+      if (CANTONS[s.canton]) swiss.push([s.lat, s.lon]);
     }
     if (here) {
       L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000, title: "Dein Standort" })
@@ -2297,12 +2788,15 @@
       points.push([here.lat, here.lon]);
     }
     map.invalidateSize();
-    if (points.length) map.fitBounds(points, { padding: [32, 32], maxZoom: 12 });
+    // The frame fits Switzerland (plus the own position); the few venues just across the border are
+    // still on the map, but they do not zoom the whole country out to Strasbourg and Munich.
+    const frame = swiss.length ? swiss.concat(here ? [[here.lat, here.lon]] : []) : points;
+    if (frame.length) map.fitBounds(frame, { padding: [40, 40], maxZoom: 12 });
     else map.setView([46.8, 8.2], 7);
 
     const rest = visible.filter((s) => !hasPos(s));
     mapRest.innerHTML =
-      `<p class="map-legend"><span class="legend-item"><span class="pin-mini"></span>Venue mit Shows (Zahl = Anzahl)</span> ` +
+      `<p class="map-legend"><span class="legend-item"><span class="pin-mini"></span>Club mit Shows (Zahl = Anzahl Shows)</span> ` +
       `<span class="legend-item"><span class="pin-mini star">★</span>«Ich gehe»</span>` +
       `${visible.some(isFestival) ? ` <span class="legend-item"><span class="pin-mini fest"></span>Festival</span>` : ""}` +
       `${here ? ` <span class="legend-item"><span class="pin-mini you"></span>du</span>` : ""}</p>` +
@@ -2317,7 +2811,7 @@
   function showSubscribe(force) {
     const canton = cantons.size === 1 ? [...cantons][0] : "";
     const url = feedUrl(canton);
-    window.jahCallout.show({
+    callout().show({
       id: "subscribe",
       force,
       title: canton ? `Shows in ${regionName(canton)} in deinem Kalender` : "Alle Shows in deinem Kalender",
@@ -2359,12 +2853,13 @@
   });
   // Nudge once: after the visitor has scrolled into the list (not on the first second).
   let nudged = false;
+  let quietScrollUntil = 0; // a scroll the page made itself (deep link, view switch) is not the visitor's
   window.addEventListener(
     "scroll",
     () => {
-      if (nudged || window.scrollY < 600 || !shows.length) return;
+      if (nudged || window.scrollY < 600 || !shows.length || Date.now() < quietScrollUntil) return;
       nudged = true;
-      setTimeout(() => showSubscribe(false), 1500);
+      setTimeout(() => showSubscribe(false), 1500); // callout.js holds it while the page is busy
     },
     { passive: true },
   );
@@ -2431,11 +2926,35 @@
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
+  const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
   function renderAndKeepInView() {
+    nudgeQuietUntil = Date.now() + 3000; // mid-task: no sticker over the result
+    filterTouched = true;
     render();
-    if (views.hidden) return;
-    const listTop = views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
-    if (window.scrollY > listTop) window.scrollTo({ top: listTop });
+    filterTouched = false;
+    // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
+    // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.
+    const target = views.hidden ? status : views;
+    if (views.hidden && !status.textContent.trim()) return;
+    const top = () => target.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
+    if (window.scrollY > top()) {
+      quietScrollUntil = Date.now() + 1000;
+      window.scrollTo({ top: top() });
+      // The bar grows by a row once it sticks: check the target again a moment later.
+      setTimeout(() => {
+        if (window.scrollY > top()) window.scrollTo({ top: top() });
+      }, 80);
+    }
+  }
+  // Scroll down (never up) until the views start right under the bar. The bar grows by a row once
+  // it sticks, so the target is checked again a moment later.
+  function scrollViewsUnderBar() {
+    if (views.hidden || window.scrollY >= viewsTop()) return;
+    quietScrollUntil = Date.now() + 1500;
+    window.scrollTo({ top: viewsTop() });
+    setTimeout(() => {
+      if (Math.abs(window.scrollY - viewsTop()) > 2) window.scrollTo({ top: viewsTop() });
+    }, 80);
   }
 
   // Scroll arrows for the chip row: only shown when there is something hidden in that direction.
@@ -2562,5 +3081,6 @@
     clearTimeout(searchTimer);
     searchTimer = setTimeout(renderAndKeepInView, 120);
   });
+  armCallout();
   init();
 })();

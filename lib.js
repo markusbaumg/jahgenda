@@ -60,7 +60,27 @@
   }
 
   // ---- Calendar export ------------------------------------------------------------------------
-  // Local-time stamp YYYYMMDDTHHMM00 (floating time: lands at the right hour in Switzerland).
+  // Europe/Zurich with its EU summer-time rules, as in the subscription feed (scripts/make_ics.py):
+  // a timed show carries DTSTART;TZID=…, so a phone set to another zone still shows the Swiss hour.
+  const TZID = "Europe/Zurich";
+  const VTIMEZONE = [
+    "BEGIN:VTIMEZONE",
+    `TZID:${TZID}`,
+    "BEGIN:STANDARD",
+    "DTSTART:19701025T030000",
+    "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU",
+    "TZOFFSETFROM:+0200",
+    "TZOFFSETTO:+0100",
+    "END:STANDARD",
+    "BEGIN:DAYLIGHT",
+    "DTSTART:19700329T020000",
+    "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU",
+    "TZOFFSETFROM:+0100",
+    "TZOFFSETTO:+0200",
+    "END:DAYLIGHT",
+    "END:VTIMEZONE",
+  ];
+  // Zurich wall-clock stamp YYYYMMDDTHHMM00 (used with TZID, see vevent).
   const localStamp = (x) =>
     `${x.getFullYear()}${pad2(x.getMonth() + 1)}${pad2(x.getDate())}T${pad2(x.getHours())}${pad2(x.getMinutes())}00`;
 
@@ -133,7 +153,7 @@
       when = `DTSTART;VALUE=DATE:${show.date.replace(/-/g, "")}\r\nDTEND;VALUE=DATE:${nextDayStamp(show.end_date)}`;
     } else if (show.time) {
       const [start, end] = showSpan(show);
-      when = `DTSTART:${localStamp(start)}\r\nDTEND:${localStamp(end)}`;
+      when = `DTSTART;TZID=${TZID}:${localStamp(start)}\r\nDTEND;TZID=${TZID}:${localStamp(end)}`;
     } else {
       when = `DTSTART;VALUE=DATE:${show.date.replace(/-/g, "")}`;
     }
@@ -152,7 +172,16 @@
   }
 
   const icsWrap = (events) =>
-    ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Jahgenda//DE", ...events, "END:VCALENDAR", ""].join("\r\n");
+    [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Jahgenda//DE",
+      `X-WR-TIMEZONE:${TZID}`,
+      ...VTIMEZONE,
+      ...events,
+      "END:VCALENDAR",
+      "",
+    ].join("\r\n");
 
   // The .ics file for one show; opts as for vevent.
   const icsFor = (show, opts) => icsWrap(vevent(show, opts));

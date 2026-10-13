@@ -63,9 +63,10 @@ scripts/make_stickers.py               Renders the promo stickers in design/stic
 scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
+e2e/                                   End-to-end tests in a real browser (Playwright; make e2e).
 design/                                Logo variants, festival spec, other design documents.
 .github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
-.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) on every push and PR.
+.github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) + e2e job on every push and PR.
 .github/workflows/quality-review.yml   Mondays: scripts/quality_review.py opens the review issue (label quality).
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.
 Makefile                               Everything you can run: `make` shows the help.
@@ -73,16 +74,20 @@ Makefile                               Everything you can run: `make` shows the 
 
 ### Filters
 
-Search (band, club, town), one genre chip (order and labels from `data/genres.json`; the count on every chip
-is what a tap on it yields under the other filters), and two dropdown panels hanging from the sticky toolbar —
-only one is open at a time, closed with ×, Escape, the button or a tap outside:
+Search (band, club, town — accents, umlauts and the spoken short names fold: geneve = Genève, Züri = Zürich),
+one genre chip (order and labels from `data/genres.json`; the count on every chip is what a tap on it yields
+under the other filters), and two dropdown panels hanging from the sticky toolbar — only one is open at a
+time, closed with ×, Escape, the button, a tap outside or the Back button. The active filters live in the
+URL hash (`#q=…&g=ska&f=festival&wo=ZH,BE&r=25&wann=weekend`), so a filtered view survives a reload, can be
+bookmarked and sent with «Link zu dieser Auswahl»:
 
 - **Wo** — cantons are multi-select chips with counts, grouped Deutschschweiz · Romandie · Ticino · Grenznah
   (D/F/I/A/FL), cantons without an upcoming show left out; the canton badge in a row toggles the same filter.
-  **Mein Standort** asks the browser for the position (also asked once on start; never stored or sent
-  anywhere) and enables a radius (10/25/50 km), distances in every row with a hover-only **SBB** badge
-  (timetable from the nearest town in `venues.json` to the show's town, arrival one hour before the show —
-  `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen» placeholder while the position is unknown.
+  **Mein Standort** asks the browser for the position (only on a tap – on start just silently when the
+  browser already allows it; never stored or sent anywhere) and enables a radius (10/25/50 km), distances in
+  every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to the show's
+  town, arrival one hour before the show — `lib.sbbUrl`, tested; also an «SBB» action in the row for touch
+  screens) and a «Distanz & Zug anzeigen» placeholder while the position is unknown.
 - **Wann** — Heute / Morgen / Wochenende / 7 Tage, or any set of months picked on a clickable month
   histogram (bars = number of shows after the other filters; past months dimmed and switching past shows on).
   The badge in the toolbar names the active choice; nothing is stored across visits. Past shows can also be
@@ -91,9 +96,10 @@ only one is open at a time, closed with ×, Escape, the button or a tap outside:
 Every active filter is a removable gold pill under the results row («Dub ✕ · Bern ✕ · Wochenende ✕»,
 «Alles zurücksetzen» from two on). When nothing matches, the empty state names the cause («Kein Dub im
 Tessin») and offers each removal with what it yields, the richest first. Links: `#<short hash>` (a show),
-`#m=…` (a shared list) and `#view=calendar|map` (the view switch writes it) — combinable with `&`, parsed
-by one `parseHash()`. After every re-render the keyboard focus returns to the same control (row + action,
-canton badge, view button), or to the filter pills line as the fallback — never to `<body>`.
+`#m=…` (a shared list) and `#view=calendar|map` — combinable with `&`, parsed by one `parseHash()`; a stale
+show link says that the show is gone instead of silently showing everything. After every re-render the
+keyboard focus returns to the same control (row + action, canton badge, view button), or to the filter pills
+line as the fallback — never to `<body>`.
 
 The list itself is time-aware: inside a month the rows are grouped by day (one date cell per day), today and
 tomorrow carry a red HEUTE / MORGEN pill (only while the data is fresher than 48 h), the Fr–So of the coming
@@ -109,8 +115,9 @@ calendar export and Google link span the whole range, calendar dots and map pins
 ### Views
 
 The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list, next to
-«Filter zurücksetzen»; the browser remembers the choice; the result count is in the footer bar next to the
-data stamp). The calendar is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
+«Filter zurücksetzen»; the browser remembers the choice and the Back button returns from a switch; the result
+count stands next to the switch and, with the month span and the data stamp, in the footer bar). The calendar
+is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
 on the phone it becomes a compact grid with dots and the list of the tapped day below. The map loads Leaflet
 1.9.4 and OpenStreetMap tiles on first open only, shows one marker per venue (popup with the shows there),
 your own location on request, and shows without coordinates below under "Ohne Standort". A tap on a show in
@@ -311,6 +318,26 @@ make status       # last deploys and the last scraper run
 ```
 
 No dependencies beyond Python 3, Node (for prettier via npx) and the GitHub CLI.
+
+### End-to-end tests
+
+`e2e/` is a small [Playwright](https://playwright.dev) project that drives the real page in a browser:
+desktop Chrome (1280×800) and an iPhone 13 emulated in Chromium. One spec per area – list, search and
+genre chips, the Wo and Wann panels, the three views (the map really loads Leaflet), Meine Shows with
+share link and `.ics` download, the phone layout of the row actions, mocked geolocation, and every page (`index.html`,
+`log.html`, `review.html`, `mischpult.html`) loading without console errors. The interaction tests run
+against a fixture served in place of `data/shows.json` (dates relative to today), so they do not depend
+on what the scraper found; the load and console checks use the real data.
+
+```sh
+make e2e                                   # npm ci, download Chromium, run the suite (serves the repo on :4173)
+cd e2e && npx playwright test --project="iPhone 13" tests/phone.spec.js   # one project / one file
+cd e2e && npx playwright test --ui          # Playwright's UI mode
+cd e2e && node adhoc.js https://markusbaumg.github.io/jahgenda/ shot.png   # ad-hoc script against any URL
+```
+
+`make e2e` is not part of `make check` (browser download, network for Leaflet and tiles); CI runs it as
+its own job in `validate.yml` and uploads the report and traces when it fails.
 
 ### Changing the logo
 
