@@ -1963,6 +1963,23 @@ a[href]:focus-visible,
 .list-foot .arrow {
   color: var(--faint);
 }
+/* Desktop with a mouse (owner decision 2026-10-13 18:20, #54): the list stays quiet – the actions line only
+ * appears when the row is hovered or focused; the reserved line keeps the rows from jumping. Rows get more
+ * air so the list reads lighter. */
+@media (hover: hover) and (min-width: 768px) {
+  .show {
+    padding: 14px 0 6px;
+  }
+  .show .actions {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .show:hover .actions,
+  .show:focus-within .actions,
+  .show.highlight .actions {
+    opacity: 1;
+  }
+}
 /* Actions line (§3.6): its own 44 px line under the meta. Icon + word from 600 px, icon-only 44 × 44
  * targets below (the aria-label keeps the name, «Infos ↗» / «Tickets ↗» keep their word). On desktop with a
  * mouse the line is 36 px and sits at the right of the body column. */
@@ -2311,8 +2328,6 @@ a[href]:focus-visible,
 /* Acts line: cream, hairline left tick, clamped to 2 lines on phones unless a search hit sits inside it. */
 .acts {
   margin: 2px 0 0;
-  padding-left: var(--s-2);
-  border-left: 1px solid var(--line);
   color: var(--text);
   font-size: var(--fs-3);
   overflow-wrap: anywhere; /* a soundsystem name written as one word must not widen the page */
@@ -2595,19 +2610,6 @@ a[href]:focus-visible,
   text-transform: uppercase;
   color: var(--gold-text);
 }
-.section-title::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: -16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 96px;
-  height: 96px;
-  background: url("img/logo/jahgenda.svg") center / contain no-repeat;
-  opacity: 0.12;
-  pointer-events: none;
-}
 .about-body {
   display: flex;
   gap: 32px;
@@ -2717,7 +2719,7 @@ a[href]:focus-visible,
   color: var(--gold);
 }
 .show.interested .act.star svg path {
-  fill: var(--gold-tint);
+  fill: var(--gold);
 }
 .show.going .act.star {
   color: var(--green-text);
@@ -4458,4 +4460,39 @@ html {
   .pin-icon {
     forced-color-adjust: none;
   }
+}
+
+/* Owner feedback 2026-10-13 18:30: quieter rows and a tidy results row.
+ * - The inline SBB badge next to the distance reserved an empty slot in the meta line; the SBB action in the
+ *   row's action line is the one place for it.
+ * - The KI note is an icon-only pill on wide screens (the sentence lives in the card and in «Über Jahgenda»),
+ *   so count and view switch share one line. */
+.dist .sbb {
+  display: none;
+}
+@media (min-width: 768px) {
+  .results-row {
+    flex-wrap: nowrap;
+  }
+  .note-pill summary .note-long,
+  .note-pill summary .note-short {
+    display: none;
+  }
+  .note-pill summary {
+    padding: 0 7px;
+  }
+}
+
+/* The header lockup is a link back to the start (owner request 2026-10-13): plain «./» resets filters and hash. */
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  color: inherit;
+  text-decoration: none;
+}
+.logo-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
