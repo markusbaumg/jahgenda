@@ -2775,7 +2775,9 @@ a[href]:focus-visible,
 @media (max-width: 599px) {
   .mark-slot {
     flex: 1 1 100%;
-    margin: 4px 0 3px; /* 3 px: the 44 px hit area of the segments ends where the action targets begin */
+    /* 11 px: 8 px of dead space between the segments' 44 px hit area and the action targets below (a tap
+     * 8 px under the «Interessiert» pill opened Google Kalender in a new tab). Costs 8 px per marked row. */
+    margin: 4px 0 11px;
   }
 }
 @media (min-width: 600px) {
@@ -4080,10 +4082,54 @@ a:visited {
     display: inline;
   }
 }
-/* Touch: chips and the small text buttons reach a finger-sized height. */
+/* Touch: chips and the small text buttons reach a finger-sized height – 36 px drawn, 44 px hit
+ * (design/ui-revamp.md: every target ≥ 44 px on touch). The chips keep their drawn box and their row
+ * pitch grows to 44, so neighbouring hit areas touch but never overlap. */
 @media (hover: none) {
   .chip {
     min-height: 36px;
+  }
+  .chip::after {
+    inset: -4px -2px;
+  }
+  /* The genre row is a 36 px scroller that clips the chips' extension: the scroller grows to 44 px
+   * (2 px into the toolbar's gap above, 6 px past the bar's bottom edge – both transparent) while the
+   * bar and the drawn chips stay where they are. */
+  .chips {
+    height: 44px;
+    margin: -2px 0 -6px;
+    padding: 3px 0 5px;
+  }
+  .chips .chip::after {
+    inset: -4px -2px -6px; /* a pixel more than the scroller shows: its clip edge is the 44 px line */
+  }
+  /* Panels: 44 px row pitch for the canton chips and the quick picks (the chips were 6 px apart). */
+  .canton-chips,
+  .when-quick,
+  .where-row,
+  .where-radius {
+    gap: 8px;
+  }
+  .panel-close {
+    position: relative;
+  }
+  .panel-close::after,
+  .seg button::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+  .seg button {
+    position: relative;
+  }
+  .seg button::after {
+    inset: -4px 0;
+  }
+  .cal-today {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding: 0 8px;
   }
   #when-reset {
     padding: 8px 0;

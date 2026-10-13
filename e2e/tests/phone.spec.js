@@ -106,6 +106,48 @@ test("the star marks the row; the state toggle and the ★ count mirror it; a se
   await expect(undo).toBeHidden();
 });
 
+// The hit span of a control: the vertical run of points at its centre that elementFromPoint hands to it
+// (the drawn box may stay 32–36 px; the invisible extension has to make up the rest).
+const hitSpan = (locator) =>
+  locator.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    let top = null;
+    let bottom = null;
+    for (let y = Math.floor(r.top) - 12; y <= Math.ceil(r.bottom) + 12; y += 0.5) {
+      const e = document.elementFromPoint(x, y);
+      if (e && (e === el || el.contains(e))) {
+        if (top === null) top = y;
+        bottom = y;
+      }
+    }
+    return top === null ? 0 : bottom - top + 0.5;
+  });
+// A sub-pixel box (339.6 px) loses up to half a pixel at each edge in elementFromPoint: 43 is a full 44.
+const HIT = 43;
+
+test("chips, panel ×, view switch and calendar «Heute» have a 44 px hit span on touch", async ({ page }) => {
+  expect(await hitSpan(page.locator("#genres .chip").nth(1))).toBeGreaterThanOrEqual(HIT);
+  for (const btn of await page.locator("#view-switch button").all())
+    expect(await hitSpan(btn)).toBeGreaterThanOrEqual(HIT);
+  await page.click("#toggle-where");
+  const cantons = page.locator("#canton-chips .chip[data-canton]");
+  expect(await hitSpan(cantons.first())).toBeGreaterThanOrEqual(HIT);
+  // Two chips in consecutive rows: their hit areas touch (44 px pitch) but never overlap.
+  const rows = await cantons.evaluateAll((els) => [
+    ...new Set(els.map((e) => e.getBoundingClientRect().top)),
+  ]);
+  expect(rows.length).toBeGreaterThan(1);
+  expect(rows[1] - rows[0]).toBeGreaterThanOrEqual(TAP);
+  expect(await hitSpan(page.locator("#where-panel .panel-close"))).toBeGreaterThanOrEqual(HIT);
+  await page.keyboard.press("Escape");
+  await page.click("#toggle-when");
+  expect(await hitSpan(page.locator('#when-panel [data-quick="today"]'))).toBeGreaterThanOrEqual(HIT);
+  await page.keyboard.press("Escape");
+  await page.locator('#view-switch [data-view="calendar"]').click();
+  expect(await hitSpan(page.locator(".cal-today"))).toBeGreaterThanOrEqual(HIT);
+});
+
 test("the .ics action in the row starts a download and says «Gespeichert»", async ({ page }) => {
   const cal = page.locator('#list .show .actions [data-act="cal"]').first();
   const download = page.waitForEvent("download");
