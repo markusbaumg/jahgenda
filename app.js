@@ -366,7 +366,8 @@
           ${starButton(s)}
         </div>
         <div class="foot-row">
-          ${shared && shared[s.id] === "going" ? `<div class="tags"><span class="tag-chip going">geht hin</span></div>` : ""}
+          ${shared && shared[s.id] === "going" ? `<span class="goes">${ICONS.star}geht hin</span>` : ""}
+          <div class="mark-slot">${markSegHtml(s)}</div>
           <div class="actions">${actionsHtml(s)}</div>
         </div>
       </li>`;
@@ -739,14 +740,29 @@
       fb.remove();
     }, 1200);
   }
-  const MARK_WORD = { "": "Entfernt", interested: "Gemerkt", going: "Ich gehe" };
+  const STATE_WORD = { interested: "Interessiert", going: "Ich gehe" };
 
-  // Per-show button actions (mark / calendar / share / copy link); the other actions are plain links.
+  // Per-show button actions (mark / state / calendar / share / copy link); the other actions are plain links.
   async function runAction(btn, s, row) {
     const act = btn.dataset.act;
     if (act === "mark") {
-      cycleMark(s, row);
-      flashWord(btn, MARK_WORD[marks[s.id] || ""]);
+      if (btn._long) {
+        btn._long = false; // the click that ends a long press: «Ich gehe» is already set
+        return;
+      }
+      if (marks[s.id]) unmark(s, row);
+      else {
+        setMark(s, "interested", row);
+        flashWord(btn, "Gemerkt");
+      }
+    }
+    if (act === "state") {
+      // A pressed segment stays pressed: the toggle never un-marks (that is the star's job).
+      const next = btn.dataset.state;
+      if (marks[s.id] !== next) {
+        setMark(s, next, row);
+        if (next === "interested") flashWord(row.querySelector(".star"), STATE_WORD[next]);
+      }
     }
     if (act === "cal") {
       downloadIcs(icsFor(s), `${s.id}.ics`);
@@ -977,19 +993,20 @@
       .catch(() => locate());
   }
 
-  // --- Meine Shows: mark shows as "Interessiert" / "Ich gehe", filter to them, share the list. ---
-  // Marks live only in this browser (localStorage); without it they last for the page view.
+  // --- Meine Shows (§7 S5): the star is Merken on / off, the state «Interessiert | Ich gehe» is a separate
+  // two-segment toggle inside every marked row – nothing cycles, so a tap never un-marks by accident. A
+  // long press on the star is the shortcut straight to «Ich gehe». Un-marking shows a 4 s toast with
+  // Rückgängig. Marks live only in this browser (localStorage); without it they last for the page view.
   const MARK_LABEL = {
     "": "Merken",
-    interested: "Interessiert",
-    going: "Ich gehe",
+    interested: "Gemerkt: Interessiert",
+    going: "Gemerkt: Ich gehe",
   };
-  const NEXT_MARK = { "": "interested", interested: "going", going: "" };
-  // Tooltip of the star button: what the next click does.
+  // Tooltip of the star button: what a click does.
   const MARK_TITLE = {
-    "": "Als «Interessiert» merken",
-    interested: "Als «Ich gehe» markieren",
-    going: "Markierung entfernen",
+    "": "Merken (lang drücken: Ich gehe)",
+    interested: "Nicht mehr merken",
+    going: "Nicht mehr merken",
   };
   let marks = {};
   // Only keep well-formed entries; anything else in storage is ignored.
@@ -1016,6 +1033,20 @@
     `${marks[s.id] ? ` ${marks[s.id]}` : ""}${shared && shared[s.id] ? " shared-row" : ""}`;
   const starButton = (s) =>
     `<button type="button" class="act star" data-act="mark" aria-pressed="${Boolean(marks[s.id])}" title="${MARK_TITLE[marks[s.id] || ""]}">${ICONS.star}<span class="lbl">${MARK_LABEL[marks[s.id] || ""]}</span></button>`;
+  // The state toggle of a marked row (§5: a role="group" of two aria-pressed buttons with visible words, so
+  // the state is readable without colour). Empty while the show is not marked.
+  const markSegHtml = (s) => {
+    const st = marks[s.id];
+    if (!st) return "";
+    const seg = (state, word, title) =>
+      `<button type="button" class="act" data-act="state" data-state="${state}" aria-pressed="${st === state}" title="${title}">${word}</button>`;
+    return (
+      `<div class="mark-seg" role="group" aria-label="Status der Markierung">` +
+      seg("interested", "Interessiert", "Vielleicht – ich schaue es mir an") +
+      seg("going", "Ich gehe", "Ich bin dabei") +
+      `</div>`
+    );
+  };
   const dayShort = (s) =>
     `${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
   const mineUrl = () =>
@@ -1024,12 +1055,17 @@
       .map((s) => `${s._short}${marks[s.id][0]}`)
       .join(",");
 
+  // Panel under the list head (§7 S5): the «nur in diesem Browser» line, then Kalender (.ics) · Teilen ·
+  // Link. Teilen is navigator.share where it exists, the WhatsApp link everywhere else (so WhatsApp never
+  // disappears); Link copies the #m= link.
   minePanel.innerHTML =
     `<span class="mine-note"></span>` +
-    `<button type="button" class="act take" data-mine="take" title="Alle Shows dieser Liste in meine Shows übernehmen" hidden>${ICONS.star}<span>Alle merken</span></button>` +
-    `<button type="button" class="act" data-mine="ics" title="Diese Liste als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
-    `<button type="button" class="act" data-mine="share" title="Link zu dieser Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
-    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Diese Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
+    `<button type="button" class="act take" data-mine="take" title="Alle Shows dieser Liste in meine Shows übernehmen" hidden>${ICONS.star}<span class="lbl">Alle merken</span></button>` +
+    `<button type="button" class="act" data-mine="ics" title="Diese Liste als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span class="lbl">Kalender (.ics)</span></button>` +
+    (navigator.share
+      ? `<button type="button" class="act" data-mine="share" title="Liste teilen (WhatsApp, Mail, …)">${ICONS.share}<span class="lbl">Teilen</span></button>`
+      : `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Liste per WhatsApp teilen">${ICONS.wa}<span class="lbl">Teilen</span></a>`) +
+    `<button type="button" class="act" data-mine="link" title="Link zu dieser Liste kopieren">${ICONS.link}<span class="lbl">Link</span></button>`;
 
   // The ★ button is always there; without marks it is muted and only explains itself (title).
   function updateMine() {
@@ -1042,14 +1078,14 @@
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !listMode() || !listShows().length;
     if (!minePanel.hidden) {
-      el("mine-wa").href =
-        `https://wa.me/?text=${encodeURIComponent(`${shared ? "Reggae-Shows" : "Meine Reggae-Shows"}: ${listUrl()}`)}`;
+      const wa = el("mine-wa");
+      if (wa) wa.href = `https://wa.me/?text=${encodeURIComponent(listShareText())}`;
       const take = minePanel.querySelector(".take");
       take.hidden = !shared;
       take.disabled = Boolean(shared) && Object.keys(shared).every((id) => marks[id]);
       take.querySelector("span").textContent = take.disabled ? "Alle gemerkt ✓" : "Alle merken";
-      minePanel.querySelector(".mine-note").textContent = !shared
-        ? "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken»."
+      minePanel.querySelector(".mine-note").innerHTML = !shared
+        ? `<b>Nur in diesem Browser.</b> Aufs andere Handy oder zu Freunden: «Teilen» und dort «Alle merken».`
         : take.disabled
           ? "Diese Shows sind in deinen Shows (★) gespeichert."
           : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.";
@@ -1057,23 +1093,132 @@
     syncListMode();
   }
 
-  function cycleMark(s, row) {
-    const next = NEXT_MARK[marks[s.id] || ""];
+  // Set a show's mark ("" removes it) and patch its row in place: fader class, star, state toggle. In the
+  // Meine-Shows list an un-marked row leaves, so the list is rendered again (the toast offers Rückgängig).
+  function setMark(s, next, row) {
+    const prev = marks[s.id] || "";
+    if (next === prev) return;
     if (next) marks[s.id] = next;
     else delete marks[s.id];
     saveMarks();
-    if (mineOnly) {
+    if (mineOnly && !next) {
       if (!markedShows().length) mineOnly = false;
       render();
       return;
     }
-    row.classList.toggle("interested", next === "interested");
-    row.classList.toggle("going", next === "going");
-    row.querySelector(".star span").textContent = MARK_LABEL[next];
-    row.querySelector(".star").title = MARK_TITLE[next];
-    row.querySelector(".star").setAttribute("aria-pressed", String(Boolean(next)));
+    for (const r of document.querySelectorAll(`.show[data-id="${CSS.escape(s.id)}"]`)) patchRow(s, r);
+    if (row && next === "going" && prev !== "going") echo(row.querySelector(".star"));
     updateMine();
   }
+  function patchRow(s, row) {
+    const st = marks[s.id] || "";
+    row.classList.toggle("interested", st === "interested");
+    row.classList.toggle("going", st === "going");
+    const star = row.querySelector(".star");
+    star.querySelector(".lbl").textContent = MARK_LABEL[st];
+    star.title = MARK_TITLE[st];
+    star.setAttribute("aria-pressed", String(Boolean(st)));
+    const slot = row.querySelector(".mark-slot");
+    if (!slot) return;
+    const seg = slot.querySelector(".mark-seg");
+    if (st && seg) {
+      // Keep the toggle's buttons (and the keyboard focus on them): only the pressed segment changes.
+      for (const b of seg.querySelectorAll("[data-state]"))
+        b.setAttribute("aria-pressed", String(b.dataset.state === st));
+    } else slot.innerHTML = markSegHtml(s);
+  }
+  // Echo (§4, gesture 2): three ghost stars scale 1 → 1.8 and fade, 120 ms apart – only on «Ich gehe».
+  function echo(star) {
+    if (!star || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    for (let i = 0; i < 3; i++) {
+      const g = document.createElement("i");
+      g.className = "echo";
+      g.setAttribute("aria-hidden", "true");
+      g.style.animationDelay = `${i * 120}ms`;
+      g.innerHTML = ICONS.star;
+      star.appendChild(g);
+      g.addEventListener("animationend", () => g.remove(), { once: true });
+      setTimeout(() => g.remove(), 1500); // whatever happens to the animation
+    }
+  }
+  // Undo toast «Entfernt · Rückgängig» (4 s): one at a time, the newest un-mark wins.
+  let undo = null; // { id, state, mineOnly, timer }
+  const undoToast = document.createElement("div");
+  undoToast.id = "undo";
+  undoToast.className = "toast undo";
+  undoToast.setAttribute("role", "status");
+  undoToast.hidden = true;
+  undoToast.innerHTML = `<span></span><button type="button" title="Markierung wiederherstellen">Rückgängig</button>`;
+  document.body.appendChild(undoToast);
+  function unmark(s, row) {
+    const state = marks[s.id];
+    if (!state) return;
+    undo = { id: s.id, state, mineOnly, timer: 0 };
+    setMark(s, "", row);
+    undoToast.querySelector("span").textContent = `«${s.title}» entfernt`;
+    undoToast.hidden = false;
+    clearTimeout(undo.timer);
+    undo.timer = setTimeout(hideUndo, 4000);
+  }
+  function hideUndo() {
+    if (undo) clearTimeout(undo.timer);
+    undo = null;
+    undoToast.hidden = true;
+  }
+  undoToast.querySelector("button").addEventListener("click", () => {
+    if (!undo) return;
+    const { id, state, mineOnly: wasMine } = undo;
+    const s = shows.find((x) => x.id === id);
+    hideUndo();
+    if (!s) return;
+    if (wasMine && !mineOnly) {
+      // The list was left because its last show went: put the mark back and open the list again.
+      marks[s.id] = state;
+      saveMarks();
+      mineOnly = true;
+      render();
+    } else if (wasMine) {
+      marks[s.id] = state;
+      saveMarks();
+      render();
+    } else setMark(s, state, document.querySelector(`.show[data-id="${CSS.escape(s.id)}"]`));
+    flashWord(document.querySelector(`.show[data-id="${CSS.escape(s.id)}"] .star`), "Wieder gemerkt");
+  });
+
+  // Long press on the star (500 ms) = «Ich gehe» in one go; the click that follows the release is swallowed.
+  const LONG_PRESS = 500;
+  let pressTimer = 0;
+  let pressed = null; // the star button of a running press
+  views.addEventListener("pointerdown", (e) => {
+    const star = e.target.closest(".act.star");
+    if (!star || e.button !== 0) return;
+    const row = star.closest(".show");
+    const s = shows.find((x) => x.id === row.dataset.id);
+    if (!s) return;
+    pressed = star;
+    star._long = false;
+    clearTimeout(pressTimer);
+    pressTimer = setTimeout(() => {
+      pressTimer = 0;
+      star._long = true; // consumed by the click handler
+      if (marks[s.id] !== "going") {
+        setMark(s, "going", row);
+        flashWord(star, "Ich gehe");
+      }
+    }, LONG_PRESS);
+  });
+  const endPress = () => {
+    clearTimeout(pressTimer);
+    pressTimer = 0;
+    pressed = null;
+  };
+  views.addEventListener("pointerup", endPress);
+  views.addEventListener("pointercancel", endPress);
+  views.addEventListener("pointerleave", endPress);
+  // The press must not open the browser's context menu on a touch screen.
+  views.addEventListener("contextmenu", (e) => {
+    if (pressed && e.target.closest(".act.star")) e.preventDefault();
+  });
 
   toggleMine.addEventListener("click", () => {
     if (!markedShows().length) return; // nothing marked yet: the tooltip says what the star does
@@ -1090,20 +1235,28 @@
         shared ? "geteilte-shows.ics" : "meine-shows.ics",
       );
     if (btn.dataset.mine === "share") {
+      const url = listUrl();
+      if (!shared) history.replaceState(null, "", url);
+      try {
+        await navigator.share({ title: listTitle(), text: listTitle(), url });
+        flashWord(btn, "Geteilt");
+      } catch (err) {
+        if (!err || err.name !== "AbortError") flashWord(btn, "Teilen nicht möglich");
+      }
+    }
+    if (btn.dataset.mine === "link") {
       // The #m= link is the shareable artefact: it goes to the clipboard and into the address bar.
       const url = listUrl();
       if (!shared) history.replaceState(null, "", url);
-      const label = btn.querySelector("span");
       try {
         await Promise.race([
           navigator.clipboard.writeText(url),
           new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
         ]);
-        label.textContent = "Kopiert";
+        flashWord(btn, "Kopiert");
       } catch {
-        label.textContent = "Kopieren nicht möglich";
+        flashWord(btn, "Link in Adresszeile");
       }
-      setTimeout(() => (label.textContent = "Liste teilen"), 1500);
     }
     if (btn.dataset.mine === "take" && shared) {
       // Never overwrites or downgrades an own mark; the friend's "Ich gehe" stays a "geht hin" chip.
@@ -1167,6 +1320,8 @@
   const listMark = (s) => (shared ? shared[s.id] : marks[s.id]);
   const listShows = () => shows.filter(inList);
   const listUrl = () => (shared ? `${location.origin}${location.pathname}${location.hash}` : mineUrl());
+  const listTitle = () => (shared ? "Reggae-Shows" : "Meine Reggae-Shows");
+  const listShareText = () => `${listTitle()}: ${listUrl()}`;
   const SHARED_HASH = /^#(mine|m)=/;
   // The only hook: every render() ends here (via updateMine).
   function syncListMode() {

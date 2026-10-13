@@ -1456,14 +1456,20 @@ body::after {
 .show:hover::after {
   background: rgba(242, 182, 50, 0.07);
 }
+/* Fader (§4, gesture 1): the track slides in from the left over --t-2 when the row is marked. */
 .show::before {
   left: calc(-1 * (var(--date-w) + var(--s-3) + 8px));
   width: 3px;
   border-radius: 2px;
-  transition: background var(--t-2) var(--ease-tape);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition:
+    transform var(--t-2) var(--ease-tape),
+    background var(--t-2) var(--ease-tape);
 }
 .show.highlight::before {
   background: var(--gold);
+  transform: none;
 }
 .show.highlight::after {
   animation: flash 2.5s ease-out;
@@ -2057,7 +2063,11 @@ body::after {
   content: " ·";
 }
 
-/* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared rows --- */
+/* --- Meine Shows (§7 S5): star = Merken on/off, state toggle in marked rows, echo, undo toast, panel --- */
+.act.star {
+  -webkit-touch-callout: none; /* the long press (= Ich gehe) must not open the touch menu */
+  user-select: none;
+}
 .act.star svg path {
   fill: none;
   stroke: currentColor;
@@ -2065,6 +2075,9 @@ body::after {
 }
 .show.interested .act.star {
   color: var(--gold);
+}
+.show.interested .act.star svg path {
+  fill: var(--gold-tint);
 }
 .show.going .act.star {
   color: var(--green-text);
@@ -2074,12 +2087,160 @@ body::after {
 }
 .show.interested::before {
   background: var(--gold);
+  transform: none;
 }
 .show.going::before {
   background: var(--green);
+  transform: none;
 }
 .show.shared-row::after {
   background: rgba(242, 182, 50, 0.07);
+}
+@media (forced-colors: active) {
+  .show.interested,
+  .show.going {
+    border-left: 3px solid;
+  }
+}
+/* Echo (§4, gesture 2): three ghost stars scale 1 → 1.8 and fade over --t-4, 120 ms apart, on «Ich gehe». */
+.act.star .echo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: var(--green-text);
+  opacity: 0;
+  animation: echo var(--t-4) var(--ease-tape) both;
+}
+.act.star .echo svg {
+  width: 20px;
+  height: 20px;
+}
+@keyframes echo {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+/* State toggle «Interessiert | Ich gehe»: a small pill group under the meta line of a marked row. The
+ * pressed segment is gold (Interessiert) or green (Ich gehe) with dark text, the words carry the state. */
+.mark-slot:empty {
+  display: none;
+}
+.mark-seg {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.mark-seg .act {
+  min-height: 26px;
+  min-width: 0;
+  padding: 0 10px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  border-radius: 999px;
+}
+.mark-seg .act[aria-pressed="true"] {
+  color: var(--on-gold);
+  background: var(--gold);
+  font-weight: 700;
+}
+.mark-seg .act[data-state="going"][aria-pressed="true"] {
+  color: var(--on-green);
+  background: var(--green-text);
+}
+@media (hover: hover) {
+  .mark-seg .act[aria-pressed="true"]:hover {
+    color: var(--on-gold);
+    background: var(--gold);
+  }
+  .mark-seg .act[data-state="going"][aria-pressed="true"]:hover {
+    color: var(--on-green);
+    background: var(--green-text);
+  }
+}
+.mark-seg .act:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+.mark-seg .act[aria-pressed="true"]:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--bg);
+}
+@media (forced-colors: active) {
+  .mark-seg .act[aria-pressed="true"] {
+    border: 3px solid;
+  }
+}
+/* Touch: the segments are 36 px high and the toggle takes its own line above the actions. */
+@media (max-width: 599px), (hover: none) {
+  .mark-seg .act {
+    min-height: 34px;
+    padding: 0 14px;
+  }
+}
+@media (max-width: 599px) {
+  .mark-slot {
+    flex: 1 1 100%;
+    margin: 4px 0 2px;
+  }
+}
+@media (min-width: 600px) {
+  .mark-slot {
+    margin-right: auto;
+    align-self: center;
+  }
+}
+/* A friend's «Ich gehe» in a shared list: green words, not a pill. */
+.goes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: auto;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--green-text);
+}
+.goes svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+/* Undo toast «… entfernt · Rückgängig» (4 s): enters from +24 px with the skank ease, docks above a visible
+ * callout. */
+.toast {
+  animation: toast-in var(--t-3) var(--ease-skank);
+}
+.toast[hidden] {
+  display: none;
+}
+.toast.undo {
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px) + var(--callout-h, 0px));
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-2);
+}
+.toast.undo span {
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toast.undo button {
+  min-height: 32px;
+}
+@keyframes toast-in {
+  from {
+    transform: translate(-50%, 24px);
+    opacity: 0;
+  }
 }
 /* ★ button: always visible right of the search; muted without the badge while nothing is marked. */
 .icon-btn.mine {
@@ -2592,11 +2753,6 @@ a {
   text-decoration: none;
   border-bottom: 0;
 }
-.tag-chip.going {
-  color: var(--bg);
-  background: var(--green-text);
-}
-
 /* Venue and ticket links inside a row */
 .venue-link {
   color: inherit;
