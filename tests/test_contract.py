@@ -94,3 +94,29 @@ class AppShell(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReadmeLayout(unittest.TestCase):
+    """README «Layout of the repo» must name every page, script, data file, scraper file and workflow."""
+
+    def test_every_repo_file_is_in_the_layout_block(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        m = re.search(r"## Layout of the repo\n\n```\n(.*?)```", readme, re.S)
+        self.assertIsNotNone(m, "README has no «Layout of the repo» block")
+        block = m.group(1)
+        patterns = [
+            "*.html",
+            "*.js",
+            "scripts/*.py",
+            "scripts/*.sh",
+            "data/*.json",
+            "scraper/*",
+            ".github/workflows/*.yml",
+        ]
+        files = [p for pat in patterns for p in ROOT.glob(pat) if p.is_file()]
+        missing = sorted(
+            str(p.relative_to(ROOT))
+            for p in files
+            if p.name not in block and str(p.relative_to(ROOT)) not in block
+        )
+        self.assertEqual(missing, [], f"add these to the README layout block: {missing}")
