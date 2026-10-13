@@ -1,14 +1,14 @@
 {
-  "ok": true,
+  "ok": false,
   "skill": "scrape-shows",
-  "at": "2026-10-13T01:47:54+02:00",
-  "runner": "local",
+  "at": "2026-10-13T03:11:32+02:00",
+  "runner": "cloud",
   "counts": {
-    "added": 14,
+    "added": 0,
     "updated": 0,
     "removed": 0,
     "total": 99
   },
-  "failed_sources": 11,
-  "error": null
+  "failed_sources": 2,
+  "error": "Kein Netzzugang: WebFetch scheitert mit ENOTFOUND (skalender.net, petzi.ch) – Umgebung braucht Network access = Full"
 }
