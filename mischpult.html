@@ -8,7 +8,7 @@
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
     <style>
-      /* Hidden admin section: not linked from the public pages, no index. Everything here is read from
+      /* Mischpult, the owners' page: not linked from the public pages, no index. Everything here is read from
          the published data files and the repository (raw.githubusercontent.com). */
       .adm h2 {
         margin-top: 36px;
@@ -130,7 +130,11 @@
       .kv dd {
         margin: 2px 0 0;
         font-weight: 600;
-        word-break: break-word;
+        overflow-wrap: anywhere; /* URLs may wrap; dates are formatted short and never break mid-token */
+        font-variant-numeric: tabular-nums;
+      }
+      .nowrap {
+        white-space: nowrap;
       }
       .ok {
         color: var(--green-text);
@@ -278,6 +282,14 @@
             /[&<>"']/g,
             (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
           );
+        // 13.10.2026, 01:47 (de-CH, like log.html) – raw ISO timestamps broke mid-token in the cards.
+        const dateFmt = new Intl.DateTimeFormat("de-CH", { dateStyle: "medium", timeStyle: "short" });
+        const fmtDate = (iso) => {
+          const d = new Date(iso);
+          return iso && !Number.isNaN(d.getTime())
+            ? `<span class="nowrap">${dateFmt.format(d)}</span>`
+            : esc(iso || "");
+        };
         const link = (u, t) =>
           u
             ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t || u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))}</a>`
@@ -362,12 +374,12 @@
           const n = shows && shows.shows ? shows.shows.length : 0;
           const kv = [
             ["Shows live", n],
-            ["Stand", shows && shows.updated],
+            ["Stand", shows && fmtDate(shows.updated)],
             ["Quelle", shows && shows.source],
             [
               "Letzter Lauf",
               status
-                ? `<span class="${status.ok ? "ok" : "bad"}">${status.ok ? "ok" : "FEHLER"}</span> · ${esc(status.at)} · ${esc(status.runner || "")}`
+                ? `<span class="${status.ok ? "ok" : "bad"}">${status.ok ? "ok" : `FEHLER${status.error ? ` (${esc(status.error)})` : ""}`}</span> · ${fmtDate(status.at)} · ${esc(status.runner || "")}`
                 : "kein status.json",
             ],
             ["Venues", venues ? Object.keys(venues.venues).length : "–"],
@@ -433,7 +445,7 @@
               ["Lauf", "Skill", "+", "~", "−", "total", "nicht erreichbar", "verworfen"],
               runs.runs.map(
                 (r) =>
-                  `<tr><td>${esc(r.at)}</td><td>${esc(r.skill)}</td><td>${r.added ?? ""}</td><td>${r.updated ?? ""}</td><td>${r.removed ?? ""}</td><td>${r.total ?? ""}</td><td>${(r.failed_sources || []).length}</td><td>${(r.dropped || []).length}</td></tr>`,
+                  `<tr><td title="${esc(r.at)}">${fmtDate(r.at)}</td><td>${esc(r.skill)}</td><td>${r.added ?? ""}</td><td>${r.updated ?? ""}</td><td>${r.removed ?? ""}</td><td>${r.total ?? ""}</td><td>${(r.failed_sources || []).length}</td><td>${(r.dropped || []).length}</td></tr>`,
               ),
             );
         });

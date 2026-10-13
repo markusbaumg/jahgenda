@@ -9,7 +9,11 @@
       content="Kandidaten, die der Scraper angeschaut und nicht aufgenommen hat – zum Gegenprüfen."
     />
     <meta name="theme-color" content="#14110e" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="img/icons/icon-192.png" type="image/png" sizes="192x192" />
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
     <link rel="stylesheet" href="style.css" />
     <style>
       .rv {
@@ -163,7 +167,7 @@
             const runs = (Array.isArray(data.runs) ? data.runs : []).filter((r) => (r.dropped || []).length);
             const total = runs.reduce((n, r) => n + r.dropped.length, 0);
             document.getElementById("stats").innerHTML =
-              `<span class="stat">${total} aussortiert</span><span class="stat">${runs.length} Läufe</span>`;
+              `<span class="stat">${total} aussortiert</span><span class="stat">${runs.length === 1 ? "1 Lauf" : `${runs.length} Läufe`}</span>`;
             if (!runs.length) {
               status.textContent = "Noch nichts aussortiert.";
               return;

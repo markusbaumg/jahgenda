@@ -2174,7 +2174,7 @@
     quietScrollUntil = Date.now() + 1500;
     window.scrollTo({ top: viewsTop() });
     setTimeout(() => {
-      if (window.scrollY < viewsTop()) window.scrollTo({ top: viewsTop() });
+      if (Math.abs(window.scrollY - viewsTop()) > 2) window.scrollTo({ top: viewsTop() });
     }, 80);
   }
 

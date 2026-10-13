@@ -51,13 +51,17 @@
         color: var(--green-text);
       }
       .count.rem {
-        color: var(--red);
+        color: var(--red-text);
       }
       .run ul {
         margin: 6px 0 0;
         padding-left: 18px;
         color: var(--muted);
         font-size: 0.9rem;
+      }
+      .run li,
+      .run summary {
+        overflow-wrap: anywhere; /* a long source URL must not widen a 320 px page */
       }
       .run li strong {
         color: var(--text);
@@ -98,7 +102,7 @@
         font-variant-numeric: tabular-nums;
       }
       tr.st-failed td:nth-child(2) {
-        color: var(--red);
+        color: var(--red-text);
       }
       tr.st-ok td:nth-child(2) {
         color: var(--green-text);
