@@ -57,6 +57,7 @@
       VIEW: "view", // "list" | "calendar" | "map"
       INSTALL_DISMISSED: "install.dismissed", // timestamp (ms) or "forever"
       VISITS: "visits", // number of page loads in this browser (the install nudge waits for the 2nd)
+      LANG: "lang", // "de" | "fr" | "en" – the language picked in the switch (src/i18n/i18n.svelte.js)
     },
   };
 })();

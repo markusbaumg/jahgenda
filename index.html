@@ -7,6 +7,12 @@
     <meta name="description" content="Kommende Reggae-, Dub- und Ska-Shows in der Schweiz." />
     <meta name="theme-color" content="#14110e" />
     <link rel="canonical" href="https://markusbaumg.github.io/jahgenda/" />
+    <!-- Languages (story #48): German by default, ?lang=fr|en picks the others; src/i18n/i18n.svelte.js
+         sets <html lang>, the canonical and the description to the language on screen. -->
+    <link rel="alternate" hreflang="de" href="https://markusbaumg.github.io/jahgenda/" />
+    <link rel="alternate" hreflang="fr" href="https://markusbaumg.github.io/jahgenda/?lang=fr" />
+    <link rel="alternate" hreflang="en" href="https://markusbaumg.github.io/jahgenda/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://markusbaumg.github.io/jahgenda/" />
     <!-- Link previews (WhatsApp, Signal, Slack …): title, text and the app icon. Static, as every
          share link points at this one page. -->
     <meta property="og:type" content="website" />

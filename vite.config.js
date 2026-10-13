@@ -6,6 +6,9 @@ import path from "node:path";
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { VitePWA } from "vite-plugin-pwa";
+import de from "./src/i18n/de.js";
+import fr from "./src/i18n/fr.js";
+import en from "./src/i18n/en.js";
 
 // Files beside the bundle that the build copies into dist/ (and the dev server serves from the root):
 // the data contract, the global stylesheet the static pages link, and the design pages (design/logos.html
@@ -70,6 +73,40 @@ function jahgendaStatic() {
   };
 }
 
+// One manifest per language (story #48): the plugin writes the German manifest.webmanifest; this copies it
+// as manifest.fr.webmanifest / manifest.en.webmanifest with the name, description and lang of that table.
+// src/i18n/i18n.svelte.js points <link rel="manifest"> at the one of the page's language.
+function jahgendaManifests() {
+  let outDir = "dist";
+  return {
+    name: "jahgenda-manifests",
+    configResolved(config) {
+      outDir = config.build.outDir;
+    },
+    closeBundle: {
+      order: "post",
+      sequential: true,
+      handler() {
+        const base = path.join(outDir, "manifest.webmanifest");
+        if (!fs.existsSync(base)) return;
+        const manifest = JSON.parse(fs.readFileSync(base, "utf8"));
+        for (const [lang, table, tag] of [
+          ["fr", fr, "fr-CH"],
+          ["en", en, "en-GB"],
+        ]) {
+          const out = {
+            ...manifest,
+            name: table["manifest.name"],
+            description: table["manifest.description"],
+            lang: tag,
+          };
+          fs.writeFileSync(path.join(outDir, `manifest.${lang}.webmanifest`), JSON.stringify(out));
+        }
+      },
+    },
+  };
+}
+
 // The PWA (story #33 M7): vite-plugin-pwa writes manifest.webmanifest (and links it in index.html) and builds
 // src/sw.js into dist/sw.js with the precache list of the shell injected (strategy injectManifest – the
 // caching rules are our own: data network-first with a 4 s timeout, flags of the current shows, unpkg
@@ -82,9 +119,10 @@ const pwa = VitePWA({
   injectRegister: false,
   manifestFilename: "manifest.webmanifest",
   manifest: {
-    name: "Jahgenda – Reggae, Dub & Ska in der Schweiz",
+    // Name and description from the German message table (src/i18n/de.js); fr / en: jahgendaManifests().
+    name: de["manifest.name"],
     short_name: "Jahgenda",
-    description: "Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz.",
+    description: de["manifest.description"],
     lang: "de-CH",
     id: "./",
     start_url: "./",
@@ -121,7 +159,7 @@ const pwa = VitePWA({
 export default defineConfig({
   base: "./",
   publicDir: "public",
-  plugins: [svelte(), jahgendaStatic(), pwa],
+  plugins: [svelte(), jahgendaStatic(), pwa, jahgendaManifests()],
   build: { outDir: "dist", emptyOutDir: true },
   // 127.0.0.1, not "localhost" (which may bind IPv6 only): the e2e suite, smoke.sh and the screenshots all
   // talk to 127.0.0.1; *.localhost names still reach it (pwa.spec.js uses jah.localhost).
