@@ -131,7 +131,7 @@ headline at 200 % text size).
   sw.js) are gone. Versions are pinned exactly in `package.json`. `make check` = lint + validate + test + build
   + smoke.
 - **Languages (story #48):** the agenda is DE · FR · EN – German default, first visit follows the browser
-  (fr*/en*), the header switch is remembered (jahStore `lang`), `?lang=` for hreflang; every visible string is
+  (fr*/en*), the footer switch (end of the link line, discreet) is remembered (jahStore `lang`), `?lang=` for hreflang; every visible string is
   `t()` from `src/i18n` (de.js is the source, «Show» wording; fr «concert», en «show»); the hash stays
   language-free; owner pages and stickers stay German (README «Languages»).
 - **Working style:** big features are built by background workflows in isolated worktrees

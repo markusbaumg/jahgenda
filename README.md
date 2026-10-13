@@ -76,7 +76,7 @@ src/lib/markdown.js                    … minimal, escaping Markdown renderer f
 src/i18n/core.js                       Languages (see «Languages»): the locale, t(key, params) with plurals, the Intl date formatters.
 src/i18n/i18n.svelte.js                … the runes store: first-visit choice, the switch (jahStore «lang»), <html lang> and the head.
 src/i18n/de.js / fr.js / en.js         … the message tables: German is the source, French and English translate it.
-src/components/LangSwitch.svelte       The DE · FR · EN switch in the header.
+src/components/LangSwitch.svelte       The DE · FR · EN switch at the end of the footer's link line.
 public/                                Static files, copied as they are into dist/ (img/, fonts, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 src/sw.js                              Service worker source (vite-plugin-pwa injectManifest → dist/sw.js): shell precache, data network-first (4 s).
@@ -435,7 +435,7 @@ The agenda speaks German, French and English (story #48); the owner pages (`log.
 `mischpult.html`) and the stickers stay German.
 
 - **Which language:** `?lang=fr|en|de` (the hreflang alternates in `index.html`) → the visitor's choice in
-  the DE · FR · EN switch (header, saved in jahStore under `lang`) → on the first visit the browser's first
+  the DE · FR · EN switch (footer link line, saved in jahStore under `lang`) → on the first visit the browser's first
   language (`fr*` → French, `en*` → English) → German. The URL hash (filters, show links, `#m=` lists) never
   carries the language, so every link works in every language.
 - **Where the words are:** `src/i18n/de.js` is the source (Swiss spelling, «Show»), `fr.js` and `en.js`

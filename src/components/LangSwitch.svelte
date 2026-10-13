@@ -1,5 +1,6 @@
 <script>
-  /* The language switch DE · FR · EN (story #48), top right in the header. A tap changes the page at once
+  /* The language switch DE · FR · EN (story #48) at the end of the footer's link line – discreet, as the
+   * owners decided (2026-10-13 21:45). A tap changes the page at once
    * (src/i18n/i18n.svelte.js) and is remembered in jahStore («lang»); the URL stays as it is. Each button's
    * tooltip is in its own language, so it reads for someone who does not read the current one. */
   import { i18n, t, LOCALES, LANG_NAMES } from "../i18n/i18n.svelte.js";
@@ -18,29 +19,25 @@
 </div>
 
 <style>
-  /* In the header's top padding (32 px), aligned with the column's right edge. */
-  :global(.head) {
-    position: relative;
-  }
+  /* Inline in the footer bar's link line, same size and colour as the links around it. */
   .lang-switch {
-    position: absolute;
-    top: 2px;
-    right: max(16px, env(safe-area-inset-right, 0px));
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    font-size: var(--fs-1);
+    vertical-align: baseline;
     font-weight: 700;
     letter-spacing: var(--track-caps);
   }
   .sep {
     color: var(--muted);
     opacity: 0.6;
+    padding: 0 2px;
   }
   button {
-    min-width: 32px;
+    min-width: 28px;
     min-height: 28px;
-    padding: 0 4px;
+    padding: 0 3px;
     font: inherit;
+    font-weight: 700;
     color: var(--muted);
     background: none;
     border: 0;

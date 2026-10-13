@@ -1,4 +1,5 @@
 <script>
+  import LangSwitch from "./LangSwitch.svelte";
   /* The footer: «Über Jahgenda» and the bottom bar with the result count + data stamp. Markup and copy
    * from index.html; the texts from app.js renderInner() / updateStamp(). */
   import { agenda } from "../stores/agenda.svelte.js";
@@ -71,6 +72,7 @@
           rel="noopener"
           title={t("foot.githubTitle")}>GitHub</a
         >
+        · <LangSwitch />
       </p>
     </div>
   </div>

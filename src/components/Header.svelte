@@ -5,7 +5,6 @@
    * lists equal. The first one is the default. French and English lines: #slogans-fr / #slogans-en (the
    * same test), picked at the same position of the list, so a language switch keeps the slot. */
   import { i18n, t } from "../i18n/i18n.svelte.js";
-  import LangSwitch from "./LangSwitch.svelte";
 
   const DEFAULT = "Reggae, Dub & Ska in der Schweiz";
   const pick = Math.random();
@@ -38,5 +37,4 @@
     >Ska <span>{t("header.country")}</span>
   </p>
   <p class="slogan" id="tagline">{slogan}</p>
-  <LangSwitch />
 </header>
