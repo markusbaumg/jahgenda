@@ -59,6 +59,14 @@ function jahgendaStatic() {
     // (this used to be the sed step in pages.yml).
     closeBundle() {
       for (const [from, to, keep] of COPIES) copyInto(outDir, from, to, keep);
+      // style.css says url("/img/…") so Vite finds the files in public/ for the bundled copy; the plain copy
+      // the static pages link (log/review/mischpult, design/logos.html) sits next to img/, and an absolute
+      // /img/… would miss the /jahgenda/ prefix on GitHub Pages – so it gets relative urls.
+      const cssPath = path.join(outDir, "style.css");
+      if (fs.existsSync(cssPath)) {
+        const css = fs.readFileSync(cssPath, "utf8");
+        fs.writeFileSync(cssPath, css.replace(/url\((["']?)\/img\//g, "url($1img/"));
+      }
       const swPath = path.join(outDir, "sw.js");
       if (!fs.existsSync(swPath)) return;
       let sw = fs.readFileSync(swPath, "utf8");
