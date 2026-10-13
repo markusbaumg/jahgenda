@@ -9,11 +9,12 @@ test.beforeEach(async ({ page, isMobile }) => {
   await openList(page);
 });
 
-const TAP = 44;
-// Whole pixels: a box read at the end of a transform animation can come back as 43.99997.
+// A box read at the end of a transform animation can come back as 43.99997: a 0.05 px tolerance
+// swallows that float noise but still fails a target that is really half a pixel short.
+const TAP = 44 - 0.05;
 const size = async (locator) => {
   const b = await locator.boundingBox();
-  return [Math.round(b.width), Math.round(b.height)];
+  return [b.width, b.height];
 };
 
 test("every row action is reachable inline: icon-only 44 px targets with names", async ({ page }) => {
