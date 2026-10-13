@@ -81,21 +81,6 @@
   font-size: var(--fs-3);
   color: var(--muted);
 }
-.notice {
-  margin: 20px 0 0;
-  padding: 10px 12px;
-  font-size: var(--fs-2);
-  color: var(--muted);
-  background: var(--surface);
-  border-radius: var(--r-2);
-}
-.notice strong {
-  color: var(--gold-text);
-}
-.notice a {
-  color: var(--green-text);
-}
-
 /* The header lockup is a link back to the start (owner request 2026-10-13): plain «./» resets filters and hash. */
 .logo-link {
   display: inline-flex;

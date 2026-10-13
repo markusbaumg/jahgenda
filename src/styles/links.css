@@ -7,7 +7,6 @@ a {
 }
 .about a,
 .foot-links a,
-.notice a,
 .geo-status a {
   text-decoration: none;
   border-bottom: 0;
