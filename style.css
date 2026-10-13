@@ -807,6 +807,20 @@ body::after {
   position: absolute;
   inset: -8px -2px;
 }
+.fpill,
+.results .clear {
+  max-width: 100%;
+  overflow-wrap: anywhere; /* a pasted search term never pushes the line past the viewport */
+}
+.results .clear {
+  position: relative;
+  min-height: 28px;
+}
+.results .clear::after {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
 .fpill .x {
   font-size: 11px;
   opacity: 0.75;
@@ -1296,8 +1310,12 @@ body::after {
   margin-top: 16px;
 }
 .status .chip.fix {
-  height: 36px;
-  padding: 0 12px;
+  flex: 0 1 auto; /* a long label wraps inside the box instead of overflowing it on a phone */
+  max-width: 100%;
+  height: auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  line-height: 1.25;
   color: var(--text);
   white-space: normal;
   text-align: left;
@@ -1311,8 +1329,11 @@ body::after {
   color: var(--muted);
 }
 .status .linkish.reset {
-  display: inline-block;
-  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap); /* 44 px target (§5) without moving the line: 14 px gap minus the extra height */
+  margin-top: 2px;
+  padding: 0 8px;
   color: var(--muted);
   text-decoration: underline dotted;
   text-underline-offset: 3px;

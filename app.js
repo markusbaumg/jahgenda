@@ -386,17 +386,32 @@
     weekend: "am Wochenende",
     7: "in den nächsten 7 Tagen",
   };
+  // A search term as a label (pill, offer, headline): long input is cut so nothing overflows a phone.
+  const qLabel = (q) => (q.length > 24 ? `${q.slice(0, 22).trimEnd()}…` : q);
   function emptyHeadline(quick) {
     const q = search.value.trim();
     const genre = activeGenre && (genreLabel[activeGenre] || activeGenre);
-    const canton = cantons.size === 1 ? [...cantons][0] : "";
-    const what = q ? ` zu «${q}»` : "";
-    if (!genre && !canton && !quick && q) return `Nichts${what}`;
-    if (!genre && !canton && quick) return `${QUICK_EMPTY[quick]} läuft nichts${what}`;
-    const where = canton ? ` ${IM.has(canton) ? "im" : "in"} ${shortRegion(canton)}` : "";
-    const when = quick ? ` ${QUICK_WHEN[quick]}` : "";
+    const what = q ? ` zu «${qLabel(q)}»` : "";
+    // Where: «im Tessin», «in Bern, Zürich», «in 4 Kantonen», «im Umkreis von 25 km».
+    const codes = [...cantons];
+    let where = "";
+    if (codes.length === 1) where = ` ${IM.has(codes[0]) ? "im" : "in"} ${shortRegion(codes[0])}`;
+    else if (codes.length && codes.length <= 3) where = ` in ${codes.map(shortRegion).join(", ")}`;
+    else if (codes.length) where = ` in ${codes.length} Kantonen`;
+    if (here && radiusKm) where += ` im Umkreis von ${radiusKm} km`;
+    // When: «heute», «am Wochenende», «im November», «in den gewählten Monaten», «vom 16.10. bis 20.10.».
+    let when = "";
+    if (quick) when = ` ${QUICK_WHEN[quick]}`;
+    else if (months.size === 1)
+      when = ` im ${monthNameFmt.format(monthList.find((d) => months.has(monthKey(d))))}`;
+    else if (months.size) when = " in den gewählten Monaten";
+    else if (rangeFrom && rangeTo)
+      when = sameDay(rangeFrom, rangeTo)
+        ? ` am ${dm(rangeFrom)}`
+        : ` vom ${dm(rangeFrom)} bis ${dm(rangeTo)}`;
     if (genre) return `Kein ${genre}${where}${when}${what}`;
-    return where || when ? `Nichts${where}${when}${what}` : "Nichts gefunden";
+    if (!where && quick) return `${QUICK_EMPTY[quick]} läuft nichts${what}`;
+    return where || when || what ? `Nichts${where}${when}${what}` : "Nichts gefunden";
   }
   // Region name for pills and headlines: «Bern», «Deutschland» (no «(grenznah)» – the row says that).
   const shortRegion = (c) => (ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c));
@@ -559,7 +574,7 @@
   function activeDims() {
     const dims = [];
     const q = search.value.trim();
-    if (q) dims.push({ kind: "q", label: `«${q}»`, count: countWith({ q: "" }) });
+    if (q) dims.push({ kind: "q", label: `«${qLabel(q)}»`, count: countWith({ q: "" }) });
     if (activeGenre)
       dims.push({
         kind: "genre",
@@ -663,7 +678,7 @@
       return s;
     };
     const scope = a.closest("[data-id], [data-day]");
-    return (scope ? `${part(scope, false)} ` : "") + part(a, true);
+    return (scope && scope !== a ? `${part(scope, false)} ` : "") + part(a, true);
   }
   function render() {
     const prev = document.activeElement;
