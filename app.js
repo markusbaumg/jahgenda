@@ -434,9 +434,11 @@
       cantons.size || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
     );
     el("clear-filters").hidden = !filtered;
+    el("share-filters").hidden = !filtered || listMode();
     updateMine();
     updateWhen();
     lastVisible = visible;
+    if (!visible.length) syncFilterHash();
     const v = listMode() ? "list" : view; // the list mode always shows the list; the stored view returns on close
     if (!visible.length) {
       list.innerHTML = "";
@@ -454,6 +456,7 @@
     }
     status.innerHTML = "";
     views.hidden = false;
+    syncFilterHash();
     const span = monthSpan(visible);
     const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
     resultsText.textContent = shared
@@ -495,6 +498,82 @@
       )
       .join("");
   }
+
+  // --- Filter state in the URL: #q=…&g=…&wo=ZH,BE&r=25&wann=weekend|today|7|2026-10,2026-11&past=1 ---
+  // Written with replaceState (a filter tap never adds a history entry), read once on load. A filtered
+  // view can thus be reloaded, bookmarked and sent as a link; show links (#<short>) and list links
+  // (#m=…) keep the hash for themselves and are never overwritten.
+  const FILTER_HASH = /^#?[a-z]+=/;
+  const isFilterHash = (h) => FILTER_HASH.test(h) && !SHARED_HASH.test(h);
+  function filterParams() {
+    const p = new URLSearchParams();
+    const q = search.value.trim();
+    if (q) p.set("q", q);
+    if (activeGenre) p.set("g", activeGenre);
+    if (cantons.size) p.set("wo", [...cantons].join(","));
+    if (here && radiusKm) p.set("r", String(radiusKm));
+    if (months.size)
+      p.set(
+        "wann",
+        monthList
+          .filter((d) => months.has(monthKey(d)))
+          .map(monthKey)
+          .join(","),
+      );
+    else if (rangeFrom && rangeTo) {
+      const kind = ["today", "weekend", "7"].find((k) => {
+        const [a, b] = quickRange(k);
+        return sameDay(a, rangeFrom) && sameDay(b, rangeTo);
+      });
+      if (kind) p.set("wann", kind);
+    }
+    if (showPast && !pastAuto) p.set("past", "1");
+    return p.toString().replace(/%2C/g, ",");
+  }
+  let filterTouched = false; // the render follows a filter tap (not a deep-link landing re-render)
+  function syncFilterHash() {
+    if (loadState !== "ready" || listMode()) return;
+    const h = location.hash;
+    // A show link (#<short>) stays while the page lands on it; a filter tap afterwards replaces it.
+    if (h && !isFilterHash(h) && !filterTouched) return;
+    const next = filterParams();
+    if (next === h.slice(1)) return;
+    history.replaceState(history.state, "", next ? `#${next}` : location.pathname + location.search);
+  }
+  function readFilterHash() {
+    if (!isFilterHash(location.hash)) return;
+    const p = new URLSearchParams(location.hash.slice(1));
+    search.value = (p.get("q") || "").slice(0, 80);
+    const g = p.get("g") || "";
+    activeGenre = genreBar.querySelector(`.chip[data-genre="${CSS.escape(g)}"]`) ? g : "";
+    for (const c of genreBar.querySelectorAll(".chip"))
+      c.setAttribute("aria-pressed", String(c.dataset.genre === activeGenre));
+    for (const c of (p.get("wo") || "").split(",")) if (CANTONS[c] || ABROAD[c]) cantons.add(c);
+    const r = Number(p.get("r"));
+    if ([10, 25, 50].includes(r)) radiusKm = r; // applies once the position is known
+    const wann = p.get("wann") || "";
+    if (["today", "weekend", "7"].includes(wann)) setRange(...quickRange(wann));
+    else if (wann) {
+      const keys = new Set(monthList.map(monthKey));
+      for (const k of wann.split(",")) if (keys.has(k)) months.add(k);
+      syncPast();
+    }
+    if (p.get("past") === "1") showPast = true;
+    updateWhere();
+  }
+  // «Link zu dieser Auswahl»: the address bar already holds it – into the clipboard it goes.
+  el("share-filters").addEventListener("click", async (e) => {
+    const btn = e.currentTarget;
+    const label = btn.querySelector("span");
+    syncFilterHash();
+    try {
+      await navigator.clipboard.writeText(location.href);
+      label.textContent = "Kopiert";
+    } catch {
+      label.textContent = "Link in Adresszeile";
+    }
+    setTimeout(() => (label.textContent = "Link zu dieser Auswahl"), 1500);
+  });
 
   // "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
   function monthSpan(visible) {
@@ -622,6 +701,7 @@
           )
           .join("");
       updateChipArrows();
+      readFilterHash(); // a reloaded, bookmarked or shared filtered view
 
       if (data.updated) {
         const note = data.source === "mock" ? " · Beispieldaten" : "";
@@ -901,6 +981,7 @@
   window.addEventListener("popstate", (e) => {
     if (pendingBack > 0) {
       pendingBack--;
+      syncFilterHash(); // a filter picked while the panel was open lived on the entry just left
       return;
     }
     overlayEntry = false;
@@ -910,6 +991,7 @@
     fromHistory = false;
     const st = e.state && e.state.jah ? e.state : null;
     if (st && st.view && st.view !== view && !listMode()) setView(st.view);
+    syncFilterHash();
   });
 
   // --- Filter panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ---
@@ -1965,7 +2047,9 @@
   const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
   function renderAndKeepInView() {
     nudgeQuietUntil = Date.now() + 3000; // mid-task: no sticker over the result
+    filterTouched = true;
     render();
+    filterTouched = false;
     // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
     // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.
     const target = views.hidden ? status : views;
