@@ -1,7 +1,7 @@
 {
   "ok": false,
   "skill": "scrape-shows",
-  "at": "2026-10-13T03:11:32+02:00",
+  "at": "2026-10-13T06:12:00+02:00",
   "runner": "cloud",
   "counts": {
     "added": 0,
@@ -9,6 +9,6 @@
     "removed": 0,
     "total": 99
   },
-  "failed_sources": 2,
-  "error": "Kein Netzzugang: WebFetch scheitert mit ENOTFOUND (skalender.net, petzi.ch) – Umgebung braucht Network access = Full"
+  "failed_sources": 1,
+  "error": "Kein Netzzugriff: WebFetch ENOTFOUND (skalender.net), curl CONNECT 403 vom Proxy; Environment braucht Network access = Full"
 }
