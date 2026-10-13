@@ -68,3 +68,22 @@ test("other-month days in the calendar are not focusable; a tap on one turns the
   await other.click();
   await expect(page.locator("#calendar .cal-title")).not.toHaveText(title);
 });
+
+test("at 200 % text size nothing overlaps and the page does not scroll sideways (WCAG 1.4.4)", async ({
+  page,
+}) => {
+  await page.addStyleTag({ content: "html { font-size: 200% }" });
+  await page.waitForTimeout(100);
+  const [sw, cw] = await page.evaluate(() => [
+    document.documentElement.scrollWidth,
+    document.documentElement.clientWidth,
+  ]);
+  expect(sw).toBe(cw);
+  // The HEUTE pill (the fixture has a show today) stays inside the date column, left of the title.
+  const date = page.locator("#list .day.today time.date").first();
+  const [clientW, scrollW] = await date.evaluate((d) => [d.clientWidth, d.scrollWidth]);
+  expect(scrollW).toBeLessThanOrEqual(clientW);
+  const pill = await date.locator(".dow.now").boundingBox();
+  const title = await page.locator("#list .day.today .title").first().boundingBox();
+  expect(pill.x + pill.width).toBeLessThanOrEqual(title.x);
+});
