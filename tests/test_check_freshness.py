@@ -129,6 +129,56 @@ class Assess(unittest.TestCase):
         self.assertTrue(healthy, lines)
         self.assertTrue(any("1.0 h ago, from shows.json updated" in line for line in lines), lines)
 
+    def harvest(self, hours_ago=2):
+        return {"skill": "harvest-bands", "at": iso(NOW - timedelta(hours=hours_ago)), "added": 3, "total": 9}
+
+    def scrape_run(self, hours_ago, **over):
+        return {
+            "skill": "scrape-shows",
+            "at": iso(NOW - timedelta(hours=hours_ago)),
+            "runner": "cloud",
+            **over,
+        }
+
+    def test_a_fresh_harvest_run_does_not_hide_a_stale_scraper(self):
+        """Review #50: harvest-bands overwrites status.json with ok:true and logs a run; neither is a sign
+        of life of the daily scraper."""
+        self.write("status.json", {**self.status(), **self.harvest(), "counts": {"added": 3}})
+        self.write("runs.json", {"runs": [self.harvest(), self.scrape_run(120)]})
+        self.write("shows.json", self.shows(hours_ago=120))
+        healthy, lines = self.assess()
+        self.assertFalse(healthy, lines)
+        self.assertTrue(any(line.startswith("data is stale: 120.0 h") for line in lines), lines)
+
+    def test_a_manual_correction_is_no_sign_of_life_either(self):
+        self.write("runs.json", {"runs": [self.scrape_run(1, runner="manual"), self.scrape_run(40)]})
+        self.write("shows.json", self.shows(hours_ago=40))
+        healthy, lines = self.assess()
+        self.assertFalse(healthy, lines)
+        self.assertTrue(any("from runs.json newest scrape-shows at" in line for line in lines), lines)
+
+    def test_a_failed_scrape_stays_red_after_harvest_overwrites_status(self):
+        self.write("status.json", {**self.status(), **self.harvest(hours_ago=1), "counts": {"added": 3}})
+        self.write(
+            "runs.json",
+            {"runs": [self.harvest(hours_ago=1), self.scrape_run(2, ok=False, error="ENOTFOUND")]},
+        )
+        self.write("shows.json", self.shows(hours_ago=20))
+        healthy, lines = self.assess()
+        self.assertFalse(healthy, lines)
+        self.assertIn("last run reported failure: ENOTFOUND", lines)
+        # the next good scrape-shows run clears it
+        self.write(
+            "runs.json",
+            {"runs": [self.scrape_run(0.5), self.harvest(hours_ago=1), self.scrape_run(2, ok=False)]},
+        )
+        self.assertTrue(self.assess()[0])
+
+    def test_status_failure_wins_over_an_older_ok_run(self):
+        self.write("status.json", self.status(hours_ago=1, ok=False, error="no network"))
+        self.write("runs.json", {"runs": [self.scrape_run(25)]})
+        self.assertIn("last run reported failure: no network", self.assess()[1])
+
     def test_malformed_counts_do_not_crash(self):
         for counts in ([], "3 added", 7, None):
             self.write("status.json", self.status(counts=counts))

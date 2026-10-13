@@ -71,6 +71,43 @@ test("assessHealth: ok:false, zero shows, future stamps and no stamps are red; m
   assert.equal(assessHealth({}, NOW).healthy, false);
 });
 
+test("assessHealth: a harvest-bands run or a hand correction is no sign of life of the scraper (review #50)", () => {
+  const harvest = { skill: "harvest-bands", at: ago(2), ok: true };
+  const stale = assessHealth(
+    {
+      status: harvest,
+      runs: {
+        runs: [
+          harvest,
+          { skill: "scrape-shows", runner: "manual", at: ago(1) },
+          { skill: "scrape-shows", at: ago(120) },
+        ],
+      },
+      shows: shows(3, { updated: ago(120) }),
+    },
+    NOW,
+  );
+  assert.equal(stale.healthy, false);
+  assert.equal(stale.stale, true);
+  assert.equal(stale.newestFrom, "runs.json");
+  assert.match(stale.problems[0], /^Daten veraltet: 120\.0 h/);
+});
+
+test("assessHealth: a failed scrape stays red after harvest-bands overwrote status.json", () => {
+  const harvest = { skill: "harvest-bands", at: ago(1), ok: true };
+  const failedRun = { skill: "scrape-shows", at: ago(2), ok: false, error: "ENOTFOUND" };
+  const files = {
+    status: harvest,
+    runs: { runs: [harvest, failedRun] },
+    shows: shows(3, { updated: ago(20) }),
+  };
+  const h = assessHealth(files, NOW);
+  assert.equal(h.healthy, false);
+  assert.equal(h.failed, "ENOTFOUND");
+  const next = { skill: "scrape-shows", at: ago(0.5) };
+  assert.equal(assessHealth({ ...files, runs: { runs: [next, harvest, failedRun] } }, NOW).healthy, true);
+});
+
 test("assessHealth agrees with scripts/check_freshness.py on the real data", () => {
   const py = execFileSync(
     "python3",

@@ -265,8 +265,10 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   `scripts/validate_shows.py` checks the shape of `status.json` like that of the other data files, so a
   malformed heartbeat cannot be committed and silently blind the watchdog.
 - **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine) and again at 14:17 (GitHub sometimes skips a scheduled fire) and executes
-  `scripts/check_freshness.py`: if the newest timestamp is older than 36 h, the last run reported failure, or
-  shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
+  `scripts/check_freshness.py`: if the newest scrape-shows timestamp (status.json while it holds the
+  scrape-shows heartbeat, the newest scrape-shows run, shows.json `updated` – a harvest-bands run or a hand
+  correction with runner `manual` does not count) is older than 36 h, the newest scrape-shows run reported
+  failure (`ok: false` in status.json or in its runs.json entry), or shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
   and turns the badge above red; when healthy again it closes the issue. `make watchdog` runs the same check
   locally without touching GitHub.
 - **Where to look:** the badge, the `scraper-failed` issue, the Mischpult (below), and the routine's own run

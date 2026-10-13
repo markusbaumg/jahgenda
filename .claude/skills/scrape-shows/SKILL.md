@@ -276,9 +276,11 @@ Commit even when no show changed (message `Scraper run: no changes (<total> tota
 If the validator reports problems, fix the data and run the command again. **Never commit data that does
 not validate.** If you cannot make it pass, or anything else stops the run: revert the data
 (`git checkout -- data/shows.json data/artists.json data/venues.json scraper/bands.md`), write
-`data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with the same
-error in `notes`, validate, and commit + push only those two files — so the failure is visible on
-the Mischpult (tab «Status») and the watchdog, and the site keeps the last good data.
+`data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with
+`"ok": false`, the same `"error"` and the error in `notes`, validate, and commit + push only those two files
+— so the failure is visible on the Mischpult (tab «Status») and the watchdog, and the site keeps the last
+good data. The `ok`/`error` in the run entry matter: `/harvest-bands` overwrites `status.json` later, and the
+watchdog then still finds the failure in the newest scrape-shows run.
 If the push is rejected because `main` moved: `git pull --rebase origin main`, then push again (once).
 
 ## 8. Report

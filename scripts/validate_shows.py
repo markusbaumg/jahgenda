@@ -551,7 +551,11 @@ def check_runs(data):
             if key in r and not isinstance(r[key], list):
                 errs.append(f"{where}: '{key}' must be a list")
         if "runner" in r and not isinstance(r["runner"], str):
-            errs.append(f"{where}: 'runner' must be a string (cloud, local, launchd)")
+            errs.append(f"{where}: 'runner' must be a string (cloud, local, launchd, manual)")
+        if "ok" in r and not isinstance(r["ok"], bool):
+            errs.append(f"{where}: 'ok' must be true or false (a failed run writes ok: false + error)")
+        if r.get("error") is not None and not isinstance(r["error"], str):
+            errs.append(f"{where}: 'error' must be a string or null")
         for j, d in enumerate(r.get("dropped") or []):
             if not (
                 isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)

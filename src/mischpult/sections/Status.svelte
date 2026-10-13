@@ -36,7 +36,7 @@
       {#each health.problems as p (p)}<li>{p}</li>{/each}
     </ul>
   {/if}
-  {#if !health.stale && status?.ok === false && health.dataAgeH != null}
+  {#if !health.stale && health.failed !== null && health.dataAgeH != null}
     <p class="mp-muted">
       Die Agenda selbst ist {health.dataAgeH <= MAX_AGE_H ? "noch frisch" : "auch veraltet"}
       (Datenstand {ago(health.dataAgeH)}).

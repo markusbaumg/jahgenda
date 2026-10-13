@@ -69,13 +69,19 @@ def assess(now, max_age):
         if isinstance(d, dict) and "__error__" in d:
             problems.append("unreadable file: " + d["__error__"])
 
-    stamps = {}
-    if isinstance(status, dict):
-        stamps["status.json at"] = parse_ts(status.get("at"))
+    # Only the daily scraper counts as a sign of life: a harvest-bands run (monthly, or by hand) and a
+    # hand correction logged with runner "manual" must not hide a stopped or failed scrape-shows.
+    scrape_status = status if is_scrape(status) else None
+    scrape_runs = []
     if isinstance(runs, dict) and isinstance(runs.get("runs"), list):
-        ats = [parse_ts(r.get("at")) for r in runs["runs"] if isinstance(r, dict)]
-        ats = [a for a in ats if a]
-        stamps["runs.json newest at"] = max(ats) if ats else None
+        scrape_runs = [r for r in runs["runs"] if is_scrape(r) and parse_ts(r.get("at"))]
+        scrape_runs.sort(key=lambda r: parse_ts(r.get("at")), reverse=True)
+
+    stamps = {}
+    if scrape_status:
+        stamps["status.json at"] = parse_ts(scrape_status.get("at"))
+    if isinstance(runs, dict) and isinstance(runs.get("runs"), list):
+        stamps["runs.json newest scrape-shows at"] = parse_ts(scrape_runs[0]["at"]) if scrape_runs else None
     if isinstance(shows, dict):
         stamps["shows.json updated"] = parse_ts(shows.get("updated"))
 
@@ -104,18 +110,19 @@ def assess(now, max_age):
             f"total={counts.get('total', '?')} +{counts.get('added', 0)} "
             f"~{counts.get('updated', 0)} -{counts.get('removed', 0)}"
         )
-        if ok is False:
-            reason = status.get("error") or status.get("message") or "no reason given"
-            problems.append(f"last run reported failure: {reason}")
-            # A failed run (e.g. the cloud routine without network) does not mean the agenda is stale:
-            # say how old the data itself is, so the owner knows whether visitors are affected.
-            data_at = stamps.get("shows.json updated")
-            if data_at:
-                data_age = now - data_at
-                verdict = "still fresh" if data_age <= max_age else "also stale"
-                info.append(f"agenda data itself: {fmt(data_at)} ({hours(data_age):.1f} h ago) — {verdict}")
     else:
         info.append("status.json: missing (no run has written the heartbeat yet)")
+
+    failed = last_scrape_failure(scrape_status, scrape_runs[0] if scrape_runs else None)
+    if failed is not None:
+        problems.append(f"last run reported failure: {failed}")
+        # A failed run (e.g. the cloud routine without network) does not mean the agenda is stale:
+        # say how old the data itself is, so the owner knows whether visitors are affected.
+        data_at = stamps.get("shows.json updated")
+        if data_at:
+            data_age = now - data_at
+            verdict = "still fresh" if data_age <= max_age else "also stale"
+            info.append(f"agenda data itself: {fmt(data_at)} ({hours(data_age):.1f} h ago) — {verdict}")
 
     if isinstance(shows, dict) and "__error__" not in shows:
         n = len(shows.get("shows") or [])
@@ -125,12 +132,39 @@ def assess(now, max_age):
         elif n == 0:
             problems.append("shows.json contains zero shows")
 
-    if isinstance(runs, dict) and isinstance(runs.get("runs"), list) and runs["runs"]:
-        r = runs["runs"][0]
-        if isinstance(r, dict) and r.get("failed_sources"):
-            info.append(f"last run: {len(r['failed_sources'])} source(s) unreachable")
+    if (
+        scrape_runs
+        and isinstance(scrape_runs[0].get("failed_sources"), list)
+        and scrape_runs[0]["failed_sources"]
+    ):
+        info.append(f"last scrape-shows run: {len(scrape_runs[0]['failed_sources'])} source(s) unreachable")
 
     return (not problems), problems + info
+
+
+def is_scrape(entry):
+    """A status.json or runs.json entry written by a scrape-shows run (an entry without `skill` predates the
+    field and was one). Hand corrections logged with runner "manual" are not runs of the scraper."""
+    return (
+        isinstance(entry, dict)
+        and "__error__" not in entry
+        and entry.get("skill", "scrape-shows") == "scrape-shows"
+        and entry.get("runner") != "manual"
+    )
+
+
+def last_scrape_failure(status, run):
+    """The error of the newest scrape-shows verdict, or None when it was ok. Two places carry it: status.json
+    (only while no other skill has overwritten it) and the run's own runs.json entry (`ok: false` + `error`,
+    which survives a harvest-bands run). The newer one wins; a tie goes to status.json."""
+    epoch = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    cands = [e for e in (status, run) if e]
+    if not cands:
+        return None
+    newest = max(cands, key=lambda e: (parse_ts(e.get("at")) or epoch, e is status))
+    if newest.get("ok") is not False:
+        return None
+    return newest.get("error") or newest.get("message") or "no reason given"
 
 
 def gh(method, path, body=None):

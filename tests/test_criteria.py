@@ -376,3 +376,11 @@ class RunRunner(unittest.TestCase):
         self.assertTrue(
             any("'runner' must be a string" in e for e in V.check_runs({"runs": [dict(base, runner=3)]}))
         )
+
+    def test_run_entry_may_carry_ok_and_error(self):
+        base = {"skill": "scrape-shows", "at": "2026-10-13T06:14:00+02:00", "added": 0, "total": 1}
+        self.assertEqual(V.check_runs({"runs": [dict(base, ok=False, error="ENOTFOUND")]}), [])
+        self.assertEqual(V.check_runs({"runs": [dict(base, ok=True, error=None)]}), [])
+        errs = V.check_runs({"runs": [dict(base, ok="no", error=3)]})
+        self.assertTrue(any("'ok' must be true or false" in e for e in errs), errs)
+        self.assertTrue(any("'error' must be a string or null" in e for e in errs), errs)
