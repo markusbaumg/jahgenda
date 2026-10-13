@@ -55,12 +55,12 @@ test("a search with no result while scrolled brings «Nichts gefunden» into vie
   expect(box.y).toBeLessThan(bar.y + bar.height + 200);
 });
 
-test("a shared show link lands with the row under the sticky bar, also after venues.json re-renders", async ({
+test("a shared show link lands with the row under the sticky bar, also after venues.web.json re-renders", async ({
   page,
 }) => {
   await useFixture(page);
-  // venues.json arrives late, after the first scroll – the rows above the target grow by then.
-  await page.route("**/data/venues.json", async (route) => {
+  // venues.web.json arrives late, after the first scroll – the rows above the target grow by then.
+  await page.route("**/data/venues.web.json", async (route) => {
     await new Promise((r) => setTimeout(r, 700));
     await route.continue();
   });

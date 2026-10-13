@@ -1,6 +1,6 @@
 (() => {
   const DATA_URL = "data/shows.json";
-  const VENUES_URL = "data/venues.json";
+  const VENUES_URL = "data/venues.web.json"; // venues.json trimmed to city/lat/lon/url (format_data.py)
   const GENRES_URL = "data/genres.json";
   let genreOrder = []; // slugs in display order (from data/genres.json)
   let genreLabel = {}; // slug → label
@@ -1282,9 +1282,10 @@
     if (mini && tag) mini.textContent = tag.textContent;
   }
 
-  // The venue database (large: it carries the scraper's notes) is not needed for the first paint –
-  // the venue names become links and the SBB start town is known a moment later. render() is
-  // idempotent, so a second pass is cheap.
+  // The venue database is not needed for the first paint – the venue names become links and the SBB
+  // start town is known a moment later. render() is idempotent, so a second pass is cheap. The page
+  // reads the derived venues.web.json (the fields used here, ~6 KB gzipped); data/venues.json itself is
+  // 100 KB, 60 % of it the scraper's notes, and used to be fetched on every visit.
   function loadVenues() {
     fetch(VENUES_URL, { cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))

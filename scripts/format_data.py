@@ -5,6 +5,9 @@
 - artists.json: artists sorted by name (case-insensitive); field order fixed
 - runs.json:    newest run first, at most 60 runs
 - venues.json:  venues sorted by name; field order fixed
+- venues.web.json: DERIVED from venues.json – the venues trimmed to what the page reads (city, lat, lon,
+  url), one line. venues.json carries the scraper's notes (60 % of its 100 KB) and the page fetched all
+  of it on every visit; --check fails when the derived file is stale, so it never drifts.
 
 Usage: python3 scripts/format_data.py [--check]
   --check   exit 1 if any file would change (for CI), without writing
@@ -101,12 +104,29 @@ def format_venues(data):
     return json.dumps(out, ensure_ascii=False, indent=2) + "\n"
 
 
+WEB_VENUE_FIELDS = ("city", "lat", "lon", "url")
+
+
+def web_venues(data):
+    """data/venues.web.json from data/venues.json: the fields app.js reads, nothing else (a venue whose
+    value is not a dict is dropped; fields that are absent stay absent)."""
+    venues = data.get("venues", {})
+    out = {}
+    if isinstance(venues, dict):
+        for name, info in sorted(venues.items(), key=lambda kv: kv[0].casefold()):
+            if isinstance(info, dict):
+                out[name] = {k: info[k] for k in WEB_VENUE_FIELDS if k in info}
+    return json.dumps({"venues": out}, ensure_ascii=False, separators=(",", ":")) + "\n"
+
+
 FORMATTERS = {
     "shows.json": format_shows,
     "artists.json": format_artists,
     "runs.json": format_runs,
     "venues.json": format_venues,
 }
+# Derived files: written from another data file (source → (target, builder)); --check fails when stale.
+DERIVED = {"venues.json": ("venues.web.json", web_venues)}
 
 
 def main(argv):
@@ -126,6 +146,14 @@ def main(argv):
             changed.append(name)
             if not check:
                 path.write_text(after, encoding="utf-8")
+        if name in DERIVED:
+            target, build = DERIVED[name]
+            derived = build(json.loads(after))
+            tpath = DATA / target
+            if not tpath.exists() or tpath.read_text(encoding="utf-8") != derived:
+                changed.append(target)
+                if not check:
+                    tpath.write_text(derived, encoding="utf-8")
     if check and changed:
         print("would reformat: " + ", ".join(changed) + "  (run: make fmt-data)")
         return 1
