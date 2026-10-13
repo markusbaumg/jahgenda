@@ -1,6 +1,7 @@
 """Drift tests for lists that live in several files and break the PWA silently when they disagree:
 the region codes (validator, src/lib/regions.js, public/img/cantons/*.svg) and the app-shell file list
-(public/sw.js SHELL, the build stamp in vite.config.js, the Makefile). Stdlib only. Run: make test"""
+(the vite-plugin-pwa precache globs in vite.config.js, src/sw.js, pages.yml, the Makefile).
+Stdlib only. Run: make test"""
 
 import importlib.util
 import re
@@ -19,7 +20,7 @@ def load_module(name):
 
 
 V = load_module("validate_shows")
-SW = (PUBLIC / "sw.js").read_text(encoding="utf-8")
+SW = (ROOT / "src" / "sw.js").read_text(encoding="utf-8")
 REGIONS_JS = (ROOT / "src" / "lib" / "regions.js").read_text(encoding="utf-8")
 MAKEFILE = (ROOT / "Makefile").read_text(encoding="utf-8")
 VITE_CONFIG = (ROOT / "vite.config.js").read_text(encoding="utf-8")
@@ -34,14 +35,15 @@ def js_object_keys(src, name):
 
 
 def shell_files():
-    m = re.search(r"const SHELL = \[(.*?)\];", SW, re.S)
-    assert m, "const SHELL = [...] not found in sw.js"
-    return [f for f in re.findall(r'"([^"]+)"', m.group(1)) if f != "./"]
+    """The precache globs of the shell (vite.config.js, injectManifest.globPatterns)."""
+    m = re.search(r"globPatterns: \[(.*?)\]", VITE_CONFIG, re.S)
+    assert m, "injectManifest.globPatterns not found in vite.config.js"
+    return re.findall(r'"([^"]+)"', m.group(1))
 
 
 def built_file(f):
-    """Where a shell file comes from before the build: public/ (static) or the repo root (style.css, copied
-    by the jahgenda-static plugin)."""
+    """Where a shell file comes from before the build: public/ (static) or the repo root (index.html, and
+    style.css, copied by the jahgenda-static plugin)."""
     return (PUBLIC / f).is_file() or (ROOT / f).is_file()
 
 
@@ -62,24 +64,37 @@ class Regions(unittest.TestCase):
 
 class AppShell(unittest.TestCase):
     def test_every_shell_file_exists(self):
-        missing = [f for f in shell_files() if not built_file(f)]
-        self.assertEqual(missing, [], "sw.js SHELL lists files that do not exist (install would fail)")
-        shell = SW.split("const SHELL = [")[1].split("];")[0]
-        self.assertIn("...BUNDLE", shell, "SHELL must spread the bundle")
+        plain = [f for f in shell_files() if not any(c in f for c in "*{")]
+        missing = [f for f in plain if not built_file(f)]
+        self.assertEqual(missing, [], "precache globs name files that do not exist")
+        self.assertIn("assets/**/*.{js,css}", shell_files(), "the shell must hold the bundle")
+        self.assertFalse(
+            [f for f in shell_files() if f.startswith("data")], "data/ is network-first, never in the shell"
+        )
 
-    def test_build_stamps_the_worker(self):
-        # The Vite build inserts the hashed bundle files and BUILD (vite.config.js) – pages.yml checks
-        # the stamp landed before uploading, so a stale cache can never ship.
-        self.assertIn('const BUILD = "__BUILD__"', SW)
-        self.assertIn("const BUNDLE = /* __BUNDLE__ */ []", SW)
-        self.assertIn("__BUNDLE__", VITE_CONFIG)
-        self.assertIn("__BUILD__", VITE_CONFIG)
-        self.assertIn("__BUILD__", PAGES)
+    def test_build_injects_the_precache(self):
+        # vite-plugin-pwa replaces the injection point with the shell list (the build fails without it);
+        # the worker hashes that list into its cache name, pages.yml checks the injection landed.
+        self.assertEqual(SW.count("self.__WB_MANIFEST"), 1)
+        self.assertIn("jahgenda-shell-${BUILD}", SW)
+        self.assertIn('DATA_CACHE = "jahgenda-data"', SW)
+        self.assertIn("NETWORK_TIMEOUT = 4000", SW)
+        self.assertEqual(SW.count("self.skipWaiting()"), 1, "skipWaiting only on the toast's message")
+        self.assertIn('strategies: "injectManifest"', VITE_CONFIG)
+        self.assertIn('filename: "sw.js"', VITE_CONFIG)
+        self.assertIn("__WB_MANIFEST", PAGES)
         self.assertIn("path: dist", PAGES)
         for f in ("data", "style.css", "design"):
             self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
 
-    def test_makefile_knows_the_shell_files(self):
+    def test_manifest_icons_exist_and_paths_are_relative(self):
+        icons = re.findall(r'src: "(img/icons/[^"]+)"', VITE_CONFIG)
+        self.assertGreaterEqual(len(icons), 3)
+        self.assertEqual([i for i in icons if not (PUBLIC / i).is_file()], [], "manifest icons missing")
+        for key in ("id", "start_url", "scope"):
+            self.assertIn(f'{key}: "./"', VITE_CONFIG, f"manifest {key} must stay relative (project page)")
+
+    def test_makefile_knows_the_scripts(self):
         web = makefile_var("WEB_FILES")
         # Plain entries must exist; a glob (e2e/*.js) must match at least one file, or prettier gets the
         # literal pattern and fails.
@@ -88,9 +103,9 @@ class AppShell(unittest.TestCase):
         m = re.search(r"^\tnode --check (.+)$", MAKEFILE, re.M)
         self.assertTrue(m, "node --check line not found in the lint target")
         checked = set(m.group(1).split())
-        shell_js = {f"public/{f}" for f in shell_files() if f.endswith(".js")}
-        self.assertEqual(sorted(shell_js - checked), [], "shell scripts not syntax-checked by make lint")
-        self.assertIn("public/sw.js", checked)
+        plain = {f"public/{p.name}" for p in PUBLIC.glob("*.js")}
+        self.assertEqual(sorted(plain - checked), [], "plain scripts not syntax-checked by make lint")
+        self.assertIn("src/sw.js", checked)
         self.assertIn("public/*.js", web, "the plain scripts in public/ must be in WEB_FILES (prettier)")
 
 

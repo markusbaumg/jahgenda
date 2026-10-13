@@ -1,37 +1,34 @@
-/* Jahgenda service worker.
+/* Jahgenda service worker – the source of dist/sw.js (vite-plugin-pwa, strategy injectManifest; story #33 M7).
  * - App shell (HTML/CSS/JS/icons) is precached and served cache-first; other same-origin files
  *   (canton flags, …) are cached on first use.
  * - data/*.json is network-first with the cached copy as offline fallback, so the agenda is always
  *   fresh when online and still readable offline.
  * - Leaflet from unpkg is cached on first use; map tiles are never cached.
- * BUILD is replaced at build time (vite.config.js, jahgenda-static plugin) with a hash of the shell files,
- * so a new shell gets a new cache and old caches are deleted on activate.
+ * The build replaces the injection point below with the shell files of dist/ (vite.config.js, globPatterns) and
+ * their revisions; BUILD is a hash of that list, so a new shell gets a new cache (and the browser a new
+ * worker → «Neue Version»), and old caches are deleted on activate. Plain JS without imports: the
+ * bundle is the file itself, registered as a classic worker.
  */
-const BUILD = "__BUILD__";
+const MANIFEST = self.__WB_MANIFEST;
+
+// FNV-1a over the manifest (urls + revisions): stable for an unchanged shell – the daily data push must
+// not give anybody a «Neue Version» toast – and different as soon as one shell file changes.
+function fnv1a(text) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+const BUILD = fnv1a(JSON.stringify(MANIFEST));
 const SHELL_CACHE = `jahgenda-shell-${BUILD}`;
 const DATA_CACHE = "jahgenda-data";
 const LIB_CACHE = "jahgenda-lib";
 
-// The hashed bundle files of the Vite build (assets/index-….js, assets/index-….css): inserted at build time
-// by the jahgenda-static plugin in vite.config.js, together with BUILD.
-const BUNDLE = /* __BUNDLE__ */ [];
-const SHELL = [
-  "./",
-  "index.html",
-  "log.html",
-  "review.html",
-  "style.css",
-  "store.js",
-  "pwa.js",
-  "callout.js",
-  "manifest.webmanifest",
-  "img/about.jpg",
-  "img/logo/jahgenda.svg",
-  "img/fonts/jahdisplay.woff2",
-  "img/icons/icon-192.png",
-  "img/icons/icon-512.png",
-  ...BUNDLE,
-];
+// "./" first: the start URL of the installed app is the directory, not index.html.
+const SHELL = ["./", ...MANIFEST.map((e) => (typeof e === "string" ? e : e.url))];
 // The agenda itself: fetched into the data cache on install, so the first visit (whose own data
 // requests ran before this worker controlled the page) already leaves an offline-readable agenda.
 // runs.json feeds log.html / review.html, which are in the shell: without it they opened offline to
@@ -63,6 +60,8 @@ async function precacheCantons() {
 }
 
 self.addEventListener("install", (event) => {
+  // No skipWaiting() here: a new worker waits until the visitor taps «Aktualisieren» (message below),
+  // so a deploy never reloads the page under somebody's thumb.
   event.waitUntil(
     Promise.all([
       caches.open(SHELL_CACHE).then((cache) =>

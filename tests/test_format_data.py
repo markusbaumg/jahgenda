@@ -254,4 +254,4 @@ class WebVenues(unittest.TestCase):
     def test_the_page_and_the_worker_read_the_derived_file(self):
         store = (ROOT / "src" / "stores" / "agenda.svelte.js").read_text(encoding="utf-8")
         self.assertIn('const VENUES_URL = "data/venues.web.json"', store)
-        self.assertIn('"data/venues.web.json"', (ROOT / "public" / "sw.js").read_text(encoding="utf-8"))
+        self.assertIn('"data/venues.web.json"', (ROOT / "src" / "sw.js").read_text(encoding="utf-8"))

@@ -1,11 +1,11 @@
-/* Vite build of the Jahgenda page (story #33). Static files live in public/ (img, fonts, manifest, the three
- * static pages, the service worker and the PWA glue until vite-plugin-pwa takes over in M7); data/ stays at
+/* Vite build of the Jahgenda page (story #33). Static files live in public/ (img, fonts, the three
+ * static pages and the plain scripts); the manifest and dist/sw.js come from vite-plugin-pwa; data/ stays at
  * the repo root as the scraper's contract and is copied into dist/data by the plugin below. */
-import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { VitePWA } from "vite-plugin-pwa";
 
 // Files beside the bundle that the build copies into dist/ (and the dev server serves from the root):
 // the data contract, the global stylesheet the static pages link, and the design pages (design/logos.html
@@ -32,7 +32,6 @@ const copyInto = (outDir, from, to, keep) => {
 
 function jahgendaStatic() {
   let outDir = "dist";
-  let bundleFiles = [];
   return {
     name: "jahgenda-static",
     configResolved(config) {
@@ -51,45 +50,78 @@ function jahgendaStatic() {
         fs.createReadStream(file).pipe(res);
       });
     },
-    generateBundle(_, bundle) {
-      bundleFiles = Object.keys(bundle).filter((f) => f.startsWith("assets/"));
-    },
-    // Build: copy the data and the static extras, then stamp the service worker – its precache list gets
-    // the hashed bundle files and BUILD a hash of the whole shell, so a new shell gets a new cache
-    // (this used to be the sed step in pages.yml).
-    closeBundle() {
-      for (const [from, to, keep] of COPIES) copyInto(outDir, from, to, keep);
-      // style.css says url("/img/…") so Vite finds the files in public/ for the bundled copy; the plain copy
-      // the static pages link (log/review/mischpult, design/logos.html) sits next to img/, and an absolute
-      // /img/… would miss the /jahgenda/ prefix on GitHub Pages – so it gets relative urls.
-      const cssPath = path.join(outDir, "style.css");
-      if (fs.existsSync(cssPath)) {
-        const css = fs.readFileSync(cssPath, "utf8");
-        fs.writeFileSync(cssPath, css.replace(/url\((["']?)\/img\//g, "url($1img/"));
-      }
-      const swPath = path.join(outDir, "sw.js");
-      if (!fs.existsSync(swPath)) return;
-      let sw = fs.readFileSync(swPath, "utf8");
-      sw = sw.replace("/* __BUNDLE__ */ []", JSON.stringify(bundleFiles));
-      const shell = (sw.match(/const SHELL = \[(.*?)\];/s) || ["", ""])[1].match(/"([^"]+)"/g) || [];
-      const hash = createHash("sha256");
-      for (const quoted of shell) {
-        const f = JSON.parse(quoted);
-        const p = path.join(outDir, f === "./" ? "index.html" : f);
-        if (fs.existsSync(p) && fs.statSync(p).isFile()) hash.update(fs.readFileSync(p));
-      }
-      hash.update(sw);
-      const build = hash.digest("hex").slice(0, 10);
-      fs.writeFileSync(swPath, sw.replace("__BUILD__", build));
-      console.log(`sw.js stamped: build ${build}, ${bundleFiles.length} bundle files in the shell`);
+    // Build: copy the data and the static extras – before vite-plugin-pwa globs dist/ for the shell
+    // (style.css is a shell file), hence order "pre".
+    closeBundle: {
+      order: "pre",
+      sequential: true,
+      handler() {
+        for (const [from, to, keep] of COPIES) copyInto(outDir, from, to, keep);
+        // style.css says url("/img/…") so Vite finds the files in public/ for the bundled copy; the plain copy
+        // the static pages link (log/review/mischpult, design/logos.html) sits next to img/, and an absolute
+        // /img/… would miss the /jahgenda/ prefix on GitHub Pages – so it gets relative urls.
+        const cssPath = path.join(outDir, "style.css");
+        if (fs.existsSync(cssPath)) {
+          const css = fs.readFileSync(cssPath, "utf8");
+          fs.writeFileSync(cssPath, css.replace(/url\((["']?)\/img\//g, "url($1img/"));
+        }
+      },
     },
   };
 }
 
+// The PWA (story #33 M7): vite-plugin-pwa writes manifest.webmanifest (and links it in index.html) and builds
+// src/sw.js into dist/sw.js with the precache list of the shell injected (strategy injectManifest – the
+// caching rules are our own: data network-first with a 4 s timeout, flags of the current shows, unpkg
+// cache-first, tiles never). The registration, the «Neue Version» toast and the install nudge live in
+// src/stores/pwa.svelte.js and src/components/pwa/, so the plugin injects no register script.
+const pwa = VitePWA({
+  strategies: "injectManifest",
+  srcDir: "src",
+  filename: "sw.js",
+  injectRegister: false,
+  manifestFilename: "manifest.webmanifest",
+  manifest: {
+    name: "Jahgenda – Reggae, Dub & Ska in der Schweiz",
+    short_name: "Jahgenda",
+    description: "Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz.",
+    lang: "de-CH",
+    id: "./",
+    start_url: "./",
+    scope: "./",
+    display: "standalone",
+    background_color: "#14110e",
+    theme_color: "#14110e",
+    icons: [
+      { src: "img/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "img/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "img/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  },
+  // The shell is exactly the list below (plus the manifest): no manifest icons beyond these, no data/
+  // (network-first, its own cache), no canton flags (precached by the worker from data/shows.json).
+  includeManifestIcons: false,
+  injectManifest: {
+    globPatterns: [
+      "index.html",
+      "log.html",
+      "review.html",
+      "style.css",
+      "*.js",
+      "assets/**/*.{js,css}",
+      "img/about.jpg",
+      "img/logo/jahgenda.svg",
+      "img/fonts/jahdisplay.woff2",
+      "img/icons/icon-{192,512}.png",
+    ],
+    globIgnores: ["sw.js", "data/**", "design/**"],
+  },
+});
+
 export default defineConfig({
   base: "./",
   publicDir: "public",
-  plugins: [svelte(), jahgendaStatic()],
+  plugins: [svelte(), jahgendaStatic(), pwa],
   build: { outDir: "dist", emptyOutDir: true },
   // 127.0.0.1, not "localhost" (which may bind IPv6 only): the e2e suite, smoke.sh and the screenshots all
   // talk to 127.0.0.1; *.localhost names still reach it (pwa.spec.js uses jah.localhost).

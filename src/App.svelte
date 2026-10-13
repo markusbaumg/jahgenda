@@ -7,8 +7,12 @@
   import Status from "./components/Status.svelte";
   import Footer from "./components/Footer.svelte";
   import { agenda } from "./stores/agenda.svelte.js";
+  // PWA (M7): service worker, «Neue Version» toast, install nudge.
+  import UpdateToast from "./components/pwa/UpdateToast.svelte";
+  import { pwa } from "./stores/pwa.svelte.js";
 
   agenda.load();
+  pwa.start();
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
   // The screen reader hears the result count after every filter change (the visible count is in the footer).
@@ -59,3 +63,5 @@
 <Footer />
 
 <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<UpdateToast />

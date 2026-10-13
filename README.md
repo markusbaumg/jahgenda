@@ -35,7 +35,7 @@ Made by Kusi & Seraina.
 index.html                             The page: the Vite entry (head, inline slogans, mounts src/main.js). Built into dist/.
 style.css                              The global stylesheet (imported by src/main.js; the static pages link the copy in dist/).
 app.js                                 The vanilla page logic, kept as the port reference for the migration stories (#33); not built.
-vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and stamps sw.js.
+vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/; vite-plugin-pwa writes sw.js + manifest.
 src/main.js / src/App.svelte           Mounts the page: skip links, stripes, header, agenda, footer.
 src/components/Header.svelte           Lockup, tagline and one of the slogans per load.
 src/components/ShowList.svelte         Month sections with festival ghost rows.
@@ -50,10 +50,11 @@ src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash p
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
 src/lib/dates.js / regions.js          … de-CH formatters and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
-public/                                Static files, copied as they are into dist/ (img/, fonts, manifest, robots.txt, the pages below).
+public/                                Static files, copied as they are into dist/ (img/, fonts, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
-public/pwa.js / sw.js                  Installable app: install banner, offline cache, update toast (sw.js is stamped by the build).
-public/manifest.webmanifest            The web app manifest (name, icons, colours).
+src/sw.js                              Service worker source (vite-plugin-pwa injectManifest → dist/sw.js): shell precache, data network-first (4 s).
+src/stores/pwa.svelte.js               PWA glue: worker registration, «Neue Version» state, install nudge; the manifest is in vite.config.js.
+src/components/pwa/UpdateToast.svelte  The «Neue Version von Jahgenda · Aktualisieren» toast.
 public/callout.js                      One callout component for every nudge (install, subscribe): snooze or «Nie mehr zeigen».
 public/log.html                        Public scraper log (renders data/runs.json).
 public/review.html                     Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
@@ -343,7 +344,7 @@ Check everything: `make validate` (strict: `make validate-strict`). Format: `mak
 ```sh
 make              # help: all targets
 make dev          # Vite dev server with hot reload on http://127.0.0.1:5173 (data/ served from the repo)
-make build        # npm ci + vite build → dist/ (data/ copied, sw.js stamped)
+make build        # npm ci + vite build → dist/ (data/ copied, sw.js + manifest by vite-plugin-pwa)
 make serve        # the production build on http://127.0.0.1:4173 (vite preview)
 make check        # lint + validate + test + build + smoke – must be green before every commit
 make deploy       # check, commit, push → GitHub Pages deploys
@@ -380,7 +381,7 @@ its own job in `validate.yml` and uploads the report and traces when it fails.
 
 Logo #10 (Swiss cross on red/gold/green stripes) is active: `public/img/logo/jahgenda.svg` is referenced in
 the header (`src/components/Header.svelte`) and `log.html`, as favicon, in the sticky bar and in
-`manifest.webmanifest` / the PWA icons (`make icons` re-renders those). All ten variants live in
+the manifest (`vite.config.js`) / the PWA icons (`make icons` re-renders those). All ten variants live in
 `public/img/logo/NN-name.svg` (icon) and `NN-name-wordmark.svg` (icon + wordmark); the picker page is
 `design/logos.html` (https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen
 icon over `public/img/logo/jahgenda.svg`, run `make icons`, commit.

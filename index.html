@@ -21,7 +21,7 @@
     <!-- PNG first: Safari (before 26) ignores SVG favicons and would otherwise ask for /favicon.ico. -->
     <link rel="icon" href="img/icons/icon-192.png" type="image/png" sizes="192x192" />
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
-    <link rel="manifest" href="manifest.webmanifest" />
+    <!-- manifest.webmanifest: vite-plugin-pwa writes it (vite.config.js) and links it here at build time. -->
     <!-- No preload for the JSON: WebKit never matches <link rel=preload as=fetch> against fetch() and
          downloaded shows.json and genres.json twice on every load (Chromium gained a few ms at most). -->
     <!-- Karte: Leaflet and the tiles come from two other origins; the handshakes start now, not on the tap. -->
@@ -61,10 +61,9 @@
     </script>
     <div id="app"></div>
     <!-- Plain scripts from public/ until the later stories move them into src/: the storage abstraction
-         (window.jahStore), the callout component and the PWA glue (service worker + install nudge). -->
+         (window.jahStore) and the callout component. The PWA glue is src/stores/pwa.svelte.js. -->
     <script src="store.js"></script>
     <script src="callout.js"></script>
-    <script src="pwa.js"></script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

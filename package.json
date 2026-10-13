@@ -16,6 +16,7 @@
     "prettier": "3.3.3",
     "prettier-plugin-svelte": "4.1.1",
     "svelte": "5.57.2",
-    "vite": "6.4.4"
+    "vite": "6.4.4",
+    "vite-plugin-pwa": "1.2.0"
   }
 }
