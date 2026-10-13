@@ -1,24 +1,18 @@
 """Edge cases for scripts/format_data.py (the canonical JSON formatter). Run: make test"""
 
 import contextlib
-import importlib.util
 import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
+from _scripts import load_script
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def load_module(name):
-    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-F = load_module("format_data")
+F = load_script("format_data")
 
 
 def show(**over):

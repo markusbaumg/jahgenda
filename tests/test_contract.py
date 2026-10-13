@@ -3,23 +3,17 @@ the region codes (validator, src/lib/regions.js, public/img/cantons/*.svg) and t
 (the vite-plugin-pwa precache globs in vite.config.js, src/sw.js, pages.yml, the Makefile).
 Stdlib only. Run: make test"""
 
-import importlib.util
 import re
 import unittest
 from pathlib import Path
+
+from _scripts import load_script
 
 ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
 
 
-def load_module(name):
-    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-V = load_module("validate_shows")
+V = load_script("validate_shows")
 SW = (ROOT / "src" / "sw.js").read_text(encoding="utf-8")
 REGIONS_JS = (ROOT / "src" / "lib" / "regions.js").read_text(encoding="utf-8")
 MAKEFILE = (ROOT / "Makefile").read_text(encoding="utf-8")

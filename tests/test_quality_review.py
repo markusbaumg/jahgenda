@@ -1,18 +1,12 @@
 """Tests for scripts/quality_review.py: the weekly issue must not list the same dropped candidate twice
 when several runs dropped it. Run: make test"""
 
-import importlib.util
-import sys
 import unittest
 from datetime import datetime, timezone
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))  # for the shared ghapi.py
-SPEC = importlib.util.spec_from_file_location(
-    "quality_review", Path(__file__).resolve().parent.parent / "scripts" / "quality_review.py"
-)
-Q = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(Q)
+from _scripts import load_script
+
+Q = load_script("quality_review")
 
 T1 = datetime(2026, 10, 13, 0, 38, tzinfo=timezone.utc)
 T2 = datetime(2026, 10, 13, 1, 47, tzinfo=timezone.utc)

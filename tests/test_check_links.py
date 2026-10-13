@@ -2,26 +2,18 @@
 broken, bot walls and timeouts never do; the result lands in the quality-review issue. No network: the
 opener is faked. Run: make test"""
 
-import importlib.util
 import socket
-import sys
 import unittest
 import urllib.error
 from pathlib import Path
 
+from _scripts import load_script
+
 SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
-sys.path.insert(0, str(SCRIPTS))  # quality_review imports check_links and ghapi
 
 
-def load(name):
-    spec = importlib.util.spec_from_file_location(name, SCRIPTS / f"{name}.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-L = load("check_links")
-Q = load("quality_review")
+L = load_script("check_links")
+Q = load_script("quality_review")
 
 
 class FakeResponse:

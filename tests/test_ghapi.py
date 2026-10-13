@@ -1,21 +1,16 @@
 """scripts/ghapi.py: the GitHub call shared by the watchdog and the quality review returns (status, body) for
 a success AND for an HTTP error (never raises), sends the token and the API version, and parse_ts is UTC."""
 
-import importlib.util
 import io
 import json
-import sys
 import unittest
 import urllib.error
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest import mock
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
-SPEC = importlib.util.spec_from_file_location("ghapi", ROOT / "scripts" / "ghapi.py")
-G = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(G)
+from _scripts import load_script
+
+G = load_script("ghapi")
 
 
 class FakeResponse(io.BytesIO):

@@ -1,27 +1,19 @@
 """Tests for scripts/check_freshness.py: assess() is the only thing that pages the owner. Run: make test"""
 
 import contextlib
-import importlib.util
 import io
 import json
-import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from _scripts import load_script
+
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))  # the scripts import their shared ghapi.py
 
 
-def load_module(name):
-    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-C = load_module("check_freshness")
+C = load_script("check_freshness")
 
 NOW = datetime(2026, 10, 13, 8, 17, tzinfo=timezone.utc)
 MAX_AGE = timedelta(hours=36)

@@ -1,20 +1,14 @@
 """Tests for the judgement in scripts/check_venues.py (no network: nominatim() is faked). Run: make test"""
 
-import importlib.util
 import unittest
 from pathlib import Path
+
+from _scripts import load_script
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def load_module(name):
-    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-C = load_module("check_venues")
+C = load_script("check_venues")
 
 
 def hit(display_name, cls="amenity"):

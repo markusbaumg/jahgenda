@@ -2,18 +2,15 @@
 parse them), so folding, escaping and the timed/all-day shapes are pinned here. Run: make test"""
 
 import contextlib
-import importlib.util
 import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-SPEC = importlib.util.spec_from_file_location(
-    "make_ics", Path(__file__).resolve().parent.parent / "scripts" / "make_ics.py"
-)
-M = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(M)
+from _scripts import load_script
+
+M = load_script("make_ics")
 
 STAMP = "20261013T060000Z"
 

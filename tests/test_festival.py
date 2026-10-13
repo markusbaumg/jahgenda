@@ -3,7 +3,6 @@ Pins the validator rules 2–9, the field order of the formatter and the multi-d
 Run: make test"""
 
 import contextlib
-import importlib.util
 import io
 import json
 import tempfile
@@ -11,19 +10,14 @@ import unittest
 from datetime import date, timedelta
 from pathlib import Path
 
+from _scripts import load_script
+
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def load_module(name):
-    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-V = load_module("validate_shows")
-F = load_module("format_data")
-M = load_module("make_ics")
+V = load_script("validate_shows")
+F = load_script("format_data")
+M = load_script("make_ics")
 
 ALLOWED = {"reggae", "dub", "dancehall", "ska", "festival"}
 TODAY = date.today()
