@@ -3,17 +3,11 @@
    * row («↳ … läuft noch bis So 1. Aug.») at the top of every later month it touches – creating that
    * month if needed. Ported from the list branch of app.js renderInner(). */
   import DayGroup from "./DayGroup.svelte";
+  import Ghost from "./festival/Ghost.svelte";
   import { agenda, isFestival } from "../stores/agenda.svelte.js";
   import { ui } from "../stores/filters.svelte.js";
-  import {
-    monthStart,
-    addDays,
-    monthKeyPadded,
-    monthNameFmt,
-    weekendRange,
-    endLabel,
-    todayStart,
-  } from "../lib/dates.js";
+  import { ghostMonths } from "../lib/festival.js";
+  import { monthStart, monthKeyPadded, monthNameFmt, weekendRange, todayStart } from "../lib/dates.js";
 
   let { shows } = $props();
 
@@ -25,14 +19,7 @@
       return map.get(key);
     };
     for (const s of shows) group(s._day).items.push(s);
-    for (const s of shows.filter(isFestival)) {
-      for (
-        let m = monthStart(addDays(monthStart(s._day), 32));
-        m <= s._end;
-        m = addDays(m, 32), m = monthStart(m)
-      )
-        group(m).ghosts.push(s);
-    }
+    for (const s of shows.filter(isFestival)) for (const m of ghostMonths(s)) group(m).ghosts.push(s);
     // The «Wochenende» rule is drawn once, before the first day of the coming weekend – not while a
     // Heute / Morgen / Wochenende quick pick already says which days these are.
     const [wkStart, wkEnd] = weekendRange(agenda.today || todayStart());
@@ -87,11 +74,7 @@
     <h2 class="month">{monthNameFmt.format(g.first)} <span class="year">{g.first.getFullYear()}</span></h2>
     <div class="shows">
       {#each g.ghosts as s (s.id)}
-        <p class="ghost">
-          <a href="#{s._short}" title="Zum Festival in der Liste springen"
-            ><span class="arrow" aria-hidden="true">↳</span> {s.title} läuft noch bis {endLabel(s)}</a
-          >
-        </p>
+        <Ghost show={s} />
       {/each}
       <DayGroup items={g.items} weekendRule={g.weekendRule} {indexOf} {geoHintId} />
     </div>

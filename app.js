@@ -518,6 +518,8 @@
   // Region name for pills and headlines: «Bern», «Deutschland» (no «(grenznah)» – the row says that).
   const shortRegion = (c) => (ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c));
 
+  // Line-up block (lineupHtml, LINEUP_PREVIEW / LINEUP_FROM): ported to src/components/festival/Lineup.svelte
+  // and src/lib/festival.js (M5).
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these). `o` replaces
   // single filters for what-if counts (countWith): { q, cantons, radius, genre }.
   // o: overrides for the facet counts ({q, cantons, radius, genre, format, months, range}); anything that is
@@ -1691,6 +1693,8 @@
 
   // renderAndKeepInView / keepInView / scrollUnderBar → src/components/views/scroll.js (changeList, keepInView,
   // scrollUnderBar; story #33 M4).
+  // Format chips (setFormat, the #formats click) and the line-up disclosure animation: ported to
+  // src/components/festival/FormatChips.svelte + Lineup.svelte and src/stores/festival.svelte.js (M5).
   armCallout();
   init();
 })();

@@ -8,6 +8,7 @@
 import { tick, untrack } from "svelte";
 import { agenda } from "./agenda.svelte.js";
 import { parseHash } from "../lib/index.js";
+import { lineups } from "./festival.svelte.js";
 
 // The filters as one comparable string: the highlight belongs to the render the link landed on and goes
 // with the next filter change (in app.js the next render rebuilt the rows without it).
@@ -73,13 +74,8 @@ export async function revealFromHash() {
   reveal.id = target.id;
   reveal.sig = filterSig();
   reveal.until = Date.now() + 3000;
+  lineups.open(target.id); // a shared link lands on the open line-up
   await tick();
-  // A shared link lands on the open line-up.
-  const lineup = row.querySelector("details.lineup");
-  if (lineup && !lineup.open) {
-    lineup.open = true;
-    lineup.classList.add("is-open");
-  }
   const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
   row.scrollIntoView({ block: "start", behavior: motion });
   row.tabIndex = -1;
