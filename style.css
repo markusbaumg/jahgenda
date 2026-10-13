@@ -4052,11 +4052,21 @@ a:visited {
     opacity: 0.4;
   }
 }
-::view-transition-old(root),
-::view-transition-new(root) {
+/* Only the list takes part in the cross-fade. The root is opted out: a root transition snapshots the whole
+ * page and, pointer-events or not, every tap in those 200 ms lands on <html> (measured in Chromium) – the
+ * next chip after a filter tap was lost. Named, only #list is swapped as an image; the bar, chips, pills and
+ * panels stay live and tappable while the rows fade. */
+html {
+  view-transition-name: none;
+}
+#list {
+  view-transition-name: list;
+}
+::view-transition-group(list),
+::view-transition-old(list),
+::view-transition-new(list) {
   animation-duration: var(--t-2);
 }
-/* The cross-fade must not swallow a tap: the next chip is reachable while the previous swap still fades. */
 ::view-transition {
   pointer-events: none;
 }
