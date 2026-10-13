@@ -10,7 +10,7 @@ test("distances appear and the radius chips filter", async ({ page }) => {
   await openList(page);
   const dist = page.locator("#list .show .dist");
   await expect(dist.first()).toBeVisible();
-  await expect(dist.first()).toHaveText(/gleich ums Eck|≈ \d+(\.\d)? km/);
+  await expect(dist.first()).toHaveText(/gleich um die Ecke|≈ \d+(\.\d)? km/);
   expect(await dist.count()).toBe(6); // every fixture show has coordinates
   await expect(page.locator("#toggle-where")).toHaveClass(/located/);
   await expect(page.locator("#toggle-where b")).toBeHidden(); // a known position is not a filter

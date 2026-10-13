@@ -409,11 +409,14 @@ a[href]:focus-visible,
   border: 0;
   border-bottom: 1px dotted var(--muted);
   cursor: pointer;
+}
+/* Separator and button fade in together on hover (nothing is left dangling while hidden). */
+.geo-hint {
   opacity: 0;
   transition: opacity 0.15s;
 }
-.show:hover .geo-ask,
-.geo-ask:focus-visible {
+.show:hover .geo-hint,
+.geo-hint:focus-within {
   opacity: 1;
 }
 @media (hover: hover) {
@@ -423,7 +426,7 @@ a[href]:focus-visible,
   }
 }
 @media (hover: none) {
-  .geo-ask {
+  .geo-hint {
     opacity: 0.7;
   }
 }
@@ -1347,8 +1350,11 @@ a[href]:focus-visible,
   flex-wrap: wrap;
   gap: 2px 10px;
 }
-#results-text:not(:empty)::after {
-  content: " ·";
+/* The separator belongs to the second item and only when both share a line (from 480 px up). */
+@media (min-width: 480px) {
+  #updated:not(:empty)::before {
+    content: "· ";
+  }
 }
 
 /* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared rows --- */
@@ -3051,5 +3057,64 @@ a:visited {
   .callout {
     transition: none;
     transform: none;
+  }
+}
+
+/* SBB badge: a finger-sized hit area around the small label on touch screens. */
+.sbb {
+  position: relative;
+}
+@media (hover: none) {
+  .sbb::before {
+    content: "";
+    position: absolute;
+    inset: -12px -8px;
+  }
+}
+/* Calendar: arrows stop at the first/last month with shows; empty month note; dot legend. */
+.cal-nav[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+.cal-month-empty {
+  margin: 10px 0 0;
+}
+.cal-month-empty a {
+  color: var(--gold);
+}
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.cal-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 0;
+}
+/* Desktop pills were cut to ~10 characters in a 103 px cell: two lines instead of an ellipsis. */
+@media (min-width: 768px) {
+  .pill {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.25;
+  }
+}
+/* About: the photo lines up with the first line of text; on phones the running text is left-aligned
+   (centred paragraphs with a ragged left edge are hard to read). */
+.about-body {
+  align-items: flex-start;
+}
+@media (max-width: 520px) {
+  .about-body p:not(.about-head):not(.authors) {
+    text-align: left;
   }
 }

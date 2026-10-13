@@ -204,7 +204,8 @@
     return 2 * 6371 * Math.asin(Math.sqrt(h));
   }
 
-  const formatKm = (km) => (km < 1 ? "gleich ums Eck" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`);
+  const formatKm = (km) =>
+    km < 1 ? "gleich um die Ecke" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
 
   // The town nearest to the user's position (from the venue list) – the "von" of the SBB timetable link.
   let homeCity = "";
@@ -231,10 +232,11 @@
   function distanceLabel(s) {
     if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
     // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
+    // The separator travels with the button (both only show on hover), so no lone «·» ends the line.
     if (!here)
       return geoDeclined
         ? ""
-        : ` · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button>`;
+        : `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
     return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
@@ -257,6 +259,8 @@
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0 1.4 4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.6 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 2.9 2.9 1 1 0 0 1 1.4 0zm2.8-2.8a1 1 0 0 1 0-1.4 4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.6 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.8 0l3-3a2 2 0 0 0-2.9-2.9 1 1 0 0 1-1.4 0z"/></svg>',
     star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.6 6 21l1.3-6.8-5-4.7 6.8-.8z"/></svg>',
+    train:
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c-4 0-8 .5-8 4v9.5A3.5 3.5 0 0 0 7.5 19L6 20.5V21h2l2-2h4l2 2h2v-.5L16.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-4-4-8-4zm-5.5 4c.2-1 2.6-2 5.5-2s5.3 1 5.5 2H6.5zM6 8h12v4H6V8zm1.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm9 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>',
     more: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>',
   };
 
@@ -359,6 +363,12 @@
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 7h20v14H2V7zm2 2v10h16V9H4zm3 2h2v6H7v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM12 3l5 3h-10l5-3z"/></svg>',
   };
 
+  // The acts line only names who is not in the title already («The Slackers (US)» / «The Slackers»
+  // doubled most rows; «Scorchers feat. Capital Soul Sinners» names its guests in the title).
+  const extraActs = (s) => {
+    const t = fold(s.title);
+    return s.acts.filter((a) => !t.includes(fold(a)));
+  };
   function renderShow(s) {
     const d = s._day;
     const dow = d.getDay();
@@ -376,8 +386,10 @@
         <div>
           <h3 class="title">${title}</h3>
           ${
-            s.acts.length > 1 || (s.acts.length === 1 && s.acts[0] !== s.title)
-              ? `<p class="acts">${s.acts.map((a) => `<span>${escape(a)}</span>`).join("")}</p>`
+            extraActs(s).length
+              ? `<p class="acts">${extraActs(s)
+                  .map((a) => `<span>${escape(a)}</span>`)
+                  .join("")}</p>`
               : ""
           }
           <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}</p>
@@ -407,6 +419,9 @@
         : "",
       tickets
         ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" title="Tickets kaufen">${ICONS.ticket}<span>Tickets</span></a>`
+        : "",
+      sbbUrl(s)
+        ? `<a class="act sbb-act" href="${escape(sbbUrl(s))}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show">${ICONS.train}<span>SBB${long ? "-Fahrplan" : ""}</span></a>`
         : "",
       `<a class="act" href="https://wa.me/?text=${encodeURIComponent(shareText(s))}" target="_blank" rel="noopener" title="Per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`,
       `<button type="button" class="act" data-act="link" title="Link zu dieser Show kopieren">${ICONS.link}<span>Link teilen</span></button>`,
@@ -665,7 +680,7 @@
           acts: Array.isArray(s.acts) ? s.acts.map(String).filter(Boolean) : [],
         }))
         .map((s) => ({ ...s, _past: s._day < today, _short: shortId(s.id), _hay: searchText(s) }))
-        .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
+        .sort((a, b) => a._day - b._day || (a.time || "99:99").localeCompare(b.time || "99:99")); // unknown time last
 
       pastCount = shows.filter((s) => s._past).length;
       loadState = "ready";
@@ -1714,11 +1729,32 @@
     }
 
     const selected = byDay.get(calDay) || [];
+    // The arrows stop at the months that have shows (plus today's); an empty month says so and points
+    // to the next show.
+    const firstMonth = monthList[0];
+    const lastMonth = monthList[monthList.length - 1];
+    const prevOk = firstMonth && calMonth > firstMonth;
+    const nextOk = lastMonth && calMonth < lastMonth;
+    const inThisMonth = [...byDay.keys()].some(inMonth);
+    const after = visible.find((s) => s._day >= new Date(y, m + 1, 1));
+    const before = [...visible].reverse().find((s) => s._day < new Date(y, m, 1));
+    const emptyNote = inThisMonth
+      ? ""
+      : `<p class="cal-empty cal-month-empty">Keine Konzerte im ${escape(monthFmt.format(calMonth))}.${
+          after
+            ? ` Nächste Show: <a href="#${after._short}" data-id="${escape(after.id)}">${escape(after.title)}</a>, ${escape(shortDate(after._day))}`
+            : before
+              ? ` Letzte Show: <a href="#${before._short}" data-id="${escape(before.id)}">${escape(before.title)}</a>, ${escape(shortDate(before._day))}`
+              : ""
+        }</p>`;
+    const legend =
+      `<p class="cal-legend" aria-hidden="true"><span><i style="background:var(--red)"></i>Ska, Rocksteady</span>` +
+      `<span><i style="background:var(--green-text)"></i>Dub, Soundsystem</span><span><i style="background:var(--gold)"></i>Reggae &amp; mehr</span></p>`;
     calendarEl.innerHTML = `
       <div class="cal-head">
-        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat">&lsaquo;</button>
+        <button type="button" class="cal-nav" data-cal="-1" aria-label="Vorheriger Monat" title="Vorheriger Monat"${prevOk ? "" : " disabled"}>&lsaquo;</button>
         <h2 class="cal-title">${escape(monthFmt.format(calMonth))}</h2>
-        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat">&rsaquo;</button>
+        <button type="button" class="cal-nav" data-cal="1" aria-label="Nächster Monat" title="Nächster Monat"${nextOk ? "" : " disabled"}>&rsaquo;</button>
         <button type="button" class="linkish cal-today" data-cal="0" title="Zum aktuellen Monat springen">Heute</button>
         <button type="button" class="linkish cal-subscribe" data-subscribe title="Alle Shows als Kalender abonnieren – aktualisiert sich von selbst">${ICONS.rss} Abonnieren</button>
       </div>
@@ -1726,6 +1762,7 @@
         ${["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((w) => `<span class="cal-dow">${w}</span>`).join("")}
         ${cells.join("")}
       </div>
+      ${emptyNote}${legend}
       <section class="cal-day">
         <h2 class="month">${escape(longDayFmt.format(parseDay(calDay)))}</h2>
         ${
@@ -1737,8 +1774,11 @@
   }
 
   calendarEl.addEventListener("click", (e) => {
-    const pill = e.target.closest(".pill");
-    if (pill) return goToShow(pill.dataset.id);
+    const pill = e.target.closest(".pill, .cal-month-empty a[data-id]");
+    if (pill) {
+      e.preventDefault();
+      return goToShow(pill.dataset.id);
+    }
     const nav = e.target.closest("[data-cal]");
     if (nav) {
       const step = Number(nav.dataset.cal);
@@ -1762,6 +1802,16 @@
         calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
       }
       renderCalendar(lastVisible);
+      // On the phone the day's shows are listed under the grid – below the fold: bring them up.
+      const day = calendarEl.querySelector(".cal-day");
+      if (
+        day &&
+        getComputedStyle(day).display !== "none" &&
+        day.getBoundingClientRect().top > innerHeight - 120
+      ) {
+        quietScrollUntil = Date.now() + 1500;
+        day.scrollIntoView({ block: "start", behavior: "smooth" });
+      }
     }
   });
 
