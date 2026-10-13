@@ -3,10 +3,10 @@
   "short_name": "Jahgenda",
   "description": "Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz.",
   "lang": "de-CH",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#14110e",
   "theme_color": "#14110e",
   "icons": [

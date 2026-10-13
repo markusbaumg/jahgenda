@@ -53,16 +53,24 @@ test("venueKey, safeUrl, escape, distanceKm", () => {
   assert.equal(lib.distanceKm({ lat: 46.948, lon: 7.447 }, { lat: 46.948, lon: 7.447 }), 0);
 });
 
-test("icsFor: one timed show, CRLF, floating local time, three hours long", () => {
+test("icsFor: one timed show, CRLF, Zurich time with TZID and VTIMEZONE, three hours long", () => {
   const ics = lib.icsFor(show(), { url: PAGE, now: NOW });
   assert.ok(ics.endsWith("END:VCALENDAR\r\n"));
   assert.ok(!/[^\r]\n/.test(ics), "every line break is CRLF");
   const lines = ics.split("\r\n");
-  assert.deepEqual(lines.slice(0, 3), ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Jahgenda//DE"]);
+  assert.deepEqual(lines.slice(0, 4), [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Jahgenda//DE",
+    "X-WR-TIMEZONE:Europe/Zurich",
+  ]);
+  assert.ok(lines.includes("BEGIN:VTIMEZONE") && lines.includes("TZID:Europe/Zurich"), "VTIMEZONE block");
+  assert.ok(lines.includes("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU"), "EU summer-time rule");
+  assert.ok(lines.indexOf("END:VTIMEZONE") < lines.indexOf("BEGIN:VEVENT"), "VTIMEZONE precedes the events");
   assert.ok(lines.includes("UID:2026-10-16-dub-collective-bern@jahgenda"));
   assert.ok(lines.includes("DTSTAMP:20261013T060000Z"), "DTSTAMP comes from the injected clock");
-  assert.ok(lines.includes("DTSTART:20261016T203000"));
-  assert.ok(lines.includes("DTEND:20261016T233000"));
+  assert.ok(lines.includes("DTSTART;TZID=Europe/Zurich:20261016T203000"));
+  assert.ok(lines.includes("DTEND;TZID=Europe/Zurich:20261016T233000"));
   assert.ok(lines.includes("SUMMARY:Dub Collective"));
   assert.ok(lines.includes("LOCATION:Dachstock\\, Bern"));
   assert.ok(lines.includes(`DESCRIPTION:${PAGE}`), "no leading blank line when the show has no url");
@@ -72,7 +80,9 @@ test("icsFor: one timed show, CRLF, floating local time, three hours long", () =
 
 test("icsFor: late show ends the next day, all-day show has no DTEND, status is passed through", () => {
   const late = lib.icsFor(show({ time: "23:00" }), { url: PAGE, now: NOW });
-  assert.ok(late.includes("DTSTART:20261016T230000\r\nDTEND:20261017T020000"));
+  assert.ok(
+    late.includes("DTSTART;TZID=Europe/Zurich:20261016T230000\r\nDTEND;TZID=Europe/Zurich:20261017T020000"),
+  );
   const allDay = lib.icsFor(show({ time: "" }), { url: PAGE, now: NOW });
   assert.ok(allDay.includes("DTSTART;VALUE=DATE:20261016"));
   assert.ok(!allDay.includes("DTEND"));

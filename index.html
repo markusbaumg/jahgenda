@@ -6,18 +6,39 @@
     <title>Jahgenda · Reggae-Konzerte in der Schweiz</title>
     <meta name="description" content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz." />
     <meta name="theme-color" content="#14110e" />
+    <link rel="canonical" href="https://markusbaumg.github.io/jahgenda/" />
+    <!-- Link previews (WhatsApp, Signal, Slack …): title, text and the app icon. Static, as every
+         share link points at this one page. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://markusbaumg.github.io/jahgenda/" />
+    <meta property="og:title" content="Jahgenda – Reggae, Dub & Ska in der Schweiz" />
+    <meta property="og:description" content="Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz." />
+    <meta property="og:locale" content="de_CH" />
+    <meta property="og:image" content="https://markusbaumg.github.io/jahgenda/img/icons/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta name="twitter:card" content="summary" />
+    <!-- PNG first: Safari (before 26) ignores SVG favicons and would otherwise ask for /favicon.ico. -->
+    <link rel="icon" href="img/icons/icon-192.png" type="image/png" sizes="192x192" />
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
+    <!-- The agenda itself starts downloading with the HTML, not after style.css and app.js have run. -->
+    <link rel="preload" href="data/shows.json" as="fetch" crossorigin />
+    <link rel="preload" href="data/genres.json" as="fetch" crossorigin />
     <!-- Karte: Leaflet and the tiles come from two other origins; the handshakes start now, not on the tap. -->
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="preconnect" href="https://tile.openstreetmap.org" />
     <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Jahgenda" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- Keyboard: ~10 tab stops per row – jump straight to the agenda or past it to the footer. -->
+    <a class="skip" href="#views">Zur Agenda</a>
+    <a class="skip" href="#foot">Zum Seitenende</a>
     <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
 
     <header class="wrap head" id="top">
@@ -68,6 +89,7 @@
             aria-pressed="false"
             aria-expanded="false"
             aria-controls="where-panel"
+            aria-label="Wo: alle Orte"
             title="Wo: Kanton wählen oder meinen Standort verwenden"
           >
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -76,6 +98,7 @@
                 d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
               />
             </svg>
+            <span class="icon-word" aria-hidden="true">Wo</span>
             <b hidden></b>
           </button>
           <button
@@ -84,7 +107,7 @@
             class="icon-btn mine"
             aria-pressed="false"
             title="Nur meine Shows anzeigen"
-            aria-label="Meine Shows anzeigen"
+            aria-label="Meine Shows"
             hidden
           >
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -102,8 +125,8 @@
             aria-pressed="false"
             aria-expanded="false"
             aria-controls="when-panel"
-            title="Zeitraum wählen"
-            aria-label="Zeitraum wählen"
+            title="Wann: Zeitraum wählen"
+            aria-label="Wann: alle kommenden"
           >
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path
@@ -111,6 +134,7 @@
                 d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 3h3v2H8v-2zm0 4h8v2H8v-2zm5-4h3v2h-3v-2z"
               />
             </svg>
+            <span class="icon-word" aria-hidden="true">Wann</span>
             <b hidden></b>
           </button>
         </div>
@@ -155,6 +179,7 @@
               type="button"
               id="locate"
               class="chip where-locate"
+              aria-pressed="false"
               title="Meinen Standort verwenden und Distanzen anzeigen"
             >
               <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
@@ -228,7 +253,7 @@
               class="chip"
               data-quick="weekend"
               aria-pressed="false"
-              title="Nächstes Wochenende (Freitag bis Sonntag)"
+              title="Das kommende Wochenende (Freitag bis Sonntag)"
             >
               Wochenende
             </button>
@@ -262,6 +287,7 @@
       </form>
 
       <p id="results" class="results">
+        <span id="results-count" class="results-count" aria-hidden="true"></span>
         <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
           <button type="button" data-view="list" aria-pressed="true" title="Als Liste anzeigen">
             <svg
@@ -333,11 +359,20 @@
         >
           ✕ Filter zurücksetzen
         </button>
+        <button
+          type="button"
+          id="share-filters"
+          class="linkish clear"
+          title="Link zu dieser Auswahl kopieren – zum Teilen oder als Lesezeichen"
+          hidden
+        >
+          <span>Link zu dieser Auswahl</span>
+        </button>
       </p>
       <!-- Screen readers hear the result count after every filter change (the visible count is in the footer). -->
       <p class="sr" id="results-live" role="status" aria-live="polite"></p>
       <div id="mine-panel" class="mine-panel" hidden></div>
-      <div id="views">
+      <div id="views" tabindex="-1">
         <div id="list">
           <ul class="skeleton" aria-label="Lade Konzerte …">
             <li aria-hidden="true">
@@ -362,14 +397,14 @@
         </div>
         <div id="calendar" class="calendar" hidden></div>
         <div id="map-view" class="map-view" hidden>
-          <div id="map" class="map" aria-label="Karte der Konzertorte"></div>
+          <div id="map" class="map" role="region" aria-label="Karte der Konzertorte"></div>
           <div id="map-rest"></div>
         </div>
       </div>
       <div id="status" class="status" role="status"></div>
     </main>
 
-    <footer class="foot">
+    <footer class="foot" id="foot" tabindex="-1">
       <div class="wrap">
         <section class="about" aria-labelledby="about-title">
           <h2 id="about-title" class="section-title">Über Jahgenda</h2>
@@ -397,8 +432,8 @@
                 etwas nicht? Schreib uns, wir freuen uns über jeden Tipp.
               </p>
               <p class="authors">
-                Mit <span class="heart" aria-label="Liebe">♥</span> gemacht – ein Herzensprojekt von
-                <strong>Kusi</strong> &amp; <strong>Seraina</strong>.
+                Mit <span class="heart" role="img" aria-label="Liebe">♥</span> gemacht – ein Herzensprojekt
+                von <strong>Kusi</strong> &amp; <strong>Seraina</strong>.
               </p>
             </div>
           </div>

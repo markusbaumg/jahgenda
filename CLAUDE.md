@@ -39,6 +39,7 @@ make              # help: all targets
 make check        # lint + validate + test – must be green before every commit
 make serve        # view the page locally (http://localhost:8000)
 make scrape       # run the scraper now (Claude Code, subscription)
+make e2e          # Playwright end-to-end tests (e2e/, desktop + iPhone) – own CI job, not part of check
 ```
 
 Skills: `/scrape-shows` (update shows), `/harvest-bands` (suggest bands from festival line-ups).

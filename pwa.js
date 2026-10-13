@@ -2,6 +2,12 @@
  * Kept separate from app.js so the agenda works without it. */
 (() => {
   const store = window.jahStore;
+  // Reload only after the user pressed "Aktualisieren": clients.claim() in the freshly installed
+  // worker also fires controllerchange on the very first visit, which must not reload the page.
+  // Declared here, at the level of showUpdateToast(): inside the block below the assignment in the
+  // click handler would silently create a global and the controllerchange listener would never reload.
+  let wantReload = false;
+  let reloading = false;
   const standalone =
     window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
@@ -30,10 +36,6 @@
         console.warn("Service worker not registered:", err);
       }
     });
-    // Reload only after the user pressed "Aktualisieren": clients.claim() in the freshly installed
-    // worker also fires controllerchange on the very first visit, which must not reload the page.
-    let wantReload = false;
-    let reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (!wantReload || reloading) return;
       reloading = true;
@@ -52,12 +54,21 @@
       wantReload = true;
       if (reg.waiting) reg.waiting.postMessage("skipWaiting");
       t.remove();
+      document.documentElement.style.removeProperty("--toast-h");
+      // The new worker took over before the click (or never will): reload anyway after a moment.
+      setTimeout(() => {
+        if (!reloading) location.reload();
+      }, 3000);
     });
     document.body.appendChild(t);
+    // A callout that appears later docks above the toast instead of underneath it.
+    document.documentElement.style.setProperty("--toast-h", `${t.offsetHeight + 12}px`);
   }
 
   // ---- Install nudge (via the shared callout) ---------------------------------------------------
   if (standalone) return; // already installed: nothing to suggest
+  const visits = (Number(store.get(store.KEYS.VISITS, 0)) || 0) + 1;
+  store.set(store.KEYS.VISITS, visits);
   const ua = navigator.userAgent;
   // iPadOS 13+ reports itself as a Mac with touch; its Share button sits top right, not in a bottom bar.
   const isIPad = /iPad/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -92,8 +103,9 @@
   });
   window.addEventListener("appinstalled", () => callout().hide());
 
-  // iPhone / iPad Safari has no install event: explain the two taps.
-  if (isIOS && isSafari) {
+  // iPhone / iPad Safari has no install event: explain the two taps – from the second visit on,
+  // once the visitor knows what Jahgenda is (and the sticker never sits over an open panel or the map).
+  if (isIOS && isSafari && visits >= 2) {
     setTimeout(() => {
       if (deferredPrompt) return;
       callout().show({

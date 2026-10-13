@@ -1,0 +1,12 @@
+{
+  "name": "jahgenda-e2e",
+  "private": true,
+  "description": "End-to-end tests for the Jahgenda page (Playwright, Chromium desktop + iPhone emulation)",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

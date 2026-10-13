@@ -29,6 +29,11 @@ html {
   /* Keeps focused/anchored content clear of the sticky filter bar. */
   scroll-padding-top: calc(var(--bar-h, 64px) + 40px);
 }
+/* The hidden attribute wins over every display rule below (a .where-radius { display: flex } once
+   showed radius chips that app.js had hidden). */
+[hidden] {
+  display: none !important;
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -72,6 +77,41 @@ body {
   max-width: 760px;
   margin: 0 auto;
   padding: 0 16px;
+  /* Installed and held sideways on a notched phone: the gutter grows past the sensor housing. */
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* Skip links: invisible until focused, then a gold pill at the top left. */
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 30;
+  padding: 8px 14px;
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.skip:focus-visible {
+  top: 12px;
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+/* Every link gets the same gold ring as the buttons (not the browser's blue one). */
+a[href]:focus-visible,
+.leaflet-container a:focus-visible,
+#views:focus-visible,
+#foot:focus-visible,
+.show:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+#q::placeholder {
+  color: var(--muted); /* the browser grey was 3.8:1 */
+  opacity: 1;
 }
 
 .head {
@@ -366,11 +406,14 @@ body {
   border: 0;
   border-bottom: 1px dotted var(--muted);
   cursor: pointer;
+}
+/* Separator and button fade in together on hover (nothing is left dangling while hidden). */
+.geo-hint {
   opacity: 0;
   transition: opacity 0.15s;
 }
-.show:hover .geo-ask,
-.geo-ask:focus-visible {
+.show:hover .geo-hint,
+.geo-hint:focus-within {
   opacity: 1;
 }
 @media (hover: hover) {
@@ -380,7 +423,7 @@ body {
   }
 }
 @media (hover: none) {
-  .geo-ask {
+  .geo-hint {
     opacity: 0.7;
   }
 }
@@ -483,6 +526,14 @@ body {
   border-color: var(--gold);
   margin-left: 0;
 }
+.results .results-count {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.results .results-count:empty {
+  display: none;
+}
 .results .linkish {
   margin-left: auto;
   color: var(--muted);
@@ -499,7 +550,7 @@ body {
   border: 0;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none; /* no underlines anywhere; the colour turns gold on hover */
 }
 @media (hover: hover) {
   .results .linkish:hover {
@@ -638,7 +689,7 @@ body {
   background: var(--bg);
 }
 .cal-cell.other .cal-num {
-  opacity: 0.35;
+  opacity: 0.6; /* 0.35 fell to 2:1 */
 }
 .cal-num {
   align-self: flex-start;
@@ -771,7 +822,9 @@ body {
   margin-top: 18px;
 }
 .map {
-  height: 70vh;
+  /* Never taller than what fits under the bar (dvh: the real viewport on iOS, vh as the fallback). */
+  height: min(70vh, calc(100vh - var(--bar-h, 64px) - 24px));
+  height: min(70vh, calc(100dvh - var(--bar-h, 64px) - 24px));
   min-height: 320px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -833,6 +886,23 @@ body {
 .map-view .leaflet-container a.leaflet-popup-close-button {
   color: var(--muted);
 }
+/* Several venues in one house share a pin: the popup lists them one after the other. */
+.map-view .popup-venue {
+  margin: 8px 0 0;
+}
+/* Touch screens: finger-sized zoom buttons, and a map that fits a phone held sideways. */
+@media (hover: none) {
+  .map-view .leaflet-touch .leaflet-bar a {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+  }
+}
+@media (max-height: 500px) {
+  .map {
+    min-height: 240px;
+  }
+}
 .popup-shows {
   list-style: none;
   margin: 6px 0 0;
@@ -855,6 +925,16 @@ body {
 }
 
 /* Empty / loading / error state: a clear box where the list would be. */
+/* One line above the list after a share link that leads nowhere any more. */
+.link-note {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-left: 3px solid var(--gold);
+  background: rgba(242, 182, 50, 0.08);
+  border-radius: 0 8px 8px 0;
+}
 .status {
   margin: 20px 0 8px;
   padding: 36px 20px;
@@ -963,7 +1043,8 @@ body {
   align-items: start;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
-  scroll-margin-top: calc(var(--bar-h, 64px) + 48px);
+  /* html already has scroll-padding-top (bar + sticky month heading); the two would add up. */
+  scroll-margin-top: 8px;
 }
 .show.highlight {
   animation: flash 2.5s ease-out;
@@ -1263,8 +1344,11 @@ body {
   flex-wrap: wrap;
   gap: 2px 10px;
 }
-#results-text:not(:empty)::after {
-  content: " ·";
+/* The separator belongs to the second item and only when both share a line (from 480 px up). */
+@media (min-width: 480px) {
+  #updated:not(:empty)::before {
+    content: "· ";
+  }
 }
 
 /* --- Meine Shows: star button, marked rows, toggle chip, export panel, shared rows --- */
@@ -1344,24 +1428,31 @@ body {
 }
 /* Month histogram: one clickable bar per month (count on top, label below); selected = gold, others dim. */
 .when-months {
+  --track: 48px; /* the room a 100 % bar gets (count above, label below) */
   display: flex;
   align-items: stretch;
   gap: 4px;
-  height: 96px;
+  height: 102px;
   margin-top: 12px;
   overflow-x: auto;
   scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+/* More months than fit (narrow phones): a fade on the right says so – scrollbars do not show on touch. */
+.when-months.can-scroll {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
 }
 .when-months .bar {
   position: relative;
   flex: 1 1 0;
-  min-width: 44px;
+  min-width: 40px;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: stretch;
   gap: 4px;
-  padding: 0 2px;
+  padding: 0 1px;
   font: inherit;
   color: var(--muted);
   background: none;
@@ -1378,19 +1469,25 @@ body {
 }
 .when-months .bar i {
   display: block;
-  height: var(--h, 0%);
+  /* --h is 0…1 (share of the busiest month). A percentage would resolve against the whole button and
+     flex-shrink would then clamp every tall bar to the same height. */
+  flex: 0 0 auto;
+  height: calc(var(--track) * var(--h, 0));
   min-height: 3px;
   background: var(--gold);
   border-radius: 3px 3px 0 0;
   transition: opacity 0.15s;
 }
 .when-months .bar span {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   text-align: center;
   white-space: nowrap;
-  padding-top: 4px;
+  padding: 4px 0 6px; /* room below for the «today» dot */
   border-top: 1px solid var(--line);
+}
+.when-months .bar.today span {
+  color: var(--text);
 }
 .when-months .bar.empty i {
   background: var(--line);
@@ -1425,7 +1522,7 @@ body {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -2px;
+  bottom: 0;
   width: 6px;
   height: 6px;
   margin-left: -3px;
@@ -1674,8 +1771,8 @@ body {
 .toast button {
   font: inherit;
   font-weight: 700;
-  color: var(--text);
-  background: var(--green);
+  color: var(--bg); /* dark on green: 8:1 (cream on green was 3.45:1) */
+  background: var(--green-text);
   border: 0;
   border-radius: 999px;
   padding: 5px 12px;
@@ -1938,9 +2035,9 @@ a {
 /* Count inside a genre chip, very light */
 .chip small {
   margin-left: 5px;
-  font-size: 0.7em;
+  font-size: 0.75em;
   font-weight: 600;
-  opacity: 0.55;
+  opacity: 0.75; /* 0.55 on 9 px read as dust (3.4:1) */
   font-variant-numeric: tabular-nums;
 }
 .chip[aria-pressed="true"] small {
@@ -1981,6 +2078,7 @@ a {
   top: 100%;
   z-index: 4;
   max-height: calc(100vh - var(--bar-h, 120px) - 24px);
+  max-height: calc(100dvh - var(--bar-h, 120px) - 24px); /* iOS: the visible viewport, not the full one */
   overflow: auto;
   padding: 10px 14px 14px;
   background: var(--surface);
@@ -2552,7 +2650,8 @@ a {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  /* --toast-h: a visible update toast (pwa.js) sits at the bottom edge; the callout docks above it. */
+  bottom: calc(12px + var(--toast-h, 0px) + env(safe-area-inset-bottom, 0px));
   z-index: 20;
   display: flex;
   gap: 14px;
@@ -2911,5 +3010,100 @@ a:visited {
 @media (prefers-reduced-motion: reduce) {
   .list-head {
     animation: none;
+  }
+}
+
+/* The word next to the pin and the calendar icon: from tablet width up, until a badge takes its place. */
+.icon-word {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+@media (min-width: 601px) {
+  .icon-btn.where:not(:has(b:not([hidden]))),
+  .icon-btn.when:not(:has(b:not([hidden]))) {
+    flex-basis: auto;
+    grid-auto-flow: column;
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .icon-btn:not(:has(b:not([hidden]))) .icon-word {
+    display: inline;
+  }
+}
+/* Touch: chips and the small text buttons reach a finger-sized height. */
+@media (hover: none) {
+  .chip {
+    min-height: 36px;
+  }
+  #when-reset {
+    padding: 8px 0;
+    margin: -8px 0;
+  }
+}
+/* Last word on motion: the callout rule above sits before its base rule and lost the cascade. */
+@media (prefers-reduced-motion: reduce) {
+  .callout {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* SBB badge: a finger-sized hit area around the small label on touch screens. */
+.sbb {
+  position: relative;
+}
+@media (hover: none) {
+  .sbb::before {
+    content: "";
+    position: absolute;
+    inset: -12px -8px;
+  }
+}
+/* Calendar: arrows stop at the first/last month with shows; empty month note; dot legend. */
+.cal-nav[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+.cal-month-empty {
+  margin: 10px 0 0;
+}
+.cal-month-empty a {
+  color: var(--gold);
+}
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.cal-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 0;
+}
+/* Desktop pills were cut to ~10 characters in a 103 px cell: two lines instead of an ellipsis. */
+@media (min-width: 768px) {
+  .pill {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.25;
+  }
+}
+/* About: the photo lines up with the first line of text; on phones the running text is left-aligned
+   (centred paragraphs with a ragged left edge are hard to read). */
+.about-body {
+  align-items: flex-start;
+}
+@media (max-width: 520px) {
+  .about-body p:not(.about-head):not(.authors) {
+    text-align: left;
   }
 }
