@@ -349,3 +349,13 @@ class ArtistDetails(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RunRunner(unittest.TestCase):
+    def test_run_entry_runner_is_an_optional_string(self):
+        base = {"skill": "scrape-shows", "at": "2026-10-13T06:14:00+02:00", "added": 0, "total": 1}
+        self.assertEqual(V.check_runs({"runs": [dict(base, runner="local")]}), [])
+        self.assertEqual(V.check_runs({"runs": [base]}), [])
+        self.assertTrue(
+            any("'runner' must be a string" in e for e in V.check_runs({"runs": [dict(base, runner=3)]}))
+        )

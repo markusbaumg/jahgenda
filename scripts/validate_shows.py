@@ -425,6 +425,8 @@ def check_runs(data):
         for key in ("failed_sources", "dropped", "notes"):
             if key in r and not isinstance(r[key], list):
                 errs.append(f"{where}: '{key}' must be a list")
+        if "runner" in r and not isinstance(r["runner"], str):
+            errs.append(f"{where}: 'runner' must be a string (cloud, local, launchd)")
         for j, d in enumerate(r.get("dropped") or []):
             if not (
                 isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)

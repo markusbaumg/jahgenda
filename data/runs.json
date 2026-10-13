@@ -24,7 +24,8 @@
           "kept": 0,
           "error": "ENOTFOUND"
         }
-      ]
+      ],
+      "runner": "cloud"
     },
     {
       "skill": "scrape-shows",
@@ -58,7 +59,8 @@
           "kept": 0,
           "error": "ENOTFOUND"
         }
-      ]
+      ],
+      "runner": "cloud"
     },
     {
       "skill": "scrape-shows",
@@ -1027,7 +1029,8 @@
           "found": 26,
           "kept": 23
         }
-      ]
+      ],
+      "runner": "local"
     },
     {
       "skill": "scrape-shows",
@@ -1136,7 +1139,8 @@
         "Ausserhalb des Fensters, vormerken: Groundation – Tribute to Bob Marley, Fri-Son Fribourg 16.05.2027.",
         "Tessin: alle Suchen ohne kommende Treffer (nur vergangene Events); Reeds Festival 2027 noch nicht angekündigt.",
         "Neue Venues (23) mit Koordinaten aus OpenStreetMap/Nominatim ergänzt; Nachtzug Aarau und Hacienda Sierre mit Stadtmitte-Koordinaten."
-      ]
+      ],
+      "runner": "local"
     }
   ]
 }

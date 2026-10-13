@@ -153,6 +153,7 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
 {
   "skill": "scrape-shows",
   "at": "2026-10-13T06:14:00+02:00",
+  "runner": "cloud",
   "added": 3, "updated": 1, "removed": 2, "total": 41,
   "failed_sources": ["https://www.example.ch/programm (timeout)"],
   "dropped": [ { "title": "Afro Night @ Plaza", "date": "2026-11-07", "venue": "Plaza", "city": "Zürich",
@@ -166,6 +167,8 @@ Prepend one entry to `data/runs.json` → `runs` (newest first, keep at most 60)
 }
 ```
 
+`runner` is where the run happened — `cloud` (the routine), `local` (`make scrape` on a Mac) or `launchd`
+(the Mac fallback job); take it from the environment variable `JAHGENDA_RUNNER`, default `cloud`.
 `sources` has one line for **every** source you touched this run (each agenda, every venue you opened,
 each web-search query as `"search: <query>"`, the watchlist as `"watchlist"`): `status` is `ok` (loaded,
 events read), `empty` (loaded, nothing matching), `failed` (could not load — put the reason in `error`),
