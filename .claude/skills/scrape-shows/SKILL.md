@@ -106,6 +106,11 @@ Rules while collecting:
   Do not try to get around bot protection — use the other sources for that venue instead.
 - Dates: `YYYY-MM-DD` local date. If only a weekday and day are given, resolve them against the page's
   month/year context. If you cannot pin the date, drop the candidate.
+- **A start–end range is one show.** Ticket pages (Eventfrog above all) give every event a `startDate` and an
+  `endDate`; an end on the next day (often the placeholder 23:59) is just the night running late. Write ONE
+  show on the start date — never one show per night, never a «2. Nacht», and no `end_date` range — unless
+  the page itself names separate nights or days (two dates with their own start times, «Day 1 / Day 2»,
+  a festival line-up by day).
 - Time: `HH:MM` (24h), door or start time if shown; otherwise omit.
 - Venue not in `data/venues.json`: add it — `city`, `canton`, `lat`, `lon` (venue website address →
   OpenStreetMap/Nominatim or Google Maps; if the exact spot cannot be found, use the city centre and write
