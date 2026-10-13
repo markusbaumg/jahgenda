@@ -125,6 +125,20 @@ class Slogans(unittest.TestCase):
         header = (ROOT / "src" / "components" / "Header.svelte").read_text(encoding="utf-8")
         self.assertIn(f'const DEFAULT = "{inline[0]}"', header, "the default tagline is the first slogan")
 
+    def test_inline_translations_equal_the_data_file(self):
+        # Story #48: the French and English lines sit inline too (#slogans-fr / #slogans-en).
+        import json
+
+        html = (ROOT / "index.html").read_text(encoding="utf-8")
+        data = json.loads((ROOT / "data" / "slogans.json").read_text(encoding="utf-8"))
+        for lang in ("fr", "en"):
+            m = re.search(rf'<script type="application/json" id="slogans-{lang}">(.*?)</script>', html, re.S)
+            self.assertIsNotNone(m, f"index.html has no inline slogans-{lang} block")
+            self.assertEqual(
+                json.loads(m.group(1)), data[lang], f"index.html #slogans-{lang} vs data/slogans.json"
+            )
+            self.assertTrue(8 <= len(data[lang]) <= 15, f"{lang}: 8–15 taglines")
+
 
 class ReadmeLayout(unittest.TestCase):
     """README «Layout of the repo» must name every page, script, data file, scraper file and workflow."""
