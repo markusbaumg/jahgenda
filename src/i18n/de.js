@@ -260,8 +260,8 @@ export default {
   "mine.backShort": "Zurück",
   "mine.backRest": " zur Agenda",
   "mine.noteOwn":
-    "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken».",
-  "mine.noteTaken": "Diese Shows sind in deinen Shows (★) gespeichert.",
+    "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Teilen» und dort «Alle merken».",
+  "mine.noteTaken": "Diese Shows sind jetzt in Meine Shows (★).",
   "mine.noteShared": "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.",
   "mine.gone": {
     one: " 1 Show aus dem Link ist vorbei oder nicht mehr in der Agenda.",

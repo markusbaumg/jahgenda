@@ -292,8 +292,7 @@ export default {
   "mine.backTitle": "Back to the agenda (Esc)",
   "mine.backShort": "Back",
   "mine.backRest": " to the agenda",
-  "mine.noteOwn":
-    "Saved in this browser. For another phone or your friends: “Share list”, then “Save all” there.",
+  "mine.noteOwn": "Saved in this browser. For another phone or your friends: “Share”, then “Save all” there.",
   "mine.noteTaken": "These shows are now in My shows (★).",
   "mine.noteShared": "Opened from a link. Nothing is saved on your side until you tap “Save all”.",
   "mine.gone": {

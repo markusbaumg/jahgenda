@@ -331,7 +331,7 @@ export default {
   "mine.backShort": "Retour",
   "mine.backRest": " à l'agenda",
   "mine.noteOwn":
-    "Enregistré dans ce navigateur. Pour un autre téléphone ou des amis : « Partager la liste », puis « Tout garder » là-bas.",
+    "Enregistré dans ce navigateur. Pour un autre téléphone ou des amis : « Partager », puis « Tout garder » là-bas.",
   "mine.noteTaken": "Ces concerts sont maintenant dans « Mes concerts » (★).",
   "mine.noteShared":
     "Ouvert depuis un lien. Rien n'est enregistré chez toi tant que tu ne touches pas « Tout garder ».",
