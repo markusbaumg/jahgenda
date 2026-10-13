@@ -3,8 +3,12 @@
  * back to the German here. Placeholders {name}; plurals { one, other }; a function where the grammar needs
  * it (prepositions, cases). The README («Languages») explains how to add a string. */
 
-// Cantons that take «im» (im Tessin, im Aargau), the rest take «in» (in Bern).
+// Cantons that take «im» (im Tessin, im Aargau), Waadt takes «in der», the rest take «in» (in Bern).
 const IM = new Set(["AG", "TG", "TI", "VS", "JU"]);
+const inRegion = (code, name) => `${code === "VD" ? "in der" : IM.has(code) ? "im" : "in"} ${name}`;
+// «A», «A und B», «A, B und C»
+const andList = (parts) =>
+  parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} und ${parts.at(-1)}`;
 
 export default {
   // --- Head, skip links, header ---------------------------------------------------------------------
@@ -134,8 +138,9 @@ export default {
   "empty.other": "Nichts{where}{when}{what}",
   "empty.genreFormat": "{genre}-{format}",
   "empty.q": " zu «{q}»",
-  "empty.inRegion": ({ code, name }) => ` ${IM.has(code) ? "im" : "in"} ${name}`,
-  "empty.inRegions": " in {names}",
+  "empty.inRegion": ({ code, name }) => ` ${inRegion(code, name)}`,
+  // Each canton with its own preposition: «im Tessin und im Aargau», «in der Waadt und im Wallis».
+  "empty.inRegions": ({ regions }) => ` ${andList(regions.map((r) => inRegion(r.code, r.name)))}`,
   "empty.inCantons": " in {n} Kantonen",
   "empty.radius": " im Umkreis von {km} km",
   "empty.inMonth": " im {month}",

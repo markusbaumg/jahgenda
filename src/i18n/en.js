@@ -168,7 +168,10 @@ export default {
   "empty.genreFormat": ({ genre, format }) => `${genre} ${String(format).toLowerCase()}`,
   "empty.q": " for “{q}”",
   "empty.inRegion": " in {name}",
-  "empty.inRegions": " in {names}",
+  "empty.inRegions": ({ regions }) => {
+    const names = regions.map((r) => r.name);
+    return ` in ${names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`}`;
+  },
   "empty.inCantons": " in {n} cantons",
   "empty.radius": " within {km} km",
   "empty.inMonth": " in {month}",

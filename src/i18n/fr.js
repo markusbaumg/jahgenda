@@ -36,6 +36,10 @@ const IN = {
   A: "en Autriche",
   FL: "au Liechtenstein",
 };
+const inRegion = (code, name) => IN[code] || `à ${name}`;
+// «A», «A et B», «A, B et C»
+const etList = (parts) =>
+  parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} et ${parts.at(-1)}`;
 
 export default {
   // --- Head, skip links, header ---------------------------------------------------------------------
@@ -203,8 +207,9 @@ export default {
   "empty.other": "Rien{where}{when}{what}",
   "empty.genreFormat": ({ genre, format }) => `${String(format).toLowerCase()} ${genre}`,
   "empty.q": " pour « {q} »",
-  "empty.inRegion": ({ code, name }) => ` ${IN[code] || `à ${name}`}`,
-  "empty.inRegions": " à {names}",
+  "empty.inRegion": ({ code, name }) => ` ${inRegion(code, name)}`,
+  // Each canton with its own preposition: «au Tessin et en Argovie».
+  "empty.inRegions": ({ regions }) => ` ${etList(regions.map((r) => inRegion(r.code, r.name)))}`,
   "empty.inCantons": " dans {n} cantons",
   "empty.radius": " dans un rayon de {km} km",
   "empty.inMonth": " en {month}",
