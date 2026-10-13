@@ -199,7 +199,7 @@ def report(healthy, lines, now):
     bullets = "\n".join(f"- {line}" for line in lines)
     links = (
         f"\n\nCheck: https://claude.ai/code/routines (last run and its log) · "
-        f"https://markusbaumg.github.io/jahgenda/log.html · "
+        f"https://markusbaumg.github.io/jahgenda/mischpult.html#status (Mischpult: status, runs) · "
         f"[watchdog run]({run_url})"
         if run_url
         else ""

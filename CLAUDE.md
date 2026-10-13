@@ -27,7 +27,7 @@ layout. The site UI is German; code, docs and config are English.
    pass. Otherwise commit nothing.
 4. **Every run leaves a trace:** an entry in `data/runs.json` (what was found, what was dropped and why,
    which sources could not be loaded) and the heartbeat `data/status.json`. Commit even when nothing
-   changed; on failure commit `status.json` with `"ok": false`. This is what `log.html` and the watchdog show.
+   changed; on failure commit `status.json` with `"ok": false`. This is what the Mischpult and the watchdog show.
 5. **Commit only `data/*` and `scraper/bands.md` (Suggestions).** Everything else is off limits.
 6. **When in doubt, leave it out.** One show too few beats one invented or wrong show.
 7. **Do not work around bot protection.** A blocked source is skipped and logged.
@@ -89,9 +89,13 @@ headline at 200 % text size).
   per visit), «Nie mehr zeigen» becomes a plain text link; Wo/Wann are icons on phones; desktop row actions on hover/focus
   only (Kusi reversed this after seeing the list, 18:20); the star stays (mark/unmark with undo, Interessiert/Ich gehe toggle); position only on a tap (final).
   Also: logo/mini-brand link to «./» (start), no logo watermark in the About section, ★ button after Wann.
-- **Mischpult (owners' page):** `mischpult.html` is hidden (no links, noindex, not in robots.txt — a Disallow line would
-  advertise it) — the overview of sources, prompt, rules and runs, plus the links to `log.html` and `review.html`.
-  Never call it «admin» (scanners try that path first). Keep it unlinked from the public pages.
+- **Mischpult (owners' console, story #55):** `mischpult.html` is the second Vite entry (`src/mischpult/`) and the
+  one tool for the owners: tabs Status (heartbeat + watchdog verdict), Läufe (the run log), Aussortiert (dropped
+  candidates, deduped like quality_review.py, «Gehört rein»), Quellen & Venues, Prompt & Regeln, Genres — each by
+  hash (`#status`, `#laeufe`, `#aussortiert`, `#quellen`, `#prompt`, `#genres`). `log.html` / `review.html` are
+  only redirects to `#laeufe` / `#aussortiert`. Hidden: no links from the public pages, noindex, not in robots.txt
+  (a Disallow line would advertise it), not in the service worker's precache. Never call it «admin» (scanners
+  try that path first).
 - **Design documents:** `design/logos.html` (picker), `design/festival-spec.md`, `design/pwa-spec.md`,
   `design/promo-plan.md` (domain jahgenda.ch is free; stickers; QR), `design/monitoring-plan.md`,
   `design/ui-revamp.md` (when the panel delivers). Promo concept for Seraina as a Claude artifact:
@@ -109,7 +113,7 @@ headline at 200 % text size).
 - **Source layout (story #33):** `index.html` at the root is the Vite entry; `src/` holds the page
   (`main.js`, `App.svelte`, `components/`, `stores/agenda.svelte.js`, `lib/` – the former lib.js split by
   topic, same exports, tested by `tests/lib.test.mjs`); `public/` holds what is copied unchanged (img/, fonts,
-  manifest, robots.txt, the static pages log/review/mischpult, and the plain scripts store/callout/pwa/sw until
+  manifest, robots.txt, the log/review redirects, and the plain scripts store/callout/pwa/sw until
   later milestones move them); `data/` stays at the root as the scraper's contract (the build copies it into
   `dist/data`, the dev server serves it); `dist/` is the build (gitignored) that pages.yml uploads. Versions
   are pinned exactly in `package.json`. `make check` = lint + validate + test + build + smoke. The migration also moves the page source from the repo root into

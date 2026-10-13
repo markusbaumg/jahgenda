@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Weekly quality review: open one GitHub issue listing what the scraper dropped in the last 7 days.
 
-Gives the owners a notification (GitHub issue → mail/app) to check false negatives on review.html.
+Gives the owners a notification (GitHub issue → mail/app) to check false negatives in the Mischpult
+(mischpult.html#aussortiert).
 Stdlib only. Needs GITHUB_TOKEN (issues: write) and GITHUB_REPOSITORY. DRY_RUN=1 prints instead.
 
 Usage: python3 scripts/quality_review.py [--days 7]
@@ -86,8 +87,9 @@ def dedupe(items):
 def body_for(items, days):
     lines = [
         f"The scraper dropped **{len(items)} candidate(s)** in the last {days} days. Please skim them for",
-        f"false negatives on [review.html]({SITE}review.html) — each row has a «Gehört rein» button",
-        "that opens a prefilled issue. Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
+        f"false negatives in the [Mischpult]({SITE}mischpult.html#aussortiert) (tab «Aussortiert») —",
+        "each row has a «Gehört rein» button that opens a prefilled issue.",
+        "Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
         "",
     ]
     for at, d, r in sorted(items, key=lambda x: x[0], reverse=True):
@@ -104,7 +106,7 @@ def body_for(items, days):
                 sources[s.get("name")] = s.get("error", "")
     if sources:
         lines += ["", "**Sources that failed in these runs:**"] + [f"- {n}: {e}" for n, e in sources.items()]
-    lines += ["", f"Full logs: {SITE}log.html"]
+    lines += ["", f"Full logs: {SITE}mischpult.html#laeufe"]
     return "\n".join(lines)
 
 
