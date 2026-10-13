@@ -1,0 +1,152 @@
+/* Design tokens and the display face – the one global stylesheet every other file builds on.
+ * Imported first by src/styles/index.css; the static pages get the same rules via dist/style.css. */
+/* ---------- Design tokens (design/ui-revamp.md §2, «Soundsystem Swiss») ----------
+ * Saturated --red/--gold/--green are fills and rules; words always use the *-text variant.
+ * Red = time pressure, gold = selection and attention, green = commitment and proximity.
+ */
+:root {
+  color-scheme: dark;
+  /* surfaces */
+  --bg: #14110e;
+  --surface: #221c17;
+  --surface-2: #2a2219;
+  --line: #766759; /* spec lists #4d4036 as 3.2:1, measured 1.9:1; this is 3.5:1 on --bg, 3.1:1 on --surface */
+  --line-soft: #2e2822;
+  /* text */
+  --text: #f3ead8;
+  --muted: #bcae98;
+  --faint: #7d7060;
+  /* brand fills (plates, rules, stripes, chip backgrounds) */
+  --red: #d8342f;
+  --gold: #f2b632;
+  --green: #1e8f4e;
+  /* brand text variants (all >= 4.5:1 on --bg / --surface) */
+  --red-text: #ff7a6e;
+  --gold-text: #f2b632;
+  --green-text: #4fd08a;
+  --on-gold: #14110e;
+  --on-red: #fffaf5; /* 4.6:1 on --red (spec's #fff5ec measured 4.4:1) */
+  --on-green: #041008; /* 4.7:1 on --green (spec's #0f2a1a measured 3.7:1) */
+  /* tints (14 % of the fill over --bg) */
+  --red-tint: rgba(216, 52, 47, 0.14);
+  --gold-tint: rgba(242, 182, 50, 0.14);
+  --green-tint: rgba(30, 143, 78, 0.14);
+  /* atmosphere */
+  --sun: radial-gradient(60vw 40vh at 0% 0%, rgba(242, 182, 50, 0.1), transparent 70%);
+  --grain-opacity: 0.035;
+
+  /* typography (16 px base; nothing in the agenda below --fs-1) */
+  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "JahDisplay", "JahDisplay Fallback", "JahDisplay Fallback Condensed",
+    "JahDisplay Fallback Sans", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
+  --fs-0: 0.78rem;
+  --fs-1: 0.8125rem;
+  --fs-2: 0.875rem;
+  --fs-3: 0.9375rem;
+  --fs-4: 1rem;
+  --fs-5: 1.125rem;
+  --fs-d1: 1.5rem;
+  --fs-d2: 2.1rem;
+  --fs-d3: clamp(2.4rem, 8vw, 3.6rem);
+  --lh-tight: 1.1;
+  --lh-body: 1.4;
+  --track-caps: 0.1em;
+
+  /* spacing, layout, radii, shadows */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --wrap: 760px;
+  --gutter: 16px;
+  --date-w: 3rem; /* 48 px – in rem, so the HEUTE / MORGEN pill still fits the column at 200 % text size */
+  --side-w: 44px;
+  --tap: 44px;
+  --bar-top: 48px;
+  --bar-chips: 36px;
+  --safe-top: env(safe-area-inset-top, 0px); /* status-bar inset of a standalone app: the bar covers it */
+  --bar-h: calc(
+    var(--bar-top) + var(--bar-chips) + var(--safe-top)
+  ); /* 84 px (+ inset), frozen: the bar never changes height */
+  --month-h: 32px;
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 12px;
+  --r-pill: 999px;
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --sh-2: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --sh-bar: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --ring: 0 0 0 3px var(--gold), 0 0 0 6px var(--bg);
+
+  /* motion: one reggae bar at 75 bpm = 800 ms, every duration is a subdivision */
+  --t-1: 100ms;
+  --t-2: 200ms;
+  --t-3: 400ms;
+  --t-4: 800ms;
+  --ease-tape: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-skank: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --stagger: 24ms;
+
+  font-family: var(--font-body);
+}
+@media (min-width: 768px) {
+  :root {
+    --bar-top: 56px;
+    --bar-chips: 40px; /* 96 px bar on desktop */
+    --date-w: 4rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-1: 0ms;
+    --t-2: 0ms;
+    --t-3: 0ms;
+    --t-4: 0ms;
+  }
+}
+
+/* Display face: Anton, self-hosted Latin subset (img/fonts, ~9 KB, OFL). Weight range 400–900 so no
+ * browser ever synthesises a bold; the size-adjusted local fallback keeps the layout stable while it loads. */
+@font-face {
+  font-family: "JahDisplay";
+  src: url("/img/fonts/jahdisplay.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-007E, U+00A0-00FF, U+2013-2014, U+2022, U+2026;
+}
+@font-face {
+  font-family: "JahDisplay Fallback";
+  src: local("Impact"), local("Arial Narrow Bold"), local("ArialNarrow-Bold");
+  font-weight: 400 900;
+  size-adjust: 95%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+/* Phones have neither Impact nor Arial Narrow, so the face above never matched there and the lockup
+ * painted 39 % too wide in a light sans until the woff2 arrived. One face per platform, each with its
+ * own size-adjust (measured on «JAHGENDA» against Anton: Helvetica Neue Condensed Bold 88 %, Helvetica /
+ * Arial Bold 69 %, Roboto Bold taken as Arial's); the line-box overrides are shared. */
+@font-face {
+  font-family: "JahDisplay Fallback Condensed";
+  src: local("HelveticaNeue-CondensedBold"), local("Helvetica Neue Condensed Bold");
+  font-weight: 400 900;
+  size-adjust: 88%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "JahDisplay Fallback Sans";
+  src: local("Roboto Bold"), local("Roboto-Bold"), local("Arial Bold"), local("Arial-BoldMT"),
+    local("Helvetica Neue Bold"), local("HelveticaNeue-Bold");
+  font-weight: 400 900;
+  size-adjust: 69%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}

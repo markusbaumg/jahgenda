@@ -6,10 +6,7 @@ import { parseDay, shortId, distanceKm, venueKey } from "../lib/index.js";
 import { fold, searchText, matchesSearch } from "../lib/search.js";
 import { todayStart, setTimeFlags, monthStart, addDays } from "../lib/dates.js";
 import { t } from "../i18n/core.js";
-
-const DATA_URL = "data/shows.json";
-const VENUES_URL = "data/venues.web.json"; // venues.json trimmed to city/lat/lon/url (format_data.py)
-const GENRES_URL = "data/genres.json";
+import { DATA, fetchJson, tryJson } from "../lib/load.js";
 
 export const FORMAT_LABEL = {
   get festival() {
@@ -127,8 +124,7 @@ export function createAgenda() {
 
   // Venue sites and places arrive after the shows (venues.web.json is optional for the page).
   function loadVenues() {
-    return fetch(VENUES_URL, { cache: "no-cache" })
-      .then((r) => (r.ok ? r.json() : null))
+    return tryJson(DATA.venuesWeb)
       .then((v) => {
         const sites = {};
         const places = [];
@@ -150,12 +146,9 @@ export function createAgenda() {
     loadState = "loading";
     loadError = null;
     try {
-      const [res, gres] = await Promise.all([
-        fetch(DATA_URL, { cache: "no-cache" }),
-        fetch(GENRES_URL, { cache: "no-cache" }).catch(() => null),
-      ]);
+      // shows.json is the agenda (an error state without it); genres.json is optional.
+      const [data, g] = await Promise.all([fetchJson(DATA.shows), tryJson(DATA.genres)]);
       try {
-        const g = gres && gres.ok ? await gres.json() : null;
         const order = [];
         const label = {};
         for (const item of (g && g.genres) || []) {
@@ -169,8 +162,6 @@ export function createAgenda() {
       } catch {
         /* genres.json is optional for the page; chips then follow the data */
       }
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
 
       today = todayStart();
       const list = (data.shows || [])

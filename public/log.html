@@ -2,258 +2,30 @@
 <html lang="de-CH">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The scraper log moved into the Mischpult (story #55); this stub keeps old links working. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
     <title>Scraper-Log · Jahgenda</title>
-    <meta
-      name="description"
-      content="Was die KI-Agenten bei jedem Lauf gefunden, geändert und verworfen haben."
-    />
-    <meta name="theme-color" content="#14110e" />
-    <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="preload" href="img/fonts/jahdisplay.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="style.css" />
+    <meta http-equiv="refresh" content="0; url=mischpult.html#laeufe" />
+    <script>
+      location.replace("mischpult.html#laeufe");
+    </script>
     <style>
-      .run {
-        padding: 16px 0;
-        border-bottom: 1px solid var(--line);
+      body {
+        background: #14110e;
+        color: #f3ead8;
+        font:
+          1rem/1.4 system-ui,
+          sans-serif;
+        padding: 16px;
       }
-      .run h3 {
-        margin: 0;
-        font-size: 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px 12px;
-        align-items: baseline;
-      }
-      .run h3 time {
-        color: var(--muted);
-        font-weight: 400;
-        font-size: 0.9rem;
-      }
-      .counts {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin: 8px 0;
-      }
-      .count {
-        font-size: 0.78rem;
-        font-weight: 700;
-        border-radius: 999px;
-        padding: 3px 9px;
-        background: var(--surface);
-        color: var(--muted);
-      }
-      .count.add {
-        color: var(--green-text);
-      }
-      .count.rem {
-        color: var(--red-text);
-      }
-      .run ul {
-        margin: 6px 0 0;
-        padding-left: 18px;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-      .run li,
-      .run summary {
-        overflow-wrap: anywhere; /* a long source URL must not widen a 320 px page */
-      }
-      .run li strong {
-        color: var(--text);
-        font-weight: 600;
-      }
-      .run details {
-        margin-top: 6px;
-      }
-      .run summary {
-        cursor: pointer;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-      .tbl {
-        overflow-x: auto;
-        margin-top: 6px;
-      }
-      table.sources {
-        border-collapse: collapse;
-        width: 100%;
-        font-size: 0.85rem;
-      }
-      table.sources th,
-      table.sources td {
-        text-align: left;
-        padding: 5px 8px;
-        border-bottom: 1px solid var(--line);
-      }
-      table.sources th {
-        font-size: 0.7rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-      table.sources td:nth-child(3),
-      table.sources td:nth-child(4) {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-      }
-      tr.st-failed td:nth-child(2) {
-        color: var(--red-text);
-      }
-      tr.st-ok td:nth-child(2) {
-        color: var(--green-text);
-      }
-      tr.st-empty td:nth-child(2),
-      tr.st-skipped td:nth-child(2) {
-        color: var(--muted);
-      }
-      .back,
-      .foot a {
-        display: inline-block;
-        margin-top: 8px;
-        color: var(--green-text);
-      }
-      .foot a:hover {
-        color: var(--gold-text);
+      a {
+        color: #4fd08a;
       }
     </style>
   </head>
   <body>
-    <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
-
-    <header class="wrap head">
-      <h1 class="logo">
-        <img class="logo-mark" src="img/logo/jahgenda.svg" alt="" width="48" height="48" /><span
-          class="wordmark"
-          ><span class="logo-word">Jah</span><span class="logo-word genda">genda</span></span
-        >
-      </h1>
-      <p class="tag">
-        Scraper-Log<span class="tri-dots" aria-hidden="true"><i></i><i></i><i></i></span
-        ><span>Was die KI-Agenten gemacht haben</span>
-      </p>
-      <a class="back" href="./" title="Zurück zur Agenda">← zur Agenda</a> ·
-      <a class="back" href="review.html" title="Aussortierte Kandidaten gegenprüfen">Aussortiert prüfen →</a>
-    </header>
-
-    <main class="wrap">
-      <p class="notice">
-        Jeder Lauf des Scrapers hinterlässt hier einen Eintrag: was neu, geändert oder entfernt wurde, welche
-        Quellen nicht erreichbar waren und was mit welcher Begründung verworfen wurde.
-      </p>
-      <p id="status" class="status" role="status">Lade Log …</p>
-      <div id="runs"></div>
-    </main>
-
-    <footer class="foot">
-      <div class="wrap">
-        <p class="updated">
-          <a href="https://github.com/markusbaumg/jahgenda" title="Quellcode auf GitHub öffnen">GitHub</a> ·
-          <a
-            href="https://github.com/markusbaumg/jahgenda/commits/main/data"
-            title="Änderungsverlauf der Daten auf GitHub öffnen"
-            >Alle Änderungen an den Daten</a
-          >
-        </p>
-      </div>
-    </footer>
-
-    <script>
-      (() => {
-        const escape = (s) =>
-          String(s ?? "").replace(
-            /[&<>"']/g,
-            (c) =>
-              ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#39;",
-              })[c],
-          );
-        const fmt = new Intl.DateTimeFormat("de-CH", {
-          dateStyle: "full",
-          timeStyle: "short",
-        });
-        const status = document.getElementById("status");
-        const box = document.getElementById("runs");
-        const names = {
-          "scrape-shows": "Konzerte aktualisiert",
-          "harvest-bands": "Bands aus Festivals gesammelt",
-        };
-
-        const list = (title, items, render) =>
-          items && items.length
-            ? `<details open><summary title="Auf- oder zuklappen">${title} (${items.length})</summary><ul>${items.map(render).join("")}</ul></details>`
-            : "";
-
-        // Per-source table: which sources were covered, which failed, where the shows came from.
-        const STATUS = {
-          ok: ["ok", "geladen"],
-          empty: ["empty", "nichts gefunden"],
-          failed: ["failed", "nicht erreichbar"],
-          skipped: ["skipped", "übersprungen"],
-        };
-        const sourcesTable = (sources) => {
-          if (!Array.isArray(sources) || !sources.length) return "";
-          const counts = {};
-          for (const s of sources) counts[s.status] = (counts[s.status] || 0) + 1;
-          const summary = Object.entries(counts)
-            .map(([k, n]) => `${n} ${(STATUS[k] || [k, k])[1]}`)
-            .join(" · ");
-          return `<details><summary>Quellen (${sources.length}: ${escape(summary)})</summary><div class="tbl"><table class="sources"><thead><tr><th>Quelle</th><th>Status</th><th>gefunden</th><th>übernommen</th></tr></thead><tbody>${sources
-            .map(
-              (s) =>
-                `<tr class="st-${escape((STATUS[s.status] || ["x"])[0])}"><td>${s.url ? `<a href="${escape(s.url)}" target="_blank" rel="noopener">${escape(s.name)}</a>` : escape(s.name)}</td><td>${escape((STATUS[s.status] || [s.status, s.status])[1])}${s.error ? ` – ${escape(s.error)}` : ""}</td><td>${s.found ?? ""}</td><td>${s.kept ?? ""}</td></tr>`,
-            )
-            .join("")}</tbody></table></div></details>`;
-        };
-
-        fetch("data/runs.json", { cache: "no-cache" })
-          .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
-          .then((data) => {
-            const runs = Array.isArray(data.runs) ? data.runs : [];
-            if (!runs.length) {
-              status.textContent =
-                "Noch kein Lauf protokolliert. Der erste Scraper-Lauf schreibt hier seinen Bericht.";
-              return;
-            }
-            status.textContent = "";
-            box.innerHTML = runs
-              .map((r) => {
-                let when = r.at;
-                try {
-                  when = fmt.format(new Date(r.at));
-                } catch {}
-                return `
-              <section class="run">
-                <h3>${escape(names[r.skill] || r.skill)} <time datetime="${escape(r.at)}">${escape(when)}</time></h3>
-                <div class="counts">
-                  ${r.runner ? `<span class="count">${escape({ cloud: "Cloud-Routine", launchd: "Mac (launchd)", local: "Mac (lokal)" }[r.runner] || r.runner)}</span>` : ""}
-                  ${r.added ? `<span class="count add">+${r.added} neu</span>` : ""}
-                  ${r.updated ? `<span class="count">~${r.updated} geändert</span>` : ""}
-                  ${r.removed ? `<span class="count rem">−${r.removed} entfernt</span>` : ""}
-                  ${typeof r.total === "number" ? `<span class="count">${r.total} total</span>` : ""}
-                </div>
-                ${sourcesTable(r.sources)}
-                ${list("Verworfen", r.dropped, (d) => `<li><strong>${escape(d.title)}</strong> – ${escape(d.why)}</li>`)}
-                ${list("Nicht erreichbar", r.failed_sources, (f) => `<li>${escape(f)}</li>`)}
-                ${list("Notizen", r.notes, (n) => `<li>${escape(n)}</li>`)}
-              </section>`;
-              })
-              .join("");
-          })
-          .catch(() => {
-            status.textContent = "Log konnte nicht geladen werden.";
-          });
-      })();
-    </script>
-    <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
+    <p>Das Scraper-Log ist umgezogen: <a href="mischpult.html#laeufe">weiter</a>.</p>
   </body>
 </html>

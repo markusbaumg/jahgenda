@@ -191,6 +191,3 @@ export function createCallout() {
 }
 
 export const callout = createCallout();
-
-// The plain scripts in public/ (pwa.js: the update toast makes way for the sticker) still look it up here.
-if (typeof window !== "undefined") window.jahCallout = callout;

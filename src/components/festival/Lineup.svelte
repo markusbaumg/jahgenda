@@ -6,7 +6,6 @@
    * out, then the <details> closes (reduced motion: at once). The open state is kept per show in the
    * festival store across re-renders; a search hit inside the line-up or a deep link opens it at once.
    * Ported from app.js lineupHtml() and the toggle/click listeners on #views. */
-  import "./festival.css";
   import { untrack } from "svelte";
   import { lineups } from "../../stores/festival.svelte.js";
   import { lineupDays, lineupLabel } from "../../lib/festival.js";

@@ -26,12 +26,30 @@
       ],
       "source": "https://en.wikipedia.org/wiki/Alborosie",
       "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026",
+        "Reggae Jam 2026",
+        "Plein-les-Watts 2025",
+        "Summerjam 2025",
+        "Rototom Sunsplash 2024"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Alex Dynamite & The Pyrolites": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Alpha Blondy": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Alpha_Blondy",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Ami Warning": {
       "genres": [
@@ -52,6 +70,18 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Barrington Levy": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Barrington_Levy",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2026",
+        "Summerjam 2026"
+      ]
+    },
     "Basement Roots": {
       "genres": [
         "reggae",
@@ -65,6 +95,18 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Bazil": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://openagenda.com/en/ile-de-france/events/bazil-max-livio",
+      "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Reggae Jam 2026"
+      ]
     },
     "Bazzassine": {
       "genres": [],
@@ -84,6 +126,18 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Beenie Man": {
+      "genres": [
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Beenie_Man",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2025",
+        "Rototom Sunsplash 2024",
+        "Summerjam 2024"
+      ]
+    },
     "Biga Ranx": {
       "genres": [
         "dancehall",
@@ -91,7 +145,11 @@
         "reggae"
       ],
       "source": "https://fr.wikipedia.org/wiki/Biga_Ranx",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Summerjam 2026"
+      ]
     },
     "Boundless Vibes Hifi": {
       "genres": [
@@ -125,6 +183,9 @@
       ],
       "source": "https://www.rsi.ch/rete-tre/programmi/intrattenimento/reggae-yard/Revelation-il-secondo-lavoro-dei-Breakfast-Mood--3084041.html",
       "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2025"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Brushy One String": {
@@ -144,6 +205,22 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Burning Spear": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Burning_Spear",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Mighty Sounds 2026",
+        "Plein-les-Watts 2026",
+        "Summerjam 2026",
+        "Rototom Sunsplash 2025",
+        "Reggae Jam 2024"
+      ]
+    },
     "Bush Doctors Sound System": {
       "genres": [
         "soundsystem",
@@ -152,6 +229,19 @@
       "source": "https://legroove.ch/agenda/sub-a-dub-2/",
       "checked": "2026-10-13"
     },
+    "Busy Signal": {
+      "genres": [
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Busy_Signal",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2024",
+        "Rototom Sunsplash 2024",
+        "Summerjam 2024"
+      ]
+    },
     "Cali P": {
       "genres": [
         "dancehall",
@@ -159,6 +249,10 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Cali_P",
       "checked": "2026-10-13",
+      "festivals": [
+        "Lakesplash 2026",
+        "Reeds Festival 2025"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Call Me Malcolm": {
@@ -203,10 +297,33 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-13"
     },
+    "Charly Black": {
+      "genres": [
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Charly_Black",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Summerjam 2026"
+      ]
+    },
     "Chris Biomassa": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Collie Buddz": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Collie_Buddz",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2024",
+        "Summerjam 2024"
+      ]
     },
     "Culcha Candela": {
       "genres": [
@@ -214,7 +331,23 @@
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Culcha_Candela",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2024"
+      ]
+    },
+    "Culture": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Culture_(band)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2026",
+        "Summerjam 2026",
+        "Rototom Sunsplash 2025"
+      ]
     },
     "Current Swell": {
       "genres": [],
@@ -290,6 +423,10 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Dub_Inc",
       "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Summerjam 2026"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Dub Pistols": {
@@ -317,6 +454,10 @@
       ],
       "source": "https://en.wikipedia.org/wiki/Dubioza_Kolektiv",
       "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2024",
+        "Reeds Festival 2024"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Dubkasm": {
@@ -327,6 +468,17 @@
       "source": "https://dubkasm.bandcamp.com/music",
       "checked": "2026-10-13",
       "tour_checked": "2026-10-13"
+    },
+    "Eesah": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://www.reggaeville.com/artist-details/eesah/about/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2025",
+        "Summerjam 2025"
+      ]
     },
     "EKR": {
       "genres": [],
@@ -345,6 +497,9 @@
       ],
       "source": "https://www.reggaeville.com/artist-details/elijah-salomon/about/",
       "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Elimb'a Mbo": {
@@ -365,12 +520,41 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Etana": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Etana_(musician)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2025",
+        "Reggae Jam 2024",
+        "Rototom Sunsplash 2024"
+      ]
+    },
     "Famara": {
       "genres": [
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Famara",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2024"
+      ]
+    },
+    "Fast Food Orchestra": {
+      "genres": [
+        "ska",
+        "reggae",
+        "rocksteady"
+      ],
+      "source": "https://last.fm/music/Fast+Food+Orchestra/+wiki",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2026",
+        "Mighty Sounds 2025",
+        "Mighty Sounds 2024"
+      ]
     },
     "Fleuve Congo": {
       "genres": [
@@ -405,10 +589,32 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Ganjaman": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Ganjaman",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Reggae Jam 2024"
+      ]
+    },
     "Genep'high": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "General Levy": {
+      "genres": [
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/General_Levy",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Gentleman": {
       "genres": [
@@ -418,6 +624,11 @@
       ],
       "source": "https://en.wikipedia.org/wiki/Gentleman_(musician)",
       "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2026",
+        "Plein-les-Watts 2025",
+        "Reeds Festival 2024"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Golden Roots Soundsystem": {
@@ -437,6 +648,19 @@
       "source": "https://www.jds.fr/artistes/goulamas-k-8342_N",
       "checked": "2026-10-13",
       "tour_checked": "2026-10-13"
+    },
+    "Groundation": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Groundation_(band)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Reeds Festival 2024",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Hanna Mercy": {
       "genres": [],
@@ -458,6 +682,42 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Inner Circle": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Inner_Circle_(band)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Summerjam 2025"
+      ]
+    },
+    "Iration Steppas": {
+      "genres": [
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Iration_Steppas",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Rototom Sunsplash 2025"
+      ]
+    },
+    "Irie Révoltés": {
+      "genres": [
+        "reggae",
+        "ska",
+        "dancehall"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Irie_R%C3%A9volt%C3%A9s",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2025",
+        "Summerjam 2025"
+      ]
+    },
     "Ironworks Dread": {
       "genres": [
         "dub",
@@ -466,12 +726,41 @@
       "source": "https://legroove.ch/agenda/sub-a-dub-2/",
       "checked": "2026-10-13"
     },
+    "Israel Vibration": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Israel_Vibration",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2026",
+        "Rototom Sunsplash 2026"
+      ]
+    },
+    "Jah Lil": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://jamaica-gleaner.com/article/entertainment/20160424/danny-brownie-returns-mainstream-music-produces-reggae-act-jah-lil",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2024",
+        "Rototom Sunsplash 2024",
+        "Summerjam 2024"
+      ]
+    },
     "Jahcoustix": {
       "genres": [
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Jahcoustix",
       "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Reggae Jam 2024"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Jahneration": {
@@ -480,6 +769,9 @@
       ],
       "source": "https://www.ostrodareggae.com/en/jahneration-france",
       "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2025"
+      ],
       "tour_checked": "2026-10-13"
     },
     "Jamaram": {
@@ -487,7 +779,24 @@
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Jamaram",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Reggae Jam 2024"
+      ]
+    },
+    "Jesse Royal": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Jesse_Royal_(musician)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2025",
+        "Rototom Sunsplash 2024",
+        "Summerjam 2024"
+      ]
     },
     "Joe Yorke": {
       "genres": [
@@ -496,7 +805,22 @@
         "dub"
       ],
       "source": "https://www.reggae.be/en/magazine/archive/2024-07-19-the-co-operators-sounds-from-the-fridge-waggle-dan/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025"
+      ]
+    },
+    "Johnny Clarke": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Johnny_Clarke",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2024",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Jonah Dan": {
       "genres": [
@@ -506,6 +830,30 @@
       ],
       "source": "https://eventbook.ro/music/bilete-ctrl-riddim-bandits-sound-system-presents-nomadix-jonah-dan-stepper-one-bass-healing-hi-fi?lang=ro",
       "checked": "2026-10-13"
+    },
+    "Julian Marley": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Julian_Marley",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2026",
+        "Rototom Sunsplash 2025",
+        "Summerjam 2024"
+      ]
+    },
+    "Junior Kelly": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Junior_Kelly",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2026",
+        "Summerjam 2025"
+      ]
     },
     "K. Evans": {
       "genres": [],
@@ -524,7 +872,10 @@
         "dancehall"
       ],
       "source": "https://en.wikipedia.org/wiki/Kabaka_Pyramid",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2024"
+      ]
     },
     "KaButt": {
       "genres": [],
@@ -550,6 +901,59 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Khalia": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://past.jamaica-gleaner.com/article/entertainment/20180831/khalia-rise",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2024",
+        "Rototom Sunsplash 2024",
+        "Summerjam 2024"
+      ]
+    },
+    "Kumar Fyah": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://www.jamaicaobserver.com/2018/09/20/kumar-steps-out-singer-to-launch-solo-career-sunday/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Summerjam 2025"
+      ]
+    },
+    "Ky-Mani Marley": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Ky-Mani_Marley",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Summerjam 2026",
+        "Rototom Sunsplash 2025",
+        "Plein-les-Watts 2024",
+        "Summerjam 2024"
+      ]
+    },
+    "L'Entourloop": {
+      "genres": [
+        "reggae",
+        "dub",
+        "dancehall"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/L%27Entourloop",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2025",
+        "Rototom Sunsplash 2025",
+        "Summerjam 2024"
+      ]
+    },
     "Lagwada": {
       "genres": [],
       "source": "",
@@ -574,10 +978,37 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Lila Iké": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Lila_Ik%C3%A9",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Summerjam 2026",
+        "Summerjam 2024"
+      ]
+    },
     "Limitless Soundsystem": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Little Lion Sound": {
+      "genres": [
+        "soundsystem",
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.reggaeville.com/artist-details/little-lion-sound/about/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Ruhr Reggae Summer 2026",
+        "Plein-les-Watts 2024",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Los Billtones": {
       "genres": [
@@ -585,12 +1016,40 @@
         "reggae"
       ],
       "source": "https://www.albani.ch/de/programm/1319/Los-Billtones-CH-Warm-Up-Alex-aka-The-AmpliFire.html",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026"
+      ]
     },
     "Los Fastidios": {
       "genres": [],
       "source": "https://it.wikipedia.org/wiki/Los_Fastidios",
       "checked": "2026-10-13"
+    },
+    "Luciano": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Luciano",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Summerjam 2026",
+        "Reggae Jam 2024"
+      ]
+    },
+    "Macka B": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Macka_B",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Rototom Sunsplash 2026"
+      ]
     },
     "Mad Professor": {
       "genres": [
@@ -598,7 +1057,11 @@
         "reggae"
       ],
       "source": "https://en.wikipedia.org/wiki/Mad_Professor",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Afro-Pfingsten 2026",
+        "Rototom Sunsplash 2025"
+      ]
     },
     "Mango Wood": {
       "genres": [
@@ -607,7 +1070,22 @@
         "reggae"
       ],
       "source": "https://liquidatormusic.com/en/ediciones/artista/mango-wood",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025"
+      ]
+    },
+    "Marcus Gad": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://easystar.com/?p=19489",
+      "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Marley's Ghost": {
       "genres": [
@@ -615,7 +1093,11 @@
         "roots"
       ],
       "source": "https://www.hamburg-tourism.de/sehen-erleben/veranstaltungen/veranstaltungskalender/marleys-ghost-bob-marley-tribute-3/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Reeds Festival 2026"
+      ]
     },
     "Mighty Children": {
       "genres": [],
@@ -632,18 +1114,47 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Miwata": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Miwata",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Ruhr Reggae Summer 2026",
+        "Summerjam 2025",
+        "Summerjam 2024"
+      ]
+    },
     "Mo'Kalamity": {
       "genres": [
         "roots",
         "reggae"
       ],
       "source": "https://fr.wikipedia.org/wiki/Mo'Kalamity",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026",
+        "Plein-les-Watts 2024",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Mo'Kalamity & The Wizards": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Morgan Heritage": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Morgan_Heritage",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Summerjam 2025"
+      ]
     },
     "Mortimer": {
       "genres": [
@@ -651,14 +1162,35 @@
         "roots"
       ],
       "source": "https://www.reggaeville.com/artist-details/mortimer/about/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Summerjam 2025"
+      ]
     },
     "Mother Dubber": {
       "genres": [
         "dub"
       ],
       "source": "https://m.soundcloud.com/motherdubber",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025"
+      ]
+    },
+    "Mr. Vegas": {
+      "genres": [
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Mr._Vegas",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Rototom Sunsplash 2026",
+        "Summerjam 2025",
+        "Plein-les-Watts 2024"
+      ]
     },
     "Mr. Williamz": {
       "genres": [
@@ -673,10 +1205,46 @@
       "source": "https://www.dynamo.ch/veranstaltung/10-years-dmb-records-skabooom-monty-burning-fuses",
       "checked": "2026-10-13"
     },
+    "Nadia McAnuff": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://www.reggae.be/en/magazine/archive/2024-07-21-nadia-mcanuff-the-ligerians-shelter-from-the-storm/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Plein-les-Watts 2024"
+      ]
+    },
+    "Nattali Rize": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Nattali_Rize",
+      "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Plein-les-Watts 2026",
+        "Rototom Sunsplash 2024"
+      ]
+    },
     "Nightmanager": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Nosliw": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Nosliw",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Summerjam 2026"
+      ]
     },
     "Nucha": {
       "genres": [],
@@ -694,7 +1262,23 @@
         "soundsystem"
       ],
       "source": "https://festapp.io/fr/artists/obf",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Rototom Sunsplash 2024"
+      ]
+    },
+    "Omar Perry": {
+      "genres": [
+        "reggae",
+        "dub"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Omar_Perry",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Plein-les-Watts 2025"
+      ]
     },
     "Open Season": {
       "genres": [
@@ -703,7 +1287,23 @@
         "rocksteady"
       ],
       "source": "https://de.wikipedia.org/wiki/Open_Season_(Band)",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026",
+        "Mighty Sounds 2024",
+        "Plein-les-Watts 2024"
+      ]
+    },
+    "Original Koffee": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Original_Koffee",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2026",
+        "Rototom Sunsplash 2025"
+      ]
     },
     "Paolo Baldini": {
       "genres": [
@@ -748,10 +1348,54 @@
       "source": "https://de.wikipedia.org/wiki/Phenomden",
       "checked": "2026-10-13"
     },
+    "Pow Pow Movement": {
+      "genres": [
+        "soundsystem",
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Pow_Pow_Movement",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Ruhr Reggae Summer 2026",
+        "Summerjam 2025"
+      ]
+    },
+    "Protoje": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Protoje",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Ruhr Reggae Summer 2026",
+        "Summerjam 2026"
+      ]
+    },
     "Quatre in Toulouse": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Queen Omega": {
+      "genres": [
+        "reggae",
+        "roots",
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Queen_Omega_(singer)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Reggae Jam 2026",
+        "Rototom Sunsplash 2026",
+        "Summerjam 2026",
+        "Plein-les-Watts 2025",
+        "Reeds Festival 2024",
+        "Summerjam 2024"
+      ]
     },
     "Radio Rhum Reggae": {
       "genres": [
@@ -807,6 +1451,19 @@
       "source": "https://www.last.fm/de/music/Refrigerators/Kompressor",
       "checked": "2026-10-13"
     },
+    "Romain Virgo": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Romain_Virgo",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Ruhr Reggae Summer 2026",
+        "Reggae Jam 2024",
+        "Rototom Sunsplash 2024",
+        "Summerjam 2024"
+      ]
+    },
     "Root Block Sound": {
       "genres": [
         "soundsystem",
@@ -820,6 +1477,33 @@
       "source": "https://www.mixcloud.com/LionPowaSoundsystem/",
       "checked": "2026-10-13"
     },
+    "Samora": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.iriemag.com/magazine/rock/samora-wins-best-new-reggae-artist-at-the-2023-caribbean-music-awards/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026",
+        "Reggae Jam 2026",
+        "Summerjam 2026",
+        "Reggae Jam 2024",
+        "Summerjam 2024"
+      ]
+    },
+    "Samory I": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://www.reggaeville.com/artist-details/samory-i/about/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2024",
+        "Summerjam 2024"
+      ]
+    },
     "Santosh Aerthott": {
       "genres": [
         "ska",
@@ -827,6 +1511,17 @@
       ],
       "source": "https://www.swissinfo.ch/eng/culture/open-season-get-ready/1133424",
       "checked": "2026-10-13"
+    },
+    "Sara Lugo": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Sara_Lugo",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Lakesplash 2026",
+        "Reggae Jam 2024"
+      ]
     },
     "Savage Dub": {
       "genres": [],
@@ -848,13 +1543,53 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Shenseea": {
+      "genres": [
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Shenseea",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Summerjam 2025"
+      ]
+    },
+    "Sika Rlion": {
+      "genres": [
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://www.frontstagefestivals.com/artist/sika-rlion",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Plein-les-Watts 2025",
+        "Rototom Sunsplash 2024"
+      ]
+    },
+    "Silly Walks Discotheque": {
+      "genres": [
+        "soundsystem",
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Silly_Walks_Discotheque",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Reggae Jam 2026",
+        "Rototom Sunsplash 2025"
+      ]
+    },
     "Sinai Sound System": {
       "genres": [
         "soundsystem",
         "dub"
       ],
       "source": "https://www.starwaxmag.com/news/sinai-sound-system",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Sinsemilia": {
       "genres": [
@@ -901,12 +1636,29 @@
       "source": "https://fr.wikipedia.org/wiki/Skarface",
       "checked": "2026-10-13"
     },
+    "Skarra Mucci": {
+      "genres": [
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://www.petzi.ch/en/events/65141-ajz-caj-ragga-blasta-tour/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Reggae Jam 2026",
+        "Ruhr Reggae Summer 2026",
+        "Rototom Sunsplash 2024"
+      ]
+    },
     "Sondaschule": {
       "genres": [
         "ska-punk"
       ],
       "source": "https://de.wikipedia.org/wiki/Sondaschule",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2026"
+      ]
     },
     "Soul Explicit": {
       "genres": [
@@ -945,6 +1697,18 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Spice": {
+      "genres": [
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Spice_(musician)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Summerjam 2026",
+        "Rototom Sunsplash 2025"
+      ]
+    },
     "Sr. Wilson": {
       "genres": [
         "reggae",
@@ -952,7 +1716,10 @@
         "dub"
       ],
       "source": "https://es.wikipedia.org/wiki/Sr._Wilson",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Steel Alive": {
       "genres": [
@@ -961,10 +1728,34 @@
       "source": "https://www.haute-savoie-tourisme.org/evenements/musique/reggae/7922577-club-sound-system",
       "checked": "2026-10-13"
     },
+    "Steel Pulse": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Steel_Pulse",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Plein-les-Watts 2024",
+        "Summerjam 2024"
+      ]
+    },
     "Stormise": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Stylo G": {
+      "genres": [
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Stylo_G",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Subsanity Soundsystem": {
       "genres": [
@@ -980,14 +1771,44 @@
       ],
       "source": "https://en.wikipedia.org/wiki/Talco_(band)",
       "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2026"
+      ],
       "tour_checked": "2026-10-13"
+    },
+    "Tarrus Riley": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Tarrus_Riley",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reeds Festival 2026",
+        "Reggae Jam 2026",
+        "Rototom Sunsplash 2025"
+      ]
     },
     "The Busters": {
       "genres": [
         "ska"
       ],
       "source": "https://de.wikipedia.org/wiki/The_Busters",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2024"
+      ]
+    },
+    "The Congos": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/The_Congos",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Summerjam 2026",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "The Fags": {
       "genres": [],
@@ -1018,6 +1839,10 @@
       ],
       "source": "https://en.wikipedia.org/wiki/The_Skatalites",
       "checked": "2026-10-13",
+      "festivals": [
+        "No Logo Festival 2026",
+        "Rototom Sunsplash 2026"
+      ],
       "tour_checked": "2026-10-13"
     },
     "The Slackers": {
@@ -1027,7 +1852,10 @@
         "reggae"
       ],
       "source": "https://en.wikipedia.org/wiki/The_Slackers",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Mighty Sounds 2025"
+      ]
     },
     "The Troublemakers": {
       "genres": [
@@ -1051,6 +1879,28 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Third World": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Third_World_(band)",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025",
+        "Summerjam 2025"
+      ]
+    },
+    "Tiken Jah Fakoly": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Tiken_Jah_Fakoly",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Ruhr Reggae Summer 2026",
+        "Rototom Sunsplash 2025"
+      ]
+    },
     "Tobin Taxi": {
       "genres": [],
       "source": "",
@@ -1062,6 +1912,18 @@
       ],
       "source": "https://todosdestinos.bandcamp.com",
       "checked": "2026-10-13"
+    },
+    "Treesha": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://unitedreggae.com/articles/n1980/102415/interview-treesha",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Chiemsee Reggae Summer 2026",
+        "Plein-les-Watts 2026",
+        "Summerjam 2026"
+      ]
     },
     "Tribute Sound System": {
       "genres": [],
@@ -1079,6 +1941,18 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Twinkle Brothers": {
+      "genres": [
+        "roots",
+        "reggae"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Twinkle_Brothers",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2026",
+        "Rototom Sunsplash 2024"
+      ]
     },
     "Two Tone Club": {
       "genres": [
@@ -1121,7 +1995,10 @@
         "reggae"
       ],
       "source": "https://en.wikipedia.org/wiki/Vibronics",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "festivals": [
+        "Rototom Sunsplash 2025"
+      ]
     },
     "Wading Birds Sound System": {
       "genres": [
@@ -1131,6 +2008,20 @@
       ],
       "source": "https://www.lausanne-tourisme.ch/fr/evenement/romandub-2",
       "checked": "2026-10-13"
+    },
+    "Warrior Sound": {
+      "genres": [
+        "soundsystem",
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://www.reggaeville.com/artist-details/warrior-sound/about/",
+      "checked": "2026-10-13",
+      "festivals": [
+        "Reggae Jam 2026",
+        "Ruhr Reggae Summer 2026",
+        "Rototom Sunsplash 2025"
+      ]
     },
     "Waskabi": {
       "genres": [

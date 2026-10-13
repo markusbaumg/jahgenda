@@ -1,34 +1,23 @@
 #!/usr/bin/env python3
 """Weekly quality review: open one GitHub issue listing what the scraper dropped in the last 7 days.
 
-Gives the owners a notification (GitHub issue → mail/app) to check false negatives on review.html.
+Gives the owners a notification (GitHub issue → mail/app) to check false negatives in the Mischpult
+(mischpult.html#aussortiert).
 Stdlib only. Needs GITHUB_TOKEN (issues: write) and GITHUB_REPOSITORY. DRY_RUN=1 prints instead.
 
 Usage: python3 scripts/quality_review.py [--days 7]
 """
 
 import json
-import os
 import re
 import sys
-import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from ghapi import DRY_RUN, REPO, SITE, TOKEN, gh, parse_ts
+
 ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "data" / "runs.json"
-REPO = os.environ.get("GITHUB_REPOSITORY", "markusbaumg/jahgenda")
-TOKEN = os.environ.get("GITHUB_TOKEN", "")
-DRY_RUN = os.environ.get("DRY_RUN") == "1"
-SITE = "https://markusbaumg.github.io/jahgenda/"
-
-
-def parse_ts(value):
-    try:
-        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
 def collect(days):
@@ -86,8 +75,9 @@ def dedupe(items):
 def body_for(items, days):
     lines = [
         f"The scraper dropped **{len(items)} candidate(s)** in the last {days} days. Please skim them for",
-        f"false negatives on [review.html]({SITE}review.html) — each row has a «Gehört rein» button",
-        "that opens a prefilled issue. Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
+        f"false negatives in the [Mischpult]({SITE}mischpult.html#aussortiert) (tab «Aussortiert») —",
+        "each row has a «Gehört rein» button that opens a prefilled issue.",
+        "Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
         "",
     ]
     for at, d, r in sorted(items, key=lambda x: x[0], reverse=True):
@@ -104,24 +94,8 @@ def body_for(items, days):
                 sources[s.get("name")] = s.get("error", "")
     if sources:
         lines += ["", "**Sources that failed in these runs:**"] + [f"- {n}: {e}" for n, e in sources.items()]
-    lines += ["", f"Full logs: {SITE}log.html"]
+    lines += ["", f"Full logs: {SITE}mischpult.html#laeufe"]
     return "\n".join(lines)
-
-
-def gh(method, path, body=None):
-    req = urllib.request.Request(
-        "https://api.github.com" + path,
-        data=json.dumps(body).encode() if body is not None else None,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {TOKEN}",
-            "Accept": "application/vnd.github+json",
-            "Content-Type": "application/json",
-            "User-Agent": "jahgenda-quality-review",
-        },
-    )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode() or "{}")
 
 
 def main(argv):
@@ -138,9 +112,15 @@ def main(argv):
         print(title)
         print(body)
         return 0
-    created = gh(
-        "POST", f"/repos/{REPO}/issues", {"title": title, "body": body, "labels": ["quality", "scraper"]}
+    code, created = gh(
+        "POST",
+        f"/repos/{REPO}/issues",
+        {"title": title, "body": body, "labels": ["quality", "scraper"]},
+        agent="jahgenda-quality-review",
     )
+    if code != 201:
+        print(f"ERROR cannot open the issue: HTTP {code} {created}")
+        return 1
     print(f"opened issue #{created.get('number')}")
     return 0
 

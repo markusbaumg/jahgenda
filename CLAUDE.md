@@ -7,13 +7,14 @@ layout. The site UI is German; code, docs and config are English.
 ## Who owns what
 
 - **Humans own:** `scraper/criteria.md`, `scraper/bands.md` (except the _Suggestions_ section),
-  `scraper/sources.json`, `index.html`, `style.css`, `app.js`, `pwa.js`, `sw.js`, `README.md`, `CLAUDE.md`.
+  `scraper/sources.json`, `index.html`, `src/` (the page: components, stores, styles, `src/sw.js`), `public/`,
+  `vite.config.js`, `package.json`, `README.md`, `CLAUDE.md`.
   Skills never change these files – with one exception: skills may append lines under _Suggestions_ in
   `bands.md`.
 - **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
 - **Humans also own:** `data/genres.json` (allowed genre slugs, labels, filter order — single source of truth
-  for validator, scraper and page) and `store.js` (every client-side persistence goes through `window.jahStore`;
+  for validator, scraper and page) and `public/store.js` (every client-side persistence goes through `window.jahStore`;
   never call localStorage directly, so the backend can be swapped later).
 - **Shared:** `data/venues.json` – humans maintain venues (coordinates, programme URL, `scrape` flag),
   skills add new venues they encounter but do not change existing ones.
@@ -27,7 +28,7 @@ layout. The site UI is German; code, docs and config are English.
    pass. Otherwise commit nothing.
 4. **Every run leaves a trace:** an entry in `data/runs.json` (what was found, what was dropped and why,
    which sources could not be loaded) and the heartbeat `data/status.json`. Commit even when nothing
-   changed; on failure commit `status.json` with `"ok": false`. This is what `log.html` and the watchdog show.
+   changed; on failure commit `status.json` with `"ok": false`. This is what the Mischpult and the watchdog show.
 5. **Commit only `data/*` and `scraper/bands.md` (Suggestions).** Everything else is off limits.
 6. **When in doubt, leave it out.** One show too few beats one invented or wrong show.
 7. **Do not work around bot protection.** A blocked source is skipped and logged.
@@ -37,30 +38,33 @@ layout. The site UI is German; code, docs and config are English.
 ```sh
 make              # help: all targets
 make check        # lint + validate + test – must be green before every commit
-make serve        # view the page locally (http://localhost:8000)
+make dev          # dev server with hot reload (http://127.0.0.1:5173)
+make serve        # build and view the production build locally (http://127.0.0.1:4173)
 make scrape       # run the scraper now (Claude Code, subscription)
 make e2e          # Playwright end-to-end tests (e2e/, desktop + iPhone) – own CI job, not part of check
 ```
 
 Skills: `/scrape-shows` (update shows), `/harvest-bands` (suggest bands from festival line-ups).
 Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `main` must pass `make check`.
-Before pushing a change to `index.html`, `app.js` or `style.css`, also run `make e2e` (Playwright, ~30 s) — CI runs it
+Before pushing a change to `index.html`, `src/` or `public/`, also run `make e2e` (Playwright, ~30 s) — CI runs it
 on Linux, whose wider fonts have caught overflow that a Mac run missed (2026-10-13: a `white-space: nowrap`
 headline at 200 % text size).
 
 ## Setup and decisions (so nothing gets lost)
 
-- **Owners:** Kusi (markus.baumgartner@gmail.com, GitHub `markusbaumg`) and Seraina. Site UI German, everything
+- **Owners:** Kusi (markus.baumgartner@gmail.com / markus.baumgartner@amaise.com for the cloud routines, GitHub `markusbaumg`) and Seraina. Site UI German, everything
   else English. Kusi is called "Kusi" on the site, never "Markus".
 - **Repo / live / board:** github.com/markusbaumg/jahgenda · https://markusbaumg.github.io/jahgenda/ ·
   project board https://github.com/users/markusbaumg/projects/2 (public; columns Backlog / Let's Build /
   In progress / In review / Done; every story has an area prefix `scraper:` `data:` `ui:` `ops:` `docs:`
   and matching labels; keep it in sync with real work).
-- **Routines (Claude Code cloud, personal Max subscription, not the API):** "Jahgenda – Shows (täglich)"
-  `trig_01P5hw7jkjp8WJuw1tDH4Djx`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-sonnet-5-5, prompt runs
-  `/scrape-shows`; "Jahgenda – Bands (monatlich)" `trig_01XcTRA8vUt2huXiva3SSP1K`, cron `0 5 1 * *`. Environment
-  `env_01DjniiwyKBnsHAzi1ECBn9P` ("Default") must have **Network access = Full**, otherwise WebFetch fails with
-  ENOTFOUND (first run failed exactly like that). Fallback: `make cron-install` (launchd 06:10 on the Mac).
+- **Routines (Claude Code cloud, amaise Max subscription since 2026-10-13 21:49, not the API):** "Jahgenda – Shows
+  (täglich)" `trig_01T3UeEu5A1ephmttuEze6zE`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-opus-5-5 (Kusi, 21:53), prompt runs
+  `/scrape-shows` with `JAHGENDA_RUNNER=cloud` and ends with a push notification (counts / failed sources, or the error) to the Claude app; "Jahgenda – Bands (monatlich)" `trig_016XrTCAAPkSTLmGb4m32HSv`, cron
+  `0 5 1 * *`. Environment "kusi" `env_018Ddh8jfs94xvRyvnKSShEx` on the amaise account (markus.baumgartner@amaise.com) —
+  it must have **Network access = Full** (verified 2026-10-13 21:50: the first cloud run fetched skalender.net
+  fine). The earlier routines on the personal gmail account were deleted by Kusi (2026-10-13 21:55). Fallback:
+  `make cron-install` (launchd 06:10 on the Mac).
 - **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 and 14:17 Zurich — GitHub dropped both cron fires on 2026-10-13; when no run shows up,
   `gh workflow run watchdog.yml` fires it by hand, `make watchdog` runs the check locally): stale
   > 36 h or `status.json` ok:false → issue labelled `scraper-failed`; README badges. Skills write
@@ -73,7 +77,7 @@ headline at 200 % text size).
   (criteria.md → Nearby) use country codes D/F/I/A/FL as `canton`. Every show needs `source_url` and a venue in
   `data/venues.json`. Optional `tickets` link. Festivals: spec in `design/festival-spec.md` (end_date + days).
 - **UI decisions:** dark warm theme, red #d8342f / gold #f2b632 / green #1e8f4e; logo #10 (Swiss cross on
-  stripes, `img/logo/jahgenda.svg`); "Jahgenda" is always one word ("Jah" cream, "genda" gold); tricolor stripe
+  stripes, `public/img/logo/jahgenda.svg`, served as `img/logo/jahgenda.svg`); "Jahgenda" is always one word ("Jah" cream, "genda" gold); tricolor stripe
   top and bottom; dense list with zebra rows; canton coats of arms (click = filter); views Liste | Kalender |
   Karte with logo-striped map pins; Meine Shows (★ in the toolbar, Interessiert / Ich gehe, share link
   `#m=…`, .ics export); short per-show hashes in links; PWA with install banner ("Nie mehr fragen"); footer band
@@ -89,9 +93,18 @@ headline at 200 % text size).
   per visit), «Nie mehr zeigen» becomes a plain text link; Wo/Wann are icons on phones; desktop row actions on hover/focus
   only (Kusi reversed this after seeing the list, 18:20); the star stays (mark/unmark with undo, Interessiert/Ich gehe toggle); position only on a tap (final).
   Also: logo/mini-brand link to «./» (start), no logo watermark in the About section, ★ button after Wann.
-- **Mischpult (owners' page):** `mischpult.html` is hidden (no links, noindex, not in robots.txt — a Disallow line would
-  advertise it) — the overview of sources, prompt, rules and runs, plus the links to `log.html` and `review.html`.
-  Never call it «admin» (scanners try that path first). Keep it unlinked from the public pages.
+- **Decisions 2026-10-13 21:45 (Kusi):** when #33 passes its parity gate it is merged and goes live directly (rollback =
+  revert); the three end-state reviews #49/#50/#51 start automatically once #33, #55 and #48 are merged; the
+  language switch (DE · FR · EN, #48) lives in the footer, discreet — browser language picks on the first visit, the
+  choice is remembered; #55 turns Mischpult into the one owners' console (Status · Läufe · Aussortiert · Quellen ·
+  Prompt · Genres), log.html/review.html become redirects.
+- **Mischpult (owners' console, story #55):** `mischpult.html` is the second Vite entry (`src/mischpult/`) and the
+  one tool for the owners: tabs Status (heartbeat + watchdog verdict), Läufe (the run log), Aussortiert (dropped
+  candidates, deduped like quality_review.py, «Gehört rein»), Quellen & Venues, Prompt & Regeln, Genres — each by
+  hash (`#status`, `#laeufe`, `#aussortiert`, `#quellen`, `#prompt`, `#genres`). `log.html` / `review.html` are
+  only redirects to `#laeufe` / `#aussortiert`. Hidden: no links from the public pages, noindex, not in robots.txt
+  (a Disallow line would advertise it), not in the service worker's precache. Never call it «admin» (scanners
+  try that path first).
 - **Design documents:** `design/logos.html` (picker), `design/festival-spec.md`, `design/pwa-spec.md`,
   `design/promo-plan.md` (domain jahgenda.ch is free; stickers; QR), `design/monitoring-plan.md`,
   `design/ui-revamp.md` (when the panel delivers). Promo concept for Seraina as a Claude artifact:
@@ -107,14 +120,16 @@ headline at 200 % text size).
   starts right after the revamp (#21–#28) and the mobile gate (#32) are merged. Until then no new big vanilla
   features beyond what is already in flight.
 - **Source layout (story #33):** `index.html` at the root is the Vite entry; `src/` holds the page
-  (`main.js`, `App.svelte`, `components/`, `stores/agenda.svelte.js`, `lib/` – the former lib.js split by
-  topic, same exports, tested by `tests/lib.test.mjs`); `public/` holds what is copied unchanged (img/, fonts,
-  manifest, robots.txt, the static pages log/review/mischpult, and the plain scripts store/callout/pwa/sw until
-  later milestones move them); `data/` stays at the root as the scraper's contract (the build copies it into
-  `dist/data`, the dev server serves it); `dist/` is the build (gitignored) that pages.yml uploads. Versions
-  are pinned exactly in `package.json`. `make check` = lint + validate + test + build + smoke. The migration also moves the page source from the repo root into
-  `src/` (+ `public/` for static files; `data/`, `scraper/`, `scripts/`, `tests/`, `design/` stay) — not
-  earlier, because the in-flight worktree branches edit the root files (Kusi, 2026-10-13).
+  (`main.js`, `App.svelte`, `components/` with a stylesheet next to each part of the page, `stores/` – the
+  reactive state that replaced the app.js IIFE –, `lib/` – the former lib.js split by topic, same exports,
+  tested by `tests/*.test.mjs` –, `styles/` – tokens, base, links, motion and `index.css`, the one list of
+  stylesheets in cascade order – and `sw.js`, the service-worker source for vite-plugin-pwa); `public/` holds
+  what is copied unchanged (img/, fonts, robots.txt, the log/review redirects to the Mischpult and `store.js`);
+  `data/` stays at the root as the scraper's contract (the build copies it into `dist/data`, the dev server
+  serves it); `dist/` is the build (gitignored) that pages.yml uploads, with `dist/style.css` (the stylesheets
+  concatenated) for the static pages. The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,
+  sw.js) are gone. Versions are pinned exactly in `package.json`. `make check` = lint + validate + test + build
+  + smoke.
 - **Languages (story #48):** the agenda is DE · FR · EN – German default, first visit follows the browser
   (fr*/en*), the header switch is remembered (jahStore `lang`), `?lang=` for hreflang; every visible string is
   `t()` from `src/i18n` (de.js is the source, «Show» wording; fr «concert», en «show»); the hash stays

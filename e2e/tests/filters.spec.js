@@ -1,7 +1,7 @@
 // The filter state lives in the URL: a filtered view survives a reload, can be bookmarked and sent as
 // a link; show links and list links keep the hash for themselves.
 const { test, expect } = require("@playwright/test");
-const { FIXTURE, useFixture, openList, results } = require("./helpers");
+const { FIXTURE, useFixture, openList, results, clickChip } = require("./helpers");
 
 test.use({ permissions: ["clipboard-read", "clipboard-write"] });
 
@@ -11,7 +11,7 @@ test("filters are written to the hash and restored after a reload", async ({ pag
   await page.click("#toggle-where");
   await page.locator('#canton-chips .chip[data-canton="ZH"]').click();
   await page.keyboard.press("Escape");
-  await page.locator('#genres .chip[data-genre="ska"]').click();
+  await clickChip(page, '#genres .chip[data-genre="ska"]');
   await page.click("#toggle-when");
   await page.locator('#when-panel [data-quick="7"]').click();
   await page.keyboard.press("Escape");
@@ -54,7 +54,7 @@ test("a filter link opens filtered; «Link zu dieser Auswahl» copies it", async
   if (!isMobile) await row.hover();
   await row.locator('[data-act="link"]').click();
   await expect(page).toHaveURL(/#[a-z0-9]{5,8}$/);
-  await page.locator('#genres .chip[data-genre=""]').click();
+  await clickChip(page, '#genres .chip[data-genre=""]');
   await expect(page).toHaveURL(/#wo=BE,LU$/);
 });
 
@@ -63,7 +63,7 @@ test("the view switch writes #view=…, Liste removes it, and a reload keeps the
   await openList(page);
   await page.locator('#view-switch [data-view="calendar"]').click();
   await expect(page).toHaveURL(/#view=calendar$/);
-  await page.locator('#genres .chip[data-genre="ska"]').click();
+  await clickChip(page, '#genres .chip[data-genre="ska"]');
   await expect(page).toHaveURL(/#g=ska&view=calendar$/); // a filter keeps the view in the hash
   await page.reload();
   await expect(page.locator("#calendar .cal-grid")).toBeVisible();
@@ -103,4 +103,27 @@ test("a filter link arriving on the open page is applied, and the plain address 
   });
   await expect(page.locator("#calendar .cal-grid")).toBeVisible();
   await expect(page).toHaveURL(/#view=calendar$/);
+});
+
+// Desktop keeps the results row one line: the active-filter pills sit between the count and the view
+// switch, horizontal. A forced line break meant for phones once ate the nowrap row and squeezed the pills
+// into a vertical column next to the switch (CI screenshot, 2026-10-13).
+test("on desktop the active filters stay on the results line, pills horizontal", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "the phone wraps the pills under the switch on purpose");
+  await useFixture(page);
+  await openList(page);
+  await page.fill("#q", "xyzzy");
+  await clickChip(page, '#genres .chip[data-genre="ska"]');
+  await expect(page.locator("#status #reset")).toBeVisible();
+  const row = await page.locator(".results-row").boundingBox();
+  const seg = await page.locator(".results-row .seg").boundingBox();
+  const pillBox = await page.locator('#results .fpill[data-remove="q"]').boundingBox();
+  const share = await page.locator("#share-filters").boundingBox();
+  expect(row.height).toBeLessThan(seg.height * 2.5); // pills may wrap once, never stack per letter
+  expect(pillBox.width).toBeGreaterThan(pillBox.height); // not stacked letter by letter
+  expect(pillBox.x + pillBox.width).toBeLessThanOrEqual(seg.x); // pills left of the switch
+  expect(share.height).toBeLessThan(30); // the link on one line too
 });

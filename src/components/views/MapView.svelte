@@ -7,7 +7,6 @@
    * loadLeaflet(). Leaflet owns the DOM inside #map; Svelte renders #map-rest. */
   import DayGroup from "../DayGroup.svelte";
   import { onMount } from "svelte";
-  import "./views.css";
   import { agenda, isFestival } from "../../stores/agenda.svelte.js";
   import { views, LEAFLET, LEAFLET_SRI } from "../../stores/views.svelte.js";
   import { escape, distanceKm } from "../../lib/index.js";

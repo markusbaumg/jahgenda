@@ -1,0 +1,165 @@
+/* Global base: reset, page background and atmosphere, focus ring, stripes, column, skip links, links. */
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+  /* Keeps focused/anchored content clear of the sticky filter bar. */
+  scroll-padding-top: calc(var(--bar-h, 64px) + 40px);
+}
+/* The hidden attribute wins over every display rule below (a .where-radius { display: flex } once
+   showed radius chips the script had hidden). */
+[hidden] {
+  display: none !important;
+}
+body {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: var(--lh-body);
+  /* Safety net: a stray unbreakable string can never scroll the page sideways (clip, unlike hidden,
+     creates no scroll container, so the sticky filter bar keeps working). */
+  overflow-x: clip;
+}
+/* Atmosphere: a warm sun glow from the top left corner, plus a screen-print grain tile on sharp screens.
+ * Both are fixed, behind the content (z-index -1 inside body's own stacking context), never animated. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+body::before {
+  background: var(--sun);
+}
+body::after {
+  display: none;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23g)'/></svg>")
+    0 0 / 160px 160px repeat;
+  opacity: var(--grain-opacity);
+}
+@media (min-resolution: 1.5dppx) {
+  body::after {
+    display: block;
+  }
+}
+
+/* Tricolor rule: the three stripe colours as structure (month heads, section titles, stuck bar, cards). */
+.rule-tri,
+.month,
+.section-title {
+  border-bottom: 3px solid;
+  border-image: linear-gradient(90deg, var(--red) 33.3%, var(--gold) 33.3% 66.6%, var(--green) 66.6%) 1;
+}
+
+/* One focus ring for every interactive element: gold double ring, visible on any surface. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.seg button:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--gold); /* the pill group clips the outer ring */
+}
+
+/* Tabular numerals wherever a date or time appears. */
+.date,
+.meta time,
+.dist,
+.cal-num,
+.popup-shows time {
+  font-variant-numeric: tabular-nums;
+}
+
+.stripe {
+  display: flex;
+  height: 6px;
+}
+/* Standalone app on a notched phone: the stripe sits below the status bar (box-sizing is border-box,
+   so the inset has to be part of the height or the coloured spans collapse to nothing). The top stripe
+   follows the skip links on index.html, so it is matched by class, not by :first-child. */
+.stripe:not(.bottom) {
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(6px + env(safe-area-inset-top, 0px));
+  background: var(--bg);
+}
+.stripe.bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(6px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+}
+.stripe span {
+  flex: 1;
+}
+.stripe span:nth-child(1) {
+  background: var(--red);
+}
+.stripe span:nth-child(2) {
+  background: var(--gold);
+}
+.stripe span:nth-child(3) {
+  background: var(--green);
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px;
+  /* Installed and held sideways on a notched phone: the gutter grows past the sensor housing. */
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* Skip links: invisible until focused, then a gold pill at the top left. */
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 30;
+  padding: 8px 14px;
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.skip:focus-visible {
+  top: 12px;
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+/* Every link gets the same gold ring as the buttons (not the browser's blue one). */
+a[href]:focus-visible,
+.leaflet-container a:focus-visible,
+#foot:focus-visible,
+.show:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* The skip link lands on the whole agenda: no ring around 14 000 px of list (its top edge peeked out
+ * under the bar as a stray gold bar); the next Tab is the first row. */
+#views:focus-visible {
+  outline: none;
+}
+#q::placeholder {
+  color: var(--muted); /* the browser grey was 3.8:1 */
+  opacity: 1;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Tricolor stripe at the bottom too */
+.stripe.bottom {
+  margin-top: 0;
+}

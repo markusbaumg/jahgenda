@@ -1,6 +1,182 @@
 {
-  "note": "Log of scraper runs, newest first, max 60 entries. Shown on log.html.",
+  "note": "Log of scraper runs, newest first, max 60 entries. Shown in the owners' console (tabs Läufe and Aussortiert).",
   "runs": [
+    {
+      "skill": "harvest-bands",
+      "at": "2026-10-13T22:12:39+02:00",
+      "runner": "cloud",
+      "added": 60,
+      "total": 232,
+      "failed_sources": [
+        "Summerjam artists-2024 page (empty response) – used de.wikipedia line-up instead",
+        "Lakesplash 2025 and 2024 line-ups (not on lakesplash.ch/history, web search found none)",
+        "Reggae Jam 2025 line-up (not on reggaejam.de or Wikipedia, web search found none)",
+        "Ruhr Reggae Summer 2025 and 2024 line-ups (site shows 2026 only, de.wikipedia has no line-ups)",
+        "Rototom Sunsplash /en/line-up/ (JavaScript only) – 2026 taken from the official announcement articles",
+        "Afro-Pfingsten programme 2025/2026 (only PDF newspapers) – Mad Professor from the news item only",
+        "No Logo Festival 2025 and 2024 line-ups (not tried beyond the 2026 programme page)",
+        "Wikipedia API rate-limited (HTTP 429) part of the time – genre sources fall back to reggaeville/press pages"
+      ],
+      "dropped": [
+        {
+          "title": "Afrob",
+          "why": "German hip-hop (criteria.md)"
+        },
+        {
+          "title": "Kumbia Boruka",
+          "why": "Cumbia without clear reggae focus (criteria.md)"
+        },
+        {
+          "title": "Dub FX",
+          "why": "Live-looping beatbox / dubstep / drum'n'bass, reggae not the main genre (in doubt: out)"
+        },
+        {
+          "title": "Mal Élevé",
+          "why": "Mainly rap/raggamuffin crossover, reggae not clearly the main genre (in doubt: out)"
+        },
+        {
+          "title": "Kybba",
+          "why": "Basshall / club producer with reggaeton and afro crossovers (in doubt: out)"
+        },
+        {
+          "title": "Bleu Soleil",
+          "why": "French electro-pop duo (criteria.md)"
+        },
+        {
+          "title": "Greeen",
+          "why": "German hip-hop (criteria.md)"
+        },
+        {
+          "title": "OG Keemo",
+          "why": "German hip-hop (criteria.md)"
+        },
+        {
+          "title": "Esaïa",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "Jô",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "Men of the Yeah!",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "THK",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "Leftside",
+          "why": "No reliable biography found (ambiguous name)"
+        }
+      ],
+      "notes": [
+        "Research budget of 60 reached; ~460 further line-up names not researched yet (mostly Rototom 2024/2025 side stages, batucadas, hip-hop and Latin acts) – the next run continues.",
+        "Existing artists matched on line-ups got their festivals appended (34 entries).",
+        "Chiemsee Reggae Summer had no 2024/2025 edition (paused 2018–2025)."
+      ]
+    },
+    {
+      "skill": "scrape-shows",
+      "at": "2026-10-13T21:51:45+02:00",
+      "runner": "cloud",
+      "added": 4,
+      "updated": 0,
+      "removed": 0,
+      "total": 102,
+      "failed_sources": [],
+      "dropped": [
+        {
+          "title": "El Flecha Negra",
+          "date": "2026-10-16",
+          "venue": "Kammgarn",
+          "city": "Schaffhausen",
+          "url": "https://kammgarn.ch/event/el-flecha-negra-2/",
+          "why": "Cumbia/Mestizo mit Reggae- und Ska-Anteil, Schwerpunkt unklar (criteria.md: im Zweifel raus)"
+        },
+        {
+          "title": "El Flecha Negra | Esteban Rey",
+          "date": "2026-12-04",
+          "venue": "Sedel",
+          "city": "Luzern",
+          "url": "https://www.petzi.ch/en/events/64999-sedel-el-flecha-negra-esteban-rey/",
+          "why": "Cumbia/Mestizo, Reggae-Bezug nur am Rand (criteria.md)"
+        },
+        {
+          "title": "Saint City Orchestra",
+          "date": "2026-11-06",
+          "venue": "Kufa",
+          "city": "Lyss",
+          "url": "https://www.kufa.ch/event/2026-11-06-saint-city-orchestra/",
+          "why": "Irish Punkrock, kein Ska/Reggae"
+        },
+        {
+          "title": "30 Jahre Slop!",
+          "date": "2027-03-20",
+          "venue": "Galvanik",
+          "city": "Zug",
+          "url": "https://galvanik-zug.ch/programm/30-jahre-slop/",
+          "why": "Punk-/Grunge-Rock, kein Ska"
+        },
+        {
+          "title": "Sean Koch – Europe 2026",
+          "date": "2026-10-18",
+          "venue": "Bierhübeli",
+          "city": "Bern",
+          "url": "https://eventfrog.ch/de/p/konzerte/reggae-ska/sean-koch-europe-2026-bern-7439219449280875981.html",
+          "why": "Indie-Folk/Surf-Folk, Reggae nur als Beiwort"
+        },
+        {
+          "title": "Elias J. Tv Europe Tour",
+          "date": "2026-10-31",
+          "venue": "Stadthalle Bülach",
+          "city": "Bülach",
+          "url": "https://eventfrog.ch/de/p/konzerte/reggae-ska/elias-j-tv-europe-tour-zurich-switzerland-buelach-7439788386003478323.html",
+          "why": "Keine Acts genannt, Genre nicht belegbar"
+        }
+      ],
+      "notes": [
+        "Netzzugriff funktioniert wieder. Verkürzter Lauf: Skalender, Petzi, Eventfrog ausgewertet; Venue-Seiten, Websuchen, Watchlist und Festivals in diesem Lauf nicht geöffnet (kommen per Rotation)."
+      ],
+      "sources": [
+        {
+          "name": "Skalender",
+          "url": "https://skalender.net/",
+          "status": "ok",
+          "found": 94,
+          "kept": 2
+        },
+        {
+          "name": "Petzi",
+          "url": "https://www.petzi.ch/en/search/?q=reggae",
+          "status": "ok",
+          "found": 54,
+          "kept": 2
+        },
+        {
+          "name": "Eventfrog – Reggae & Ska",
+          "url": "https://eventfrog.ch/de/events/ch/reggae-ska-konzerte.html",
+          "status": "ok",
+          "found": 24,
+          "kept": 1
+        },
+        {
+          "name": "watchlist",
+          "url": "",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Venue-Programme",
+          "url": "",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        }
+      ]
+    },
     {
       "skill": "scrape-shows",
       "at": "2026-10-13T06:12:00+02:00",

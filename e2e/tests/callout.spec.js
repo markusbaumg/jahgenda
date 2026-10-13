@@ -10,12 +10,7 @@ test.beforeEach(async ({ page }) => {
 const tall = (page) => page.evaluate(() => (document.querySelector(".foot").style.minHeight = "3000px"));
 
 test("the subscribe nudge waits while a panel is open and comes once it is closed", async ({ page }) => {
-  // callout.js is the last script and the fixture answers at once: on a busy machine the agenda is in
-  // before callout.js has run. The nudge must wait all the same (the blocker is handed over late).
-  await page.route("**/callout.js", async (route) => {
-    await new Promise((r) => setTimeout(r, 300));
-    await route.continue();
-  });
+  // (The vanilla page delayed callout.js here; the nudges are in the bundle now, src/components/callout.)
   await openList(page);
   await tall(page);
   await page.click("#toggle-where");
