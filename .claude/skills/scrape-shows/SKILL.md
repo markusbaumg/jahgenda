@@ -31,7 +31,8 @@ guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
    - If `"source"` is `"mock"`: ignore every existing show. Mock entries are examples, not data; the list is
      built from scratch.
    - Otherwise keep every existing *future* show that has a `source_url`, unless you find clear evidence that
-     it was cancelled or moved, or step 3 says it is out. Existing `id`s stay stable. An existing show
+     it was cancelled or moved (a «cancelled» on the venue or ticket page beats an aggregator that still
+     lists it), or step 3 says it is out. Existing `id`s stay stable. An existing show
      without `source_url` is dropped (it can never validate).
 6. `data/artists.json` — the genre cache. Look here before researching an act. Entries with
    `"source": "manual"` were written by a human: use them, never change them.
@@ -113,6 +114,14 @@ Rules while collecting:
 
 Decision order for each candidate:
 
+0. **Cancelled before?** Look through the `dropped` entries of the `scrape-shows` runs in `data/runs.json`
+   from the last 60 days. If one has the same date and the same venue (compare as in step 5.1) and its
+   `why` says it was cancelled (abgesagt / cancelled / annulé / verschoben), keep the candidate out — unless
+   the venue's or the ticket shop's own page, opened in this run, lists it as on sale again. Log it under
+   `dropped` again with the same reason. An aggregator listing (Skalender, Eventfrog, Petzi's agenda list,
+   a search hit) never overrides a «cancelled» on the venue or ticket page: an aggregator is often the last
+   to notice a cancellation, so a shortened run that only reaches the aggregator must not bring a rejected
+   show back.
 1. Its headliner (first/main act) is under **Excluded** in `bands.md`, or it is the only act → drop.
    An **Excluded** act as one of several acts: keep the show, ignore that act for the genres.
 2. An act under **Included** → keep.
