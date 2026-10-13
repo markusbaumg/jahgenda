@@ -1096,15 +1096,24 @@
   }
   // Sticky month heads: a 1 px gold hairline draws in while a head is stuck under the bar (§4). The
   // observer looks at the heads of the current render; a head is stuck once its top meets the bar.
+  // The bar height is read from a head's resolved sticky `top` (the --bar-h token is a calc() string,
+  // which would parse as NaN); a head that is not sticky at all (max-height: 500px) is left alone.
   let monthObserver = null;
   function observeMonths() {
     if (!("IntersectionObserver" in window)) return;
     if (monthObserver) monthObserver.disconnect();
-    const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bar-h")) || 84;
+    const first = list.querySelector(".month");
+    if (!first) return;
+    const bar = parseFloat(getComputedStyle(first).top);
+    if (!(bar >= 0)) return;
     monthObserver = new IntersectionObserver(
       (entries) => {
-        for (const e of entries)
-          e.target.classList.toggle("stuck", e.intersectionRatio < 1 && e.boundingClientRect.top <= bar + 1);
+        for (const e of entries) {
+          const r = e.boundingClientRect;
+          // Stuck: partly cut by the bar's edge, its top at the bar, its bottom still below it. A head
+          // inside a month that content-visibility has skipped reports an empty box and is never stuck.
+          e.target.classList.toggle("stuck", e.intersectionRatio < 1 && r.top <= bar + 1 && r.bottom > bar);
+        }
       },
       { threshold: [1], rootMargin: `-${Math.round(bar) + 1}px 0px 0px 0px` },
     );

@@ -207,8 +207,9 @@ body::after {
   height: 6px;
 }
 /* Standalone app on a notched phone: the stripe sits below the status bar (box-sizing is border-box,
-   so the inset has to be part of the height or the coloured spans collapse to nothing). */
-.stripe:first-child {
+   so the inset has to be part of the height or the coloured spans collapse to nothing). The top stripe
+   follows the skip links on index.html, so it is matched by class, not by :first-child. */
+.stripe:not(.bottom) {
   padding-top: env(safe-area-inset-top, 0px);
   height: calc(6px + env(safe-area-inset-top, 0px));
   background: var(--bg);
@@ -1241,8 +1242,8 @@ a[href]:focus-visible,
   }
   .cal-nav {
     flex: none;
-    width: 40px;
-    height: 40px;
+    width: var(--tap); /* a finger-sized target on the phone (§5) */
+    height: var(--tap);
   }
   .cal-title {
     white-space: nowrap;
@@ -4021,7 +4022,7 @@ a:visited {
 /* ---------- S8: motion system, performance and preference rules (design/ui-revamp.md §4, §5) ---------- */
 
 /* Switch-on (§4, gesture 3): the top stripe draws in once, scaleX 0 → 1 over 450 ms. */
-.stripe:first-child {
+.stripe:not(.bottom) {
   transform-origin: left;
   animation: switch-on 450ms var(--ease-tape) both;
 }
@@ -4054,6 +4055,10 @@ a:visited {
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--t-2);
+}
+/* The cross-fade must not swallow a tap: the next chip is reachable while the previous swap still fades. */
+::view-transition {
+  pointer-events: none;
 }
 
 /* Locate: the button's ring expands over --t-4, repeating until a fix (app.js sets .locating); the
@@ -4111,7 +4116,7 @@ a:visited {
   }
   .sk,
   .list-head,
-  .stripe:first-child,
+  .stripe:not(.bottom),
   #list .show.enter,
   #list.dip,
   #list .dist,

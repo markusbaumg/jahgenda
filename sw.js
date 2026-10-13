@@ -39,8 +39,9 @@ const DATA = ["data/shows.json", "data/genres.json", "data/venues.json", "data/s
 const NETWORK_TIMEOUT = 4000;
 // Canton flags: only the ones of cantons that occur in data/shows.json are precached (read from the copy
 // just fetched into the data cache); the fetch handler stores any other same-origin file on first use.
-async function precacheCantons(shell, data) {
+async function precacheCantons() {
   try {
+    const [shell, data] = await Promise.all([caches.open(SHELL_CACHE), caches.open(DATA_CACHE)]);
     const res = await data.match("data/shows.json");
     const json = res ? await res.json() : null;
     const cantons = new Set((json && json.shows ? json.shows : []).map((s) => s.canton).filter(Boolean));
@@ -69,7 +70,7 @@ self.addEventListener("install", (event) => {
         .then((cache) =>
           Promise.all(DATA.map((u) => cache.add(new Request(u, { cache: "reload" })).catch(() => {}))),
         ),
-    ]).then(([shell, data]) => precacheCantons(shell, data)),
+    ]).then(precacheCantons),
   );
 });
 
