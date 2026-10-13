@@ -596,43 +596,8 @@
 
   // One row inside a day group (see renderDays), §3.6: the 3-line stack (title, acts, meta), the side column
   // (coat of arms + abbreviation as a filter button, the star) and the actions line under the stack.
-  // Line-up block (festival-spec.md §3.1): with more than 5 acts (festival or not) the acts line shows the
-  // first 4 and a <details class="lineup"> holds the rest – by day when `days` exists, else the flat list.
-  // Open when the visitor opened it before (openIds), when a search hit sits inside it, or from a deep
-  // link. A festival without acts says «Line-up folgt».
-  const LINEUP_PREVIEW = 4;
-  const LINEUP_FROM = 6;
-  function lineupHtml(s, q, hit) {
-    const n = s.acts.length;
-    const open = hit || openIds.has(s.id);
-    const days = s.days && typeof s.days === "object" ? s.days : {};
-    const keys = Object.keys(days)
-      .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(days[k]) && days[k].length)
-      .sort();
-    const actList = (list) =>
-      `<span class="a">${list.map((a) => `<span>${markHit(String(a), q)}</span>`).join("")}</span>`;
-    let body;
-    if (keys.length) {
-      // «Tag offen» = acts that sit in no day; compared like the validator's artist_key (venueKey is the
-      // same rule), so «DUB INC.» in days matches «Dub Inc» in acts.
-      const placed = new Set();
-      body = keys
-        .map((k) => {
-          for (const a of days[k]) placed.add(venueKey(String(a)));
-          const d = parseDay(k);
-          return `<span class="d">${dowFmt.format(d).replace(".", "")} ${d.getDate()}.</span>${actList(days[k])}`;
-        })
-        .join("");
-      const rest = s.acts.filter((a) => !placed.has(venueKey(a)));
-      if (rest.length) body += `<span class="d">Tag offen</span>${actList(rest)}`;
-    } else body = `<span class="d sr">Acts</span>${actList(s.acts)}`;
-    const label = keys.length ? `Alle ${n} Acts nach Tag` : `Alle ${n} Acts`;
-    return (
-      `<details class="lineup${open ? " is-open" : ""}"${open ? " open" : ""}>` +
-      `<summary title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
-      `<div class="lineup-body"><div><div class="days">${body}</div></div></div></details>`
-    );
-  }
+  // Line-up block (lineupHtml, LINEUP_PREVIEW / LINEUP_FROM): ported to src/components/festival/Lineup.svelte
+  // and src/lib/festival.js (M5).
   // The acts line only names who is not in the title already («The Slackers (US)» / «The Slackers»
   // doubled most rows; «Scorchers feat. Capital Soul Sinners» names its guests in the title).
   const extraActs = (s) => {
@@ -3371,57 +3336,8 @@
     setGenre(activeGenre === btn.dataset.genre ? "" : btn.dataset.genre);
     renderAndKeepInView();
   });
-  // Format chips (Festival): a toggle of its own next to the genre, so «Dub» + «Festival» = dub festivals.
-  function setFormat(f) {
-    activeFormat = f;
-    for (const c of formatBar.querySelectorAll(".chip[data-format]"))
-      c.setAttribute("aria-pressed", String(c.dataset.format === activeFormat));
-  }
-  formatBar.addEventListener("click", (e) => {
-    const btn = e.target.closest(".chip[data-format]");
-    if (!btn) return;
-    setFormat(activeFormat === btn.dataset.format ? "" : btn.dataset.format);
-    if (activeFormat) btn.scrollIntoView({ inline: "nearest", block: "nearest" });
-    renderAndKeepInView();
-  });
-
-  // Line-up disclosure (§4: grid-template-rows 0fr → 1fr over --t-3). Opening: the browser opens the
-  // <details>, the class animates the body in on the next frame. Closing: the click is intercepted, the body
-  // animates out, then the <details> closes. Reduced motion: 0 ms transitions fire no transitionend, so it
-  // closes at once. The open state is remembered per show (openIds) across re-renders.
-  views.addEventListener(
-    "toggle",
-    (e) => {
-      const d = e.target;
-      if (!(d instanceof HTMLDetailsElement) || !d.classList.contains("lineup")) return;
-      const row = d.closest(".show");
-      if (!row) return;
-      if (d.open) {
-        openIds.add(row.dataset.id);
-        requestAnimationFrame(() => d.classList.add("is-open"));
-      } else openIds.delete(row.dataset.id);
-    },
-    true,
-  );
-  views.addEventListener("click", (e) => {
-    const summary = e.target.closest("details.lineup > summary");
-    if (!summary) return;
-    const d = summary.parentElement;
-    if (!d.open || d.dataset.closing) return;
-    e.preventDefault();
-    d.dataset.closing = "1";
-    d.classList.remove("is-open");
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      delete d.dataset.closing;
-      d.open = false;
-    };
-    if (reducedMotion.matches) return finish();
-    d.querySelector(".lineup-body").addEventListener("transitionend", finish, { once: true });
-    setTimeout(finish, 450);
-  });
+  // Format chips (setFormat, the #formats click) and the line-up disclosure animation: ported to
+  // src/components/festival/FormatChips.svelte + Lineup.svelte and src/stores/festival.svelte.js (M5).
 
   // Search: debounced 120 ms so typing does not re-render on every key.
   let searchTimer = 0;
