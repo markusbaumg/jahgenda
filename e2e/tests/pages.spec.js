@@ -44,3 +44,10 @@ test("the hidden Mischpult is not linked from the public pages", async ({ page }
   await page.goto("/mischpult.html");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
 });
+
+test("the Mischpult lists the portals from scraper/sources.json (the build publishes it)", async ({
+  page,
+}) => {
+  await page.goto("/mischpult.html");
+  await expect(page.locator("#agendas-tbl tbody tr").first()).toBeVisible();
+});

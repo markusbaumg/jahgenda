@@ -88,6 +88,9 @@ class AppShell(unittest.TestCase):
         self.assertIn("path: dist", PAGES)
         for f in ("data", "design"):
             self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
+        # mischpult.html fetches scraper/sources.json relative to the page (Portale, Suchen, Festivals).
+        self.assertIn('json("scraper/sources.json")', (PUBLIC / "mischpult.html").read_text(encoding="utf-8"))
+        self.assertIn('["scraper/sources.json", "scraper/sources.json"]', VITE_CONFIG)
         self.assertIn(
             'path.join(outDir, "style.css"), plainStylesheet()',
             VITE_CONFIG,
