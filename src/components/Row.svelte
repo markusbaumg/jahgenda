@@ -4,35 +4,20 @@
    * stack. The markup is the row template of app.js renderShow(), element for element. */
   import Icon from "./Icon.svelte";
   import { agenda } from "../stores/agenda.svelte.js";
-  import {
-    safeUrl,
-    venueKey,
-    gcalUrl,
-    sbbUrl,
-    dateText,
-    distanceKm,
-    formatKm,
-    parseDay,
-  } from "../lib/index.js";
+  import { safeUrl, venueKey, gcalUrl, sbbUrl, dateText, distanceKm, formatKm } from "../lib/index.js";
   import { fold } from "../lib/search.js";
   import { ABROAD, regionName, cantonLabel } from "../lib/regions.js";
-  import { dow } from "../lib/dates.js";
-
   // Line-up block (festival-spec.md §3.1): with more than 5 acts (festival or not) the acts line shows
-  // the first 4 and a <details class="lineup"> holds the rest – by day when `days` exists, else the flat
-  // list. Open when the visitor opened it before (openIds), when a search hit sits inside it, or from a
-  // deep link. A festival without acts says «Line-up folgt».
-  const LINEUP_PREVIEW = 4;
-  const LINEUP_FROM = 6;
+  // the first 4 and Lineup.svelte holds the rest. A festival without acts says «Line-up folgt».
+  import Lineup from "./festival/Lineup.svelte";
+  import { LINEUP_PREVIEW, LINEUP_FROM, dayCount } from "../lib/festival.js";
+
   const MARK_LABEL = { "": "Merken", interested: "Gemerkt: Interessiert", going: "Gemerkt: Ich gehe" };
   const MARK_TITLE = {
     "": "Merken (lang drücken: Ich gehe)",
     interested: "Nicht mehr merken",
     going: "Nicht mehr merken",
   };
-  // The line-up disclosures stay open across re-renders.
-  const openIds = new Set();
-
   let {
     show: s,
     index = 0, // position in the list: the first ten rows enter one --stagger apart (§4)
@@ -53,7 +38,7 @@
       .map((g) => agenda.genreLabel[g] || g),
   );
   // Festival (§3.7): «3 Tage» leads the meta line, the door time (a weekender) follows.
-  const nDays = $derived(s._end ? Math.round((s._end - s._day) / 864e5) + 1 : 0);
+  const nDays = $derived(dayCount(s));
   // The acts line only names who is not in the title already («The Slackers (US)» / «The Slackers»
   // doubled most rows; «Scorchers feat. Capital Soul Sinners» names its guests in the title).
   const extra = $derived.by(() => {
@@ -65,23 +50,6 @@
   const hit = $derived(hasActs && Boolean(q) && s.acts.some((a) => a.toLowerCase().includes(q)));
   const long = $derived(s.acts.length >= LINEUP_FROM);
   const preview = $derived(long ? extra.slice(0, LINEUP_PREVIEW) : extra);
-  const lineupOpen = $derived(hit || openIds.has(s.id));
-  const dayKeys = $derived.by(() => {
-    const days = s.days && typeof s.days === "object" ? s.days : {};
-    return Object.keys(days)
-      .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(days[k]) && days[k].length)
-      .sort();
-  });
-  // «Tag offen» = acts that sit in no day; compared like the validator's artist_key (venueKey is the
-  // same rule), so «DUB INC.» in days matches «Dub Inc» in acts.
-  const dayRest = $derived.by(() => {
-    const placed = new Set();
-    for (const k of dayKeys) for (const a of s.days[k]) placed.add(venueKey(String(a)));
-    return s.acts.filter((a) => !placed.has(venueKey(a)));
-  });
-  const lineupLabel = $derived(
-    dayKeys.length ? `Alle ${s.acts.length} Acts nach Tag` : `Alle ${s.acts.length} Acts`,
-  );
   const venueUrl = $derived(agenda.venueSites[venueKey(s.venue)] || "");
   const hasGeo = $derived(typeof s.lat === "number" && typeof s.lon === "number");
   const km = $derived(here && hasGeo ? formatKm(distanceKm(here, s)) : "");
@@ -101,10 +69,6 @@
     const i = q && low.length === text.length ? low.indexOf(q) : -1;
     if (i < 0) return null;
     return [text.slice(0, i), text.slice(i, i + q.length), text.slice(i + q.length)];
-  }
-  function onToggle(e) {
-    if (e.currentTarget.open) openIds.add(s.id);
-    else openIds.delete(s.id);
   }
 </script>
 
@@ -147,12 +111,6 @@
   {/if}
 {/snippet}
 
-{#snippet actList(list)}
-  <span class="a"
-    >{#each list as a}<span>{@render marked(String(a))}</span>{/each}</span
-  >
-{/snippet}
-
 <li
   class="show{s._past ? ' past' : ''}{s._end ? ' festival' : ''}{mark ? ` ${mark}` : ''}{shared &&
   shared[s.id]
@@ -177,26 +135,7 @@
       </p>
     {/if}
     {#if long}
-      <details class="lineup{lineupOpen ? ' is-open' : ''}" open={lineupOpen} ontoggle={onToggle}>
-        <summary title={lineupLabel}
-          ><span class="open">{lineupLabel}</span><span class="close">Weniger</span></summary
-        >
-        <div class="lineup-body">
-          <div>
-            <div class="days">
-              {#if dayKeys.length}
-                {#each dayKeys as k}
-                  {@const d = parseDay(k)}
-                  <span class="d">{dow(d)} {d.getDate()}.</span>{@render actList(s.days[k])}
-                {/each}
-                {#if dayRest.length}<span class="d">Tag offen</span>{@render actList(dayRest)}{/if}
-              {:else}
-                <span class="d sr">Acts</span>{@render actList(s.acts)}
-              {/if}
-            </div>
-          </div>
-        </div>
-      </details>
+      <Lineup show={s} {hit} {marked} />
     {:else if s._end && !s.acts.length}
       <p class="acts none">Line-up folgt</p>
     {/if}

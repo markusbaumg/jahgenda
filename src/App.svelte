@@ -6,6 +6,7 @@
   import ShowList from "./components/ShowList.svelte";
   import Status from "./components/Status.svelte";
   import Footer from "./components/Footer.svelte";
+  import FormatChips from "./components/festival/FormatChips.svelte";
   import { agenda } from "./stores/agenda.svelte.js";
 
   agenda.load();
@@ -34,6 +35,8 @@
 
 <main class="wrap">
   <div id="stuck-sentinel" aria-hidden="true"></div>
+  <!-- M5: the format chips (#formats); the filter-bar story places them in #chips after #genres. -->
+  <FormatChips />
   <p class="sr" id="results-live" role="status" aria-live="polite">{resultsLive}</p>
   <!-- Feedback words of the row actions («Kopiert», «Gespeichert» …) for screen readers. -->
   <p class="sr" id="feedback" role="status" aria-live="polite"></p>

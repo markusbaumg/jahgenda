@@ -5,6 +5,7 @@
    * first of them. A festival (§3.7) is a card of its own with a range date cell, never grouped with the
    * day's shows. Ported from app.js renderDays(). */
   import Row from "./Row.svelte";
+  import FestivalDate from "./festival/FestivalDate.svelte";
   import { agenda } from "../stores/agenda.svelte.js";
   import { addDays, sameDay, weekendRange, dow, fullDayFmt } from "../lib/dates.js";
 
@@ -41,13 +42,9 @@
         ruleDue = false;
         rule = true;
       }
-      const g = { rows, s0, d, end, cls: cls.join(" "), rule, pill: "", label: "", datetime: s0.date };
-      if (s0._end) {
-        // «FR–SO» over «16–18»; across a month boundary «30» over «–1.8.»; «LÄUFT» while it runs.
-        g.sameMonth = d.getMonth() === end.getMonth() && d.getFullYear() === end.getFullYear();
-        g.label = `${s0._now ? "Läuft, " : ""}${fullDayFmt.format(d)} bis ${fullDayFmt.format(end)}`;
-        g.datetime = `${s0.date}/${s0.end_date}`;
-      } else {
+      const g = { rows, s0, d, end, cls: cls.join(" "), rule, pill: "", label: "" };
+      // A festival's range cell is FestivalDate.svelte (M5).
+      if (!s0._end) {
         g.pill = fresh && (isToday || isTomorrow) ? (isToday ? "Heute" : "Morgen") : "";
         // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
         g.label = `${g.pill ? `${g.pill}, ` : ""}${fullDayFmt.format(d)}`;
@@ -62,16 +59,15 @@
     <p class="rule-weekend"><span>Wochenende</span></p>
   {/if}
   <section class={g.cls} data-date={g.s0.date}>
-    <time class="date" datetime={g.datetime} aria-label={g.label}
-      >{#if g.s0._end}{#if g.s0._now}<span class="dow now live">Läuft</span>{:else}<span class="dow range"
-            >{dow(g.d)}–{dow(g.end)}</span
-          >{/if}{#if g.sameMonth}<span class="num range">{g.d.getDate()}–{g.end.getDate()}</span>{:else}<span
-            class="num range">{g.d.getDate()}</span
-          ><span class="day-end">–{g.end.getDate()}.{g.end.getMonth() + 1}.</span
-          >{/if}{:else}{#if g.pill}<span class="dow now">{g.pill}</span>{:else}<span class="dow"
-            >{dow(g.d)}</span
-          >{/if}<span class="num">{g.d.getDate()}</span>{/if}</time
-    >
+    {#if g.s0._end}
+      <FestivalDate show={g.s0} />
+    {:else}
+      <time class="date" datetime={g.s0.date} aria-label={g.label}
+        >{#if g.pill}<span class="dow now">{g.pill}</span>{:else}<span class="dow">{dow(g.d)}</span>{/if}<span
+          class="num">{g.d.getDate()}</span
+        ></time
+      >
+    {/if}
     <ul class="day-shows">
       {#each g.rows as s (s.id)}
         <Row show={s} index={indexOf(s)} geoHint={!geoHintId || geoHintId === s.id} />
