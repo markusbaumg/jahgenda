@@ -87,6 +87,11 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   `design/promo-plan.md` (domain jahgenda.ch is free; stickers; QR), `design/monitoring-plan.md`,
   `design/ui-revamp.md` (when the panel delivers). Promo concept for Seraina as a Claude artifact:
   https://claude.ai/artifact/V4gf752tMY4EaeDRgaaoAD
+- **Revamp merged (2026-10-13 14:30):** the «Soundsystem Swiss» revamp S1–S8 (#21–#28) and festival support (#6)
+  are on main: display-face lockup, tricolor month heads, day groups with HEUTE/MORGEN, 3-line rows with inline
+  actions (also on phones — the earlier «Mehr» sheet is gone; #32 re-tests this), explicit Meine Shows states with
+  undo, facet counts + filter pills + empty state naming its cause, festival cards (`end_date` + `days`), scoped
+  view transitions, reduced-motion/contrast rules. The Playwright suite follows the revamp DOM.
 - **Tech decision (approved 2026-10-13):** the page migrates to **Svelte 5 + Vite** (components per
   design/ui-revamp.md, reactive store, vite-plugin-pwa, Vitest + Playwright mobile tests), still a static build
   on GitHub Pages; everything else (data contract, skills, validator, routines, watchdog) stays. Story #33 —
