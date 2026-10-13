@@ -10,6 +10,7 @@
   import { agenda } from "../../stores/agenda.svelte.js";
   import { views } from "../../stores/views.svelte.js";
   import { showSubscribe } from "./subscribe.js";
+  import "./views.css";
   import { quietScroll } from "./scroll.js";
   import { pad2, parseDay } from "../../lib/text.js";
   import { addDays, monthFmt, monthStart, dow, todayStart } from "../../lib/dates.js";
