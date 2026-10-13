@@ -136,14 +136,12 @@ Rules while collecting:
 
 Decision order for each candidate:
 
-0. **Cancelled before?** Look through the `dropped` entries of the `scrape-shows` runs in `data/runs.json`
-   from the last 60 days. If one has the same date and the same venue (compare as in step 5.1) and its
-   `why` says it was cancelled (abgesagt / cancelled / annulé / verschoben), keep the candidate out — unless
-   the venue's or the ticket shop's own page, opened in this run, lists it as on sale again. Log it under
-   `dropped` again with the same reason. An aggregator listing (Skalender, Eventfrog, Petzi's agenda list,
-   a search hit) never overrides a «cancelled» on the venue or ticket page: an aggregator is often the last
-   to notice a cancellation, so a shortened run that only reaches the aggregator must not bring a rejected
-   show back.
+0. **Cancelled before?** Apply the rule «Cancellations carry forward» above: same date + venue (compare as
+   in step 5.1) in any earlier run's `dropped` list — scrape runs and `"runner": "manual"` hand corrections
+   alike, however old — with a cancelled/moved reason (abgesagt / cancelled / annulé / verschoben) keeps the
+   candidate out, unless the venue's or ticket shop's own page, opened in this run, lists it as on sale
+   again. Log it under `dropped` again with the same reason. A shortened run that only reaches an
+   aggregator must never bring a rejected show back.
 1. Its headliner (first/main act) is under **Excluded** in `bands.md`, or it is the only act → drop.
    An **Excluded** act as one of several acts: keep the show, ignore that act for the genres.
 2. An act under **Included** → keep.
