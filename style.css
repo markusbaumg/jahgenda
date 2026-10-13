@@ -4223,6 +4223,13 @@ a:visited {
   .seg button::after {
     inset: -4px 0;
   }
+  /* The chip row's scroll arrows (28 px, kept on touch: a swipe is not the only way to the end of the
+   * row) get the chips' 44 px hit band – vertically the scroller's own, 8 px sideways. */
+  .scroll-btn::after {
+    content: "";
+    position: absolute;
+    inset: -7px -9px -11px;
+  }
   .cal-today {
     display: inline-flex;
     align-items: center;

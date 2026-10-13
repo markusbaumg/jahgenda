@@ -130,6 +130,20 @@ const HIT = 43;
 
 test("chips, panel ×, view switch and calendar «Heute» have a 44 px hit span on touch", async ({ page }) => {
   expect(await hitSpan(page.locator("#genres .chip").nth(1))).toBeGreaterThanOrEqual(HIT);
+  // The row's scroll arrow is a 28 px disc over the last chip: on touch its hit box is 44 × 44.
+  const arrow = page.locator(".scroll-btn.right");
+  await expect(arrow).toBeVisible();
+  expect(await hitSpan(arrow)).toBeGreaterThanOrEqual(HIT);
+  expect(
+    await arrow.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const y = r.top + r.height / 2;
+      let w = 0;
+      for (let x = r.left - 12; x <= r.right + 12; x += 0.5)
+        if (document.elementFromPoint(x, y) === el) w += 0.5;
+      return w;
+    }),
+  ).toBeGreaterThanOrEqual(HIT);
   for (const btn of await page.locator("#view-switch button").all())
     expect(await hitSpan(btn)).toBeGreaterThanOrEqual(HIT);
   await page.click("#toggle-where");
