@@ -379,13 +379,13 @@
       "hint": "Server-rendered cards: title, 'Elefantehuus Liestal', 'Do., 15. Oktober 2026 20:00 Uhr', eventfrog tickets. Reggae relevance: low — blues/soul/tribute nights, a cappella."
     },
     "Elysia": {
-      "city": "Basel",
-      "canton": "BS",
-      "lat": 47.5518,
-      "lon": 7.5847,
+      "city": "Münchenstein",
+      "canton": "BL",
+      "lat": 47.5317,
+      "lon": 7.6075,
       "url": "https://www.elysia.ch/",
       "scrape": false,
-      "hint": "Next.js page with an empty events div; the JSON API https://www.elysia.ch/api/events returns [{slug,title,date 'YYYY-MM-DD',presstext}]. Reggae relevance: low — house/techno club nights."
+      "hint": "Frankfurt-Strasse 36 on the Dreispitz, 4142 Münchenstein (BL), not Basel city. Next.js page with an empty events div; the JSON API https://www.elysia.ch/api/events returns [{slug,title,date 'YYYY-MM-DD',presstext}]. Reggae relevance: low — house/techno club nights."
     },
     "ESSE Musicbar": {
       "city": "Winterthur",
