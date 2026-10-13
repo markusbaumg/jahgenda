@@ -4,6 +4,9 @@ on:
   schedule:
     # 06:17 UTC = 08:17 CEST / 07:17 CET. GitHub cron is UTC only; avoid :00 (high-load, delays).
     - cron: "17 6 * * *"
+    # Second fire at noon UTC: GitHub drops or delays scheduled runs at busy hours (the 06:17 fire was
+    # skipped on 2026-10-13); the script is idempotent, so a second pass never duplicates the issue.
+    - cron: "17 12 * * *"
   workflow_dispatch:
 
 permissions:
