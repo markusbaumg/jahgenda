@@ -146,7 +146,9 @@ export function createCallout() {
     setHost(el) {
       host = el;
     },
-    /** Queue a callout: {id, title, text (HTML), actions:[{label, href?, external?, onClick?(close, el), primary?, title?}], force?} */
+    /** Queue a callout: {id, title, text (HTML), actions:[{label, href?, external?, onClick?(close, el), primary?, title?}], force?}.
+     * title, text, label and an action's title may be thunks (() => t("…")): Callout.svelte resolves them
+     * while rendering, so an open sticker follows a language switch. */
     show(c) {
       if (!c || !c.id) return;
       if (!c.force && dismissedState(c.id)) return;
@@ -181,7 +183,7 @@ export function createCallout() {
     setBlocker(fn) {
       blocker = typeof fn === "function" ? fn : () => false;
     },
-    /** A new label for one action button of the visible callout («Adresse kopieren» → «Kopiert»). */
+    /** A new label (string or thunk) for one action button of the visible callout («Adresse kopieren» → «Kopiert»). */
     relabel(idx, text) {
       labels = { ...labels, [idx]: text };
     },

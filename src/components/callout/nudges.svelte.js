@@ -62,28 +62,30 @@ export function showSubscribe(force) {
   callout.show({
     id: "subscribe",
     force,
-    title: canton ? t("sub.titleRegion", { name: regionName(canton) }) : t("sub.title"),
-    text: t("sub.text"),
+    // Texts as thunks: Callout.svelte resolves them while it renders, so an open sticker follows a
+    // DE/FR/EN switch like every other t() on the page.
+    title: () => (canton ? t("sub.titleRegion", { name: regionName(canton) }) : t("sub.title")),
+    text: () => t("sub.text"),
     actions: [
       {
-        label: t("sub.apple"),
+        label: () => t("sub.apple"),
         primary: true,
         href: url.replace("https://", "webcal://"),
-        title: t("sub.appleTitle"),
+        title: () => t("sub.appleTitle"),
       },
       {
-        label: t("sub.google"),
+        label: () => t("sub.google"),
         href: `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(url)}`,
         external: true,
-        title: t("sub.googleTitle"),
+        title: () => t("sub.googleTitle"),
       },
       {
-        label: t("sub.copy"),
-        title: t("sub.copyTitle"),
+        label: () => t("sub.copy"),
+        title: () => t("sub.copyTitle"),
         onClick: async () => {
           try {
             await navigator.clipboard.writeText(url);
-            callout.relabel(2, t("fb.copied"));
+            callout.relabel(2, () => t("fb.copied"));
           } catch {
             prompt(t("sub.prompt"), url);
           }
@@ -116,13 +118,13 @@ function startInstall() {
     if (visits < 2) return;
     callout.show({
       id: "install",
-      title: t("install.title"),
-      text: t("install.text"),
+      title: () => t("install.title"),
+      text: () => t("install.text"),
       actions: [
         {
-          label: t("install.button"),
+          label: () => t("install.button"),
           primary: true,
-          title: t("install.buttonTitle"),
+          title: () => t("install.buttonTitle"),
           onClick: async (close) => {
             if (!deferredPrompt) return close("done");
             deferredPrompt.prompt();
@@ -143,20 +145,21 @@ function startInstall() {
       if (deferredPrompt) return;
       callout.show({
         id: "install",
-        title: t("install.iosTitle", { device: isIPad ? "iPad" : "iPhone" }),
+        title: () => t("install.iosTitle", { device: isIPad ? "iPad" : "iPhone" }),
         // The message carries {where}, {share} and {add}: the place of the button and the two icons.
-        text: t("install.iosText", {
-          where: t(isIPad ? "install.iosWhereIpad" : "install.iosWherePhone"),
-          share: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg>`,
-          add: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3z"/></svg>`,
-        }),
+        text: () =>
+          t("install.iosText", {
+            where: t(isIPad ? "install.iosWhereIpad" : "install.iosWherePhone"),
+            share: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg>`,
+            add: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3z"/></svg>`,
+          }),
         // A friendly primary (snooze), so «Nie mehr zeigen» is not the only – and the biggest – button of
         // a nudge that wants the opposite.
         actions: [
           {
-            label: t("install.ok"),
+            label: () => t("install.ok"),
             primary: true,
-            title: t("install.okTitle"),
+            title: () => t("install.okTitle"),
             onClick: (close) => close("snooze"),
           },
         ],
