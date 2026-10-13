@@ -19,7 +19,7 @@ export const isFestival = (s) => Boolean(s._end);
 const endDay = (s) =>
   /^\d{4}-\d{2}-\d{2}$/.test(s.end_date || "") && s.end_date > s.date ? parseDay(s.end_date) : null;
 
-export function createAgenda() {
+function createAgenda() {
   let shows = $state.raw([]);
   let loadState = $state("loading"); // "loading" | "ready" | "error"
   let loadError = $state(null);

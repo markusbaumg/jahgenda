@@ -29,7 +29,7 @@ function dismissedState(id) {
   return "";
 }
 
-export function createCallout() {
+function createCallout() {
   let current = $state.raw(null); // the callout on screen: {id, title, text, actions, force}
   let hidden = $state(true); // the host's hidden attribute (stays false through the exit transition)
   let shown = $state(false); // the .show class (slide in / out)

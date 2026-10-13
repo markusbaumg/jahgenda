@@ -26,7 +26,6 @@ const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
 const feedUrl = (region) => FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
 
 let quietUntil = 0; // no nudge for a moment after a filter interaction or a deep-link landing
-const extraBusy = [];
 
 const shown = (id) => {
   const el = document.getElementById(id);
@@ -41,22 +40,15 @@ const occupied = () =>
   shown("where-panel") || shown("when-panel") || visibleView() === "map" || shown("undo");
 /** True while a nudge must wait. */
 export function busy() {
-  return occupied() || Date.now() < quietUntil || extraBusy.some((fn) => fn());
+  return occupied() || Date.now() < quietUntil;
 }
 /** No nudge for `ms` (mid-task: a filter tap, a deep-link landing). */
 export function quiet(ms) {
   quietUntil = Math.max(quietUntil, Date.now() + ms);
 }
-/** The page scrolls by itself for `ms` (deep link, keepInView, scroll restoration): no scroll nudge.
- * One clock for the whole page: lib/scroll.js, which the filter and view stores mark too. */
-export { quietScroll };
-/** Another reason to wait (returns true while busy). */
-export function addBusy(fn) {
-  extraBusy.push(fn);
-}
 
 // --- Kalender abonnieren: the same callout as the install nudge --------------------------------------
-export function showSubscribe(force) {
+function showSubscribe(force) {
   const cs = agenda.filters.cantons;
   const canton = cs.size === 1 ? [...cs][0] : "";
   const url = feedUrl(canton);

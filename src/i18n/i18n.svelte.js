@@ -74,7 +74,7 @@ function apply(l) {
 }
 
 /** Pick the locale once, before the first render (src/main.js imports this module first). */
-export function initLocale() {
+function initLocale() {
   apply(initialLocale());
 }
 

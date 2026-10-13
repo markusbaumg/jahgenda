@@ -31,7 +31,7 @@ export const VIEWS = ["list", "calendar", "map"];
 // --- Labels -----------------------------------------------------------------------------------------
 export const nShows = (n) => t("n.shows", { n });
 // A search term as a label (pill, offer, headline): long input is cut so nothing overflows a phone.
-export const qLabel = (q) => (q.length > 24 ? `${q.slice(0, 22).trimEnd()}…` : q);
+const qLabel = (q) => (q.length > 24 ? `${q.slice(0, 22).trimEnd()}…` : q);
 export { dm }; // «16.10.» in the page's locale (lib/dates.js)
 // The histogram's month key «2026-10» – unpadded, the same as in the #wann= hash.
 export const monthKey = (d) => `${d.getFullYear()}-${d.getMonth() + 1}`;

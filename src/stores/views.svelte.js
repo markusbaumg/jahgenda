@@ -18,7 +18,7 @@ export const LEAFLET_SRI = {
   css: "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=",
 };
 
-export function createViews() {
+function createViews() {
   let calMonth = $state.raw(null); // first day of the month on display (null: today's month)
   let calDay = $state(""); // selected day (YYYY-MM-DD) for the compact layout ("" = the default)
   // The list mode (★ Meine Shows / a shared list) always shows the list; the stored view returns on close.

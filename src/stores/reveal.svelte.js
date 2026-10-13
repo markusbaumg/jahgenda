@@ -35,7 +35,7 @@ export const reveal = $state({
 export const highlighted = () => (reveal.id && reveal.sig === filterSig() ? reveal.id : "");
 
 // The show id in the hash, if the hash names one (not a list, not a filter state, not the view only).
-export function hashShowId(hash = location.hash) {
+function hashShowId(hash = location.hash) {
   const h = parseHash(hash);
   if (h.mine || !h.id || h.id.includes("=")) return "";
   return h.id;

@@ -50,7 +50,7 @@ export const MARK_TITLE = {
     return t("mark.unmark");
   },
 };
-export const STATE_WORD = {
+const STATE_WORD = {
   get interested() {
     return t("row.interested");
   },
@@ -58,7 +58,7 @@ export const STATE_WORD = {
     return t("row.going");
   },
 };
-export const UNDO_MS = 8000;
+const UNDO_MS = 8000;
 export const LONG_PRESS = 500;
 
 const jah = () => (typeof window !== "undefined" ? window.jahStore : null);
@@ -76,7 +76,7 @@ function loadMarks() {
   return out;
 }
 
-export function createMarks() {
+function createMarks() {
   let marks = $state.raw(loadMarks()); // { id: "interested" | "going" }, replaced on every change
   let mineOnly = $state(false); // ★ Meine Shows is on
   let shared = $state.raw(null); // { id: state } from a #m=… link: the list is that one

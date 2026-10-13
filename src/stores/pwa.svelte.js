@@ -8,7 +8,7 @@ import { callout } from "./callout.svelte.js";
 
 const isLocal = () => ["localhost", "127.0.0.1"].includes(location.hostname);
 
-export function createPwa() {
+function createPwa() {
   // The waiting registration once a new worker is installed while an old one controls the page.
   let update = $state.raw(null);
   // Reload only after the visitor pressed «Aktualisieren»: clients.claim() in the freshly installed

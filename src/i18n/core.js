@@ -28,7 +28,7 @@ export const getLocale = () => {
   track();
   return current;
 };
-export const intlTag = () => INTL[getLocale()];
+const intlTag = () => INTL[getLocale()];
 /** Set the locale (the reactive store calls this; anything else goes through i18n.svelte.js). */
 export function setCurrentLocale(l) {
   if (LOCALES.includes(l)) current = l;
@@ -76,7 +76,7 @@ export const has = (key) => TABLES[current][key] !== undefined || de[key] !== un
 // --- Dates ------------------------------------------------------------------------------------------
 const formats = new Map();
 /** A cached Intl.DateTimeFormat for the current locale. */
-export function dateFmt(opts) {
+function dateFmt(opts) {
   const tag = intlTag();
   const k = `${tag}|${JSON.stringify(opts)}`;
   if (!formats.has(k)) formats.set(k, new Intl.DateTimeFormat(tag, opts));
