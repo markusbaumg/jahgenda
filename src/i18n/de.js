@@ -3,8 +3,12 @@
  * back to the German here. Placeholders {name}; plurals { one, other }; a function where the grammar needs
  * it (prepositions, cases). The README («Languages») explains how to add a string. */
 
-// Cantons that take «im» (im Tessin, im Aargau), the rest take «in» (in Bern).
+// Cantons that take «im» (im Tessin, im Aargau), Waadt takes «in der», the rest take «in» (in Bern).
 const IM = new Set(["AG", "TG", "TI", "VS", "JU"]);
+const inRegion = (code, name) => `${code === "VD" ? "in der" : IM.has(code) ? "im" : "in"} ${name}`;
+// «A», «A und B», «A, B und C»
+const andList = (parts) =>
+  parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} und ${parts.at(-1)}`;
 
 export default {
   // --- Head, skip links, header ---------------------------------------------------------------------
@@ -12,7 +16,7 @@ export default {
   "meta.ogTitle": "Jahgenda – Reggae, Dub & Ska in der Schweiz",
   "meta.description": "Kommende Reggae-, Dub- und Ska-Shows in der Schweiz.",
   "manifest.name": "Jahgenda – Reggae, Dub & Ska in der Schweiz",
-  "manifest.description": "Kommende Reggae-, Dub- und Ska-Konzerte in der Schweiz.",
+  "manifest.description": "Kommende Reggae-, Dub- und Ska-Shows in der Schweiz.",
   "skip.agenda": "Zur Agenda",
   "skip.footer": "Zum Seitenende",
   "header.home": "Zum Anfang: Agenda ohne Filter",
@@ -134,8 +138,9 @@ export default {
   "empty.other": "Nichts{where}{when}{what}",
   "empty.genreFormat": "{genre}-{format}",
   "empty.q": " zu «{q}»",
-  "empty.inRegion": ({ code, name }) => ` ${IM.has(code) ? "im" : "in"} ${name}`,
-  "empty.inRegions": " in {names}",
+  "empty.inRegion": ({ code, name }) => ` ${inRegion(code, name)}`,
+  // Each canton with its own preposition: «im Tessin und im Aargau», «in der Waadt und im Wallis».
+  "empty.inRegions": ({ regions }) => ` ${andList(regions.map((r) => inRegion(r.code, r.name)))}`,
   "empty.inCantons": " in {n} Kantonen",
   "empty.radius": " im Umkreis von {km} km",
   "empty.inMonth": " im {month}",
@@ -196,7 +201,7 @@ export default {
   "row.dist": "Luftlinie von deinem Standort",
   "row.sbbTitle": "SBB-Fahrplan {from} → {to}, Ankunft eine Stunde vor der Show",
   "row.sbbAria": "SBB-Fahrplan nach {to}",
-  "row.sbbActAria": "SBB-Fahrplan nach {to} (öffnet externe Seite)",
+  "row.sbbActAria": "SBB-Fahrplan nach {to} für {title} (öffnet externe Seite)",
   "row.cantonTitle": "{name} als Filter ein-/ausschalten",
   "row.cantonOnly": "Nur {name} anzeigen ({code})",
   "row.abroadOnly": "{name}, grenznah – nur diese Shows anzeigen ({code})",
@@ -208,21 +213,25 @@ export default {
   "row.going": "Ich gehe",
   "row.goingTitle": "Ich bin dabei",
   "row.cal": "Kalender",
-  "row.calAria": "In Kalender speichern (.ics)",
+  "row.markAria": "{label} – {title}",
+  "row.calAria": "{title} in Kalender speichern (.ics)",
   "row.calTitle": "Als .ics speichern (Apple, Outlook …)",
   "row.google": "Google",
   "row.googleTitle": "In Google Kalender eintragen",
+  "row.googleAria": "{title} in Google Kalender eintragen",
   "row.share": "Teilen",
-  "row.shareAria": "Show teilen",
+  "row.shareAria": "{title} teilen",
   "row.shareTitle": "Teilen (WhatsApp, Mail, …)",
   "row.wa": "Per WhatsApp teilen",
+  "row.waAria": "{title} per WhatsApp teilen",
   "row.link": "Link",
   "row.linkTitle": "Link zu dieser Show kopieren",
+  "row.linkAria": "Link zu {title} kopieren",
   "row.tickets": "Tickets",
-  "row.ticketsAria": "Tickets kaufen (öffnet externe Seite)",
+  "row.ticketsAria": "Tickets für {title} kaufen (öffnet externe Seite)",
   "row.ticketsTitle": "Tickets kaufen",
   "row.info": "Infos",
-  "row.infoAria": "Infos beim Veranstalter (öffnet externe Seite)",
+  "row.infoAria": "Infos zu {title} beim Veranstalter (öffnet externe Seite)",
   "row.infoTitle": "Event-Seite des Veranstalters öffnen",
   "fb.saved": "Gespeichert",
   "fb.shared": "Geteilt",
@@ -254,8 +263,8 @@ export default {
   "mine.backShort": "Zurück",
   "mine.backRest": " zur Agenda",
   "mine.noteOwn":
-    "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken».",
-  "mine.noteTaken": "Diese Shows sind in deinen Shows (★) gespeichert.",
+    "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Teilen» und dort «Alle merken».",
+  "mine.noteTaken": "Diese Shows sind jetzt in Meine Shows (★).",
   "mine.noteShared": "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.",
   "mine.gone": {
     one: " 1 Show aus dem Link ist vorbei oder nicht mehr in der Agenda.",
@@ -311,6 +320,7 @@ export default {
   "map.you": "Dein Standort",
   "map.youHere": "Du bist hier",
   "map.legendClub": "Club mit Shows (Zahl = Anzahl Shows)",
+  "map.legendCluster": "Mehrere Clubs: antippen zum Zoomen",
   "map.legendGoing": "«Ich gehe»",
   "map.legendFestival": "Festival",
   "map.legendYou": "du",
@@ -321,7 +331,7 @@ export default {
   "callout.neverTitle": "Diesen Hinweis nie mehr anzeigen",
   "callout.closeTitle": "Später wieder zeigen (30 Tage)",
   "callout.closeAria": "Schliessen – in 30 Tagen wieder zeigen",
-  "sub.titleRegion": "Shows in {name} in deinem Kalender",
+  "sub.titleRegion": ({ code, name }) => `Shows ${inRegion(code, name)} im Kalender`, // «Shows im Tessin im Kalender»
   "sub.title": "Alle Shows in deinem Kalender",
   "sub.text": "Einmal abonnieren – danach hält sich der Kalender selbst aktuell.",
   "sub.apple": "Apple / Outlook",

@@ -16,7 +16,7 @@
 import { untrack } from "svelte";
 import { callout } from "../../stores/callout.svelte.js";
 import { agenda } from "../../stores/agenda.svelte.js";
-import { regionName } from "../../lib/regions.js";
+import { shortRegion } from "../../lib/regions.js";
 import { parseHash } from "../../lib/hash.js";
 import { quietScroll, isQuietScroll } from "../../lib/scroll.js";
 import { t } from "../../i18n/core.js";
@@ -64,8 +64,10 @@ export function showSubscribe(force) {
     id: "subscribe",
     force,
     // Texts as thunks: Callout.svelte resolves them while it renders, so an open sticker follows a
-    // DE/FR/EN switch like every other t() on the page.
-    title: () => (canton ? t("sub.titleRegion", { name: regionName(canton) }) : t("sub.title")),
+    // DE/FR/EN switch like every other t() on the page. Short name («Deutschland», not «Deutschland
+    // (grenznah)»): the headline fits one line at 375 px.
+    title: () =>
+      canton ? t("sub.titleRegion", { code: canton, name: shortRegion(canton) }) : t("sub.title"),
     text: () => t("sub.text"),
     actions: [
       {

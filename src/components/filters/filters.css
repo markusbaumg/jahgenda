@@ -882,8 +882,11 @@
   color: var(--bg);
   background: var(--gold);
 }
+/* The four radius chips wrap inside the panel: in one line «Alle Distanzen» ran past the panel's right
+ * edge on every phone up to 390 px (only «Alle» was left at 320 px). */
 .where-radius {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-left: 4px;
 }
@@ -1004,7 +1007,7 @@
     display: none;
   }
 }
-/* Phones (≤ 599): the results row is one line – ⓘ · «98 Konzerte» · Liste|Kalender|Karte (design §3.4
+/* Phones (≤ 599): the results row is one line – ⓘ · «98 Shows» · Liste|Kalender|Karte (design §3.4
  * draws one line at 375; the view switch stood alone on a second line with an empty left half, 46 px
  * of fold lost above the list). The note pill is its icon; the words stay its accessible name. */
 @media (max-width: 599px) {
@@ -1026,7 +1029,7 @@
 }
 @media (max-width: 340px) {
   .seg button {
-    padding: 0 12px; /* 288 px: ⓘ + «100 Konzerte» + the switch still fit on the line */
+    padding: 0 12px; /* 288 px: ⓘ + «100 Shows» + the switch still fit on the line */
   }
 }
 

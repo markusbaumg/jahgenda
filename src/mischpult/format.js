@@ -34,7 +34,7 @@ export const RUNNER = {
   manual: "Handkorrektur",
 };
 export const SKILL = {
-  "scrape-shows": "Konzerte aktualisiert",
+  "scrape-shows": "Shows aktualisiert",
   "harvest-bands": "Bands aus Festivals gesammelt",
 };
 // Per-source status of a run (runs.json → sources[].status).

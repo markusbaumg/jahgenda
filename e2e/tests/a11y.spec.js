@@ -109,27 +109,45 @@ test("choosing a calendar day keeps the focus on it and marks it pressed; the gr
   await expect(page.locator("#calendar .cal-day .show").first()).toBeInViewport();
 });
 
-test("at 200 % text size nothing overlaps and the page does not scroll sideways (WCAG 1.4.4)", async ({
-  page,
-}) => {
-  await page.addStyleTag({ content: "html { font-size: 200% }" });
-  await page.waitForTimeout(100);
-  // Name the culprits in the failure message: the three widest elements that reach past the viewport
-  // (a bare «1426 ≠ 1280» from CI took a probe to decode).
-  const { sw, cw, over } = await page.evaluate(() => {
+// Elements whose box reaches past the right edge of the viewport. body has overflow-x: clip (a safety
+// net), so documentElement.scrollWidth never grows: a scrollWidth check passes while content is cut off.
+// Hidden elements (no box) and content inside a container that scrolls sideways on purpose are skipped.
+function clippedAtRight(page) {
+  return page.evaluate(() => {
     const cw = document.documentElement.clientWidth;
-    const over = [...document.querySelectorAll("body *")]
+    const scrolls = (el) => {
+      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+        const ox = getComputedStyle(p).overflowX;
+        if (ox === "auto" || ox === "scroll") return true;
+      }
+      return false;
+    };
+    return [...document.querySelectorAll("body *")]
       .map((el) => ({ el, r: el.getBoundingClientRect() }))
-      .filter(({ r }) => r.width && r.right > cw + 1)
+      .filter(({ el, r }) => r.width && r.height && r.right > cw + 1 && !scrolls(el))
       .sort((a, b) => b.r.right - a.r.right)
       .slice(0, 3)
       .map(
         ({ el, r }) =>
           `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}.${String(el.className).split(" ")[0]} right=${Math.round(r.right)}`,
       );
-    return { sw: document.documentElement.scrollWidth, cw, over };
   });
-  expect(sw, `page scrolls sideways at 200 %: ${over.join(", ") || "no element found"}`).toBe(cw);
+}
+
+test("at 200 % text size nothing overlaps and nothing reaches past the right edge (WCAG 1.4.4)", async ({
+  page,
+  isMobile,
+}) => {
+  if (isMobile) await page.setViewportSize({ width: 375, height: 740 }); // the narrower iPhone (SE, mini)
+  await page.addStyleTag({ content: "html { font-size: 200% }" });
+  await page.waitForTimeout(100);
+  // A marked show adds the «Interessiert | Ich gehe» toggle to its row: the widest thing a row can carry.
+  const row = page.locator("#list .show").first();
+  if (!isMobile) await row.hover();
+  await row.locator(".act.star").click();
+  await expect(row.locator(".mark-seg")).toBeVisible();
+  // Name the culprits in the failure message (a bare «1426 ≠ 1280» from CI took a probe to decode).
+  expect(await clippedAtRight(page), "cut off at the right edge at 200 %").toEqual([]);
   // The HEUTE pill (the fixture has a show today) stays inside the date column, left of the title.
   const date = page.locator("#list .day.today time.date").first();
   const [clientW, scrollW] = await date.evaluate((d) => [d.clientWidth, d.scrollWidth]);
@@ -137,6 +155,36 @@ test("at 200 % text size nothing overlaps and the page does not scroll sideways 
   const pill = await date.locator(".dow.now").boundingBox();
   const title = await page.locator("#list .day.today .title").first().boundingBox();
   expect(pill.x + pill.width).toBeLessThanOrEqual(title.x);
+  // Meine Shows: the head shows its whole title, and the count stays clear of the ★ button.
+  await page.locator("#toggle-mine").click();
+  await expect(page.locator("#list-head")).toBeVisible();
+  expect(await clippedAtRight(page), "Meine Shows cut off at the right edge at 200 %").toEqual([]);
+  const t = page.locator("#list-title .t");
+  const [tClient, tScroll] = await t.evaluate((e) => [e.clientWidth, e.scrollWidth]);
+  expect(tScroll, "the Meine Shows title is cut short").toBeLessThanOrEqual(tClient);
+  const n = await page.locator("#list-title .n").boundingBox();
+  const star = await page.locator("#toggle-mine").boundingBox();
+  const apart = n.x + n.width <= star.x || n.y >= star.y + star.height || n.y + n.height <= star.y;
+  expect(apart, "the count badge sits on the ★ button").toBe(true);
+});
+
+test("row actions name their show, so a screen reader's lists of links and buttons tell the rows apart", async ({
+  page,
+}) => {
+  const rows = page.locator("#list .show");
+  for (const [i, title] of [
+    [0, "Roots Night"],
+    [1, "Dub Station"],
+  ]) {
+    for (const sel of ['[data-act="mark"]', '[data-act="cal"]', '[data-act="link"]', ".act.event"])
+      await expect(rows.nth(i).locator(sel)).toHaveAttribute("aria-label", new RegExp(title));
+  }
+  const cal = rows.first().locator('[data-act="cal"]');
+  await expect(cal).toHaveAttribute("aria-label", "Roots Night in Kalender speichern (.ics)");
+  await expect(rows.first().locator('[data-act="mark"]')).toHaveAttribute(
+    "aria-label",
+    "Merken – Roots Night",
+  );
 });
 
 test.describe("axe-core finds no WCAG A/AA violation", () => {

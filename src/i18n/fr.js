@@ -36,6 +36,10 @@ const IN = {
   A: "en Autriche",
   FL: "au Liechtenstein",
 };
+const inRegion = (code, name) => IN[code] || `à ${name}`;
+// «A», «A et B», «A, B et C»
+const etList = (parts) =>
+  parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} et ${parts.at(-1)}`;
 
 export default {
   // --- Head, skip links, header ---------------------------------------------------------------------
@@ -203,8 +207,9 @@ export default {
   "empty.other": "Rien{where}{when}{what}",
   "empty.genreFormat": ({ genre, format }) => `${String(format).toLowerCase()} ${genre}`,
   "empty.q": " pour « {q} »",
-  "empty.inRegion": ({ code, name }) => ` ${IN[code] || `à ${name}`}`,
-  "empty.inRegions": " à {names}",
+  "empty.inRegion": ({ code, name }) => ` ${inRegion(code, name)}`,
+  // Each canton with its own preposition: «au Tessin et en Argovie».
+  "empty.inRegions": ({ regions }) => ` ${etList(regions.map((r) => inRegion(r.code, r.name)))}`,
   "empty.inCantons": " dans {n} cantons",
   "empty.radius": " dans un rayon de {km} km",
   "empty.inMonth": " en {month}",
@@ -267,7 +272,7 @@ export default {
   "row.dist": "À vol d'oiseau depuis ta position",
   "row.sbbTitle": "Horaire CFF {from} → {to}, arrivée une heure avant le concert",
   "row.sbbAria": "Horaire CFF pour {to}",
-  "row.sbbActAria": "Horaire CFF pour {to} (ouvre un site externe)",
+  "row.sbbActAria": "Horaire CFF pour {to}, {title} (ouvre un site externe)",
   "row.cantonTitle": "Activer ou désactiver le filtre {name}",
   "row.cantonOnly": "Seulement {name} ({code})",
   "row.abroadOnly": "{name}, près de la frontière – seulement ces concerts ({code})",
@@ -279,21 +284,25 @@ export default {
   "row.going": "J'y vais",
   "row.goingTitle": "J'en suis",
   "row.cal": "Agenda",
-  "row.calAria": "Ajouter à l'agenda (.ics)",
+  "row.markAria": "{label} – {title}",
+  "row.calAria": "Ajouter {title} à l'agenda (.ics)",
   "row.calTitle": "Enregistrer en .ics (Apple, Outlook …)",
   "row.google": "Google",
   "row.googleTitle": "Ajouter à Google Agenda",
+  "row.googleAria": "Ajouter {title} à Google Agenda",
   "row.share": "Partager",
-  "row.shareAria": "Partager le concert",
+  "row.shareAria": "Partager {title}",
   "row.shareTitle": "Partager (WhatsApp, e-mail, …)",
   "row.wa": "Partager sur WhatsApp",
+  "row.waAria": "Partager {title} sur WhatsApp",
   "row.link": "Lien",
   "row.linkTitle": "Copier le lien vers ce concert",
+  "row.linkAria": "Copier le lien vers {title}",
   "row.tickets": "Billets",
-  "row.ticketsAria": "Acheter des billets (ouvre un site externe)",
+  "row.ticketsAria": "Acheter des billets pour {title} (ouvre un site externe)",
   "row.ticketsTitle": "Acheter des billets",
   "row.info": "Infos",
-  "row.infoAria": "Infos chez l'organisateur (ouvre un site externe)",
+  "row.infoAria": "Infos sur {title} chez l'organisateur (ouvre un site externe)",
   "row.infoTitle": "Ouvrir la page de l'événement",
   "fb.saved": "Enregistré",
   "fb.shared": "Partagé",
@@ -325,7 +334,7 @@ export default {
   "mine.backShort": "Retour",
   "mine.backRest": " à l'agenda",
   "mine.noteOwn":
-    "Enregistré dans ce navigateur. Pour un autre téléphone ou des amis : « Partager la liste », puis « Tout garder » là-bas.",
+    "Enregistré dans ce navigateur. Pour un autre téléphone ou des amis : « Partager », puis « Tout garder » là-bas.",
   "mine.noteTaken": "Ces concerts sont maintenant dans « Mes concerts » (★).",
   "mine.noteShared":
     "Ouvert depuis un lien. Rien n'est enregistré chez toi tant que tu ne touches pas « Tout garder ».",
@@ -383,6 +392,7 @@ export default {
   "map.you": "Ta position",
   "map.youHere": "Tu es ici",
   "map.legendClub": "Club avec concerts (chiffre = nombre de concerts)",
+  "map.legendCluster": "Plusieurs clubs : toucher pour zoomer",
   "map.legendGoing": "« J'y vais »",
   "map.legendFestival": "Festival",
   "map.legendYou": "toi",

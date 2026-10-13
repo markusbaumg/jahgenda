@@ -26,12 +26,13 @@ test("every row action is reachable inline: icon-only 44 px targets with names",
   const actions = row.locator(".actions .act");
   await expect(actions).toHaveCount(5);
   const names = await actions.evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
+  // Each name carries the show's title (a screen reader's lists of links and buttons tell rows apart).
   for (const re of [
-    /^In Kalender speichern/,
-    /^In Google Kalender/,
-    /teilen$/,
-    /^Link zu dieser Show/,
-    /^Infos beim Veranstalter/,
+    /^Roots Night in Kalender speichern/,
+    /^Roots Night in Google Kalender/,
+    /^Roots Night .*teilen$/,
+    /^Link zu Roots Night kopieren/,
+    /^Infos zu Roots Night beim Veranstalter/,
   ])
     expect(
       names.some((n) => re.test(n)),

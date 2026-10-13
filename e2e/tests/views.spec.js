@@ -47,6 +47,9 @@ test("the map loads Leaflet and places pins", async ({ page }) => {
   // zooms into that group until the pins come apart (every pin is reachable with a thumb).
   for (let i = 0; i < 6 && (await clusters.count()); i++) {
     await expect(clusters.first()).toHaveAttribute("aria-label", /^\d+ Clubs mit \d+ Shows: hineinzoomen$/);
+    // The badge counts shows, as the pins' badges and the legend do (not the clubs).
+    const shows = (await clusters.first().getAttribute("aria-label")).match(/mit (\d+) Shows/)[1];
+    await expect(clusters.first()).toHaveText(shows);
     const before = (await pins.count()) + (await clusters.count());
     await clusters.first().click();
     await expect.poll(async () => (await pins.count()) + (await clusters.count())).toBeGreaterThan(before);

@@ -40,6 +40,9 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
 
   // Share link: «Teilen» is the WhatsApp link where navigator.share is missing (the test browser) and
   // carries the same #m=<short>g link that «Link» copies.
+  // The note above names that button by the label it really has.
+  const shareLabel = await page.locator("#mine-wa .lbl").textContent();
+  await expect(panel.locator(".mine-note")).toContainText(`«${shareLabel}»`);
   const wa = await page.locator("#mine-wa").getAttribute("href");
   expect(decodeURIComponent(wa)).toMatch(/#m=[a-z0-9]+g$/);
   // The message names the shows (date · title, city), not just «Meine Reggae-Shows» + link.

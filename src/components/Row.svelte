@@ -216,6 +216,7 @@
       class="act star{starWord ? ' fb-on' : ''}"
       data-act="mark"
       aria-pressed={Boolean(mark)}
+      aria-label={t("row.markAria", { label: MARK_LABEL[mark], title: s.title })}
       title={MARK_TITLE[mark]}
       onclick={onStarClick}
       onpointerdown={onStarDown}
@@ -254,7 +255,8 @@
       {/if}
     </div>
     <!-- The actions line of a row (§3.6): Kalender (.ics) · Google · Teilen · Link, plus «Tickets ↗» and
-         «Infos ↗» when the show has those URLs. Teilen is navigator.share where it exists; elsewhere it
+         «Infos ↗» when the show has those URLs. Every accessible name carries the show's title, so a screen
+         reader's list of links and buttons can tell the rows apart («Tickets für Roots Night kaufen …»). Teilen is navigator.share where it exists; elsewhere it
          stays the WhatsApp link, so WhatsApp never disappears for anyone. -->
     <div class="actions">
       <button
@@ -262,7 +264,7 @@
         class="act{flashes.cal ? ' fb-on' : ''}"
         data-act="cal"
         onclick={() => act("cal")}
-        aria-label={t("row.calAria")}
+        aria-label={t("row.calAria", { title: s.title })}
         title={t("row.calTitle")}
         ><Icon name="cal" /><span class="lbl">{t("row.cal")}</span>{@render fbWord("cal")}</button
       ><a
@@ -270,14 +272,14 @@
         href={gcalUrl(s, { url: showUrl() })}
         target="_blank"
         rel="noopener"
-        aria-label={t("row.googleTitle")}
+        aria-label={t("row.googleAria", { title: s.title })}
         title={t("row.googleTitle")}><Icon name="gcal" /><span class="lbl">{t("row.google")}</span></a
       >{#if canShare}<button
           type="button"
           class="act{flashes.share ? ' fb-on' : ''}"
           data-act="share"
           onclick={() => act("share")}
-          aria-label={t("row.shareAria")}
+          aria-label={t("row.shareAria", { title: s.title })}
           title={t("row.shareTitle")}
           ><Icon name="share" /><span class="lbl">{t("row.share")}</span>{@render fbWord("share")}</button
         >{:else}<a
@@ -285,14 +287,14 @@
           href={waUrl()}
           target="_blank"
           rel="noopener"
-          aria-label={t("row.wa")}
+          aria-label={t("row.waAria", { title: s.title })}
           title={t("row.wa")}><Icon name="wa" /><span class="lbl">{t("row.share")}</span></a
         >{/if}<button
         type="button"
         class="act{flashes.link ? ' fb-on' : ''}"
         data-act="link"
         onclick={() => act("link")}
-        aria-label={t("row.linkTitle")}
+        aria-label={t("row.linkAria", { title: s.title })}
         title={t("row.linkTitle")}
         ><Icon name="link" /><span class="lbl">{t("row.link")}</span>{@render fbWord("link")}</button
       >{#if tickets}<a
@@ -300,7 +302,7 @@
           href={tickets}
           target="_blank"
           rel="noopener"
-          aria-label={t("row.ticketsAria")}
+          aria-label={t("row.ticketsAria", { title: s.title })}
           title={t("row.ticketsTitle")}
           ><Icon name="ticket" /><span class="lbl">{t("row.tickets")}</span>{@render extNote()}</a
         >{/if}{#if url}<a
@@ -308,7 +310,7 @@
           href={url}
           target="_blank"
           rel="noopener"
-          aria-label={t("row.infoAria")}
+          aria-label={t("row.infoAria", { title: s.title })}
           title={t("row.infoTitle")}
           ><Icon name="event" /><span class="lbl">{t("row.info")}</span>{@render extNote()}</a
         >{/if}{#if sbb}<a
@@ -316,7 +318,7 @@
           href={sbb}
           target="_blank"
           rel="noopener"
-          aria-label={t("row.sbbActAria", { to: s.city })}
+          aria-label={t("row.sbbActAria", { to: s.city, title: s.title })}
           title={t("row.sbbTitle", { from: agenda.homeCity, to: s.city })}
           ><Icon name="train" /><span class="lbl">SBB</span>{@render extNote()}</a
         >{/if}

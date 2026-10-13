@@ -49,6 +49,38 @@ test("«Abonnieren» opens a dialog: focus inside, Escape closes it and returns 
   expect(await page.evaluate(() => document.activeElement.className)).toContain("cal-subscribe");
 });
 
+test("with one canton the subscribe headline names it with the right preposition", async ({ page }) => {
+  // One show in the Tessin (the fixture has none there): the calendar of #wo=TI then has a show to subscribe to.
+  const d = new Date(Date.now() + 3 * 86_400_000);
+  const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const ti = { venue: "Studio Foce", city: "Lugano", canton: "TI", lat: 46.0037, lon: 8.9511 };
+  await page.route("**/data/shows.json", (route) =>
+    route.fulfill({
+      json: {
+        updated: new Date().toISOString(),
+        source: "scraper",
+        shows: [
+          {
+            id: `${date}-ska-lugano`,
+            date,
+            time: "21:00",
+            title: "Ska Lugano",
+            acts: ["Ska Lugano"],
+            ...ti,
+            url: "https://example.org/event",
+            source_url: "https://example.org/agenda",
+            genres: ["ska"],
+          },
+        ],
+      },
+    }),
+  );
+  await page.goto("/#wo=TI");
+  await page.locator('#view-switch [data-view="calendar"]').click();
+  await page.locator("#calendar .cal-subscribe").click();
+  await expect(page.locator(".callout")).toContainText("Shows im Tessin im Kalender");
+});
+
 test("iPhone: the install sticker waits for the second visit; after a closed nudge no second one follows", async ({
   page,
   isMobile,

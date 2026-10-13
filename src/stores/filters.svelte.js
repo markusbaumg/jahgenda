@@ -287,12 +287,12 @@ function createFilterUi() {
         : FORMAT_LABEL[f.format]
       : genreWord;
     const what = q ? t("empty.q", { q: qLabel(q) }) : "";
-    // Where: «im Tessin», «in Bern, Zürich», «in 4 Kantonen», «im Umkreis von 25 km».
+    // Where: «im Tessin», «in Bern und in Zürich», «in 4 Kantonen», «im Umkreis von 25 km».
     const codes = [...f.cantons];
     let where = "";
     if (codes.length === 1) where = t("empty.inRegion", { code: codes[0], name: shortRegion(codes[0]) });
     else if (codes.length && codes.length <= 3)
-      where = t("empty.inRegions", { names: codes.map(shortRegion).join(", ") });
+      where = t("empty.inRegions", { regions: codes.map((code) => ({ code, name: shortRegion(code) })) });
     else if (codes.length) where = t("empty.inCantons", { n: codes.length });
     if (agenda.here && f.radius) where += t("empty.radius", { km: f.radius });
     // When: «heute», «am Wochenende», «im November», «in den gewählten Monaten», «vom 16.10. bis 20.10.».

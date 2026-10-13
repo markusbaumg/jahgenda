@@ -256,7 +256,7 @@ export function createMarks() {
     return "";
   }
 
-  // Leaving the mode by any exit: a #m= link that «Liste teilen» or a friend put into the address bar goes too.
+  // Leaving the mode by any exit: a #m= link that «Teilen» or a friend put into the address bar goes too.
   function clearListHash() {
     if (parseHash().mine) setHash("");
   }
