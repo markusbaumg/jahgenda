@@ -68,12 +68,13 @@ const FIXTURE = {
 
 // Serve the fixture instead of the real data and silence the install/subscribe callouts, which
 // would otherwise cover the bottom of the phone viewport.
-async function useFixture(page) {
+async function useFixture(page, { callouts = false } = {}) {
   await page.route("**/data/shows.json", (route) =>
     route.fulfill({
       json: { updated: new Date().toISOString(), source: "scraper", shows: fixtureShows() },
     }),
   );
+  if (callouts) return;
   await page.addInitScript(() => {
     try {
       localStorage.setItem("jahgenda.callout.install", JSON.stringify("forever"));

@@ -267,6 +267,9 @@
   const findShow = (token) => shows.find((s) => s._short === token) || shows.find((s) => s.id === token);
 
   const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
+  // callout.js loads after this file: always look it up when needed.
+  const callout = () => window.jahCallout;
+  let nudgeQuietUntil = 0; // no nudge for a moment after a filter interaction or a deep-link landing
 
   const shareText = (s) =>
     `${s.title} – ${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.${s._day.getFullYear()}` +
@@ -623,6 +626,12 @@
         stampText = `Stand: ${stampFmt.format(new Date(data.updated))}${note}${old}`;
         updateStamp();
       }
+      // A nudge (install, subscribe) waits while the visitor is busy with a panel, the sheet, the map,
+      // a filter they just touched, or has just landed on a shared show.
+      if (callout())
+        callout().setBlocker(
+          () => Boolean(openPanel) || !sheet.hidden || view === "map" || Date.now() < nudgeQuietUntil,
+        );
       render();
       revealFromHash();
       loadVenues();
@@ -730,6 +739,7 @@
     }
     sheetActions.querySelector(".act").focus();
     pushOverlay("sheet");
+    if (callout()) callout().suspend();
   }
   // The sheet's star mirrors the row's state (label and colour).
   function syncSheetMark() {
@@ -856,6 +866,7 @@
     row.classList.add("highlight");
     quietScrollUntil = Date.now() + 2000;
     revealUntil = Date.now() + 3000;
+    nudgeQuietUntil = Date.now() + 8000; // a friend's link lands on the show, not on a sticker
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     row.scrollIntoView({ block: "start", behavior: motion });
   }
@@ -910,6 +921,7 @@
     if (name === "when") updateWhen();
     if (name) {
       pushOverlay(name);
+      if (callout()) callout().suspend(); // a sticker never covers the panel's last rows
       // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
       const first = el(PANELS[name][1]).querySelector(".chip:not([hidden])");
       if (first) first.focus({ preventScroll: true });
@@ -1477,6 +1489,10 @@
     markView();
     if (opts.push) history.pushState(histState(), "");
     else history.replaceState(histState(), "");
+    if (callout() && opts.push) {
+      callout().suspend(); // a nudge steps aside (the map must stay tappable)
+      callout().hide(); // a callout opened on purpose closes with the view it belonged to
+    }
     render();
     // A switch to the calendar or the map brings that view up under the bar (on a phone it would
     // otherwise start two thirds down the screen, behind the hero).
@@ -1792,7 +1808,7 @@
   function showSubscribe(force) {
     const canton = cantons.size === 1 ? [...cantons][0] : "";
     const url = feedUrl(canton);
-    window.jahCallout.show({
+    callout().show({
       id: "subscribe",
       force,
       title: canton ? `Shows in ${regionName(canton)} in deinem Kalender` : "Alle Shows in deinem Kalender",
@@ -1840,7 +1856,7 @@
     () => {
       if (nudged || window.scrollY < 600 || !shows.length || Date.now() < quietScrollUntil) return;
       nudged = true;
-      setTimeout(() => showSubscribe(false), 1500);
+      setTimeout(() => showSubscribe(false), 1500); // callout.js holds it while the page is busy
     },
     { passive: true },
   );
@@ -1865,6 +1881,7 @@
   // jump back to the start of the results so the user doesn't land in empty space.
   const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
   function renderAndKeepInView() {
+    nudgeQuietUntil = Date.now() + 3000; // mid-task: no sticker over the result
     render();
     // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
     // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.

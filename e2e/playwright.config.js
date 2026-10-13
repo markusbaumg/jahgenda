@@ -13,7 +13,9 @@ module.exports = defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: true,
   retries: 0,
-  workers: process.env.CI ? 2 : undefined,
+  // Four workers locally: the suite stays fast (~10 s) and no longer starves itself – or a second
+  // Playwright run on the same machine – into 30 s test timeouts.
+  workers: process.env.CI ? 2 : 4,
   // Locally the list is enough; in CI the HTML report is uploaded on failure.
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
