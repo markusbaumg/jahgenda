@@ -1161,9 +1161,19 @@
   .results-row .seg {
     order: 5;
   }
-  .note-pill summary .note-long,
+  /* Hidden for the eye only, as on phones: the words stay the summary's accessible name (review #50 –
+   * display:none left the disclosure without a name, axe summary-name). */
   .note-pill summary .note-short {
     display: none;
+  }
+  .note-pill summary .note-long {
+    display: inline;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
   .note-pill summary {
     padding: 0 7px;

@@ -168,6 +168,12 @@
   margin: 4px 0;
   color: var(--muted);
 }
+/* Colour alone does not set a link apart from the muted line around it (axe link-in-text-block, WCAG
+ * 1.4.1); the site has no link underlines, so the weight does it. */
+.mp-links a,
+.mp-edit a {
+  font-weight: 600;
+}
 
 /* Tables (sources, venues, festivals, genres, per-run sources): scroll sideways inside their box. */
 .mp-tbl {
