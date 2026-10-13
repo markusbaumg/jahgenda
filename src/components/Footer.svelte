@@ -1,31 +1,14 @@
 <script>
   /* The footer: «Über Jahgenda» and the bottom bar with the result count + data stamp. Markup and copy
    * from index.html; the texts from app.js renderInner() / updateStamp(). */
-  import { agenda, isFestival } from "../stores/agenda.svelte.js";
-  import { monthFmt, stampFmt } from "../lib/dates.js";
+  import { agenda } from "../stores/agenda.svelte.js";
+  import { ui } from "../stores/filters.svelte.js";
+  import { stampFmt } from "../lib/dates.js";
 
   let online = $state(typeof navigator === "undefined" || navigator.onLine !== false);
 
-  function monthSpan(visible) {
-    const first = visible[0]._day;
-    const last = visible.reduce(
-      (m, s) => (s._end && s._end > m ? s._end : m),
-      visible[visible.length - 1]._day,
-    );
-    return first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
-      ? monthFmt.format(first)
-      : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
-  }
-  // Festivals are counted apart from the concerts: «12 Shows · 1 Festival · Juli 2027».
-  const resultsText = $derived.by(() => {
-    const visible = agenda.visible;
-    if (agenda.loadState !== "ready" || !visible.length) return "";
-    const nFest = visible.filter(isFestival).length;
-    const nConc = visible.length - nFest;
-    const festNote = nFest ? `${nConc ? " · " : ""}${nFest} ${nFest === 1 ? "Festival" : "Festivals"}` : "";
-    const concerts = nConc ? `${nConc} ${nConc === 1 ? "Show" : "Shows"}` : "";
-    return `${concerts}${festNote}${agenda.filtered ? " für diese Auswahl" : ""} · ${monthSpan(visible)}`;
-  });
+  // «12 Shows · 1 Festival für diese Auswahl · Juli 2027 · Heute» – derived in the filter store.
+  const resultsText = $derived(ui.resultsText);
   // "Offline · Stand: …": the service worker serves the last copy without a connection; the stamp says
   // so, so the visitor knows the list may have moved on. A stamp older than two days means the data may
   // be stale (a cached copy, or the routine failed – the watchdog knows, the visitor should too).
