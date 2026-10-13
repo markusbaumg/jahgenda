@@ -39,9 +39,11 @@
 
   nav.start(); // before the data: the saved scroll offset is read off the entry the browser restored
   agenda.load();
+  // Meine Shows (M3) before the reveal: its hashchange listener has to run first, so a show link that
+  // replaces a friend's #m= list sees the agenda again (app.js revealFromHash dropped the list first).
+  mine.start();
   // Rows & deep links (M2): #<short> lands on the row.
   initReveal();
-  mine.start();
   views.start();
   startNudges();
   pwa.start();

@@ -103,3 +103,22 @@ test("a stale #m= link opened while in Meine Shows leaves the list mode and says
   await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming); // «hier ist alles, was kommt»
   await expect(page).not.toHaveURL(/#/);
 });
+
+test("a show link that replaces a friend's list lands in the agenda without clearing the filters", async ({
+  page,
+}) => {
+  await useFixture(page);
+  await openList(page);
+  const first = await page.locator("#list .show").first().getAttribute("data-id");
+  await page.fill("#q", "Ska");
+  const ska = page.locator("#list .show").first();
+  await expect(ska).toContainText("Ska");
+  const skaId = await ska.getAttribute("data-id");
+  // The friend's list is dropped before the landing (app.js revealFromHash), so the search stays.
+  await page.evaluate((h) => (location.hash = h), `m=${encodeURIComponent(first)}:i`);
+  await expect(page.locator("body")).toHaveClass(/list-shared/);
+  await page.evaluate((h) => (location.hash = h), skaId);
+  await expect(page.locator(`#list .show[data-id="${skaId}"]`)).toBeVisible();
+  await expect(page.locator("body")).not.toHaveClass(/list-mode/);
+  await expect(page.locator("#q")).toHaveValue("Ska");
+});
