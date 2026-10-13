@@ -137,6 +137,7 @@
 
   // The town nearest to the user's position (from the venue list) – the "von" of the SBB timetable link.
   let homeCity = "";
+  let geoDeclined = false; // the browser said no: no «Distanz & Zug anzeigen» placeholder in the rows
   function updateHomeCity() {
     if (!here || !venuePlaces.length) return;
     const near = venuePlaces.map((p) => ({ p, km: distanceKm(here, p) })).sort((a, b) => a.km - b.km)[0];
@@ -842,7 +843,6 @@
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
   }
-  let geoDeclined = false; // no placeholder in the rows once the browser said no
   locateBtn.addEventListener("click", locate);
   list.addEventListener("click", (e) => {
     if (e.target.closest(".geo-ask")) locate();
