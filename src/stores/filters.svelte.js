@@ -197,12 +197,7 @@ function createFilterUi() {
     pastAuto = false;
   }
 
-  function toggleCanton(code) {
-    const next = new Set(f.cantons);
-    if (next.has(code)) next.delete(code);
-    else next.add(code);
-    f.cantons = next;
-  }
+  const toggleCanton = (code) => agenda.toggleCanton(code);
   const clearCantons = () => (f.cantons = new Set());
   const setGenre = (g) => (f.genre = g);
   const setFormat = (v) => (f.format = v);

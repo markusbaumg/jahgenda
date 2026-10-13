@@ -318,29 +318,6 @@
     if (!url) return "";
     return `<a class="sbb" href="${url}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show" aria-label="SBB-Fahrplan nach ${escape(s.city)}">SBB</a>`;
   }
-  const coarse = matchMedia("(hover: none)"); // touch screens: the placeholder below cannot wait for a hover
-  let geoHints = 0; // placeholders rendered in this pass (renderInner resets it)
-  function distanceLabel(s) {
-    if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
-    // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
-    // The separator travels with the button (both only show on hover), so no lone «·» ends the line.
-    // On a touch screen it is always visible, so it stands once, in the first row: 98 identical
-    // lines made most rows a line longer (the Wo panel has «Mein Standort» for everyone else).
-    if (!here) {
-      if (geoDeclined || (coarse.matches && geoHints++)) return "";
-      return `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
-    }
-    return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
-  }
-
-  // Venue name as a link to the venue's site when data/venues.json knows it.
-  const venueLink = (s) => {
-    const u = venueSites[venueKey(s.venue)];
-    return u
-      ? `<a class="venue-link" href="${escape(u)}" target="_blank" rel="noopener" title="Website von ${escape(s.venue)} öffnen">${escape(s.venue)}</a>`
-      : escape(s.venue);
-  };
-
   const ICONS = {
     rss: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.2 15.6a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM4 9.5a10.5 10.5 0 0 1 10.5 10.5h-3A7.5 7.5 0 0 0 4 12.5v-3zM4 3.5A16.5 16.5 0 0 1 20.5 20h-3A13.5 13.5 0 0 0 4 6.5v-3z"/></svg>',
     event:
@@ -541,214 +518,6 @@
   // Region name for pills and headlines: «Bern», «Deutschland» (no «(grenznah)» – the row says that).
   const shortRegion = (c) => (ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c));
 
-  // Escaped text with the search hit wrapped in <mark> (first occurrence, case-insensitive).
-  function markHit(text, q) {
-    const low = text.toLowerCase();
-    const i = q && low.length === text.length ? low.indexOf(q) : -1;
-    if (i < 0) return escape(text);
-    return `${escape(text.slice(0, i))}<mark>${escape(text.slice(i, i + q.length))}</mark>${escape(text.slice(i + q.length))}`;
-  }
-  // Accessible name of the canton button in a row (§5): «Nur Bern anzeigen», abroad «Deutschland, grenznah».
-  // The visible code is part of the name, so what is read matches what is seen (Lighthouse).
-  const cantonLabel = (c) =>
-    ABROAD[c]
-      ? `${ABROAD[c].replace(" (grenznah)", ", grenznah")} – nur diese Shows anzeigen (${c})`
-      : `Nur ${CANTONS[c] || c} anzeigen (${c})`;
-
-  // One row inside a day group (see renderDays), §3.6: the 3-line stack (title, acts, meta), the side column
-  // (coat of arms + abbreviation as a filter button, the star) and the actions line under the stack.
-  // Line-up block (festival-spec.md §3.1): with more than 5 acts (festival or not) the acts line shows the
-  // first 4 and a <details class="lineup"> holds the rest – by day when `days` exists, else the flat list.
-  // Open when the visitor opened it before (openIds), when a search hit sits inside it, or from a deep
-  // link. A festival without acts says «Line-up folgt».
-  const LINEUP_PREVIEW = 4;
-  const LINEUP_FROM = 6;
-  function lineupHtml(s, q, hit) {
-    const n = s.acts.length;
-    const open = hit || openIds.has(s.id);
-    const days = s.days && typeof s.days === "object" ? s.days : {};
-    const keys = Object.keys(days)
-      .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(days[k]) && days[k].length)
-      .sort();
-    const actList = (list) =>
-      `<span class="a">${list.map((a) => `<span>${markHit(String(a), q)}</span>`).join("")}</span>`;
-    let body;
-    if (keys.length) {
-      // «Tag offen» = acts that sit in no day; compared like the validator's artist_key (venueKey is the
-      // same rule), so «DUB INC.» in days matches «Dub Inc» in acts.
-      const placed = new Set();
-      body = keys
-        .map((k) => {
-          for (const a of days[k]) placed.add(venueKey(String(a)));
-          const d = parseDay(k);
-          return `<span class="d">${dowFmt.format(d).replace(".", "")} ${d.getDate()}.</span>${actList(days[k])}`;
-        })
-        .join("");
-      const rest = s.acts.filter((a) => !placed.has(venueKey(a)));
-      if (rest.length) body += `<span class="d">Tag offen</span>${actList(rest)}`;
-    } else body = `<span class="d sr">Acts</span>${actList(s.acts)}`;
-    const label = keys.length ? `Alle ${n} Acts nach Tag` : `Alle ${n} Acts`;
-    return (
-      `<details class="lineup${open ? " is-open" : ""}"${open ? " open" : ""}>` +
-      `<summary title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
-      `<div class="lineup-body"><div><div class="days">${body}</div></div></div></details>`
-    );
-  }
-  // The acts line only names who is not in the title already («The Slackers (US)» / «The Slackers»
-  // doubled most rows; «Scorchers feat. Capital Soul Sinners» names its guests in the title).
-  const extraActs = (s) => {
-    const t = fold(s.title);
-    return s.acts.filter((a) => !t.includes(fold(a)));
-  };
-  function renderShow(s) {
-    const url = safeUrl(s.url);
-    // A title with a URL is recognisable as a link: dotted gold underline, «↗» and sr text.
-    const title = url
-      ? `<a class="ext" href="${escape(url)}" target="_blank" rel="noopener" title="Seite des Veranstalters öffnen">${escape(s.title)}<span class="ext-mark" aria-hidden="true">↗</span><span class="sr"> (öffnet externe Seite)</span></a>`
-      : escape(s.title);
-    const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
-    // Genres are muted words at the end of the meta line; the active genre chip is not repeated.
-    const genreWords = s.genres
-      .filter((g) => g !== activeGenre && g !== activeFormat)
-      .map((g) => ` · <span class="genre">${escape(genreLabel[g] || g)}</span>`)
-      .join("");
-    // Festival (§3.7): «3 Tage» leads the meta line, the door time (a weekender) follows.
-    const nDays = s._end ? Math.round((s._end - s._day) / 864e5) + 1 : 0;
-    const daysWord = nDays ? `<span class="ndays">${nDays} Tage</span> · ` : "";
-    // With a known position the distance sits before the genres (§3.6); the hover-only placeholder that
-    // asks for the position goes last, so its invisible width leaves no hole in the line.
-    const dist = distanceLabel(s);
-    const past = s._past ? ` · <span class="vorbei">vorbei</span>` : "";
-    const extra = extraActs(s);
-    const hasActs = extra.length > 0;
-    // A search hit inside the line-up is highlighted, and the line (clamped to 2 lines on phones) opens up.
-    const q = search.value.trim().toLowerCase();
-    const hit = hasActs && Boolean(q) && s.acts.some((a) => a.toLowerCase().includes(q));
-    const long = s.acts.length >= LINEUP_FROM;
-    const preview = long ? extra.slice(0, LINEUP_PREVIEW) : extra;
-    let acts = hasActs
-      ? `<p class="acts${hit ? " hit" : ""}">${preview.map((a) => `<span>${markHit(a, q)}</span>`).join("")}</p>`
-      : "";
-    if (long) acts += lineupHtml(s, q, hit);
-    else if (s._end && !s.acts.length) acts = `<p class="acts none">Line-up folgt</p>`;
-    return `
-      <li class="show${s._past ? " past" : ""}${s._end ? " festival" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
-        <div class="body">
-          <h3 class="title">${title}</h3>
-          ${acts}
-          <p class="meta">${daysWord}${time}${venueLink(s)} · ${escape(s.city)}${here ? dist : ""}${genreWords}${past}${here ? "" : dist}</p>
-        </div>
-        <div class="side">
-          <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" aria-pressed="${cantons.has(s.canton)}" aria-label="${escape(cantonLabel(s.canton))}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy" decoding="async">${escape(s.canton)}</button>
-          ${starButton(s)}
-        </div>
-        <div class="foot-row">
-          ${shared && shared[s.id] === "going" ? `<span class="goes">${ICONS.star}geht hin</span>` : ""}
-          <div class="mark-slot">${markSegHtml(s)}</div>
-          <div class="actions">${actionsHtml(s)}</div>
-        </div>
-      </li>`;
-  }
-
-  // Day groups (§3.5): one <section class="day"> per date with a single <time> cell that every show of
-  // that day shares. Today and tomorrow get a red HEUTE / MORGEN pill in the DOW slot while the data is
-  // fresh; Fr/Sa/So of the coming weekend get a red DOW and, in the list, a «Wochenende» rule before the
-  // first of them.
-  function renderDays(items, { weekendRule = false } = {}) {
-    const today = todayStart();
-    const tomorrow = addDays(today, 1);
-    const [wkStart, wkEnd] = weekendRange(today);
-    const fresh = isFresh();
-    // A festival (§3.7) is a card of its own with a range date cell, never grouped with the day's shows.
-    const days = new Map();
-    for (const s of items) {
-      const key = s._end ? `${s.date}/${s.id}` : s.date;
-      if (!days.has(key)) days.set(key, []);
-      days.get(key).push(s);
-    }
-    let ruleDue = weekendRule;
-    return [...days]
-      .map(([, rows]) => {
-        const s0 = rows[0];
-        const d = s0._day;
-        const end = s0._end || d;
-        const date = s0.date;
-        const isToday = sameDay(d, today);
-        const isTomorrow = sameDay(d, tomorrow);
-        const inWeekend = d <= wkEnd && end >= wkStart;
-        const cls = ["day"];
-        if (s0._past) cls.push("past");
-        if (inWeekend) cls.push("weekend");
-        if (isToday) cls.push("today");
-        if (s0._end) cls.push("festival");
-        let rule = "";
-        if (ruleDue && inWeekend) {
-          ruleDue = false;
-          rule = `<p class="rule-weekend"><span>Wochenende</span></p>`;
-        }
-        let dow, num, label, datetime;
-        if (s0._end) {
-          // «FR–SO» over «16–18»; across a month boundary «30» over «–1.8.»; «LÄUFT» while it runs.
-          const sameMonth = d.getMonth() === end.getMonth() && d.getFullYear() === end.getFullYear();
-          dow = s0._now
-            ? `<span class="dow now live">Läuft</span>`
-            : `<span class="dow range">${dowFmt.format(d).replace(".", "")}–${dowFmt.format(end).replace(".", "")}</span>`;
-          num = sameMonth
-            ? `<span class="num range">${d.getDate()}–${end.getDate()}</span>`
-            : `<span class="num range">${d.getDate()}</span><span class="day-end">–${end.getDate()}.${end.getMonth() + 1}.</span>`;
-          label = `${s0._now ? "Läuft, " : ""}${fullDayFmt.format(d)} bis ${fullDayFmt.format(end)}`;
-          datetime = `${date}/${s0.end_date}`;
-        } else {
-          const pill = fresh && (isToday || isTomorrow) ? (isToday ? "Heute" : "Morgen") : "";
-          dow = pill
-            ? `<span class="dow now">${pill}</span>`
-            : `<span class="dow">${dowFmt.format(d).replace(".", "")}</span>`;
-          num = `<span class="num">${d.getDate()}</span>`;
-          // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
-          label = `${pill ? `${pill}, ` : ""}${fullDayFmt.format(d)}`;
-          datetime = date;
-        }
-        return `${rule}
-        <section class="${cls.join(" ")}" data-date="${escape(date)}">
-          <time class="date" datetime="${escape(datetime)}" aria-label="${escape(label)}">${dow}${num}</time>
-          <ul class="day-shows">${rows.map(renderShow).join("")}</ul>
-        </section>`;
-      })
-      .join("");
-  }
-  // The line-up disclosures stay open across re-renders (render() rebuilds the DOM on every keystroke).
-  const openIds = new Set();
-
-  // The actions line of a row (§3.6): Kalender (.ics) · Google · Teilen · Link, plus «Tickets ↗» and
-  // «Infos ↗» when the show has those URLs. Links carry their href, buttons carry data-act – both are
-  // handled by runAction(). Teilen is navigator.share where it exists; elsewhere it stays the WhatsApp
-  // link, so WhatsApp never disappears for anyone. Labels are visible from 600 px, icon-only below
-  // (44 × 44, the aria-label keeps the name); the feedback word («Kopiert» …) appears next to the icon.
-  const waUrl = (s) => `https://wa.me/?text=${encodeURIComponent(shareText(s))}`;
-  const extNote = `<span class="ext-mark" aria-hidden="true">↗</span><span class="sr"> (öffnet externe Seite)</span>`;
-  function actionsHtml(s) {
-    const url = safeUrl(s.url);
-    const tickets = safeUrl(s.tickets);
-    return [
-      `<button type="button" class="act" data-act="cal" aria-label="In Kalender speichern (.ics)" title="Als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span class="lbl">Kalender</span></button>`,
-      `<a class="act" href="${escape(gcalUrl(s))}" target="_blank" rel="noopener" aria-label="In Google Kalender eintragen" title="In Google Kalender eintragen">${ICONS.gcal}<span class="lbl">Google</span></a>`,
-      navigator.share
-        ? `<button type="button" class="act" data-act="share" aria-label="Show teilen" title="Teilen (WhatsApp, Mail, …)">${ICONS.share}<span class="lbl">Teilen</span></button>`
-        : `<a class="act" href="${waUrl(s)}" target="_blank" rel="noopener" aria-label="Per WhatsApp teilen" title="Per WhatsApp teilen">${ICONS.wa}<span class="lbl">Teilen</span></a>`,
-      `<button type="button" class="act" data-act="link" aria-label="Link zu dieser Show kopieren" title="Link zu dieser Show kopieren">${ICONS.link}<span class="lbl">Link</span></button>`,
-      tickets
-        ? `<a class="act tickets" href="${escape(tickets)}" target="_blank" rel="noopener" aria-label="Tickets kaufen (öffnet externe Seite)" title="Tickets kaufen">${ICONS.ticket}<span class="lbl">Tickets</span>${extNote}</a>`
-        : "",
-      url
-        ? `<a class="act event" href="${escape(url)}" target="_blank" rel="noopener" aria-label="Infos beim Veranstalter (öffnet externe Seite)" title="Event-Seite des Veranstalters öffnen">${ICONS.event}<span class="lbl">Infos</span>${extNote}</a>`
-        : "",
-      // The timetable is also an action (the SBB badge in the meta line only shows on hover – touch
-      // screens have none).
-      sbbUrl(s)
-        ? `<a class="act sbb-act" href="${escape(sbbUrl(s))}" target="_blank" rel="noopener" aria-label="SBB-Fahrplan nach ${escape(s.city)} (öffnet externe Seite)" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show">${ICONS.train}<span class="lbl">SBB</span>${extNote}</a>`
-        : "",
-    ].join("");
-  }
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these). `o` replaces
   // single filters for what-if counts (countWith): { q, cantons, radius, genre }.
   // o: overrides for the facet counts ({q, cantons, radius, genre, format, months, range}); anything that is
@@ -802,7 +571,6 @@
 
   function renderInner() {
     if (loadState !== "ready") return; // data not in yet (or an error): the skeleton / message stays
-    geoHints = 0;
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter((s) => isVisible(s));
 
@@ -952,32 +720,6 @@
       row.style.setProperty("--i", String(Math.min(i, 9)));
       if (i < 10) row.classList.add("enter");
     });
-    observeMonths();
-  }
-  // Sticky month heads: a 1 px gold hairline draws in while a head is stuck under the bar (§4). The
-  // observer looks at the heads of the current render; a head is stuck once its top meets the bar.
-  // The bar height is read from a head's resolved sticky `top` (the --bar-h token is a calc() string,
-  // which would parse as NaN); a head that is not sticky at all (max-height: 500px) is left alone.
-  let monthObserver = null;
-  function observeMonths() {
-    if (!("IntersectionObserver" in window)) return;
-    if (monthObserver) monthObserver.disconnect();
-    const first = list.querySelector(".month");
-    if (!first) return;
-    const bar = parseFloat(getComputedStyle(first).top);
-    if (!(bar >= 0)) return;
-    monthObserver = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          const r = e.boundingClientRect;
-          // Stuck: partly cut by the bar's edge, its top at the bar, its bottom still below it. A head
-          // inside a month that content-visibility has skipped reports an empty box and is never stuck.
-          e.target.classList.toggle("stuck", e.intersectionRatio < 1 && r.top <= bar + 1 && r.bottom > bar);
-        }
-      },
-      { threshold: [1], rootMargin: `-${Math.round(bar) + 1}px 0px 0px 0px` },
-    );
-    for (const h of list.querySelectorAll(".month")) monthObserver.observe(h);
   }
   // «So 1. Aug.» – the last day of a festival for the ghost row (non-breaking, so it never wraps to «Aug.»).
   const endLabel = (s) =>
@@ -1202,7 +944,6 @@
     list.hidden = false;
     init();
   }
-
   // Feedback word (§3.6): a 1.2 s inline word next to the icon («Kopiert», «Gespeichert», «Ich gehe»),
   // mirrored into the page-level live region so screen readers hear it as well.
   const feedback = el("feedback");
@@ -2452,44 +2193,6 @@
   // Ported to src/components/filters (story #33 M1): the sticky bar, note pill, chip row, search,
   // filter panels, Wo / Wann, the view switch, the filter hash, pills, counts and the empty state.
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-
-  // Line-up disclosure (§4: grid-template-rows 0fr → 1fr over --t-3). Opening: the browser opens the
-  // <details>, the class animates the body in on the next frame. Closing: the click is intercepted, the body
-  // animates out, then the <details> closes. Reduced motion: 0 ms transitions fire no transitionend, so it
-  // closes at once. The open state is remembered per show (openIds) across re-renders.
-  views.addEventListener(
-    "toggle",
-    (e) => {
-      const d = e.target;
-      if (!(d instanceof HTMLDetailsElement) || !d.classList.contains("lineup")) return;
-      const row = d.closest(".show");
-      if (!row) return;
-      if (d.open) {
-        openIds.add(row.dataset.id);
-        requestAnimationFrame(() => d.classList.add("is-open"));
-      } else openIds.delete(row.dataset.id);
-    },
-    true,
-  );
-  views.addEventListener("click", (e) => {
-    const summary = e.target.closest("details.lineup > summary");
-    if (!summary) return;
-    const d = summary.parentElement;
-    if (!d.open || d.dataset.closing) return;
-    e.preventDefault();
-    d.dataset.closing = "1";
-    d.classList.remove("is-open");
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      delete d.dataset.closing;
-      d.open = false;
-    };
-    if (reducedMotion.matches) return finish();
-    d.querySelector(".lineup-body").addEventListener("transitionend", finish, { once: true });
-    setTimeout(finish, 450);
-  });
 
   armCallout();
   init();

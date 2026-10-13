@@ -47,6 +47,9 @@ src/components/Icon.svelte             The inline SVG icons of the row actions.
 src/stores/agenda.svelte.js            The reactive store: shows + derived fields, genres, venues, filters, visible list.
 src/stores/filters.svelte.js           Filter UI state: open panel, view, Wann range, position, active-filter pills, the URL hash.
 src/components/filters/                The filter bar (search, Wo / Wann toggles, genre chips, panels), results row, empty state, past footer, URL / history glue.
+src/stores/reveal.svelte.js            Deep links #<short>: scroll under the bar, highlight, stale-link note.
+src/stores/feedback.svelte.js          Feedback words of the row actions («Kopiert» …) and the #feedback live region.
+src/components/list/                   Row actions (.ics, Teilen, Link) and the stale-link note (LinkNote).
 src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.

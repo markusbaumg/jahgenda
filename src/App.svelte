@@ -7,14 +7,21 @@
   import Status from "./components/Status.svelte";
   import Footer from "./components/Footer.svelte";
   import { agenda } from "./stores/agenda.svelte.js";
-  // M1: the filter bar, the results row, the past footer and the URL / history glue.
+  // M1: the filter bar, the results row, the past footer and the URL / history glue (which also wires the
+  // rows' canton badge and «Distanz & Zug anzeigen», and the silent autoLocate after the data is in).
   import FilterBar from "./components/filters/FilterBar.svelte";
   import ResultsRow from "./components/filters/ResultsRow.svelte";
   import PastFoot from "./components/filters/PastFoot.svelte";
   import UrlState from "./components/filters/UrlState.svelte";
   import { ui } from "./stores/filters.svelte.js";
+  // M2: the stale-link note, the feedback words and the deep links #<short>.
+  import LinkNote from "./components/list/LinkNote.svelte";
+  import { feedback } from "./stores/feedback.svelte.js";
+  import { initReveal } from "./stores/reveal.svelte.js";
 
   agenda.load();
+  // Rows & deep links (M2): #<short> lands on the row.
+  initReveal();
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
   // The screen reader hears the results line after every filter change (#status announces an empty state).
@@ -42,9 +49,10 @@
   <div id="stuck-sentinel" aria-hidden="true"></div>
   <FilterBar />
   <ResultsRow />
+  <LinkNote />
   <p class="sr" id="results-live" role="status" aria-live="polite">{resultsLive}</p>
   <!-- Feedback words of the row actions («Kopiert», «Gespeichert» …) for screen readers. -->
-  <p class="sr" id="feedback" role="status" aria-live="polite"></p>
+  <p class="sr" id="feedback" role="status" aria-live="polite">{feedback.text}</p>
   <div
     id="views"
     tabindex="-1"
