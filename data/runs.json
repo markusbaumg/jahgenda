@@ -2,6 +2,82 @@
   "note": "Log of scraper runs, newest first, max 60 entries. Shown on log.html.",
   "runs": [
     {
+      "skill": "harvest-bands",
+      "at": "2026-10-13T22:12:39+02:00",
+      "runner": "cloud",
+      "added": 60,
+      "total": 232,
+      "failed_sources": [
+        "Summerjam artists-2024 page (empty response) – used de.wikipedia line-up instead",
+        "Lakesplash 2025 and 2024 line-ups (not on lakesplash.ch/history, web search found none)",
+        "Reggae Jam 2025 line-up (not on reggaejam.de or Wikipedia, web search found none)",
+        "Ruhr Reggae Summer 2025 and 2024 line-ups (site shows 2026 only, de.wikipedia has no line-ups)",
+        "Rototom Sunsplash /en/line-up/ (JavaScript only) – 2026 taken from the official announcement articles",
+        "Afro-Pfingsten programme 2025/2026 (only PDF newspapers) – Mad Professor from the news item only",
+        "No Logo Festival 2025 and 2024 line-ups (not tried beyond the 2026 programme page)",
+        "Wikipedia API rate-limited (HTTP 429) part of the time – genre sources fall back to reggaeville/press pages"
+      ],
+      "dropped": [
+        {
+          "title": "Afrob",
+          "why": "German hip-hop (criteria.md)"
+        },
+        {
+          "title": "Kumbia Boruka",
+          "why": "Cumbia without clear reggae focus (criteria.md)"
+        },
+        {
+          "title": "Dub FX",
+          "why": "Live-looping beatbox / dubstep / drum'n'bass, reggae not the main genre (in doubt: out)"
+        },
+        {
+          "title": "Mal Élevé",
+          "why": "Mainly rap/raggamuffin crossover, reggae not clearly the main genre (in doubt: out)"
+        },
+        {
+          "title": "Kybba",
+          "why": "Basshall / club producer with reggaeton and afro crossovers (in doubt: out)"
+        },
+        {
+          "title": "Bleu Soleil",
+          "why": "French electro-pop duo (criteria.md)"
+        },
+        {
+          "title": "Greeen",
+          "why": "German hip-hop (criteria.md)"
+        },
+        {
+          "title": "OG Keemo",
+          "why": "German hip-hop (criteria.md)"
+        },
+        {
+          "title": "Esaïa",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "Jô",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "Men of the Yeah!",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "THK",
+          "why": "No reliable source on genre found"
+        },
+        {
+          "title": "Leftside",
+          "why": "No reliable biography found (ambiguous name)"
+        }
+      ],
+      "notes": [
+        "Research budget of 60 reached; ~460 further line-up names not researched yet (mostly Rototom 2024/2025 side stages, batucadas, hip-hop and Latin acts) – the next run continues.",
+        "Existing artists matched on line-ups got their festivals appended (34 entries).",
+        "Chiemsee Reggae Summer had no 2024/2025 edition (paused 2018–2025)."
+      ]
+    },
+    {
       "skill": "scrape-shows",
       "at": "2026-10-13T21:51:45+02:00",
       "runner": "cloud",
