@@ -39,7 +39,10 @@ test("shortId: pinned values (every shared link depends on them) and uniqueness 
 
 test("venueKey, safeUrl, escape, distanceKm", () => {
   assert.equal(lib.venueKey("Dachstock (Reitschule)"), "dachstockreitschule");
-  assert.equal(lib.venueKey("Schüür"), "schr");
+  // Accents fold like the validator's norm_key (NFKD): «Schüür» keeps its u's, «Sinaï» meets «Sinai».
+  assert.equal(lib.venueKey("Schüür"), "schuur");
+  assert.equal(lib.venueKey("Sinaï Sound System"), lib.venueKey("Sinai Sound System"));
+  assert.equal(lib.venueKey("L'Usine Genève"), "lusinegeneve");
   assert.equal(lib.safeUrl("https://x.ch/a"), "https://x.ch/a");
   assert.equal(lib.safeUrl("javascript:alert(1)"), "");
   assert.equal(lib.safeUrl(undefined), "");

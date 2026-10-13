@@ -78,7 +78,9 @@ rotation). When a source is huge, take the next 6 months, not everything.
    c. **Line-up.** `acts` = every act name on the line-up page, exactly as written, in page order. Strip
       country suffixes «(JM)», «(FR)»; «Sound System» stays when it is part of the name. Normalise names
       through `artists.json` (step 4.2), so the same act is spelled the same in `acts`, `days` and the
-      cache. Leave out acts whose headliner is under **Excluded**.
+      cache — «Channel One» on the poster is `Channel One Sound System` when that is the cache key, and
+      «O.B.F Sound System» is `O.B.F`. The validator rejects an act that is cached under a variant
+      spelling (case, punctuation, accents and a trailing Sound System / Sound / HiFi / Int. / Crew). Leave out acts whose headliner is under **Excluded**.
    d. **Days.** `days` ONLY when the page names a day next to the act (date, weekday or «Day 1» →
       `date` + offset). Never guess a day. Ignore stages.
    e. **Genres.** `festival` + the 3 most frequent genres of the acts (cache as in step 4). Per festival
