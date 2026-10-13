@@ -746,8 +746,10 @@
   async function runAction(btn, s, row) {
     const act = btn.dataset.act;
     if (act === "mark") {
-      if (btn._long) {
-        btn._long = false; // the click that ends a long press: «Ich gehe» is already set
+      // The click that ends a long press: «Ich gehe» is already set. A touch screen may not send that click
+      // at all, so the flag is a timestamp that expires by itself instead of swallowing the next tap or Enter.
+      if (btn._longAt && Date.now() - btn._longAt < 1000) {
+        btn._longAt = 0;
         return;
       }
       if (marks[s.id]) unmark(s, row);
@@ -1155,8 +1157,8 @@
     if (!state) return;
     undo = { id: s.id, state, mineOnly, timer: 0 };
     setMark(s, "", row);
+    undoToast.hidden = false; // shown first, then filled: a live region announces only what changes while visible
     undoToast.querySelector("span").textContent = `«${s.title}» entfernt`;
-    undoToast.hidden = false;
     clearTimeout(undo.timer);
     undo.timer = setTimeout(hideUndo, 4000);
   }
@@ -1171,13 +1173,10 @@
     const s = shows.find((x) => x.id === id);
     hideUndo();
     if (!s) return;
-    if (wasMine && !mineOnly) {
-      // The list was left because its last show went: put the mark back and open the list again.
-      marks[s.id] = state;
-      saveMarks();
-      mineOnly = true;
-      render();
-    } else if (wasMine) {
+    // The list was left because its last show went: open it again. In any list (Meine Shows opened since, or
+    // a shared one) the row has to be rendered, so the list is drawn again; in the agenda the row is patched.
+    if (wasMine && !shared) mineOnly = true;
+    if (listMode()) {
       marks[s.id] = state;
       saveMarks();
       render();
@@ -1196,11 +1195,11 @@
     const s = shows.find((x) => x.id === row.dataset.id);
     if (!s) return;
     pressed = star;
-    star._long = false;
+    star._longAt = 0;
     clearTimeout(pressTimer);
     pressTimer = setTimeout(() => {
       pressTimer = 0;
-      star._long = true; // consumed by the click handler
+      star._longAt = Date.now(); // consumed by the click handler
       if (marks[s.id] !== "going") {
         setMark(s, "going", row);
         flashWord(star, "Ich gehe");

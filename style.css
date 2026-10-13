@@ -2178,17 +2178,24 @@ body::after {
     border: 3px solid;
   }
 }
-/* Touch: the segments are 36 px high and the toggle takes its own line above the actions. */
+/* Touch: the segments draw 34 px high, but their hit area is the full --tap (44 px) via an invisible
+ * extension above and below (§5); the toggle takes its own line above the actions. */
 @media (max-width: 599px), (hover: none) {
   .mark-seg .act {
+    position: relative;
     min-height: 34px;
     padding: 0 14px;
+  }
+  .mark-seg .act::before {
+    content: "";
+    position: absolute;
+    inset: -5px 0;
   }
 }
 @media (max-width: 599px) {
   .mark-slot {
     flex: 1 1 100%;
-    margin: 4px 0 2px;
+    margin: 4px 0 3px; /* 3 px: the 44 px hit area of the segments ends where the action targets begin */
   }
 }
 @media (min-width: 600px) {
@@ -2631,7 +2638,8 @@ body::after {
   font: inherit;
   font-weight: 700;
   color: var(--on-green);
-  background: var(--green);
+  /* The green plate that carries dark text at >= 4.5:1 (--on-green on --green itself is only 3.7:1). */
+  background: var(--green-text);
   border: 0;
   border-radius: 999px;
   padding: 5px 12px;
