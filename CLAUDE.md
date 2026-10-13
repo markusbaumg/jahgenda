@@ -75,6 +75,11 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   `#m=…`, .ics export); short per-show hashes in links; PWA with install banner ("Nie mehr fragen"); footer band
   "Über uns" with photo (red/gold/green ring) and a bottom bar with result count + data stamp; no link
   underlines; nearest-show hint links to the closest upcoming show.
+- **Beta/design review decisions (2026-10-13, #47/#52 merged):** filters live in the URL hash (`#q=…&g=…&wo=ZH,BE&r=25&wann=…`,
+  «Link zu dieser Auswahl»), the Back button closes panels/sheet and returns from views, the position is requested
+  on a tap only (silent locate when already granted — testers found the prompt on arrival off-putting; Kusi may
+  overrule, see #54), one callout nudge per visit, Playwright e2e suite in `e2e/` runs as its own CI job. Open
+  design/copy questions for Seraina & Kusi are collected in #54.
 - **Mischpult (owners' page):** `mischpult.html` is hidden (no links, noindex, not in robots.txt — a Disallow line would
   advertise it) — the overview of sources, prompt, rules and runs, plus the links to `log.html` and `review.html`.
   Never call it «admin» (scanners try that path first). Keep it unlinked from the public pages.
