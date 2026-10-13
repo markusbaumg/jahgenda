@@ -1398,18 +1398,31 @@ body::after {
 .day-shows .show + .show {
   border-top: 1px solid var(--line-soft);
 }
-/* A row: content column + canton, the actions on their own line below. Two pseudo-elements paint across
- * the whole row width, date column included: ::after is the hover / highlight plate, ::before the 3 px
- * fader at the far left (gold = Interessiert, green = Ich gehe). */
+/* A row (§3.6): grid [body | 44 px side column], the actions line under the body. Two pseudo-elements paint
+ * across the whole row width, date column included: ::after is the hover / highlight plate, ::before the
+ * 3 px fader at the far left (gold = Interessiert, green = Ich gehe). */
 .show {
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 14px;
+  grid-template-columns: minmax(0, 1fr) var(--side-w);
+  gap: 0 var(--s-3);
   align-items: start;
-  padding: 12px 0;
+  min-height: 64px;
+  padding: 8px 0 2px;
   scroll-margin-top: calc(var(--bar-h, 64px) + 48px);
+  -webkit-tap-highlight-color: transparent;
+}
+.show > .body {
+  min-width: 0;
+}
+/* Side column: coat of arms + green abbreviation (a filter button) over the star, both 44 px wide. */
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: var(--side-w);
+  margin-top: -4px;
 }
 .show::before,
 .show::after {
@@ -1449,16 +1462,12 @@ body::after {
     background: transparent;
   }
 }
-.show .canton {
-  margin-top: 2px;
-}
-
 .foot-row {
-  grid-column: 1 / -1;
+  grid-column: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 12px;
+  gap: 2px 8px;
   margin-top: 2px;
 }
 
@@ -1517,34 +1526,178 @@ body::after {
 .list-foot .arrow {
   color: var(--faint);
 }
+/* Actions line (§3.6): its own 44 px line under the meta. Icon + word from 600 px, icon-only 44 × 44
+ * targets below (the aria-label keeps the name, «Infos ↗» / «Tickets ↗» keep their word). On desktop with a
+ * mouse the line is 36 px and sits at the right of the body column. */
 .actions {
-  display: inline-flex;
-  gap: 2px;
-  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 2px;
+  margin-left: -10px; /* the first icon lines up with the title */
 }
 .act {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 0 10px;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: var(--fs-2);
+  line-height: 1;
+  white-space: nowrap;
   color: var(--muted);
   background: none;
   border: 0;
-  border-radius: 6px;
-  padding: 3px 6px;
+  border-radius: var(--r-2);
   cursor: pointer;
   text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--t-1) var(--ease-skank),
+    color var(--t-2) var(--ease-tape),
+    background var(--t-2) var(--ease-tape);
+}
+.act:active {
+  transform: scale(0.96);
 }
 @media (hover: hover) {
   .act:hover {
-    color: var(--gold);
-    background: rgba(242, 182, 50, 0.08);
+    color: var(--gold-text);
+    background: var(--gold-tint);
   }
 }
 .act svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.act .ext-mark {
+  margin-left: -3px;
+}
+/* Feedback word: takes the label's place for 1.2 s, fading in over --t-2. */
+.act .fb {
+  color: var(--green-text);
+  font-weight: 600;
+  animation: fb-in var(--t-2) var(--ease-tape);
+}
+.act.fb-on .lbl {
+  display: none;
+}
+@keyframes fb-in {
+  from {
+    opacity: 0;
+  }
+}
+/* Desktop with a mouse: the line is 36 px and right-aligned under the star (the side column is empty at
+ * this grid row); it never wraps, so a long feedback word («Link in Adresszeile») shifts it left instead. */
+@media (hover: hover) and (min-width: 768px) {
+  .act {
+    min-height: 36px;
+  }
+  .foot-row {
+    grid-column: 1 / -1;
+  }
+  .actions {
+    flex-wrap: nowrap;
+    margin-left: auto;
+  }
+  .foot-row .tags {
+    margin-right: auto;
+  }
+}
+/* Phones: all six actions icon-only (44 × 44, named by aria-label), spread over the body and side columns
+ * so that they fit on one line. The line is 38 px tall and the targets grow 3 px into the row paddings
+ * above and below (still 44 × 44), which keeps a row with acts and two meta lines near 130 px. The feedback
+ * word pops up as a plate above the icon, so the line never reflows. */
+@media (max-width: 599px) {
+  .show {
+    padding-top: 6px;
+  }
+  .foot-row {
+    grid-column: 1 / -1;
+    margin-top: -4px;
+    min-height: 38px;
+  }
+  .actions {
+    flex: 1;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-left: -13px; /* the icon (18 px, centred in 44 px) lines up with the title */
+  }
+  .show .actions .act {
+    position: relative;
+    width: var(--tap);
+    height: var(--tap);
+    margin: -3px 0;
+    padding: 0;
+  }
+  .show .actions .act .lbl,
+  .show .actions .act .ext-mark {
+    display: none;
+  }
+  .show .actions .act .fb {
+    position: absolute;
+    bottom: calc(100% - 4px);
+    left: 0;
+    z-index: 1;
+    padding: 4px 8px;
+    white-space: nowrap;
+    color: var(--green-text);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-1);
+    box-shadow: var(--sh-1);
+  }
+  .show .actions .act:nth-last-child(-n + 3) .fb {
+    left: auto;
+    right: 0;
+  }
+  /* The ticket icon stays green: the one call to action in the line. */
+  .show .actions .act.tickets {
+    color: var(--green-text);
+  }
+  /* The star tucks 6 px under the coat-of-arms button, so the side column stays within a short row. */
+  .side .star {
+    margin-top: -6px;
+  }
+}
+/* The star in the side column: 44 × 44, icon only (the word lives in the tooltip and for screen readers);
+ * its feedback word pops up as a small plate at its left. */
+.side .star {
+  position: relative;
+  width: var(--tap);
+  height: var(--tap);
+  min-height: 0;
+  padding: 0;
+}
+.side .star svg {
+  width: 20px;
+  height: 20px;
+}
+.side .star .lbl {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.side .star .fb {
+  position: absolute;
+  right: calc(100% + 2px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  font-size: var(--fs-1);
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  box-shadow: var(--sh-1);
 }
 .date {
   text-align: center;
@@ -1588,24 +1741,43 @@ body::after {
 
 .title {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: var(--fs-4);
+  font-weight: 600;
+  line-height: 1.25;
   overflow-wrap: anywhere;
+}
+@media (min-width: 768px) {
+  .title {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
 }
 .title a {
   color: inherit;
   text-decoration: none;
 }
+/* Link affordance (§3.6): a title with a URL gets a dotted gold underline and «↗»; without URL plain text. */
+.title a.ext {
+  text-decoration: underline dotted var(--gold);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.ext-mark {
+  margin-left: 0.25em;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--gold-text);
+}
 @media (hover: hover) {
   .title a:hover {
-    color: var(--gold);
-    text-decoration: underline;
+    color: var(--gold-text);
+    text-decoration-style: solid;
   }
 }
 .meta {
   margin: 2px 0 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: var(--fs-2);
   overflow-wrap: anywhere;
 }
 .meta time {
@@ -1614,43 +1786,83 @@ body::after {
 }
 
 .canton {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 2px;
+  width: var(--side-w);
+  min-height: var(--tap);
+  padding: 2px 0;
   font: inherit;
+  font-size: var(--fs-1);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: var(--green-text);
   background: none;
-  border: 0;
-  padding: 2px 4px;
-  border-radius: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--r-2);
   cursor: pointer;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: var(--muted);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--t-1) var(--ease-skank),
+    background var(--t-2) var(--ease-tape);
+}
+.canton:active {
+  transform: scale(0.96);
+}
+.canton[aria-pressed="true"] {
+  color: var(--gold-text);
+  background: var(--gold-tint);
+  border-color: var(--gold);
 }
 @media (hover: hover) {
   .canton:hover {
-    background: rgba(242, 182, 50, 0.1);
+    background: var(--gold-tint);
     color: var(--text);
   }
 }
+@media (forced-colors: active) {
+  .canton[aria-pressed="true"] {
+    border: 3px solid;
+  }
+}
 .canton img {
-  width: 22px;
-  height: 26px;
+  width: 28px;
+  height: 32px;
   object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
 }
 .canton.abroad img {
-  width: 24px;
-  height: 16px;
+  width: 28px;
+  height: 19px;
   border-radius: 2px;
 }
 
+/* Acts line: cream, hairline left tick, clamped to 2 lines on phones unless a search hit sits inside it. */
 .acts {
   margin: 2px 0 0;
+  padding-left: var(--s-2);
+  border-left: 1px solid var(--line);
   color: var(--text);
-  font-size: 0.92rem;
+  font-size: var(--fs-3);
   overflow-wrap: anywhere; /* a soundsystem name written as one word must not widen the page */
+}
+.acts mark {
+  padding: 0 0.1em;
+  color: var(--gold-text);
+  background: var(--gold-tint);
+  border-radius: 2px;
+}
+@media (max-width: 420px) {
+  .acts:not(.hit) {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 }
 .acts span + span::before {
   content: " · ";
@@ -2053,6 +2265,9 @@ body::after {
 }
 .mine-panel .act {
   color: var(--text);
+  white-space: normal; /* the pills may wrap; the row actions above never do */
+  text-align: center;
+  line-height: 1.2;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 4px 10px;
@@ -2087,9 +2302,6 @@ body::after {
   .dow.now {
     padding: 3px 3px 2px; /* MORGEN must stay inside the 48 px date column */
     letter-spacing: 0.01em;
-  }
-  .act span {
-    display: none;
   }
 }
 
@@ -2372,40 +2584,6 @@ a {
   color: inherit;
 }
 
-/* Row actions only on hover / focus (desktop); a marked star stays visible. Phones and touch screens
-   get the collapsed "⋯ Mehr" button instead (see the action sheet block below). */
-@media (hover: hover) and (min-width: 601px) {
-  .show .actions {
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  .show:hover .actions,
-  .show:focus-within .actions {
-    opacity: 1;
-  }
-  .show.interested .actions .star,
-  .show.going .actions .star {
-    opacity: 1;
-  }
-  .show .actions .star {
-    transition: opacity 0.15s;
-  }
-}
-.foot-row {
-  align-items: center;
-  min-height: 30px;
-}
-.foot-row .tags {
-  align-items: center;
-}
-.foot-row .actions {
-  align-items: center;
-  margin-left: auto;
-}
-.act {
-  line-height: 1;
-  height: 26px;
-}
 .tag-chip {
   line-height: 1;
   display: inline-flex;
@@ -2611,48 +2789,8 @@ a {
     min-width: 120px;
   }
 }
-/* --- Action sheet: on phones (≤ 600 px) and touch screens the row actions collapse into "⋯ Mehr" next to
-   the star; the sheet lists the same actions as big rows (bottom sheet on phones, popover on tablets). --- */
-.act.more {
-  display: none;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 3px 9px;
-}
-.act.more[aria-expanded="true"] {
-  color: var(--gold);
-  border-color: var(--gold);
-}
-@media (max-width: 720px), (hover: none) {
-  .show .actions .act:not(.star):not(.more) {
-    display: none;
-  }
-  .show .actions .act.more {
-    display: inline-flex;
-  }
-  .act.more span {
-    display: inline; /* the single label stays, even where the row labels are hidden (≤ 420 px) */
-  }
-}
-/* Thumb-sized targets on phones and touch screens: the star (a state-cycling toggle) and "⋯ Mehr" get
-   44 / 36 px hit areas and a real gap, grown into the row's own padding with negative margins so the
-   row height does not change. Same for the view switch. */
+/* Phones / touch: the past-shows link gets a thumb-sized hit area without moving the line. */
 @media (max-width: 600px), (hover: none) {
-  .show .actions {
-    gap: 10px;
-  }
-  .show .actions .act.star {
-    width: 44px;
-    height: 44px;
-    margin: -9px 0;
-    justify-content: center;
-    padding: 0;
-  }
-  .show .actions .act.more {
-    min-height: 36px;
-    padding: 0 12px;
-    margin: -5px 0;
-  }
   .results .linkish {
     padding: 8px 0;
     margin: -8px 0;
@@ -2674,143 +2812,7 @@ a {
     background: rgba(242, 182, 50, 0.1);
   }
 }
-.sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-}
-.sheet[hidden] {
-  display: none;
-}
-.sheet-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  animation: sheet-fade 0.2s;
-}
-.sheet-panel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-height: 85vh;
-  overflow: auto;
-  overscroll-behavior: contain;
-  padding: 8px 12px calc(12px + env(safe-area-inset-bottom, 0px));
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  border-top: 3px solid var(--gold);
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.6);
-  animation: sheet-up 0.25s ease-out;
-}
-.sheet-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 0 6px 10px;
-}
-.sheet-title {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-}
-.sheet-close {
-  flex: none;
-  width: 40px;
-  height: 40px;
-  font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-}
-@media (hover: hover) {
-  .sheet-close:hover {
-    color: var(--text);
-    background: rgba(242, 182, 50, 0.08);
-  }
-}
-.sheet-close:focus-visible {
-  outline: 2px solid var(--gold);
-}
-.sheet-actions {
-  display: flex;
-  flex-direction: column;
-}
-.sheet-actions .act {
-  height: 48px;
-  gap: 12px;
-  padding: 0 10px;
-  font-size: 1rem;
-  color: var(--text);
-  border-radius: 8px;
-}
-.sheet-actions .act span {
-  display: inline;
-}
-.sheet-actions .act svg {
-  flex: none;
-  width: 20px;
-  height: 20px;
-  color: var(--muted);
-}
-.sheet-actions .act:hover svg,
-.sheet-panel.interested .act.star,
-.sheet-panel.interested .act.star svg {
-  color: var(--gold);
-}
-.sheet-panel.going .act.star,
-.sheet-panel.going .act.star svg,
-.sheet-actions .act.tickets svg {
-  color: var(--green-text);
-}
-.sheet-panel.going .act.star svg path {
-  fill: currentColor;
-}
-/* Popover variant (touch screens wider than a phone): anchored under the "⋯" button, no dimming. */
-.sheet.popover .sheet-backdrop {
-  background: transparent;
-  animation: none;
-}
-.sheet.popover .sheet-panel {
-  left: auto;
-  bottom: auto;
-  width: 300px;
-  max-height: calc(100vh - 16px);
-  padding: 6px 8px 8px;
-  border-bottom: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-  animation: sheet-fade 0.15s;
-}
-.sheet.popover .sheet-actions .act {
-  height: 44px;
-  font-size: 0.95rem;
-}
-@keyframes sheet-up {
-  from {
-    transform: translateY(100%);
-  }
-}
-@keyframes sheet-fade {
-  from {
-    opacity: 0;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  .sheet-backdrop,
-  .sheet-panel {
-    animation: none;
-  }
   .genres {
     scroll-behavior: auto;
   }
@@ -2891,17 +2893,6 @@ a {
     min-height: 36px;
     padding: 0 14px;
   }
-}
-
-/* Row actions never overflow the card: wrap to a second line, right-aligned */
-.foot-row {
-  flex-wrap: wrap;
-}
-.foot-row .actions {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  max-width: 100%;
-  row-gap: 4px;
 }
 
 /* "Kalender abonnieren" sticker + popover */
@@ -3214,7 +3205,7 @@ a:visited {
 }
 @media (hover: hover) {
   .actions .act:hover {
-    color: var(--gold);
+    color: var(--gold-text);
   }
 }
 
@@ -3369,6 +3360,9 @@ a:visited {
     justify-content: center;
     height: auto;
     min-height: 44px;
+  }
+  .list-mode .mine-panel .act[data-mine="ics"] {
+    flex-basis: 100%; /* the long label gets the whole row; the two share links sit below */
   }
 }
 @media (max-width: 480px) {
