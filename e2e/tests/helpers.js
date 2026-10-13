@@ -115,13 +115,13 @@ const pill = (page, kind, value) =>
 
 // A chip in the genre row. The row scrolls sideways with scroll-behavior: smooth and scroll-snap, and
 // Playwright's own scroll-into-view races that animation: on CI's wider fonts the click landed between
-// two chips while the row was still moving (a11y.spec, 2026-10-13). Scroll instantly, let the snap
-// settle for two frames, then click like a user.
+// two chips while the row was still moving (a11y.spec, 2026-10-13). A chip left half-visible at the
+// row's edge fails too: mousedown focuses it, the focus scroll moves the row, mouseup lands elsewhere
+// and no click fires – the chip ends up focused but not pressed (CI, iPhone 13). So: scroll the chip to
+// the centre instantly, let the snap settle for two frames, then click like a user.
 async function clickChip(page, selector) {
   const chip = page.locator(selector);
-  await chip.evaluate((el) =>
-    el.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "instant" }),
-  );
+  await chip.evaluate((el) => el.scrollIntoView({ inline: "center", block: "nearest", behavior: "instant" }));
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   await chip.click();
 }
