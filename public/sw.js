@@ -128,22 +128,24 @@ async function networkFirst(req, cacheName) {
     const res = await Promise.race([fresh, timeout]);
     if (res !== "timeout") return res;
     // Slow network: the cached copy now, the fresh one for next time – only without a copy we wait.
-    const hit = await cache.match(req);
+    const hit = await cache.match(req, { ignoreVary: true });
     if (hit) {
       fresh.catch(() => {});
       return hit;
     }
     return await fresh;
   } catch {
-    const hit = await cache.match(req);
+    const hit = await cache.match(req, { ignoreVary: true });
     if (hit) return hit;
     throw new Error("offline and not cached");
   }
 }
 
+// ignoreVary: every cached file here is same-origin, so a «Vary: Origin» a dev/preview server adds (vite
+// preview's CORS middleware) must not turn the precached shell into a miss once offline.
 async function cacheFirst(req, cacheName) {
   const cache = await caches.open(cacheName);
-  const hit = await cache.match(req, { ignoreSearch: true });
+  const hit = await cache.match(req, { ignoreSearch: true, ignoreVary: true });
   if (hit) return hit;
   const res = await fetch(req);
   if (res.ok) cache.put(req, res.clone());
