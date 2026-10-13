@@ -2,7 +2,7 @@
 // state's headline and the subscribe callout. Run: make test (node --test tests/).
 import test from "node:test";
 import assert from "node:assert/strict";
-import { t, setCurrentLocale } from "../src/i18n/core.js";
+import { t, setCurrentLocale, TABLES } from "../src/i18n/core.js";
 import { shortRegion } from "../src/lib/regions.js";
 
 const where = (codes) =>
@@ -37,5 +37,22 @@ test("English: a plain «in» list", () => {
     assert.equal(where(["TI", "AG"]), " in Ticino and Aargau");
   } finally {
     setCurrentLocale("de");
+  }
+});
+
+// The three tables stay in step: French and English carry every German key (German is the source), and
+// their only keys of their own are the region names (region.<code>, regionShort.<code> for the places
+// abroad), which German takes from src/lib/regions.js. A missing key would silently show German; a stray key would be dead text.
+test("fr and en have every de key; extras are only region(Short).<code> names", () => {
+  const de = Object.keys(TABLES.de);
+  for (const lang of ["fr", "en"]) {
+    const keys = new Set(Object.keys(TABLES[lang]));
+    assert.deepEqual(
+      de.filter((k) => !keys.has(k)),
+      [],
+      `${lang} lacks keys`,
+    );
+    const extra = [...keys].filter((k) => !TABLES.de[k] && !/^region(Short)?\.[A-Z]{1,2}$/.test(k));
+    assert.deepEqual(extra, [], `${lang} has keys de does not`);
   }
 });
