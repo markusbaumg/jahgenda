@@ -131,6 +131,57 @@
   const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : "");
   const regionName = (c) => CANTONS[c] || ABROAD[c] || c;
 
+  // Search folding: accents and umlauts go (geneve = Genève, zurich = Zürich), typographic apostrophes
+  // become plain ones (L’Usine = L'Usine), ß → ss. A query spelt with ae/oe/ue is tried both ways
+  // (zuerich = Zürich). Every whitespace-separated word must match somewhere ("ska punk", "Busters Fette").
+  const fold = (t) =>
+    String(t)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[’‘`´]/g, "'")
+      .replace(/ß/g, "ss")
+      .toLowerCase();
+  const deUmlaut = (t) => t.replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u");
+  // Spoken short names of the big towns (keys folded like the query); a canton's code or its French /
+  // Italian name finds its shows too.
+  const SEARCH_ALIASES = { winti: "winterthur", barn: "bern", lozarn: "luzern", zuri: "zurich" };
+  const CANTON_ALIASES = {
+    BE: "Berne",
+    BL: "Bâle-Campagne",
+    BS: "Bâle-Ville",
+    FR: "Fribourg",
+    GE: "Genève Geneva",
+    GR: "Grigioni Grischun",
+    LU: "Lucerne",
+    NE: "Neuchâtel",
+    TI: "Ticino",
+    VD: "Vaud",
+    VS: "Valais",
+    ZH: "Zurich",
+  };
+  const searchText = (s) =>
+    fold(
+      [
+        s.title,
+        s.venue,
+        s.city,
+        regionName(s.canton),
+        CANTON_ALIASES[s.canton] || "",
+        ...s.genres,
+        ...s.genres.map((g) => genreLabel[g] || ""),
+        ...s.acts,
+      ].join(" "),
+    );
+  function matchesSearch(s, q) {
+    for (const raw of q.split(/\s+/).filter(Boolean)) {
+      const t = SEARCH_ALIASES[raw] || raw;
+      if (s._hay.includes(t) || s._hay.includes(deUmlaut(t)) || String(s.canton).toLowerCase() === raw)
+        continue;
+      return false;
+    }
+    return true;
+  }
+
   let shows = [];
   let here = null; // { lat, lon } once the visitor shares their location
 
@@ -350,17 +401,13 @@
   }
   // Every filter except the date range (the histogram in the "Wann" panel uses exactly these).
   function matchesFilters(s) {
-    const q = search.value.trim().toLowerCase();
+    const q = fold(search.value.trim());
     if (shared && !shared[s.id]) return false;
     if (mineOnly && !marks[s.id]) return false;
     if (cantons.size && !cantons.has(s.canton)) return false;
     if (radiusKm && here && typeof s.lat === "number" && distanceKm(here, s) > radiusKm) return false;
     if (activeGenre && !s.genres.includes(activeGenre)) return false;
-    if (!q) return true;
-    return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
-      .join(" ")
-      .toLowerCase()
-      .includes(q);
+    return !q || matchesSearch(s, q);
   }
   const isVisible = (s) =>
     listMode() ? inList(s) : (!s._past || showPast) && inRange(s) && matchesFilters(s);
@@ -514,7 +561,7 @@
           genres: Array.isArray(s.genres) ? s.genres.map((g) => String(g).toLowerCase()) : [],
           acts: Array.isArray(s.acts) ? s.acts.map(String).filter(Boolean) : [],
         }))
-        .map((s) => ({ ...s, _past: s._day < today, _short: shortId(s.id) }))
+        .map((s) => ({ ...s, _past: s._day < today, _short: shortId(s.id), _hay: searchText(s) }))
         .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
 
       pastCount = shows.filter((s) => s._past).length;

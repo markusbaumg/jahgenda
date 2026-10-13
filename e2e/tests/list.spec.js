@@ -33,6 +33,24 @@ test.describe("with fixture data", () => {
     await page.fill("#q", "luzern");
     await expect(rows).toHaveCount(FIXTURE.perCanton.LU);
 
+    // Accents and umlauts do not matter, nor the order of the words; a canton's code or French name
+    // and the spoken short names of the big towns work too.
+    const zh = FIXTURE.perCanton.ZH;
+    const cases = [
+      ["zurich", zh],
+      ["zuerich", zh],
+      ["Züri", zh],
+      ["ZH", zh],
+      ["Zurich reggae", 1],
+      ["station dub", 1],
+      ["lozärn", FIXTURE.perCanton.LU],
+      ["l’", 0],
+    ];
+    for (const [q, n] of cases) {
+      await page.fill("#q", q);
+      await expect(rows, q).toHaveCount(n);
+    }
+
     await page.fill("#q", "xyzzy");
     await expect(page.locator("#status .big")).toHaveText("Nichts gefunden");
     await page.click("#status #reset");
