@@ -69,10 +69,14 @@
 .mark-slot:empty {
   display: none;
 }
+/* At large text sizes the two segments do not fit beside each other in a narrow row: they wrap onto two
+ * lines inside the group instead of running past the screen edge (WCAG 1.4.4 / 1.4.10). */
 .mark-seg {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   padding: 2px;
-  gap: 2px;
+  gap: 10px 2px; /* rows: the segments' 44 px touch extensions (±5 px, below) must not overlap */
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -287,10 +291,14 @@
 .list-mode.list-shared .toolbar {
   display: none;
 }
+/* The title wraps under ✕ when the two do not fit on one line (long list names, 200 % text size), so
+ * «Meine Shows» is not cut to «Mei…»; the frozen bar height holds both lines. */
 .list-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  align-content: center;
+  gap: 2px 10px;
   height: var(--bar-h);
   padding: 0 54px 0 0; /* room for the ★ at the right */
   animation: list-in 0.18s ease-out;
@@ -335,7 +343,7 @@
   outline-offset: 1px;
 }
 .list-title {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
