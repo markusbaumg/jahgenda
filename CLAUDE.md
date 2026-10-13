@@ -57,8 +57,8 @@ headline at 200 % text size).
   In progress / In review / Done; every story has an area prefix `scraper:` `data:` `ui:` `ops:` `docs:`
   and matching labels; keep it in sync with real work).
 - **Routines (Claude Code cloud, amaise Max subscription since 2026-10-13 21:49, not the API):** "Jahgenda – Shows
-  (täglich)" `trig_01T3UeEu5A1ephmttuEze6zE`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-sonnet-5-5, prompt runs
-  `/scrape-shows` with `JAHGENDA_RUNNER=cloud`; "Jahgenda – Bands (monatlich)" `trig_016XrTCAAPkSTLmGb4m32HSv`, cron
+  (täglich)" `trig_01T3UeEu5A1ephmttuEze6zE`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-opus-5-5 (Kusi, 21:53), prompt runs
+  `/scrape-shows` with `JAHGENDA_RUNNER=cloud` and ends with a push notification (counts / failed sources, or the error) to the Claude app; "Jahgenda – Bands (monatlich)" `trig_016XrTCAAPkSTLmGb4m32HSv`, cron
   `0 5 1 * *`. Environment "kusi" `env_018Ddh8jfs94xvRyvnKSShEx` on the amaise account (markus.baumgartner@amaise.com) —
   it must have **Network access = Full** (verified 2026-10-13 21:50: the first cloud run fetched skalender.net
   fine). The earlier routines on the personal gmail account were deleted by Kusi (2026-10-13 21:55). Fallback:
