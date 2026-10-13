@@ -446,6 +446,7 @@
       mapRest.innerHTML = "";
       views.hidden = true;
       resultsText.textContent = "";
+      el("results-count").textContent = "";
       resultsLive.textContent = ""; // #status (role=status) announces "Nichts gefunden" itself
       status.innerHTML = listMode()
         ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Diese Liste ist leer</p><p>Keine der Shows ist mehr in der Agenda.</p><button type="button" class="primary" id="reset" title="Zurück zur Agenda">Zurück zur Agenda</button>`
@@ -463,6 +464,8 @@
       ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
       : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
     resultsLive.textContent = resultsText.textContent;
+    // The count where the list begins (the full line with the span is in the footer bar).
+    el("results-count").textContent = `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}`;
 
     list.hidden = v !== "list";
     calendarEl.hidden = v !== "calendar";
@@ -899,7 +902,10 @@
     }
     if (e.target.id === "retry") retry();
   });
-  el("clear-filters").addEventListener("click", resetFilters);
+  el("clear-filters").addEventListener("click", () => {
+    resetFilters();
+    search.focus(); // the button is gone now; the focus must not drop to <body>
+  });
 
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
   // A re-render in the seconds after the jump (venues.json arrived, the position came in) rebuilds the
@@ -955,6 +961,8 @@
     nudgeQuietUntil = Date.now() + 8000; // a friend's link lands on the show, not on a sticker
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     row.scrollIntoView({ block: "start", behavior: motion });
+    row.tabIndex = -1;
+    row.focus({ preventScroll: true }); // the next Tab starts at the show, screen readers announce it
   }
   window.addEventListener("hashchange", revealFromHash);
 
@@ -1057,6 +1065,7 @@
     toggleWhere.classList.toggle("located", Boolean(here));
     toggleWhere.setAttribute("aria-pressed", String(Boolean(cantons.size || (here && radiusKm))));
     toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kantone wählen oder meinen Standort verwenden";
+    toggleWhere.setAttribute("aria-label", `Wo: ${label || "alle Orte"}`); // the badge alone would be the name
     for (const c of el("canton-chips").querySelectorAll(".chip"))
       c.setAttribute(
         "aria-pressed",
@@ -1224,6 +1233,7 @@
     toggleMine.hidden = n === 0;
     toggleMine.setAttribute("aria-pressed", String(mineOnly));
     toggleMine.title = mineOnly ? "Wieder alle Shows anzeigen" : "Nur meine Shows anzeigen";
+    toggleMine.setAttribute("aria-label", `Meine Shows (${n})`); // aria-pressed carries the state
     toggleMine.querySelector("b").textContent = n;
     minePanel.hidden = !listMode() || !listShows().length;
     if (!minePanel.hidden) {
@@ -1267,6 +1277,7 @@
   toggleMine.addEventListener("click", () => {
     mineOnly = !mineOnly;
     renderAndKeepInView();
+    if (mineOnly) scrollViewsUnderBar(); // the list of marked shows comes up, not just the gold star
   });
 
   minePanel.addEventListener("click", async (e) => {
@@ -1298,6 +1309,7 @@
       for (const id of Object.keys(shared)) if (!marks[id]) marks[id] = "interested";
       saveMarks();
       render();
+      el("list-title").focus({ preventScroll: true }); // the button turned into text: announce the list
     }
   });
 
@@ -1509,6 +1521,7 @@
     const active = rangeActive();
     toggleWhen.setAttribute("aria-pressed", String(active));
     toggleWhen.title = active ? `Wann: ${rangeLabel()} (ändern)` : "Wann: Zeitraum wählen";
+    toggleWhen.setAttribute("aria-label", `Wann: ${active ? rangeLabel() : "alle kommenden"}`);
     const badge = toggleWhen.querySelector("b");
     badge.hidden = !active;
     badge.textContent = active ? rangeLabel() : "";
@@ -1679,9 +1692,14 @@
       if (d < today) cls.push("past");
       if (dow === 0 || dow === 5 || dow === 6) cls.push("weekend");
       const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Konzert" : "Konzerte"}` : ""}`;
+      const other = d.getMonth() !== m;
       cells.push(`
         <div class="${cls.join(" ")}" data-day="${key}">
-          <button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>
+          ${
+            other
+              ? `<span class="cal-num" aria-hidden="true">${d.getDate()}</span>`
+              : `<button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>`
+          }
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
             .map((s) => `<i style="background:${genreColor(s)}"></i>`)
@@ -1734,10 +1752,15 @@
       renderCalendar(lastVisible);
       return;
     }
-    // The whole day cell selects the day (the number button stays for keyboard and screen readers).
+    // The whole day cell selects the day (the number button stays for keyboard and screen readers);
+    // a day of the neighbouring month turns the page to that month.
     const cell = e.target.closest("[data-day]");
     if (cell) {
       calDay = cell.dataset.day;
+      if (cell.classList.contains("other")) {
+        const d = parseDay(calDay);
+        calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+      }
       renderCalendar(lastVisible);
     }
   });

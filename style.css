@@ -29,6 +29,11 @@ html {
   /* Keeps focused/anchored content clear of the sticky filter bar. */
   scroll-padding-top: calc(var(--bar-h, 64px) + 40px);
 }
+/* The hidden attribute wins over every display rule below (a .where-radius { display: flex } once
+   showed radius chips that app.js had hidden). */
+[hidden] {
+  display: none !important;
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -72,6 +77,41 @@ body {
   max-width: 760px;
   margin: 0 auto;
   padding: 0 16px;
+  /* Installed and held sideways on a notched phone: the gutter grows past the sensor housing. */
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* Skip links: invisible until focused, then a gold pill at the top left. */
+.skip {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 30;
+  padding: 8px 14px;
+  background: var(--gold);
+  color: var(--bg);
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+}
+.skip:focus-visible {
+  top: 12px;
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+/* Every link gets the same gold ring as the buttons (not the browser's blue one). */
+a[href]:focus-visible,
+.leaflet-container a:focus-visible,
+#views:focus-visible,
+#foot:focus-visible,
+.show:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+#q::placeholder {
+  color: var(--muted); /* the browser grey was 3.8:1 */
+  opacity: 1;
 }
 
 .head {
@@ -486,6 +526,14 @@ body {
   border-color: var(--gold);
   margin-left: 0;
 }
+.results .results-count {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.results .results-count:empty {
+  display: none;
+}
 .results .linkish {
   margin-left: auto;
   color: var(--muted);
@@ -502,7 +550,7 @@ body {
   border: 0;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none; /* no underlines anywhere; the colour turns gold on hover */
 }
 @media (hover: hover) {
   .results .linkish:hover {
@@ -641,7 +689,7 @@ body {
   background: var(--bg);
 }
 .cal-cell.other .cal-num {
-  opacity: 0.35;
+  opacity: 0.6; /* 0.35 fell to 2:1 */
 }
 .cal-num {
   align-self: flex-start;
@@ -1987,9 +2035,9 @@ a {
 /* Count inside a genre chip, very light */
 .chip small {
   margin-left: 5px;
-  font-size: 0.7em;
+  font-size: 0.75em;
   font-weight: 600;
-  opacity: 0.55;
+  opacity: 0.75; /* 0.55 on 9 px read as dust (3.4:1) */
   font-variant-numeric: tabular-nums;
 }
 .chip[aria-pressed="true"] small {
@@ -2030,6 +2078,7 @@ a {
   top: 100%;
   z-index: 4;
   max-height: calc(100vh - var(--bar-h, 120px) - 24px);
+  max-height: calc(100dvh - var(--bar-h, 120px) - 24px); /* iOS: the visible viewport, not the full one */
   overflow: auto;
   padding: 10px 14px 14px;
   background: var(--surface);
@@ -2966,5 +3015,41 @@ a:visited {
 @media (prefers-reduced-motion: reduce) {
   .list-head {
     animation: none;
+  }
+}
+
+/* The word next to the pin and the calendar icon: from tablet width up, until a badge takes its place. */
+.icon-word {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+@media (min-width: 601px) {
+  .icon-btn.where:not(:has(b:not([hidden]))),
+  .icon-btn.when:not(:has(b:not([hidden]))) {
+    flex-basis: auto;
+    grid-auto-flow: column;
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .icon-btn:not(:has(b:not([hidden]))) .icon-word {
+    display: inline;
+  }
+}
+/* Touch: chips and the small text buttons reach a finger-sized height. */
+@media (hover: none) {
+  .chip {
+    min-height: 36px;
+  }
+  #when-reset {
+    padding: 8px 0;
+    margin: -8px 0;
+  }
+}
+/* Last word on motion: the callout rule above sits before its base rule and lost the cascade. */
+@media (prefers-reduced-motion: reduce) {
+  .callout {
+    transition: none;
+    transform: none;
   }
 }
