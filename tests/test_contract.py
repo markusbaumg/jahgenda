@@ -307,3 +307,24 @@ class Mischpult(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Watchdog(unittest.TestCase):
+    """The freshness limit lives in four places on purpose (the workflow, the script's default, make watchdog,
+    the Mischpult's mirror in src/lib/health.js); they must say the same number, or the console and the
+    watchdog disagree about «stale»."""
+
+    def test_max_age_hours_agree(self):
+        watchdog = (ROOT / ".github" / "workflows" / "watchdog.yml").read_text(encoding="utf-8")
+        health = (ROOT / "src" / "lib" / "health.js").read_text(encoding="utf-8")
+        script = (ROOT / "scripts" / "check_freshness.py").read_text(encoding="utf-8")
+        found = {
+            "watchdog.yml": re.search(r'MAX_AGE_HOURS:\s*"?(\d+)"?', watchdog),
+            "health.js": re.search(r"export const MAX_AGE_H = (\d+);", health),
+            "check_freshness.py": re.search(r"max_h = (\d+)\.0", script),
+            "Makefile": re.search(r"check_freshness\.py --max-age-hours (\d+)", MAKEFILE),
+        }
+        for name, m in found.items():
+            self.assertIsNotNone(m, f"{name}: no max-age setting found")
+        values = {name: int(m.group(1)) for name, m in found.items()}
+        self.assertEqual(len(set(values.values())), 1, f"max-age differs: {values}")
