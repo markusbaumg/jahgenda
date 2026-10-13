@@ -89,6 +89,11 @@ headline at 200 % text size).
   per visit), «Nie mehr zeigen» becomes a plain text link; Wo/Wann are icons on phones; desktop row actions on hover/focus
   only (Kusi reversed this after seeing the list, 18:20); the star stays (mark/unmark with undo, Interessiert/Ich gehe toggle); position only on a tap (final).
   Also: logo/mini-brand link to «./» (start), no logo watermark in the About section, ★ button after Wann.
+- **Decisions 2026-10-13 21:45 (Kusi):** when #33 passes its parity gate it is merged and goes live directly (rollback =
+  revert); the three end-state reviews #49/#50/#51 start automatically once #33, #55 and #48 are merged; the
+  language switch (DE · FR · EN, #48) lives in the footer, discreet — browser language picks on the first visit, the
+  choice is remembered; #55 turns Mischpult into the one owners' console (Status · Läufe · Aussortiert · Quellen ·
+  Prompt · Genres), log.html/review.html become redirects.
 - **Mischpult (owners' page):** `mischpult.html` is hidden (no links, noindex, not in robots.txt — a Disallow line would
   advertise it) — the overview of sources, prompt, rules and runs, plus the links to `log.html` and `review.html`.
   Never call it «admin» (scanners try that path first). Keep it unlinked from the public pages.
