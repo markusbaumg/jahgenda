@@ -29,14 +29,19 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
-      # The build copies data/ into dist/data and stamps sw.js with a hash of the app shell (the
-      # jahgenda-static plugin in vite.config.js), so a new shell gets a new cache.
+      # The build copies data/ into dist/data (the jahgenda-static plugin in vite.config.js) and
+      # vite-plugin-pwa builds dist/sw.js from src/sw.js with the shell list injected – the worker hashes
+      # that list into its cache name, so a new shell gets a new cache – and writes manifest.webmanifest.
       - name: Build the page (vite build → dist/)
         run: npm ci --no-fund --no-audit && npm run build
       - name: Build calendar feeds (jahgenda.ics + per canton) into dist/
         run: python3 scripts/make_ics.py dist
-      - name: Check the service worker stamp
-        run: grep -q 'const BUILD = "__BUILD__"' dist/sw.js && exit 1 || grep -o 'const BUILD = "[0-9a-f]*"' dist/sw.js
+      - name: Check the service worker precache was injected
+        run: |
+          ! grep -q '__WB_MANIFEST' dist/sw.js
+          grep -q '"url":"index.html"' dist/sw.js
+          grep -o '"url":"assets/[^"]*"' dist/sw.js
+          test -s dist/manifest.webmanifest
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

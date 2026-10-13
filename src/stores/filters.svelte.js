@@ -21,6 +21,7 @@ import {
 import { CANTONS, ABROAD, shortRegion } from "../lib/regions.js";
 import { quietScroll } from "../components/views/scroll.js";
 import { nav } from "./history.js";
+import { callout as calloutStore } from "./callout.svelte.js";
 
 export const VIEWS = ["list", "calendar", "map"];
 
@@ -77,7 +78,7 @@ export const parseHash = (hash = location.hash) =>
   );
 
 const jahStore = () => (typeof window !== "undefined" ? window.jahStore : null);
-const callout = () => (typeof window !== "undefined" ? window.jahCallout : null);
+const callout = () => calloutStore;
 const el = (id) => document.getElementById(id);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 

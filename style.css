@@ -2561,7 +2561,7 @@ a[href]:focus-visible,
   }
 }
 
-/* Update toast (pwa.js); the install nudge is a callout (src/components/callout/Callout.svelte). */
+/* Update toast (src/components/pwa/UpdateToast.svelte); the install nudge is a callout (src/components/callout/Callout.svelte). */
 .toast {
   position: fixed;
   left: 50%;

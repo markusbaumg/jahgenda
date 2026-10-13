@@ -110,7 +110,7 @@
       position: fixed;
       left: 12px;
       right: 12px;
-      /* --toast-h: a visible update toast (pwa.js) sits at the bottom edge; the callout docks above it. */
+      /* --toast-h: a visible update toast (UpdateToast.svelte) sits at the bottom edge; the callout docks above it. */
       bottom: calc(12px + var(--toast-h, 0px) + env(safe-area-inset-bottom, 0px));
       z-index: 20;
       display: flex;

@@ -25,7 +25,7 @@ node_modules/.package-lock.json: package-lock.json
 
 deps: node_modules/.package-lock.json ## Install the pinned node dependencies (npm ci)
 
-build: deps ## Production build into dist/ (npm ci + vite build; data/ is copied, sw.js stamped)
+build: deps ## Production build into dist/ (npm ci + vite build; data/ is copied, sw.js + manifest via vite-plugin-pwa)
 	$(VITE) build
 
 dev: deps ## Dev server with hot reload (http://127.0.0.1:5173, data/ served from the repo)
@@ -47,7 +47,7 @@ test: ## Unit tests: Python (validator, formatter, watchdog, venue check, contra
 lint: deps ## Syntax and format check (plain scripts via node, Python via ruff – PATH or uvx –, the rest via prettier)
 	@! grep -rnE '^\s*(<<<<<<< |>>>>>>> |=======$$)' --include='*.html' --include='*.css' --include='*.js' --include='*.svelte' --include='*.py' --include='*.md' --include='*.json' --include='Makefile' . --exclude-dir=.git --exclude-dir=.claude --exclude-dir=node_modules --exclude-dir=dist || (echo "lint: merge conflict markers found" && exit 1)
 	@! ls _*.html >/dev/null 2>&1 || (echo "lint: workflow scratch pages (_*.html) in the tree, delete them" && exit 1)
-	node --check public/store.js public/pwa.js public/sw.js
+	node --check public/store.js src/sw.js
 	@$(RUFF) check scripts tests && $(RUFF) format --check scripts tests
 	$(PRETTIER) --check $(WEB_FILES)
 

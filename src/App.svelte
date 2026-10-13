@@ -16,6 +16,9 @@
   // M2: the stale-link note, the feedback words and the deep links #<short>.
   import LinkNote from "./components/list/LinkNote.svelte";
   import { initReveal } from "./stores/reveal.svelte.js";
+  // M7: the service worker and the «Neue Version» toast (the install nudge is a callout, M6).
+  import UpdateToast from "./components/pwa/UpdateToast.svelte";
+  import { pwa } from "./stores/pwa.svelte.js";
 
   // M4: the calendar and the map (the view switch itself sits in the results row, M1).
   import Calendar from "./components/views/Calendar.svelte";
@@ -36,6 +39,7 @@
   initReveal();
   views.start();
   startNudges();
+  pwa.start();
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
 
@@ -104,3 +108,5 @@
 <Footer />
 
 <div class="stripe bottom" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<UpdateToast />
