@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Weekly quality review: open one GitHub issue listing what the scraper dropped in the last 7 days.
+"""Weekly quality review: open one GitHub issue listing what the scraper dropped in the last 7 days
+and, with --links, the dead links on the live page (scripts/check_links.py: 404/410/DNS only).
 
 Gives the owners a notification (GitHub issue → mail/app) to check false negatives in the Mischpult
-(mischpult.html#aussortiert).
+(mischpult.html#aussortiert) and to repair dead show/ticket/venue links.
 Stdlib only. Needs GITHUB_TOKEN (issues: write) and GITHUB_REPOSITORY. DRY_RUN=1 prints instead.
 
-Usage: python3 scripts/quality_review.py [--days 7]
+Usage: python3 scripts/quality_review.py [--days 7] [--links]
 """
 
 import json
@@ -14,6 +15,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import check_links
 from ghapi import DRY_RUN, REPO, SITE, TOKEN, gh, parse_ts
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -72,14 +74,28 @@ def dedupe(items):
     return [(b[0], dict(b[1], runs=b[4]), b[2]) for b in (best[k] for k in order)]
 
 
-def body_for(items, days):
+def links_section(broken):
+    """The dead links (url, where, reason) as an issue section; [] when there are none."""
+    if not broken:
+        return []
     lines = [
-        f"The scraper dropped **{len(items)} candidate(s)** in the last {days} days. Please skim them for",
-        f"false negatives in the [Mischpult]({SITE}mischpult.html#aussortiert) (tab «Aussortiert») —",
-        "each row has a «Gehört rein» button that opens a prefilled issue.",
-        "Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
-        "",
+        f"**Dead links on the page ({len(broken)})** – 404/410 or unknown host; bot walls are not listed.",
+        "Fix the record (venue programme page or the show's `source_url` instead) or let the next run do it:",
     ]
+    lines += [f"- {reason}: {url} ← {where}" for url, where, reason in broken]
+    return lines
+
+
+def body_for(items, days, broken=()):
+    lines = []
+    if items:
+        lines += [
+            f"The scraper dropped **{len(items)} candidate(s)** in the last {days} days. Please skim them",
+            f"for false negatives in the [Mischpult]({SITE}mischpult.html#aussortiert) (tab «Aussortiert») —",
+            "each row has a «Gehört rein» button that opens a prefilled issue.",
+            "Rules live in `scraper/criteria.md` and `scraper/bands.md`.",
+            "",
+        ]
     for at, d, r in sorted(items, key=lambda x: x[0], reverse=True):
         where = ", ".join(x for x in (d.get("venue"), d.get("city")) if x)
         link = f" ([Quelle]({d['url']}))" if d.get("url") else ""
@@ -94,8 +110,19 @@ def body_for(items, days):
                 sources[s.get("name")] = s.get("error", "")
     if sources:
         lines += ["", "**Sources that failed in these runs:**"] + [f"- {n}: {e}" for n, e in sources.items()]
+    if broken:
+        lines += ([""] if lines else []) + links_section(broken)
     lines += ["", f"Full logs: {SITE}mischpult.html#laeufe"]
     return "\n".join(lines)
+
+
+def title_for(items, days, broken):
+    parts = []
+    if items:
+        parts.append(f"{len(items)} dropped candidate(s) in the last {days} days")
+    if broken:
+        parts.append(f"{len(broken)} dead link(s)")
+    return "Quality review: " + ", ".join(parts)
 
 
 def main(argv):
@@ -103,11 +130,12 @@ def main(argv):
     if "--days" in argv:
         days = int(argv[argv.index("--days") + 1])
     items = dedupe(collect(days))
-    if not items:
-        print("nothing dropped in the period – no issue")
+    broken = check_links.check(check_links.load()) if "--links" in argv else []
+    if not items and not broken:
+        print("nothing dropped in the period and no dead link – no issue")
         return 0
-    title = f"Quality review: {len(items)} dropped candidate(s) in the last {days} days"
-    body = body_for(items, days)
+    title = title_for(items, days, broken)
+    body = body_for(items, days, broken)
     if DRY_RUN or not TOKEN:
         print(title)
         print(body)

@@ -78,3 +78,21 @@ test("iPhone: the install sticker waits for the second visit; after a closed nud
   await page.waitForTimeout(2500);
   await expect(page.locator(".callout.show")).toHaveCount(0); // one nudge per visit
 });
+
+test("an open callout follows a DE/FR/EN switch", async ({ page }) => {
+  await openList(page);
+  await page.locator('#view-switch [data-view="calendar"]').click();
+  await page.locator("#calendar .cal-subscribe").click();
+  const callout = page.locator(".callout");
+  await expect(callout).toBeVisible();
+  await expect(callout).toContainText("Alle Shows in deinem Kalender");
+  await expect(callout.locator('[data-callout-action="2"]')).toHaveText("Adresse kopieren");
+
+  await page.locator('.lang-switch [data-lang="fr"]').dispatchEvent("click");
+  await expect(page.locator("html")).toHaveAttribute("lang", "fr-CH");
+  await expect(callout).toBeVisible();
+  await expect(callout.locator("strong")).toHaveText("Tous les concerts dans ton agenda");
+  await expect(callout).toHaveAttribute("aria-label", "Tous les concerts dans ton agenda");
+  await expect(callout.locator('[data-callout-action="2"]')).toHaveText("Copier l'adresse");
+  await expect(callout).not.toContainText("Kalender");
+});

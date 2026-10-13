@@ -9,7 +9,7 @@
   import { tick } from "svelte";
   import { agenda } from "../../stores/agenda.svelte.js";
   import { views } from "../../stores/views.svelte.js";
-  import { quietScroll } from "./scroll.js";
+  import { quietScroll } from "../../lib/scroll.js";
   import { pad2, parseDay } from "../../lib/text.js";
   import { addDays, monthFmt, monthStart, dow, dm, todayStart } from "../../lib/dates.js";
   import { localeFmt } from "../../i18n/core.js";

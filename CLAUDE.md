@@ -11,7 +11,8 @@ layout. The site UI is German; code, docs and config are English.
   `vite.config.js`, `package.json`, `README.md`, `CLAUDE.md`.
   Skills never change these files – with one exception: skills may append lines under _Suggestions_ in
   `bands.md`.
-- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat). Humans may correct them;
+- **Skills own:** `data/shows.json`, `data/artists.json`, `data/runs.json`, `data/status.json` (heartbeat),
+  `data/venues.web.json` (derived from `venues.json` by `scripts/format_data.py`; a skill that adds a venue commits it too). Humans may correct them;
   skills respect hand corrections (`"source": "manual"` in artists.json).
 - **Humans also own:** `data/genres.json` (allowed genre slugs, labels, filter order — single source of truth
   for validator, scraper and page) and `public/store.js` (every client-side persistence goes through `window.jahStore`;
@@ -127,7 +128,7 @@ headline at 200 % text size).
   what is copied unchanged (img/, fonts, robots.txt, the log/review redirects to the Mischpult and `store.js`);
   `data/` stays at the root as the scraper's contract (the build copies it into `dist/data`, the dev server
   serves it); `dist/` is the build (gitignored) that pages.yml uploads, with `dist/style.css` (the stylesheets
-  concatenated) for the static pages. The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,
+  concatenated) for design/logos.html (not precached). The vanilla root files (app.js, style.css, lib.js, callout.js, pwa.js,
   sw.js) are gone. Versions are pinned exactly in `package.json`. `make check` = lint + validate + test + build
   + smoke.
 - **Languages (story #48):** the agenda is DE · FR · EN – German default, first visit follows the browser
@@ -136,4 +137,5 @@ headline at 200 % text size).
   language-free; owner pages and stickers stay German (README «Languages»).
 - **Working style:** big features are built by background workflows in isolated worktrees
   (`.claude/worktrees/…`, gitignored) with a reviewer, then merged by hand into `main`; `make check` must be
-  green before every push; GitHub Pages deploys every push to `main`.
+  green before every push; GitHub Pages deploys every push to `main` once its CI job `ci` (make check) passed
+  (pages.yml runs on `workflow_run` of CI; a red e2e job does not hold the deploy back).

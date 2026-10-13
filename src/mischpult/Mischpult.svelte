@@ -7,6 +7,7 @@
    * is opened. Hidden: not linked from the public pages, noindex, not in robots.txt (CLAUDE.md). */
   import { onMount } from "svelte";
   import { DATA, tryJson } from "../lib/load.js";
+  import { safeDecode } from "../lib/hash.js";
   import Status from "./sections/Status.svelte";
   import Runs from "./sections/Runs.svelte";
   import Dropped from "./sections/Dropped.svelte";
@@ -36,7 +37,8 @@
     links: "status",
   };
   const fromHash = (h) => {
-    const id = decodeURIComponent(String(h || "").replace(/^#/, "")).toLowerCase();
+    // A hand-typed or broken hash (#%E0) must not blank the console: safeDecode never throws.
+    const id = safeDecode(String(h || "").replace(/^#/, "")).toLowerCase();
     const known = ALIAS[id] || id;
     return TABS.some((t) => t.id === known) ? known : "status";
   };

@@ -11,6 +11,9 @@
   onMount(() => callout.setHost(host));
 
   const c = $derived(callout.content);
+  // Texts may come as thunks (() => t("…")): resolved here, inside the template, they follow a language
+  // switch while the sticker is open.
+  const txt = (v) => (typeof v === "function" ? v() : v);
 
   // Swipe down to dismiss (touch, §3.9): the sticker follows the finger and snaps away past 40 px.
   let swipe = $state(null);
@@ -44,7 +47,7 @@
   hidden={callout.hidden}
   tabindex="-1"
   role={c ? (c.force ? "dialog" : "region") : undefined}
-  aria-label={c ? c.title : undefined}
+  aria-label={c ? txt(c.title) : undefined}
   style:--drag={swipe ? `${swipe.dy}px` : undefined}
   onpointerdown={down}
   onpointermove={move}
@@ -54,9 +57,9 @@
   <div class="callout-icon"><img src="img/logo/jahgenda.svg" alt="" width="40" height="40" /></div>
   <div class="callout-body">
     {#if c}
-      <strong>{c.title}</strong>
+      <strong>{txt(c.title)}</strong>
       <!-- The texts are the page's own constants (the iOS steps carry inline icons). -->
-      <span>{@html c.text}</span>
+      <span>{@html txt(c.text)}</span>
       <span class="callout-actions">
         {#each c.actions || [] as a, i (i)}
           {#if a.href}
@@ -67,8 +70,8 @@
               target={a.external ? "_blank" : undefined}
               rel={a.external ? "noopener" : undefined}
               data-callout-action={i}
-              title={a.title || a.label}
-              onclick={(e) => callout.act(i, e.currentTarget)}>{callout.labels[i] || a.label}</a
+              title={txt(a.title) || txt(a.label)}
+              onclick={(e) => callout.act(i, e.currentTarget)}>{txt(callout.labels[i]) || txt(a.label)}</a
             >
           {:else}
             <button
@@ -76,8 +79,9 @@
               class="callout-btn"
               class:primary={a.primary}
               data-callout-action={i}
-              title={a.title || a.label}
-              onclick={(e) => callout.act(i, e.currentTarget)}>{callout.labels[i] || a.label}</button
+              title={txt(a.title) || txt(a.label)}
+              onclick={(e) => callout.act(i, e.currentTarget)}
+              >{txt(callout.labels[i]) || txt(a.label)}</button
             >
           {/if}
         {/each}

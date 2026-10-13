@@ -17,9 +17,11 @@ import { nav } from "./history.js";
 import { callout } from "./callout.svelte.js";
 import { live } from "./live.svelte.js";
 import { reveal } from "./reveal.svelte.js";
-import { vevent, icsWrap } from "../lib/index.js";
+import { vevent, icsWrap, safeDecode } from "../lib/index.js";
 import { dayShort } from "../lib/dates.js";
-import { showUrl, downloadIcs } from "../components/list/actions.js";
+import { showUrl, downloadIcs } from "../lib/actions.js";
+import { ID, byId as el, starOf } from "../lib/dom.js";
+import { copyText, shareOr, waLink } from "../lib/share.js";
 import { FLASH_MS } from "./feedback.svelte.js";
 import { t } from "../i18n/core.js";
 
@@ -59,16 +61,7 @@ export const UNDO_MS = 8000;
 export const LONG_PRESS = 500;
 
 const jah = () => (typeof window !== "undefined" ? window.jahStore : null);
-const el = (id) => document.getElementById(id);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-// Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
-const decodeHashPart = (t) => {
-  try {
-    return decodeURIComponent(t);
-  } catch {
-    return t;
-  }
-};
 // Write a hash without a navigation (empty = none); path and query stay as they are.
 const setHash = (h) =>
   history.replaceState(history.state, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
@@ -123,7 +116,7 @@ export function createMarks() {
   function echo(id) {
     if (reducedMotion()) return;
     flushSync();
-    const star = document.querySelector(`.show[data-id="${CSS.escape(id)}"] .star`);
+    const star = starOf(id);
     const icon = star && star.querySelector("svg");
     if (!icon) return;
     for (let i = 0; i < 3; i++) {
@@ -206,10 +199,10 @@ export function createMarks() {
     const id = undo && undo.id;
     undo = null;
     // The focus never vanishes with the toast: back to the row's star (or the ★ in the bar).
-    const toast = el("undo");
+    const toast = el(ID.undo);
     if (toast && toast.contains(document.activeElement)) {
-      const star = id && document.querySelector(`.show[data-id="${CSS.escape(id)}"] .star`);
-      (star || el("toggle-mine")).focus({ preventScroll: true });
+      const star = id && starOf(id);
+      (star || el(ID.toggleMine)).focus({ preventScroll: true });
     }
   }
   function restore() {
@@ -238,8 +231,8 @@ export function createMarks() {
     if (ui.openPanel) nav.quietly(() => ui.setPanel(null));
   }
   const scrollToList = () => {
-    const panel = el("mine-panel");
-    ui.scrollUnderBar(!panel || panel.hidden ? el("views") : panel);
+    const panel = el(ID.minePanel);
+    ui.scrollUnderBar(!panel || panel.hidden ? el(ID.views) : panel);
   };
 
   // The ★ in the toolbar. Returns the word the button says when there is nothing to show yet.
@@ -276,8 +269,8 @@ export function createMarks() {
       sharedMissing = 0;
       clearListHash();
     });
-    const toggle = el("toggle-mine");
-    (toggle && !toggle.hidden ? toggle : el("q"))?.focus({ preventScroll: true });
+    const toggle = el(ID.toggleMine);
+    (toggle && !toggle.hidden ? toggle : el(ID.q))?.focus({ preventScroll: true });
   }
 
   // A friend's list (#m=…): the page switches to the list mode with exactly those shows; the friend's
@@ -288,12 +281,12 @@ export function createMarks() {
     let missing = 0;
     for (const part of raw.split(",")) {
       if (part.startsWith("von:")) {
-        by = decodeHashPart(part.slice(4)).trim().slice(0, 40);
+        by = safeDecode(part.slice(4)).trim().slice(0, 40);
         continue;
       }
       let token, st;
-      if (part.includes(":")) [token, st] = part.split(":").map(decodeHashPart);
-      else [token, st] = [decodeHashPart(part.slice(0, -1)), part.slice(-1)];
+      if (part.includes(":")) [token, st] = part.split(":").map(safeDecode);
+      else [token, st] = [safeDecode(part.slice(0, -1)), part.slice(-1)];
       const show = token && agenda.findShow(token);
       if (show) map[show.id] = st === "g" ? "going" : "interested";
       else if (token) missing++;
@@ -333,7 +326,7 @@ export function createMarks() {
     if (ids.some((id) => agenda.findShow(id)?._past)) ui.setShowPast(true);
     if (!wasOn) foldPanel();
     flushSync();
-    tick().then(() => el("list-title")?.focus({ preventScroll: true })); // opened from a link: announce it
+    tick().then(() => el(ID.listTitle)?.focus({ preventScroll: true })); // opened from a link: announce it
   }
 
   // «Alle merken»: never overwrites or downgrades an own mark; the friend's «Ich gehe» stays a chip.
@@ -344,7 +337,7 @@ export function createMarks() {
     marks = m;
     save();
     flushSync();
-    el("list-title")?.focus({ preventScroll: true }); // the button turned into text: announce the list
+    el(ID.listTitle)?.focus({ preventScroll: true }); // the button turned into text: announce the list
   }
 
   // Direct links: #m=… opens a shared list; a hash without it closes a friend's list that was open.
@@ -374,6 +367,8 @@ export function createMarks() {
     return lines;
   };
   const listShareText = () => `${listTitle()}\n${listShareLines().join("\n")}\n${listUrl()}`;
+  // The WhatsApp link of the list: Teilen where navigator.share is missing, and its fallback.
+  const listWaUrl = () => waLink(listShareText());
   function saveListIcs() {
     downloadIcs(
       icsWrap(
@@ -384,34 +379,22 @@ export function createMarks() {
       t(shared ? "mine.icsFileShared" : "mine.icsFile"),
     );
   }
-  // Teilen (navigator.share) of the list; the #m= link goes into the address bar first.
+  // Teilen (navigator.share) of the list; the #m= link goes into the address bar first. Not possible:
+  // the WhatsApp link opens, as for a row.
   async function shareList() {
     const url = listUrl();
     if (!shared) history.replaceState(history.state, "", url);
-    try {
-      await navigator.share({
-        title: listTitle(),
-        text: `${listTitle()}\n${listShareLines().join("\n")}`,
-        url,
-      });
-      return t("fb.shared");
-    } catch (err) {
-      return !err || err.name !== "AbortError" ? t("fb.shareFailed") : "";
-    }
+    const r = await shareOr(
+      { title: listTitle(), text: `${listTitle()}\n${listShareLines().join("\n")}`, url },
+      listWaUrl(),
+    );
+    return r === "shared" ? t("fb.shared") : "";
   }
   // Link: the #m= link is the shareable artefact – it goes to the clipboard and into the address bar.
   async function copyListLink() {
     const url = listUrl();
     if (!shared) history.replaceState(history.state, "", url);
-    try {
-      await Promise.race([
-        navigator.clipboard.writeText(url),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
-      ]);
-      return t("fb.copied");
-    } catch {
-      return t("fb.inAddressBar");
-    }
+    return (await copyText(url)) === "copied" ? t("fb.copied") : t("fb.inAddressBar");
   }
 
   // --- Wiring: Back closes ★ Meine Shows, Esc closes the list, #m= links open a list. ------------------
@@ -426,7 +409,7 @@ export function createMarks() {
         ui.applyFilter(() => {
           mineOnly = false;
         });
-        el("toggle-mine")?.focus({ preventScroll: true });
+        el(ID.toggleMine)?.focus({ preventScroll: true });
       },
     });
     window.addEventListener("hashchange", fromHash);
@@ -496,6 +479,7 @@ export function createMarks() {
     showShared,
     takeAll,
     listShareText,
+    listWaUrl,
     saveListIcs,
     shareList,
     copyListLink,

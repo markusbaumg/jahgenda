@@ -228,7 +228,6 @@ export default {
   "fb.shared": "Geteilt",
   "fb.copied": "Kopiert",
   "fb.inAddressBar": "Link in Adresszeile",
-  "fb.shareFailed": "Teilen nicht möglich",
   "share.with": "mit {acts}",
 
   // --- Meine Shows ----------------------------------------------------------------------------------

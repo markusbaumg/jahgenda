@@ -2,7 +2,7 @@
  * or is global (tokens, base, motion and preferences). The order is the one of the former single style.css:
  * where two rules of equal specificity compete, the later file wins – keep that in mind before moving a
  * file up or down. The build bundles these into assets/index-*.css for the page and also writes them,
- * concatenated in this order, to dist/style.css for the static pages (log, review, mischpult, logos). */
+ * concatenated in this order, to dist/style.css for the design page design/logos.html. */
 @import "./tokens.css";
 @import "./base.css";
 @import "../components/header.css";

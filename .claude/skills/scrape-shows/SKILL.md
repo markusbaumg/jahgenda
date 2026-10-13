@@ -6,8 +6,10 @@ description: Research upcoming reggae, dub and ska shows in Switzerland (and jus
 # Scrape shows
 
 You update the concert data of Jahgenda. The result of this run is one commit on `main` that changes
-`data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only), `data/runs.json` and — only
-new lines under **Suggestions** — `scraper/bands.md`. Nothing else in the repo is touched.
+`data/shows.json`, `data/artists.json`, `data/venues.json` (new venues only) with its derived
+`data/venues.web.json` (written by `scripts/format_data.py`, never by hand), `data/runs.json`,
+`data/status.json` and — only new lines under **Suggestions** — `scraper/bands.md`. Nothing else in the
+repo is touched.
 
 Work from the repository root. Today's date is what `TZ=Europe/Zurich date +%F` prints — use it, do not
 guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
@@ -31,7 +33,8 @@ guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
    - If `"source"` is `"mock"`: ignore every existing show. Mock entries are examples, not data; the list is
      built from scratch.
    - Otherwise keep every existing *future* show that has a `source_url`, unless you find clear evidence that
-     it was cancelled or moved, or step 3 says it is out. Existing `id`s stay stable. An existing show
+     it was cancelled or moved (a «cancelled» on the venue or ticket page beats an aggregator that still
+     lists it), or step 3 says it is out. Existing `id`s stay stable. An existing show
      without `source_url` is dropped (it can never validate).
 6. `data/artists.json` — the genre cache. Look here before researching an act. Entries with
    `"source": "manual"` were written by a human: use them, never change them.
@@ -100,6 +103,11 @@ Rules while collecting:
 - Dates: `YYYY-MM-DD` local date. If only a weekday and day are given, resolve them against the page's
   month/year context. If you cannot pin the date, drop the candidate.
 - Time: `HH:MM` (24h), door or start time if shown; otherwise omit.
+- Links must work: a `url` or `tickets` you write (new or kept) that answers 404/410 — the part after `#` is
+  never sent, so `…/programm.html#/events/123` is dead when `programm.html` is — is replaced: `url` by the
+  venue's programme `url` from `data/venues.json` or else the show's `source_url`; `tickets` is left out.
+  A 401/403/429 or timeout is a bot wall, not a dead link — keep it. (The weekly quality review lists the
+  dead links it finds, `scripts/check_links.py`.)
 - Venue not in `data/venues.json`: add it — `city`, `canton`, `lat`, `lon` (venue website address →
   OpenStreetMap/Nominatim or Google Maps; if the exact spot cannot be found, use the city centre and write
   `"hint": "Koordinaten: Stadtmitte"`), `url` of its programme page if known, `"scrape": false`. Use the
@@ -113,6 +121,14 @@ Rules while collecting:
 
 Decision order for each candidate:
 
+0. **Cancelled before?** Look through the `dropped` entries of the `scrape-shows` runs in `data/runs.json`
+   from the last 60 days. If one has the same date and the same venue (compare as in step 5.1) and its
+   `why` says it was cancelled (abgesagt / cancelled / annulé / verschoben), keep the candidate out — unless
+   the venue's or the ticket shop's own page, opened in this run, lists it as on sale again. Log it under
+   `dropped` again with the same reason. An aggregator listing (Skalender, Eventfrog, Petzi's agenda list,
+   a search hit) never overrides a «cancelled» on the venue or ticket page: an aggregator is often the last
+   to notice a cancellation, so a shortened run that only reaches the aggregator must not bring a rejected
+   show back.
 1. Its headliner (first/main act) is under **Excluded** in `bands.md`, or it is the only act → drop.
    An **Excluded** act as one of several acts: keep the show, ignore that act for the genres.
 2. An act under **Included** → keep.
@@ -253,7 +269,7 @@ Run exactly this, as one command, so nothing is committed when validation fails:
 
 ```sh
 python3 scripts/format_data.py && python3 scripts/validate_shows.py \
-  && git add data/shows.json data/artists.json data/venues.json data/runs.json data/status.json scraper/bands.md \
+  && git add data/shows.json data/artists.json data/venues.json data/venues.web.json data/runs.json data/status.json scraper/bands.md \
   && git commit -m "Update shows: +<added> ~<updated> -<removed> (<total> total)" \
   && git push origin main
 ```
@@ -263,7 +279,7 @@ Commit even when no show changed (message `Scraper run: no changes (<total> tota
 
 If the validator reports problems, fix the data and run the command again. **Never commit data that does
 not validate.** If you cannot make it pass, or anything else stops the run: revert the data
-(`git checkout -- data/shows.json data/artists.json data/venues.json scraper/bands.md`), write
+(`git checkout -- data/shows.json data/artists.json data/venues.json data/venues.web.json scraper/bands.md`), write
 `data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with the same
 error in `notes`, validate, and commit + push only those two files — so the failure is visible on
 the Mischpult (tab «Status») and the watchdog, and the site keeps the last good data.

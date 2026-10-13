@@ -104,8 +104,8 @@ venues-check: ## Re-check every venue's coordinates against OpenStreetMap (Nomin
 ics: ## Build the subscribable calendar feeds (jahgenda.ics + per canton) into dist/ (after make build)
 	python3 scripts/make_ics.py dist
 
-quality-review: ## Preview the weekly quality-review issue (dropped candidates), without touching GitHub
-	DRY_RUN=1 python3 scripts/quality_review.py --days 7
+quality-review: ## Preview the weekly quality-review issue (dropped candidates + dead links), without touching GitHub
+	DRY_RUN=1 python3 scripts/quality_review.py --days 7 --links
 
 watchdog: ## Freshness check (same as the GitHub watchdog), without touching GitHub
 	DRY_RUN=1 python3 scripts/check_freshness.py --max-age-hours 36

@@ -167,6 +167,13 @@ test("parseHash: a show, a shared list, a view, combinations, bad escapes", () =
   assert.deepEqual(lib.parseHash(undefined), { id: "", mine: "", view: "" });
 });
 
+test("safeDecode: decodes, and gives a bad escape back as typed instead of throwing", () => {
+  assert.equal(lib.safeDecode("von%20Kusi"), "von Kusi");
+  assert.equal(lib.safeDecode("%E0"), "%E0");
+  assert.equal(lib.safeDecode("laeufe%E0%A4%A"), "laeufe%E0%A4%A");
+  assert.equal(lib.safeDecode(""), "");
+});
+
 test("festival (end_date): one all-day event over the range, line-up in the description, Google dates", () => {
   const fest = show({
     id: "2027-07-16-reeds-festival-pfaeffikon",

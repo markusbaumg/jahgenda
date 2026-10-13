@@ -13,6 +13,7 @@
  * Callout.svelte renders `current`; the store drives the timing (the .show class one frame after the
  * sticker is in, hidden 300 ms after it left) exactly as callout.js did. */
 import { tick } from "svelte";
+import { ID, byId } from "../lib/dom.js";
 
 const SNOOZE_DAYS = 30;
 const RETRY_MS = 1500;
@@ -88,7 +89,7 @@ export function createCallout() {
     current = null;
     hideHost();
     if (hadFocus) {
-      const back = force && opener && opener.isConnected ? opener : document.getElementById("views");
+      const back = force && opener && opener.isConnected ? opener : byId(ID.views);
       if (back) back.focus({ preventScroll: true });
     }
     opener = null;
@@ -146,7 +147,9 @@ export function createCallout() {
     setHost(el) {
       host = el;
     },
-    /** Queue a callout: {id, title, text (HTML), actions:[{label, href?, external?, onClick?(close, el), primary?, title?}], force?} */
+    /** Queue a callout: {id, title, text (HTML), actions:[{label, href?, external?, onClick?(close, el), primary?, title?}], force?}.
+     * title, text, label and an action's title may be thunks (() => t("…")): Callout.svelte resolves them
+     * while rendering, so an open sticker follows a language switch. */
     show(c) {
       if (!c || !c.id) return;
       if (!c.force && dismissedState(c.id)) return;
@@ -181,7 +184,7 @@ export function createCallout() {
     setBlocker(fn) {
       blocker = typeof fn === "function" ? fn : () => false;
     },
-    /** A new label for one action button of the visible callout («Adresse kopieren» → «Kopiert»). */
+    /** A new label (string or thunk) for one action button of the visible callout («Adresse kopieren» → «Kopiert»). */
     relabel(idx, text) {
       labels = { ...labels, [idx]: text };
     },

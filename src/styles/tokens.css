@@ -1,5 +1,5 @@
 /* Design tokens and the display face – the one global stylesheet every other file builds on.
- * Imported first by src/styles/index.css; the static pages get the same rules via dist/style.css. */
+ * Imported first by src/styles/index.css; design/logos.html gets the same rules via dist/style.css. */
 /* ---------- Design tokens (design/ui-revamp.md §2, «Soundsystem Swiss») ----------
  * Saturated --red/--gold/--green are fills and rules; words always use the *-text variant.
  * Red = time pressure, gold = selection and attention, green = commitment and proximity.

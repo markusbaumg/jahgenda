@@ -34,7 +34,7 @@ Made by Kusi & Seraina.
 ```
 index.html                             The page: the Vite entry (head, inline slogans, mounts src/main.js). Built into dist/.
 vite.config.js / package.json          Vite 6 + Svelte 5 build, pinned; the jahgenda-static plugin copies data/ and scraper/sources.json (for the Mischpult) and writes dist/style.css; vite-plugin-pwa writes sw.js + manifest.
-src/styles/index.css                   The stylesheets in cascade order (imported by src/main.js; concatenated into dist/style.css for the static pages).
+src/styles/index.css                   The stylesheets in cascade order (imported by src/main.js; concatenated into dist/style.css for design/logos.html).
 src/styles/tokens.css / base.css       Design tokens and the display face; reset, atmosphere, focus ring, stripes, column, skip links.
 src/styles/links.css / motion.css      Link colours (late on purpose); motion, performance and the reduced-motion / contrast / forced-colours rules.
 src/components/**/*.css                One stylesheet per part of the page, next to its components (header, filters, status, list, footer, mine, toast, festival, views).
@@ -52,12 +52,11 @@ src/stores/filters.svelte.js           Filter UI state: open panel, view, Wann r
 src/components/filters/                The filter bar (search, Wo / Wann toggles, genre chips, panels), results row, empty state, past footer, URL / history glue.
 src/stores/reveal.svelte.js            Deep links #<short>: scroll under the bar, highlight, stale-link note.
 src/stores/feedback.svelte.js          Feedback words of the row actions («Kopiert» …) for 1.2 s; announced through live.svelte.js.
-src/components/list/                   Row actions (.ics, Teilen, Link) and the stale-link note (LinkNote).
+src/components/list/                   The stale-link note (LinkNote) and the list styles.
 src/stores/marks.svelte.js             Meine Shows: marks (jahStore), star / state / undo, list mode, #m= links, list share + .ics.
 src/components/mine/                   ★ toolbar toggle, list head («Zurück zur Agenda»), list panel, undo toast.
 src/stores/views.svelte.js             Kalender / Karte state on top of ui.view: calendar month/day, list mode, pill/popup jumps.
-src/components/views/                  Calendar (month grid, day list), MapView (Leaflet on demand, pins, clusters),
-                                       scroll.js (scrolls the page makes itself).
+src/components/views/                  Calendar (month grid, day list), MapView (Leaflet on demand, pins, clusters).
 src/stores/festival.svelte.js          Open line-ups (kept across re-renders, deep links).
 src/components/callout/                One sticker for every nudge (Callout.svelte) and the nudges (install, subscribe): snooze or «Nie mehr zeigen».
 src/stores/callout.svelte.js           The callout queue: one at a time, one nudge per visit, waits while the page is busy.
@@ -69,6 +68,10 @@ src/lib/calendar.js                    … .ics / Google Calendar / SBB links, f
 src/lib/dates.js / regions.js          … the formatters (in the page language) and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
+src/lib/actions.js                     … the row actions (.ics, Teilen, Link) – rows and the Meine-Shows store use them.
+src/lib/scroll.js                      … scrolls the page makes itself (the subscribe nudge waits for the visitor's own).
+src/lib/dom.js                         … the ids / classes the stores reach into (focus, scroll, star echo); a contract test checks components render them.
+src/lib/share.js                       … copy to the clipboard (1 s timeout) and navigator.share with the WhatsApp fallback, for every copy/share button.
 src/lib/load.js                        … the one fetch helper (data/*.json paths, raw.githubusercontent.com) for the agenda and the Mischpult.
 src/lib/health.js / drops.js           … Mischpult: the watchdog verdict (mirrors check_freshness.py), the dropped-candidate dedupe
                                        (mirrors quality_review.py) and the «Gehört rein» issue link.
@@ -113,13 +116,14 @@ scripts/smoke.sh                       Loads the built pages (dist/) in headless
 scripts/make_icons.sh                  Renders the PWA icons from public/img/logo/jahgenda.svg.
 scripts/make_ics.py                    Builds the subscribable calendar feeds (jahgenda.ics + one per region) before deploy.
 scripts/make_stickers.py               Renders the promo stickers in design/stickers/ (make stickers).
-scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
+scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review) and the dead links.
+scripts/check_links.py                 Dead-link check of show/ticket/venue links (404/410/DNS only; bot walls ignored).
 scripts/ghapi.py                       Shared by the two above: repo/token env, ISO timestamp parser, GitHub REST call.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for src/lib).
 e2e/                                   End-to-end tests in a real browser (Playwright against vite preview; make e2e).
 design/                                Logo variants, festival spec, other design documents (the HTML pages are copied into dist/design).
-.github/workflows/pages.yml            Validates data, builds dist/ (vite, service worker with the injected shell list, .ics feeds), deploys on every push to main.
+.github/workflows/pages.yml            After CI passed `make ci` for a push to main: validates data, builds dist/ (vite, service worker with the injected shell list, .ics feeds), deploys.
 .github/workflows/validate.yml         CI: `make ci` (lint, validate, test, build, smoke, format check) + e2e job on every push and PR.
 .github/workflows/quality-review.yml   Mondays: scripts/quality_review.py opens the review issue (label quality).
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.
@@ -213,7 +217,7 @@ the result and commits it.
                          │ git push main
                          ▼
             ┌──────────────────────────┐
-            │ GitHub Pages workflow    │ validates again, deploys
+            │ CI, then Pages workflow  │ make check green → validates again, deploys
             └──────────────────────────┘
 
   monthly ──► skill harvest-bands: festival line-ups (Summerjam, Reeds, Lakesplash, …)
@@ -289,7 +293,7 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   the weekly issue (`src/lib/drops.js` mirrors `quality_review.py`; «Jeden Lauf einzeln zeigen» lists every run);
   «Gehört rein» opens a prefilled GitHub issue. Every
   Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped
-  candidates and failed sources, so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
+  candidates, failed sources and dead links (404/410/unknown host, `scripts/check_links.py`), so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
 
 ### When a run fails
 

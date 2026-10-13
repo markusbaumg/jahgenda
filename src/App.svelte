@@ -28,7 +28,7 @@
   import { tick } from "svelte";
   import Callout from "./components/callout/Callout.svelte";
   import { startNudges } from "./components/callout/nudges.svelte.js";
-  import { quietScroll } from "./components/views/scroll.js";
+  import { quietScroll } from "./lib/scroll.js";
   import { nav } from "./stores/history.js";
   import { live } from "./stores/live.svelte.js";
   import { parseHash } from "./lib/hash.js";

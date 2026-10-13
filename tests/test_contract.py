@@ -42,10 +42,7 @@ def shell_files():
 
 
 def built_file(f):
-    """Where a shell file comes from before the build: public/ (static), the repo root (index.html), or
-    the jahgenda-static plugin (style.css, put together from src/styles/index.css)."""
-    if f == "style.css":
-        return (ROOT / "src" / "styles" / "index.css").is_file()
+    """Where a shell file comes from before the build: public/ (static) or the repo root (index.html)."""
     return (PUBLIC / f).is_file() or (ROOT / f).is_file()
 
 
@@ -94,12 +91,28 @@ class AppShell(unittest.TestCase):
         self.assertIn(
             'path.join(outDir, "style.css"), plainStylesheet()',
             VITE_CONFIG,
-            "no style.css for the static pages",
+            "no style.css for design/logos.html",
         )
+        # …but no visitor loads it (the pages bundle assets/*.css): it is never precached.
+        self.assertNotIn("style.css", shell_files())
+
+    def test_deploy_waits_for_make_check(self):
+        # Every commit on main must pass make check (CLAUDE.md): pages.yml deploys only after the CI
+        # workflow's job «ci» (make ci) passed for that commit – never straight on push.
+        ci = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding="utf-8")
+        self.assertIn("name: CI\n", ci)
+        self.assertIn("\n  ci:\n", ci)
+        self.assertIn("run: make ci", ci)
+        on = PAGES.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+        self.assertNotIn("push:", on)
+        self.assertIn("workflow_run:\n    workflows: [CI]", on)
+        self.assertIn('select(.name == "ci") | .conclusion', PAGES)
+        self.assertIn("needs: gate", PAGES)
+        self.assertIn("ref: ${{ needs.gate.outputs.sha }}", PAGES)
 
     def test_every_stylesheet_is_imported_once(self):
         # src/styles/index.css is the cascade order of the page; a .css file outside it would be dead or
-        # imported by a component at a position the bundle decides (and the static pages would miss it).
+        # imported by a component at a position the bundle decides (and dist/style.css would miss it).
         index = (ROOT / "src" / "styles" / "index.css").read_text(encoding="utf-8")
         listed = [
             (ROOT / "src" / "styles" / p).resolve() for p in re.findall(r'^@import "([^"]+)";', index, re.M)
@@ -225,6 +238,46 @@ class SmokeCoverage(unittest.TestCase):
         )
         # The console and the two old pages that now redirect into it stay in the loop.
         self.assertTrue({"index.html", "mischpult.html", "log.html", "review.html"} <= tested)
+
+
+class DomContract(unittest.TestCase):
+    """The stores reach into component markup (focus, scrolling, panel sizing, the star echo) only through
+    src/lib/dom.js – and every id / class listed there is still rendered by a component."""
+
+    DOM = (ROOT / "src" / "lib" / "dom.js").read_text(encoding="utf-8")
+    SVELTE = "\n".join(
+        p.read_text(encoding="utf-8") for p in (ROOT / "src").rglob("*.svelte") if "mischpult" not in p.parts
+    )
+    STORES = sorted((ROOT / "src" / "stores").glob("*.js"))
+
+    def block(self, name):
+        m = re.search(rf"export const {name} = \{{(.*?)\n\}};", self.DOM, re.S)
+        self.assertIsNotNone(m, f"{name} not found in src/lib/dom.js")
+        return re.findall(r'^\s*\w+: "([^"]+)",', m.group(1), re.M)
+
+    def test_every_id_is_rendered(self):
+        ids = self.block("ID")
+        self.assertGreater(len(ids), 10)
+        missing = [i for i in ids if f'id="{i}"' not in self.SVELTE]
+        self.assertEqual(missing, [], "src/lib/dom.js names ids no component renders")
+
+    def test_every_class_is_rendered(self):
+        classes = self.block("CLASS")
+        rendered = set()
+        for attr in re.findall(r'class="([^"]*)"', self.SVELTE):
+            rendered.update(re.findall(r"[\w-]+", re.sub(r"\{[^}]*\}", " ", attr)))
+        self.assertEqual([c for c in classes if c not in rendered], [], "classes no component renders")
+
+    def test_stores_use_the_contract_and_never_import_components(self):
+        for p in self.STORES:
+            src = p.read_text(encoding="utf-8")
+            self.assertNotRegex(
+                src, r'getElementById\("', f"{p.name}: a literal id – add it to src/lib/dom.js"
+            )
+            self.assertNotRegex(src, r'\bel\("', f"{p.name}: a literal id – add it to src/lib/dom.js")
+            self.assertNotRegex(
+                src, r'from "[^"]*/components/', f"{p.name}: a store imports from components/"
+            )
 
 
 class Mischpult(unittest.TestCase):

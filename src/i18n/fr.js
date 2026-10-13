@@ -299,7 +299,6 @@ export default {
   "fb.shared": "Partagé",
   "fb.copied": "Copié",
   "fb.inAddressBar": "Lien dans la barre d'adresse",
-  "fb.shareFailed": "Partage impossible",
   "share.with": "avec {acts}",
 
   // --- Mes concerts ---------------------------------------------------------------------------------

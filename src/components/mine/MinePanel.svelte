@@ -10,7 +10,7 @@
   const canShare = typeof navigator !== "undefined" && Boolean(navigator.share);
   const hidden = $derived(!mine.listMode || !mine.listShows.length);
   const taken = $derived(mine.allTaken);
-  const waHref = $derived(hidden ? "#" : `https://wa.me/?text=${encodeURIComponent(mine.listShareText())}`);
+  const waHref = $derived(hidden ? "#" : mine.listWaUrl());
   const note = $derived.by(() => {
     const k = mine.sharedMissing;
     const gone = k ? t("mine.gone", { n: k }) : "";

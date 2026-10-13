@@ -11,6 +11,16 @@ export function shortId(id) {
   return h.toString(36);
 }
 
+// Hash parts come from a URL someone typed or pasted: a bad escape («%E0») gives the raw text back
+// instead of throwing. Every decoder of a hash part goes through this (the agenda, Meine Shows, the Mischpult).
+export function safeDecode(part) {
+  try {
+    return decodeURIComponent(part);
+  } catch {
+    return part;
+  }
+}
+
 // One parser for every hash the page writes or accepts: #<short hash or id> (a show), #m=<list> /
 // #mine=<list> (a shared list) and #view=<name> (the view switch); parts may be combined with "&" in
 // any order, e.g. #view=map&m=…. Returns { id, mine, view } with "" for what is absent; a bad escape in
@@ -25,11 +35,7 @@ export function parseHash(hash, views = ["list", "calendar", "map"]) {
       const v = part.slice(5);
       if (views.includes(v)) out.view = v;
     } else if (part && !out.id) {
-      try {
-        out.id = decodeURIComponent(part);
-      } catch {
-        out.id = part;
-      }
+      out.id = safeDecode(part);
     }
   }
   return out;

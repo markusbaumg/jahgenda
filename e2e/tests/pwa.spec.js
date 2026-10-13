@@ -54,3 +54,35 @@ test("«Aktualisieren» after a new worker installs reloads the page", async ({ 
   // (The reloaded page registers plain sw.js again – for the browser yet another version, so a second
   // toast may follow; that is the test set-up, not the page.)
 });
+
+test("the owners' console is never served from the worker's cache: a new deploy shows on reload", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/");
+  await workerReady(page);
+  await page.goto("mischpult.html");
+  await expect(page).toHaveTitle("Mischpult · Jahgenda");
+  expect(await page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true);
+
+  // A Mischpult-only deploy: the server now answers with a changed page. The precache list (and so the
+  // worker) stays the same, so only a worker that leaves the console to the network shows the new copy.
+  await context.route("**/mischpult.html", async (route) => {
+    const res = await route.fetch();
+    const body = (await res.text()).replace(
+      "<title>Mischpult · Jahgenda</title>",
+      "<title>Mischpult neu</title>",
+    );
+    await route.fulfill({ response: res, body });
+  });
+  await page.reload();
+  await expect(page).toHaveTitle("Mischpult neu");
+  const cached = await page.evaluate(async () => {
+    const urls = [];
+    for (const key of await caches.keys()) {
+      for (const req of await (await caches.open(key)).keys()) urls.push(req.url);
+    }
+    return urls.filter((u) => u.includes("mischpult"));
+  });
+  expect(cached).toEqual([]);
+});

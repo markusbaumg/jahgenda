@@ -1,7 +1,13 @@
+# Deploys main to GitHub Pages – only after CI (validate.yml) has run for that commit and its `ci` job
+# (`make ci` = `make check`) passed: every commit on main must pass make check (CLAUDE.md), and only such a
+# commit reaches visitors. The Playwright job (e2e) shows red in CI but does not hold back a deploy, so a
+# flaky browser test never keeps the daily data push off the site. workflow_dispatch redeploys main by hand.
 name: Deploy to GitHub Pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -9,19 +15,59 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
+  gate:
+    # A CI run for a push to main of this repository (not a pull request from a fork's «main»).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.gate.outputs.sha }}
+      deploy: ${{ steps.gate.outputs.deploy }}
+    steps:
+      - name: make check passed for this commit (CI job «ci») and it is still the tip of main
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" = workflow_dispatch ]; then echo "deploy=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          ci=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs" --jq '.jobs[] | select(.name == "ci") | .conclusion')
+          echo "CI job «ci» for $SHA: ${ci:-missing}"
+          if [ "$ci" != success ]; then
+            echo "::error::make check failed for $SHA – not deploying (the site keeps the last good build)"
+            exit 1
+          fi
+          tip=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [ "$tip" != "$SHA" ]; then
+            echo "::notice::main moved on to $tip – its own CI run deploys it, skipping $SHA"
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
   deploy:
+    needs: gate
+    if: needs.gate.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
       - name: Validate data before deploying
         run: python3 scripts/validate_shows.py --allow-past
       - uses: actions/setup-node@v4
@@ -38,7 +84,7 @@ jobs:
         run: python3 scripts/make_ics.py dist
       - name: Check the service worker precache was injected
         run: |
-          ! grep -q '__WB_MANIFEST' dist/sw.js
+          if grep -q '__WB_MANIFEST' dist/sw.js; then echo "::error::precache list not injected"; exit 1; fi
           grep -q '"url":"index.html"' dist/sw.js
           grep -o '"url":"assets/[^"]*"' dist/sw.js
           test -s dist/manifest.webmanifest
