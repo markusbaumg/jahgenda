@@ -163,6 +163,14 @@ test("Mischpult: the hash picks the tab, old anchors land on their tab, the keyb
   await expectTab(page, "quellen");
   await page.goto("/mischpult.html#gibtsnicht");
   await expectTab(page, "status");
+  // A broken escape in the hash (hand-typed, cut-off link) lands on Status – it never blanks the console.
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/mischpult.html#%E0");
+  await expectTab(page, "status");
+  await page.evaluate(() => (location.hash = "#laeufe%E0%A4%A"));
+  await expectTab(page, "status");
+  expect(errors).toEqual([]);
 
   // Tablist keys: arrows wrap, Home / End jump; focus follows the selection.
   await tab(page, "status").focus();

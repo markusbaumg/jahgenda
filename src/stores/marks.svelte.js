@@ -17,7 +17,7 @@ import { nav } from "./history.js";
 import { callout } from "./callout.svelte.js";
 import { live } from "./live.svelte.js";
 import { reveal } from "./reveal.svelte.js";
-import { vevent, icsWrap } from "../lib/index.js";
+import { vevent, icsWrap, safeDecode } from "../lib/index.js";
 import { dayShort } from "../lib/dates.js";
 import { showUrl, downloadIcs } from "../components/list/actions.js";
 import { FLASH_MS } from "./feedback.svelte.js";
@@ -61,14 +61,6 @@ export const LONG_PRESS = 500;
 const jah = () => (typeof window !== "undefined" ? window.jahStore : null);
 const el = (id) => document.getElementById(id);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-// Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
-const decodeHashPart = (t) => {
-  try {
-    return decodeURIComponent(t);
-  } catch {
-    return t;
-  }
-};
 // Write a hash without a navigation (empty = none); path and query stay as they are.
 const setHash = (h) =>
   history.replaceState(history.state, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
@@ -288,12 +280,12 @@ export function createMarks() {
     let missing = 0;
     for (const part of raw.split(",")) {
       if (part.startsWith("von:")) {
-        by = decodeHashPart(part.slice(4)).trim().slice(0, 40);
+        by = safeDecode(part.slice(4)).trim().slice(0, 40);
         continue;
       }
       let token, st;
-      if (part.includes(":")) [token, st] = part.split(":").map(decodeHashPart);
-      else [token, st] = [decodeHashPart(part.slice(0, -1)), part.slice(-1)];
+      if (part.includes(":")) [token, st] = part.split(":").map(safeDecode);
+      else [token, st] = [safeDecode(part.slice(0, -1)), part.slice(-1)];
       const show = token && agenda.findShow(token);
       if (show) map[show.id] = st === "g" ? "going" : "interested";
       else if (token) missing++;
