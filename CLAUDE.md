@@ -60,9 +60,8 @@ headline at 200 % text size).
   (täglich)" `trig_01T3UeEu5A1ephmttuEze6zE`, cron `0 4 * * *` UTC (06:00 Zurich), model claude-sonnet-5-5, prompt runs
   `/scrape-shows` with `JAHGENDA_RUNNER=cloud`; "Jahgenda – Bands (monatlich)" `trig_016XrTCAAPkSTLmGb4m32HSv`, cron
   `0 5 1 * *`. Environment "kusi" `env_018Ddh8jfs94xvRyvnKSShEx` on the amaise account (markus.baumgartner@amaise.com) —
-  it must have **Network access = Full**, otherwise WebFetch fails with ENOTFOUND. The earlier routines on the personal
-  gmail account (`trig_01P5hw7jkjp8WJuw1tDH4Djx`, `trig_01XcTRA8vUt2huXiva3SSP1K`, env `env_01DjniiwyKBnsHAzi1ECBn9P`)
-  are to be paused there by Kusi (claude.ai/code/routines) so the scrape does not run twice. Fallback:
+  it must have **Network access = Full** (verified 2026-10-13 21:50: the first cloud run fetched skalender.net
+  fine). The earlier routines on the personal gmail account were deleted by Kusi (2026-10-13 21:55). Fallback:
   `make cron-install` (launchd 06:10 on the Mac).
 - **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 and 14:17 Zurich — GitHub dropped both cron fires on 2026-10-13; when no run shows up,
   `gh workflow run watchdog.yml` fires it by hand, `make watchdog` runs the check locally): stale
