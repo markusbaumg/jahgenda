@@ -7,8 +7,14 @@
   import Status from "./components/Status.svelte";
   import Footer from "./components/Footer.svelte";
   import { agenda } from "./stores/agenda.svelte.js";
+  // M4 views: Liste | Kalender | Karte
+  import ViewSwitch from "./components/views/ViewSwitch.svelte";
+  import Calendar from "./components/views/Calendar.svelte";
+  import MapView from "./components/views/MapView.svelte";
+  import { views } from "./stores/views.svelte.js";
 
   agenda.load();
+  views.start();
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
   // The screen reader hears the result count after every filter change (the visible count is in the footer).
@@ -34,6 +40,8 @@
 
 <main class="wrap">
   <div id="stuck-sentinel" aria-hidden="true"></div>
+  <!-- M4: the view switch; its home is the results row of the filter bar (the integrator moves it there). -->
+  <div class="results-row"><ViewSwitch /></div>
   <p class="sr" id="results-live" role="status" aria-live="polite">{resultsLive}</p>
   <!-- Feedback words of the row actions («Kopiert», «Gespeichert» …) for screen readers. -->
   <p class="sr" id="feedback" role="status" aria-live="polite"></p>
@@ -42,16 +50,15 @@
     tabindex="-1"
     hidden={agenda.loadState === "error" || (agenda.loadState === "ready" && !hasRows)}
   >
-    <div id="list">
-      {#if hasRows}
+    <!-- Only the active view keeps its rows: the calendar's day list and the map's «Ohne Standort» list
+         reuse the row ids, and #id links must find the list row. -->
+    <div id="list" hidden={views.current !== "list"}>
+      {#if hasRows && views.current === "list"}
         <ShowList shows={agenda.visible} />
       {/if}
     </div>
-    <div id="calendar" class="calendar" hidden></div>
-    <div id="map-view" class="map-view" hidden>
-      <div id="map" class="map" role="region" aria-label="Karte der Clubs"></div>
-      <div id="map-rest"></div>
-    </div>
+    <Calendar shows={agenda.visible} active={hasRows && views.current === "calendar"} />
+    <MapView shows={agenda.visible} active={hasRows && views.current === "map"} />
   </div>
   <Status onretry={() => agenda.load()} />
 </main>

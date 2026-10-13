@@ -45,6 +45,9 @@ src/components/Status.svelte           Loading skeleton, error state with retry,
 src/components/Footer.svelte           «Über Jahgenda» and the bottom bar (result count, data stamp, links).
 src/components/Icon.svelte             The inline SVG icons of the row actions.
 src/stores/agenda.svelte.js            The reactive store: shows + derived fields, genres, venues, filters, visible list.
+src/stores/views.svelte.js             Liste | Kalender | Karte: the chosen view, #view= in the hash, history entries, calendar month/day.
+src/components/views/                  ViewSwitch, Calendar (month grid, day list), MapView (Leaflet on demand, pins, clusters),
+                                       subscribe.js (calendar feed callout), scroll.js (focus, keep-in-view, list view transition).
 src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
