@@ -81,6 +81,10 @@ Tests: `make test` (`python3 -m unittest discover -s tests`). Every commit on `m
   on a tap only (silent locate when already granted — testers found the prompt on arrival off-putting; Kusi may
   overrule, see #54), one callout nudge per visit, Playwright e2e suite in `e2e/` runs as its own CI job. Open
   design/copy questions for Seraina & Kusi are collected in #54.
+- **Owner decisions 2026-10-13 18:05 (#54):** one word «Show» everywhere (counters too); calendar genre colours stay;
+  the «Gut zu wissen» box stays but is closable (remembered via jahStore); subscribe + install stickers stay (one nudge
+  per visit), «Nie mehr zeigen» becomes a plain text link; Wo/Wann are icons on phones; desktop row actions always
+  visible; the star stays (mark/unmark with undo, Interessiert/Ich gehe toggle); position only on a tap (final).
 - **Mischpult (owners' page):** `mischpult.html` is hidden (no links, noindex, not in robots.txt — a Disallow line would
   advertise it) — the overview of sources, prompt, rules and runs, plus the links to `log.html` and `review.html`.
   Never call it «admin» (scanners try that path first). Keep it unlinked from the public pages.
