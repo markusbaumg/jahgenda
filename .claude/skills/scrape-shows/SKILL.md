@@ -103,6 +103,11 @@ Rules while collecting:
 - Dates: `YYYY-MM-DD` local date. If only a weekday and day are given, resolve them against the page's
   month/year context. If you cannot pin the date, drop the candidate.
 - Time: `HH:MM` (24h), door or start time if shown; otherwise omit.
+- Links must work: a `url` or `tickets` you write (new or kept) that answers 404/410 — the part after `#` is
+  never sent, so `…/programm.html#/events/123` is dead when `programm.html` is — is replaced: `url` by the
+  venue's programme `url` from `data/venues.json` or else the show's `source_url`; `tickets` is left out.
+  A 401/403/429 or timeout is a bot wall, not a dead link — keep it. (The weekly quality review lists the
+  dead links it finds, `scripts/check_links.py`.)
 - Venue not in `data/venues.json`: add it — `city`, `canton`, `lat`, `lon` (venue website address →
   OpenStreetMap/Nominatim or Google Maps; if the exact spot cannot be found, use the city centre and write
   `"hint": "Koordinaten: Stadtmitte"`), `url` of its programme page if known, `"scrape": false`. Use the

@@ -1,4 +1,5 @@
-# Weekly: one issue listing what the scraper dropped, so the owners can check for false negatives.
+# Weekly: one issue listing what the scraper dropped (so the owners can check for false negatives) and
+# the dead links on the page.
 name: Quality review
 
 on:
@@ -13,10 +14,11 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Open the weekly quality-review issue
+      # --links: also check every show/ticket/venue link (scripts/check_links.py; 404/410/DNS count as dead).
+      - name: Open the weekly quality-review issue (dropped candidates + dead links)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 scripts/quality_review.py --days 7
+        run: python3 scripts/quality_review.py --days 7 --links

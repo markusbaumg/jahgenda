@@ -113,7 +113,8 @@ scripts/smoke.sh                       Loads the built pages (dist/) in headless
 scripts/make_icons.sh                  Renders the PWA icons from public/img/logo/jahgenda.svg.
 scripts/make_ics.py                    Builds the subscribable calendar feeds (jahgenda.ics + one per region) before deploy.
 scripts/make_stickers.py               Renders the promo stickers in design/stickers/ (make stickers).
-scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
+scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review) and the dead links.
+scripts/check_links.py                 Dead-link check of show/ticket/venue links (404/410/DNS only; bot walls ignored).
 scripts/ghapi.py                       Shared by the two above: repo/token env, ISO timestamp parser, GitHub REST call.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for src/lib).
@@ -289,7 +290,7 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   the weekly issue (`src/lib/drops.js` mirrors `quality_review.py`; «Jeden Lauf einzeln zeigen» lists every run);
   «Gehört rein» opens a prefilled GitHub issue. Every
   Monday `.github/workflows/quality-review.yml` opens one `quality` issue summarising the week's dropped
-  candidates and failed sources, so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
+  candidates, failed sources and dead links (404/410/unknown host, `scripts/check_links.py`), so the check is never forgotten (`make quality-review` previews it). Details and alternatives (ntfy/Telegram) in `design/monitoring-plan.md`.
 
 ### When a run fails
 
