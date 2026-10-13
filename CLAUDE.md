@@ -77,7 +77,7 @@ headline at 200 % text size).
   (criteria.md → Nearby) use country codes D/F/I/A/FL as `canton`. Every show needs `source_url` and a venue in
   `data/venues.json`. Optional `tickets` link. Festivals: spec in `design/festival-spec.md` (end_date + days).
 - **UI decisions:** dark warm theme, red #d8342f / gold #f2b632 / green #1e8f4e; logo #10 (Swiss cross on
-  stripes, `img/logo/jahgenda.svg`); "Jahgenda" is always one word ("Jah" cream, "genda" gold); tricolor stripe
+  stripes, `public/img/logo/jahgenda.svg`, served as `img/logo/jahgenda.svg`); "Jahgenda" is always one word ("Jah" cream, "genda" gold); tricolor stripe
   top and bottom; dense list with zebra rows; canton coats of arms (click = filter); views Liste | Kalender |
   Karte with logo-striped map pins; Meine Shows (★ in the toolbar, Interessiert / Ich gehe, share link
   `#m=…`, .ics export); short per-show hashes in links; PWA with install banner ("Nie mehr fragen"); footer band
