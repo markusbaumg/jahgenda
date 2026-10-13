@@ -295,8 +295,8 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
 
 - **Nothing breaks.** A failed run commits nothing; the page keeps showing the last good state
   (`Stand: …` in the footer). The browser hides past shows anyway.
-- **Where to look:** https://claude.ai/code/routines → routine → last run → log. Or `log.html` on the site
-  if the run got as far as writing `data/runs.json`.
+- **Where to look:** https://claude.ai/code/routines → routine → last run → log. Or the Mischpult's «Läufe» tab
+  (`mischpult.html#laeufe`) if the run got as far as writing `data/runs.json`.
 - **Usual causes:** a source blocks (listed in the log under "Nicht erreichbar" – adjust or remove it in
   `sources.json` / `venues.json`), the validator fails (the message names file and field), the
   subscription limit is reached (the next run catches up), network access of the environment not Full.
@@ -423,7 +423,7 @@ its own job in `validate.yml` and uploads the report and traces when it fails.
 ### Changing the logo
 
 Logo #10 (Swiss cross on red/gold/green stripes) is active: `public/img/logo/jahgenda.svg` is referenced in
-the header (`src/components/Header.svelte`) and `log.html`, as favicon, in the sticky bar and in
+the header (`src/components/Header.svelte`) and the Mischpult, as favicon, in the sticky bar and in
 the manifest (`vite.config.js`) / the PWA icons (`make icons` re-renders those). All ten variants live in
 `public/img/logo/NN-name.svg` (icon) and `NN-name-wordmark.svg` (icon + wordmark); the picker page is
 `design/logos.html` (https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen
@@ -431,8 +431,8 @@ icon over `public/img/logo/jahgenda.svg`, run `make icons`, commit.
 
 ### Languages
 
-The agenda speaks German, French and English (story #48); the owner pages (`log.html`, `review.html`,
-`mischpult.html`) and the stickers stay German.
+The agenda speaks German, French and English (story #48); the owners' console (`mischpult.html`; `log.html` and
+`review.html` only redirect there) and the stickers stay German.
 
 - **Which language:** `?lang=fr|en|de` (the hreflang alternates in `index.html`) → the visitor's choice in
   the DE · FR · EN switch (footer link line, saved in jahStore under `lang`) → on the first visit the browser's first

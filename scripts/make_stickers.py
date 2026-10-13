@@ -34,7 +34,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT_DEFAULT = ROOT / "design" / "stickers"
 VENV = ROOT / ".venv-stickers"
 
-# Brand colours (style.css) – the printer converts to CMYK, see README-stickers.md.
+# Brand colours (src/styles/tokens.css) – the printer converts to CMYK, see README-stickers.md.
 BG = "#14110e"
 CREAM = "#f3ead8"
 MUTED = "#a39682"

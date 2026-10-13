@@ -108,8 +108,8 @@ WEB_VENUE_FIELDS = ("city", "lat", "lon", "url")
 
 
 def web_venues(data):
-    """data/venues.web.json from data/venues.json: the fields app.js reads, nothing else (a venue whose
-    value is not a dict is dropped; fields that are absent stay absent)."""
+    """data/venues.web.json from data/venues.json: the fields the page reads (src/stores/agenda.svelte.js),
+    nothing else (a venue whose value is not a dict is dropped; fields that are absent stay absent)."""
     venues = data.get("venues", {})
     out = {}
     if isinstance(venues, dict):

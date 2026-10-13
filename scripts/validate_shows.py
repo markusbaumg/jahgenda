@@ -315,7 +315,7 @@ def check_days(where, days, d, end, act_keys):
 
 def norm_key(name):
     """Normalised form for near-duplicate detection (venues, artists, same-slot shows):
-    lowercase ASCII letters and digits only. app.js venueKey applies the same rule."""
+    lowercase ASCII letters and digits only. venueKey in src/lib/text.js applies the same rule."""
     return re.sub(r"[^a-z0-9]+", "", str(name).lower())
 
 
