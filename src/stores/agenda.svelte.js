@@ -110,7 +110,7 @@ export function createAgenda() {
   function updateHomeCity() {
     if (!here || !venuePlaces.length) return;
     const near = venuePlaces.map((p) => ({ p, km: distanceKm(here, p) })).sort((a, b) => a.km - b.km)[0];
-    homeCity = near ? near.p.city : "";
+    homeCity = near && near.km < 60 ? near.p.city : "";
   }
 
   // Venue sites and places arrive after the shows (venues.web.json is optional for the page).
