@@ -69,6 +69,7 @@ src/lib/calendar.js                    … .ics / Google Calendar / SBB links, f
 src/lib/dates.js / regions.js          … the formatters (in the page language) and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
+src/lib/state-hash.js                  … the pure half of the filter / list stores: quick picks, the #q=…&wann=… hash, #m= list links.
 src/lib/load.js                        … the one fetch helper (data/*.json paths, raw.githubusercontent.com) for the agenda and the Mischpult.
 src/lib/health.js / drops.js           … Mischpult: the watchdog verdict (mirrors check_freshness.py), the dropped-candidate dedupe
                                        (mirrors quality_review.py) and the «Gehört rein» issue link.

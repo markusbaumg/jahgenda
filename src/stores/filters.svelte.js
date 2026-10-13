@@ -8,9 +8,9 @@
 import { flushSync } from "svelte";
 import { agenda, FORMAT_LABEL } from "./agenda.svelte.js";
 import { distanceKm, parseHash as parseHashLib } from "../lib/index.js";
+import { quickRange, isStateHash, encodeFilters, decodeFilters } from "../lib/state-hash.js";
 import {
   todayStart,
-  addDays,
   sameDay,
   monthStart,
   monthFmt,
@@ -65,22 +65,11 @@ export function monthSpan(visible) {
     : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
 }
 
-// Quick picks, as [from, to].
-export function quickRange(kind) {
-  const today = todayStart();
-  const d = today.getDay(); // 0 = Sunday
-  if (kind === "today") return [today, today];
-  if (kind === "tomorrow") return [addDays(today, 1), addDays(today, 1)];
-  if (kind === "weekend")
-    return [d === 0 || d >= 5 ? today : addDays(today, 5 - d), addDays(today, (7 - d) % 7)];
-  return [today, addDays(today, Number(kind) - 1)];
-}
+// Quick picks as [from, to] and the hash helpers: pure, in src/lib/state-hash.js (tests/state-hash.test.mjs).
+export { quickRange, isStateHash };
 
 // --- Hash helpers -----------------------------------------------------------------------------------
 // Filter state in the URL: #q=…&g=…&f=…&wo=ZH,BE&r=25&wann=weekend|today|7|2026-10,2026-11&past=1&view=…
-// Only key=value parts and no list link (#m=…), even when combined with "&".
-const STATE_HASH = /^#?[a-z]+=[^&]*(&[a-z]+=[^&]*)*$/;
-export const isStateHash = (h) => STATE_HASH.test(h) && !/(^#?|&)(mine|m)=/.test(h);
 // The page's view of a hash: a show token never contains "=" (q=… is a filter, not a show).
 export const parseHash = (hash = location.hash) =>
   parseHashLib(
@@ -339,27 +328,17 @@ function createFilterUi() {
 
   // --- The hash -------------------------------------------------------------------------------------
   function filterParams() {
-    const p = new URLSearchParams();
-    const q = f.q.trim();
-    if (q) p.set("q", q);
-    if (f.genre) p.set("g", f.genre);
-    if (f.format) p.set("f", f.format);
-    if (f.cantons.size) p.set("wo", [...f.cantons].join(","));
-    if (agenda.here && f.radius) p.set("r", String(f.radius));
-    if (f.months.size)
-      p.set(
-        "wann",
-        monthList
-          .filter((d) => f.months.has(monthKey(d)))
-          .map(monthKey)
-          .join(","),
-      );
-    else if (f.range) {
-      const kind = quickActive();
-      if (kind) p.set("wann", kind);
-    }
-    if (f.showPast && !pastAuto) p.set("past", "1");
-    return p.toString().replace(/%2C/g, ",");
+    return encodeFilters({
+      q: f.q,
+      genre: f.genre,
+      format: f.format,
+      cantons: f.cantons,
+      radius: f.radius,
+      here: Boolean(agenda.here),
+      months: monthList.map(monthKey).filter((k) => f.months.has(k)),
+      quick: f.range ? quickActive() : "",
+      past: f.showPast && !pastAuto,
+    });
   }
   // The filters plus the view (#g=dub&view=map); "" for the plain list without a filter.
   const stateParams = () => [filterParams(), view !== "list" ? `view=${view}` : ""].filter(Boolean).join("&");
@@ -377,28 +356,24 @@ function createFilterUi() {
     history.replaceState(history.state, "", stateUrl());
   }
   function readFilterHash() {
-    if (!isStateHash(location.hash)) return;
-    const p = new URLSearchParams(location.hash.slice(1));
-    f.q = (p.get("q") || "").slice(0, 80);
-    const g = p.get("g") || "";
-    f.genre = agenda.genres.includes(g) ? g : "";
-    const fm = p.get("f") || "";
-    f.format = agenda.formats.includes(fm) ? fm : "";
-    const cs = new Set(f.cantons);
-    for (const c of (p.get("wo") || "").split(",")) if (CANTONS[c] || ABROAD[c]) cs.add(c);
-    f.cantons = cs;
-    const r = Number(p.get("r"));
-    if ([10, 25, 50].includes(r)) f.radius = r; // applies once the position is known
-    const wann = p.get("wann") || "";
-    if (QUICK[wann]) setRange(...quickRange(wann));
-    else if (wann) {
-      const keys = new Set(monthList.map(monthKey));
-      const ms = new Set(f.months);
-      for (const k of wann.split(",")) if (keys.has(k)) ms.add(k);
-      f.months = ms;
+    const h = decodeFilters(location.hash, {
+      genres: agenda.genres,
+      formats: agenda.formats,
+      isRegion: (c) => Boolean(CANTONS[c] || ABROAD[c]),
+      monthKeys: monthList.map(monthKey),
+    });
+    if (!h) return;
+    f.q = h.q;
+    f.genre = h.genre;
+    f.format = h.format;
+    f.cantons = new Set([...f.cantons, ...h.cantons]);
+    if (h.radius) f.radius = h.radius; // applies once the position is known
+    if (h.quick) setRange(...quickRange(h.quick));
+    else if (h.months.length) {
+      f.months = new Set([...f.months, ...h.months]);
       syncPast();
     }
-    if (p.get("past") === "1") f.showPast = true;
+    if (h.past) f.showPast = true;
   }
   // Once, when the data is first in: a reloaded, bookmarked or shared filtered view.
   function readHashOnce() {
