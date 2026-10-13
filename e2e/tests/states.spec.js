@@ -93,3 +93,25 @@ test("a link to a show that is gone says so instead of silently showing everythi
   await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
   await expect(page.locator(".link-note")).toContainText("Die Shows aus diesem Link sind vorbei");
 });
+
+test("the error's «Nochmals versuchen» is on screen without scrolling – also at 320×568 and in landscape", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "phone only");
+  await useFixture(page);
+  await page.route("**/data/shows.json", (route) => route.fulfill({ status: 500, body: "nope" }));
+  for (const [width, height] of [
+    [320, 568],
+    [568, 320],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    const retry = page.locator("#status #retry");
+    await expect(retry).toBeVisible();
+    await page.waitForTimeout(400); // the page scrolls the button into the fold
+    const box = await retry.boundingBox();
+    expect(box.y + box.height, `${width}×${height}`).toBeLessThanOrEqual(height);
+    expect(box.y, `${width}×${height}`).toBeGreaterThanOrEqual(0);
+  }
+});

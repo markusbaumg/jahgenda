@@ -1532,6 +1532,16 @@ a[href]:focus-visible,
   width: 48px;
   height: 48px;
 }
+/* Short or very narrow screens (a phone held sideways, 320 px): the card drops its icon and some padding,
+ * so the message and its button («Nochmals versuchen») need no scroll. */
+@media (max-height: 600px), (max-width: 340px) {
+  .status .state-icon {
+    display: none;
+  }
+  .status {
+    padding: 20px 16px;
+  }
+}
 /* The offers of the empty state (§3.8): «Tessin entfernen → 4 Shows», the richest first; the yield in
  * green, 0 in muted. «Alles zurücksetzen» as a quiet link under them. */
 .status .fixes {

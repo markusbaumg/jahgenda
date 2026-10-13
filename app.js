@@ -1410,6 +1410,14 @@
         `<p class="big">${offline ? "Kein Empfang" : "Daten konnten nicht geladen werden"}</p>` +
         `<p>${offline ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es." : "Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen."}</p>` +
         `<button type="button" class="primary" id="retry" title="Konzerte nochmals laden">Nochmals versuchen</button>`;
+      // The only recovery must be on screen: on a 320 px phone and in landscape the card (header + bar +
+      // results row above it) ends below the fold – the page scrolls just far enough to show the button.
+      const retryBtn = el("retry");
+      const below = retryBtn.getBoundingClientRect().bottom + 16 - innerHeight;
+      if (below > 0) {
+        quietScrollUntil = Date.now() + 1500;
+        window.scrollTo({ top: Math.min(underBar(status), window.scrollY + below) });
+      }
     }
   }
   function retry() {
