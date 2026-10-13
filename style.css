@@ -858,6 +858,19 @@ body {
 }
 
 /* Empty / loading / error state: a clear box where the list would be. */
+/* One line above the list after a share link that leads nowhere any more. */
+.link-note {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-left: 3px solid var(--gold);
+  background: rgba(242, 182, 50, 0.08);
+  border-radius: 0 8px 8px 0;
+}
+.link-note[hidden] {
+  display: none;
+}
 .status {
   margin: 20px 0 8px;
   padding: 36px 20px;
@@ -966,7 +979,8 @@ body {
   align-items: start;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
-  scroll-margin-top: calc(var(--bar-h, 64px) + 48px);
+  /* html already has scroll-padding-top (bar + sticky month heading); the two would add up. */
+  scroll-margin-top: 8px;
 }
 .show.highlight {
   animation: flash 2.5s ease-out;

@@ -72,6 +72,10 @@
   }
   let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
+  // "loading" | "ready" | "error": while loading or after an error a filter tap must not replace the
+  // skeleton or the error message with a false «Noch nichts im Kalender».
+  let loadState = "loading";
+  const SKELETON = list.innerHTML;
   const resultsText = el("results-text");
   const resultsLive = el("results-live"); // screen readers: the count after every filter change
   let showPast = false;
@@ -413,6 +417,7 @@
     listMode() ? inList(s) : (!s._past || showPast) && inRange(s) && matchesFilters(s);
 
   function render() {
+    if (loadState !== "ready") return;
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter(isVisible);
 
@@ -522,10 +527,7 @@
         updateHomeCity();
         if (!shows.length) return;
         render();
-        // A deep-linked row was rebuilt just now: keep its highlight.
-        const target = findShow(decodeHashPart(location.hash.slice(1)));
-        const row = target && document.getElementById(target.id);
-        if (row) row.classList.add("highlight");
+        keepRevealed();
       })
       .catch(() => {
         /* venues.json is optional for the page */
@@ -575,6 +577,7 @@
         .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
 
       pastCount = shows.filter((s) => s._past).length;
+      loadState = "ready";
       setupWhen();
       // Canton chips (multi-select, with counts) inside the Wo panel: Swiss cantons A–Z, the
       // neighbouring countries at the end.
@@ -626,11 +629,27 @@
       autoLocate();
     } catch (err) {
       console.error(err);
+      loadState = "error";
       // The skeleton rows go, so the message is the first thing under the bar (not below the fold).
       list.innerHTML = "";
       views.hidden = true;
-      status.innerHTML = `<p class="state-icon">${STATE_ICONS.offline}</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
+      // «Kein Empfang» only when the browser is really offline; a server or data error while online
+      // gets a title that matches, and both get a retry that needs no reload.
+      const offline = navigator.onLine === false;
+      status.innerHTML =
+        `<p class="state-icon">${STATE_ICONS.offline}</p>` +
+        `<p class="big">${offline ? "Kein Empfang" : "Daten konnten nicht geladen werden"}</p>` +
+        `<p>${offline ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es." : "Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen."}</p>` +
+        `<button type="button" class="primary" id="retry" title="Konzerte nochmals laden">Nochmals versuchen</button>`;
     }
+  }
+  function retry() {
+    loadState = "loading";
+    status.innerHTML = "";
+    list.innerHTML = SKELETON;
+    views.hidden = false;
+    list.hidden = false;
+    init();
   }
 
   // Canton badge in a row: toggles that canton in the Wo filter.
@@ -782,14 +801,46 @@
       resetFilters();
       search.focus();
     }
+    if (e.target.id === "retry") retry();
   });
   el("clear-filters").addEventListener("click", resetFilters);
 
   // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
+  // A re-render in the seconds after the jump (venues.json arrived, the position came in) rebuilds the
+  // rows: keepRevealed() puts the highlight back and, while the rows above may still be shifting, scrolls
+  // to the row again – otherwise the row ends up under the sticky bar.
+  let revealUntil = 0;
+  const hashTarget = () => findShow(decodeHashPart(location.hash.slice(1)));
+  function keepRevealed() {
+    const target = hashTarget();
+    const row = target && document.getElementById(target.id);
+    if (!row) return;
+    row.classList.add("highlight");
+    if (Date.now() < revealUntil) row.scrollIntoView({ block: "start" });
+  }
+  const linkNote = document.createElement("p");
+  linkNote.className = "link-note";
+  linkNote.setAttribute("role", "status");
+  linkNote.hidden = true;
+  el("results").after(linkNote);
+  function noteLink(text) {
+    linkNote.textContent = text;
+    linkNote.hidden = !text;
+  }
   function revealFromHash() {
     if (/^#(mine|m)=/.test(location.hash)) return showShared();
-    const target = findShow(decodeHashPart(location.hash.slice(1)));
-    if (!target) return;
+    const raw = location.hash.slice(1);
+    if (!raw || raw === "top" || raw.includes("=")) return; // nothing, the «Nach oben» link, filter state
+    const target = findShow(decodeHashPart(raw));
+    if (!target) {
+      // A stale or mistyped share link: say so instead of silently showing everything.
+      if (loadState === "ready") {
+        noteLink("Diese Show ist nicht mehr in der Agenda – hier ist alles, was kommt.");
+        history.replaceState(history.state, "", location.pathname + location.search);
+      }
+      return;
+    }
+    noteLink("");
     const id = target.id;
     if (target._past && !showPast) showPast = true;
     if (target._past) pastAuto = false; // the link asked for it, so a later range reset keeps it
@@ -804,6 +855,7 @@
     void row.offsetWidth; // restart the animation
     row.classList.add("highlight");
     quietScrollUntil = Date.now() + 2000;
+    revealUntil = Date.now() + 3000;
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     row.scrollIntoView({ block: "start", behavior: motion });
   }
@@ -976,6 +1028,7 @@
           geoStatus.textContent = "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
         }
         render();
+        keepRevealed();
       },
       (err) => {
         locating = false;
@@ -989,6 +1042,7 @@
             ? "Standort im Browser blockiert. In den Website-Einstellungen freigeben, dann nochmals «Mein Standort» tippen."
             : "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
         render();
+        keepRevealed();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
@@ -1079,11 +1133,16 @@
       take.hidden = !shared;
       take.disabled = Boolean(shared) && Object.keys(shared).every((id) => marks[id]);
       take.querySelector("span").textContent = take.disabled ? "Alle gemerkt ✓" : "Alle merken";
-      minePanel.querySelector(".mine-note").textContent = !shared
-        ? "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken»."
-        : take.disabled
-          ? "Diese Shows sind in deinen Shows (★) gespeichert."
-          : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.";
+      const gone = sharedMissing
+        ? ` ${sharedMissing === 1 ? "1 Show aus dem Link ist" : `${sharedMissing} Shows aus dem Link sind`} vorbei oder nicht mehr in der Agenda.`
+        : "";
+      minePanel.querySelector(".mine-note").textContent =
+        (!shared
+          ? "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken»."
+          : take.disabled
+            ? "Diese Shows sind in deinen Shows (★) gespeichert."
+            : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.") +
+        gone;
     }
     syncListMode();
   }
@@ -1147,6 +1206,7 @@
   function showShared() {
     shared = {};
     sharedBy = "";
+    sharedMissing = 0;
     // New form #m=<short><g|i>,…[,von:<Name>] ; old form #mine=<id>:<g|i>,… still accepted.
     const raw = location.hash.replace(/^#(mine|m)=/, "");
     for (const part of raw.split(",")) {
@@ -1159,12 +1219,22 @@
       else [token, st] = [decodeHashPart(part.slice(0, -1)), part.slice(-1)];
       const show = token && findShow(token);
       if (show) shared[show.id] = st === "g" ? "going" : "interested";
+      else if (token) sharedMissing++;
     }
     const ids = Object.keys(shared);
     if (!ids.length) {
       shared = null;
+      if (sharedMissing) {
+        // Shows pass and are removed daily: an old list link ends up here. Say so, show everything.
+        noteLink(
+          "Die Shows aus diesem Link sind vorbei oder nicht mehr in der Agenda – hier ist alles, was kommt.",
+        );
+        history.replaceState(history.state, "", location.pathname + location.search);
+      }
+      render(); // a list that was on screen before (hashchange) goes
       return;
     }
+    noteLink("");
     // The visitor's own link (every marked show, nothing else): that is simply "Meine Shows".
     if (ids.length === markedShows().length && ids.every((id) => marks[id])) {
       shared = null;
@@ -1186,6 +1256,7 @@
   const listHead = el("list-head");
   const BASE_TITLE = document.title;
   let sharedBy = ""; // optional "von:<Name>" token in a #m= link
+  let sharedMissing = 0; // ids in a #m= link that no show matches any more (passed, removed)
   listHead.innerHTML =
     `<button type="button" class="list-close" id="list-close" title="Zurück zur Agenda (Esc)" aria-label="Zurück zur Agenda"><b aria-hidden="true">✕</b><span>Zurück<i> zur Agenda</i></span></button>` +
     `<h2 class="list-title" id="list-title" tabindex="-1"></h2>`;
@@ -1227,6 +1298,7 @@
     mineOnly = false;
     shared = null;
     sharedBy = "";
+    sharedMissing = 0;
     renderAndKeepInView(); // → syncListMode strips a #m= hash
     (toggleMine.hidden ? search : toggleMine).focus({ preventScroll: true });
   }
@@ -1794,11 +1866,18 @@
   const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
   function renderAndKeepInView() {
     render();
-    if (views.hidden) return;
-    const listTop = viewsTop();
-    if (window.scrollY > listTop) {
+    // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
+    // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.
+    const target = views.hidden ? status : views;
+    if (views.hidden && !status.textContent.trim()) return;
+    const top = () => target.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
+    if (window.scrollY > top()) {
       quietScrollUntil = Date.now() + 1000;
-      window.scrollTo({ top: listTop });
+      window.scrollTo({ top: top() });
+      // The bar grows by a row once it sticks: check the target again a moment later.
+      setTimeout(() => {
+        if (window.scrollY > top()) window.scrollTo({ top: top() });
+      }, 80);
     }
   }
   // Scroll down (never up) until the views start right under the bar. The bar grows by a row once
