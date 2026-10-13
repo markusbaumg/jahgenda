@@ -1,10 +1,10 @@
 // Meine Shows: star → toolbar counter → own list → share link (#m=…) → .ics export.
-const { test, expect } = require("@playwright/test");
+const { test, expect, devices } = require("@playwright/test");
 const { useFixture, openList } = require("./helpers");
 
 test.use({ permissions: ["clipboard-read", "clipboard-write"] });
 
-test("marks a show, filters to it, shares it and exports .ics", async ({ page, isMobile }) => {
+test("marks a show, filters to it, shares it and exports .ics", async ({ page, browser, isMobile }) => {
   await useFixture(page);
   await openList(page);
   const row = page.locator("#list .show").first();
@@ -34,21 +34,27 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, i
   expect(decodeURIComponent(wa)).toMatch(/#m=[a-z0-9]+g$/);
   const share = panel.locator('[data-mine="share"]');
   await share.click();
-  await expect(share.locator("span")).toHaveText(/Link kopiert|Kopieren nicht möglich/);
+  await expect(share.locator("span")).toHaveText(/^Kopiert|Kopieren nicht möglich/);
   const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(() => "");
   if (copied) expect(copied).toMatch(/#m=[a-z0-9]+g$/);
 
-  // The shared link opens a read-only view of exactly those shows.
+  // The shared link opens a read-only view of exactly those shows – for a friend, i.e. in another
+  // browser (in the own browser the same link is just «Meine Shows» again).
   const link = decodeURIComponent(wa).replace(/^.*(?=#m=)/, "");
-  await page.goto(`/${link}`);
-  await expect(page.locator("#list .show")).toHaveCount(1);
-  await expect(page.locator("#list .show .tag-chip.going")).toHaveText("geht hin");
-  await expect(page.locator("#results-text")).toHaveText(/^Geteilte Liste · 1 Show/);
-  await page.click("#clear-filters");
-  await expect(page.locator("#list .show")).toHaveCount(6);
+  const friend = await browser.newContext({ ...devices[isMobile ? "iPhone 13" : "Desktop Chrome"] });
+  const fp = await friend.newPage();
+  await useFixture(fp);
+  await fp.goto(`/${link}`);
+  await expect(fp.locator("#list .show")).toHaveCount(1);
+  await expect(fp.locator("#list .show .tag-chip.going")).toHaveText("geht hin");
+  await expect(fp.locator("#results-text")).toHaveText(/^Geteilte Liste · 1 Show/);
+  await expect(fp.locator("body")).toHaveClass(/list-shared/);
+  await fp.click("#list-close"); // «Zurück zur Agenda» in the list-mode header
+  await expect(fp.locator("#list .show")).toHaveCount(6);
+  await friend.close();
 
-  // .ics export of the own list.
-  await page.locator("#toggle-mine").click();
+  // .ics export of the own list (the first page is still in «Meine Shows»).
+  await expect(page.locator("#mine-panel")).toBeVisible();
   const download = page.waitForEvent("download");
   await page.locator('#mine-panel [data-mine="ics"]').click();
   expect((await download).suggestedFilename()).toBe("meine-shows.ics");
