@@ -830,22 +830,26 @@
 
   if (!("geolocation" in navigator)) locateBtn.hidden = true;
 
-  // Ask the browser for the position. Used by the Wo button, by the placeholder in every row and –
-  // once per visit, when the browser already allows it or has never been asked – right on start.
+  // Ask the browser for the position. Used by the Wo button and by the placeholder in every row; on
+  // start only silently, when the browser already allows it (never a permission prompt the visitor did
+  // not ask for – a reflexive «Block» would kill the feature for good).
   // The position is only used in this browser tab; it is never stored or sent anywhere.
   let locating = false;
-  function locate() {
+  function locate(opts = {}) {
+    const silent = Boolean(opts.silent);
     if (locating || !("geolocation" in navigator)) return;
     locating = true;
-    geoStatus.textContent = "Suche dich …";
+    if (!silent) geoStatus.textContent = "Suche dich …";
     locateBtn.disabled = true;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         locating = false;
         here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        geoDeclined = false;
         updateHomeCity();
         locateBtn.disabled = false;
         locateBtn.classList.add("active");
+        locateBtn.setAttribute("aria-pressed", "true");
         // Closest upcoming show (never a past one), as a link into the list.
         const near = shows
           .filter((s) => !s._past && typeof s.lat === "number")
@@ -857,7 +861,7 @@
           const n = near[0];
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
-            `<span class="geo-pin">📍</span> Nächste Show: ` +
+            `<span class="geo-pin">📍</span> Am nächsten bei dir: ` +
             `<a href="#${n.s._short}" title="Zur Show in der Liste springen"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
             `<span class="dist" title="Luftlinie von deinem Standort">${formatKm(n.km)}${sbbLink(n.s)}</span>`;
         } else {
@@ -865,32 +869,38 @@
         }
         render();
       },
-      () => {
+      (err) => {
         locating = false;
         locateBtn.disabled = false;
-        geoStatus.textContent = "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
-        geoDeclined = true;
+        // 1 = the browser (or the visitor) blocks the position: the row placeholders go, the panel says how
+        // to get it back. Anything else (timeout, no fix) is transient: the row placeholders stay.
+        const blocked = err && err.code === 1;
+        if (blocked) geoDeclined = true;
+        if (!silent)
+          geoStatus.textContent = blocked
+            ? "Standort im Browser blockiert. In den Website-Einstellungen freigeben, dann nochmals «Mein Standort» tippen."
+            : "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
         render();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
   }
-  locateBtn.addEventListener("click", locate);
+  locateBtn.addEventListener("click", () => locate());
   list.addEventListener("click", (e) => {
     if (e.target.closest(".geo-ask")) locate();
   });
-  // On start: silently when permission was granted before; with the browser's own question when it
-  // has never been asked; never when it was denied (the browser would not ask again anyway).
+  // On start: silently when permission was granted before – nothing else. A browser that has never been
+  // asked waits for a tap on «Mein Standort» or «Distanz & Zug anzeigen»; one that said no is left alone.
   function autoLocate() {
     if (!("geolocation" in navigator) || !shows.length) return;
-    if (!navigator.permissions || !navigator.permissions.query) return locate();
+    if (!navigator.permissions || !navigator.permissions.query) return;
     navigator.permissions
       .query({ name: "geolocation" })
       .then((p) => {
-        if (p.state !== "denied") locate();
-        else geoDeclined = true;
+        if (p.state === "granted") locate({ silent: true });
+        else if (p.state === "denied") geoDeclined = true;
       })
-      .catch(() => locate());
+      .catch(() => {});
   }
 
   // --- Meine Shows: mark shows as "Interessiert" / "Ich gehe", filter to them, share the list. ---

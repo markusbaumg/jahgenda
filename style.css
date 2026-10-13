@@ -212,6 +212,9 @@ body {
   opacity: 0.5;
   cursor: progress;
 }
+.icon-btn[hidden] {
+  display: none;
+}
 .icon-btn.active {
   color: var(--bg);
   background: var(--gold);
@@ -2057,6 +2060,11 @@ a {
   display: inline-flex;
   gap: 6px;
   margin-left: 4px;
+}
+/* Without a known position there is no radius to pick (the display rule above would otherwise win
+   over the UA's [hidden]). */
+.where-radius[hidden] {
+  display: none;
 }
 .where-panel .geo-status {
   margin: 10px 0 4px;
