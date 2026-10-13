@@ -406,6 +406,32 @@ the manifest (`vite.config.js`) / the PWA icons (`make icons` re-renders those).
 `design/logos.html` (https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen
 icon over `public/img/logo/jahgenda.svg`, run `make icons`, commit.
 
+### Languages
+
+The agenda speaks German, French and English (story #48); the owner pages (`log.html`, `review.html`,
+`mischpult.html`) and the stickers stay German.
+
+- **Which language:** `?lang=fr|en|de` (the hreflang alternates in `index.html`) → the visitor's choice in
+  the DE · FR · EN switch (header, saved in jahStore under `lang`) → on the first visit the browser's first
+  language (`fr*` → French, `en*` → English) → German. The URL hash (filters, show links, `#m=` lists) never
+  carries the language, so every link works in every language.
+- **Where the words are:** `src/i18n/de.js` is the source (Swiss spelling, «Show»), `fr.js` and `en.js`
+  translate it key by key; a key missing there falls back to German. Components call `t("key", params)`
+  from `src/i18n/i18n.svelte.js`, plain modules (`src/lib`, stores) the same `t` from `src/i18n/core.js`.
+  Dates go through the formatters in `src/lib/dates.js` (Intl, de-CH / fr-CH / en-GB).
+- **Edit a string:** change the value in all three tables. Placeholders are `{name}`; a plural is
+  `{ one: "{n} Show", other: "{n} Shows" }` (picked by `params.n`); grammar that a template cannot carry
+  (French prepositions: «au Tessin», «à Genève») is a function `(params) => string`.
+- **Add a string:** add the key to `de.js`, `fr.js` and `en.js`, then use `t("area.name")` in the
+  component (literal key, so the e2e scan in `e2e/tests/i18n.spec.js` knows it). Canton names are
+  `region.<code>` in fr / en (German: `src/lib/regions.js`).
+- **Taglines:** `data/slogans.json` has `slogans` (German, also the stickers) and `fr` / `en`; the same
+  lists sit inline in `index.html` (`#slogans`, `#slogans-fr`, `#slogans-en`) – `tests/test_contract.py`
+  keeps them equal, the validator checks all three.
+- **Head and app:** `<html lang>`, description, og/canonical follow the language at runtime; the build
+  writes `manifest.webmanifest` (German) plus `manifest.fr.webmanifest` / `manifest.en.webmanifest`
+  (`vite.config.js`, name and description from the tables).
+
 ### Contributing (for Seraina and everyone else)
 
 You can shape the agenda without touching code – four text files:
