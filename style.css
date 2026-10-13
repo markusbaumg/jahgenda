@@ -657,6 +657,11 @@ body::after {
 .geo-status:empty {
   display: none;
 }
+.geo-pin {
+  vertical-align: -2px;
+  margin-right: 2px;
+  color: var(--red-text);
+}
 
 .tags {
   display: inline-flex;
@@ -753,24 +758,82 @@ body::after {
   color: var(--muted);
   font-size: var(--fs-2);
 }
+/* Active filters (§3.4): removable gold pills on their own line under pill + view switch, one per
+ * dimension («dub ✕ · Bern ✕ · Wochenende ✕»); «Alles zurücksetzen» only from two on. Without a filter
+ * the line is folded away like .sr (not display:none): it stays the focus fallback after a re-render. */
 .results {
-  order: 3; /* filter buttons on their own line under pill + view switch */
+  order: 3;
   flex: 1 1 100%;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  align-items: baseline;
+  gap: 6px 8px;
+  align-items: center;
   margin: 0;
 }
-.results:not(:has(:not([hidden]))) {
-  display: none; /* no visible button: no empty line */
+.results.empty {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.results:focus-visible {
+  box-shadow: none;
+  outline: 0;
+}
+.fpill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 8px 0 10px;
+  font: inherit;
+  font-size: var(--fs-2);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--on-gold);
+  background: var(--gold);
+  border: 0;
+  border-radius: var(--r-1);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--t-1) var(--ease-skank);
+}
+.fpill::after {
+  /* 44 px hit area on touch without changing the drawn box */
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}
+.fpill .x {
+  font-size: 11px;
+  opacity: 0.75;
+}
+.fpill:active {
+  transform: scale(0.96);
+}
+@media (hover: hover) {
+  .fpill:hover {
+    filter: brightness(1.08);
+  }
+  .fpill:hover .x {
+    opacity: 1;
+  }
+}
+@media (forced-colors: active) {
+  .fpill {
+    border: 2px solid;
+  }
 }
 .results .clear {
-  color: var(--gold-text);
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 .results .linkish {
   color: var(--muted);
-  text-decoration: none;
 }
 @media (hover: hover) {
   .results .linkish:hover {
@@ -884,10 +947,6 @@ body::after {
   text-decoration: underline;
 }
 @media (hover: hover) {
-  .results .linkish:hover {
-    color: var(--gold);
-    border-color: var(--gold);
-  }
   .linkish:hover {
     color: var(--gold);
   }
@@ -1208,19 +1267,55 @@ body::after {
   margin: 0;
 }
 .status .big {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
   margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  color: var(--text);
+  text-wrap: balance;
 }
 .status .state-icon {
   margin-bottom: 12px;
-  color: var(--muted);
-  opacity: 0.7;
+  color: var(--faint);
 }
 .status .state-icon svg {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
+}
+/* The offers of the empty state (§3.8): «Tessin entfernen → 4 Shows», the richest first; the yield in
+ * green, 0 in muted. «Alles zurücksetzen» as a quiet link under them. */
+.status .fixes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.status .chip.fix {
+  height: 36px;
+  padding: 0 12px;
+  color: var(--text);
+  white-space: normal;
+  text-align: left;
+}
+.status .fix b {
+  font-weight: 600;
+  color: var(--green-text);
+  white-space: nowrap;
+}
+.status .fix.none b {
+  color: var(--muted);
+}
+.status .linkish.reset {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
 }
 .status button.primary {
   margin-top: 16px;
@@ -2756,8 +2851,7 @@ a {
 .about a,
 .foot-links a,
 .notice a,
-.geo-status a,
-.results .linkish {
+.geo-status a {
   text-decoration: none;
   border-bottom: 0;
 }
@@ -2786,6 +2880,8 @@ a {
 /* Count inside a genre chip, very light */
 .chip small {
   margin-left: 5px;
+  min-width: 2ch; /* counts change with the other filters; the chip never moves */
+  text-align: left;
   font-size: 0.7em;
   font-weight: 600;
   opacity: 0.55;
@@ -2914,6 +3010,22 @@ a {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 10px;
+}
+/* The chips are grouped like the spec's <optgroup>s: a small tracked label starts each group. */
+.canton-group {
+  display: contents;
+}
+.group-label {
+  flex: 1 1 100%;
+  margin-top: 6px;
+  font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.canton-group:first-of-type .group-label {
+  margin-top: 2px;
 }
 .canton-chips .chip.abroad {
   border-style: dashed;

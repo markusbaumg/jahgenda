@@ -302,17 +302,8 @@
             </p>
           </div>
         </details>
-        <p id="results" class="results">
-          <button
-            type="button"
-            id="clear-filters"
-            class="linkish clear"
-            title="Alle Filter zurücksetzen"
-            hidden
-          >
-            ✕ Filter zurücksetzen
-          </button>
-        </p>
+        <!-- Active filters as removable pills (app.js); also the focus fallback after a re-render (§5). -->
+        <p id="results" class="results empty" role="group" aria-label="Aktive Filter" tabindex="-1"></p>
         <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
           <button type="button" data-view="list" aria-pressed="true" title="Als Liste anzeigen">
             <svg

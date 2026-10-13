@@ -150,8 +150,34 @@
     return `https://www.sbb.ch/de?${p}`;
   }
 
+  // ---- Links --------------------------------------------------------------------------------
+  // One parser for every hash the page writes or accepts: #<short hash or id> (a show), #m=<list> /
+  // #mine=<list> (a shared list) and #view=<name> (the view switch); parts may be combined with "&" in
+  // any order, e.g. #view=map&m=…. Returns { id, mine, view } with "" for what is absent; a bad escape in
+  // the id never throws. `views` lists the view names that count.
+  function parseHash(hash, views = ["list", "calendar", "map"]) {
+    const out = { id: "", mine: "", view: "" };
+    for (const part of String(hash || "")
+      .replace(/^#/, "")
+      .split("&")) {
+      if (/^(mine|m)=/.test(part)) out.mine = part.replace(/^(mine|m)=/, "");
+      else if (part.startsWith("view=")) {
+        const v = part.slice(5);
+        if (views.includes(v)) out.view = v;
+      } else if (part && !out.id) {
+        try {
+          out.id = decodeURIComponent(part);
+        } catch {
+          out.id = part;
+        }
+      }
+    }
+    return out;
+  }
+
   return {
     shortId,
+    parseHash,
     venueKey,
     safeUrl,
     escape,

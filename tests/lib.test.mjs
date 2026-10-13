@@ -129,3 +129,30 @@ test("sbbUrl: arrival one hour before the show, 20:00 default, encoded towns, em
   assert.equal(lib.sbbUrl(show(), ""), "");
   assert.equal(lib.sbbUrl(show(), "Bern"), "");
 });
+
+test("parseHash: a show, a shared list, a view, combinations, bad escapes", () => {
+  assert.deepEqual(lib.parseHash("#1tsjh1k"), { id: "1tsjh1k", mine: "", view: "" });
+  assert.deepEqual(lib.parseHash("#2026-10-16-dub-collective-bern"), {
+    id: "2026-10-16-dub-collective-bern",
+    mine: "",
+    view: "",
+  });
+  assert.deepEqual(lib.parseHash("#m=1tsjh1ki,8457szg,von:Kusi"), {
+    id: "",
+    mine: "1tsjh1ki,8457szg,von:Kusi",
+    view: "",
+  });
+  assert.deepEqual(
+    lib.parseHash("#mine=2026-10-16-dub-collective-bern:g").mine,
+    "2026-10-16-dub-collective-bern:g",
+  );
+  assert.deepEqual(lib.parseHash("#view=calendar"), { id: "", mine: "", view: "calendar" });
+  assert.deepEqual(lib.parseHash("#view=map&1tsjh1k"), { id: "1tsjh1k", mine: "", view: "map" });
+  assert.deepEqual(lib.parseHash("#1tsjh1k&view=map"), { id: "1tsjh1k", mine: "", view: "map" });
+  assert.equal(lib.parseHash("#view=nope").view, "", "unknown views are ignored");
+  assert.equal(lib.parseHash("#view=foo", ["foo"]).view, "foo");
+  assert.equal(lib.parseHash("#a%20b").id, "a b");
+  assert.equal(lib.parseHash("#%E0%A4%A").id, "%E0%A4%A", "a bad escape stays as typed, never throws");
+  assert.deepEqual(lib.parseHash(""), { id: "", mine: "", view: "" });
+  assert.deepEqual(lib.parseHash(undefined), { id: "", mine: "", view: "" });
+});

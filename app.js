@@ -49,6 +49,37 @@
     A: "Österreich (grenznah)",
     FL: "Liechtenstein",
   };
+  // The Wo panel groups the canton chips like the spec's <optgroup>s (§3.2); bilingual Freiburg and
+  // Wallis count as Romandie, Bern as Deutschschweiz.
+  const REGIONS = [
+    [
+      "Deutschschweiz",
+      [
+        "AG",
+        "AI",
+        "AR",
+        "BE",
+        "BL",
+        "BS",
+        "GL",
+        "GR",
+        "LU",
+        "NW",
+        "OW",
+        "SG",
+        "SH",
+        "SO",
+        "SZ",
+        "TG",
+        "UR",
+        "ZG",
+        "ZH",
+      ],
+    ],
+    ["Romandie", ["FR", "GE", "JU", "NE", "VD", "VS"]],
+    ["Ticino", ["TI"]],
+    ["Grenznah", ["D", "F", "I", "A", "FL"]],
+  ];
   const list = el("list");
   const views = el("views");
   const calendarEl = el("calendar");
@@ -56,10 +87,38 @@
   const viewSwitch = el("view-switch");
   const VIEWS = ["list", "calendar", "map"];
   const store = window.jahStore;
+  // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
+  const decodeHashPart = (t) => {
+    try {
+      return decodeURIComponent(t);
+    } catch {
+      return t;
+    }
+  };
+  // One parser for every hash the page writes or accepts (§7 S6): #<short hash or id> (a show),
+  // #m=<list> / #mine=<list> (a shared list, S5) and #view=calendar|map (the segmented control). Parts may
+  // be combined with "&" in any order, e.g. #view=map&m=…; what is absent is "". revealFromHash(),
+  // showShared() and the view bootstrap all consume this and nothing else reads location.hash.
+  function parseHash(hash = location.hash) {
+    const out = { id: "", mine: "", view: "" };
+    for (const part of hash.replace(/^#/, "").split("&")) {
+      if (/^(mine|m)=/.test(part)) out.mine = part.replace(/^(mine|m)=/, "");
+      else if (part.startsWith("view=")) {
+        const v = part.slice(5);
+        if (VIEWS.includes(v)) out.view = v;
+      } else if (part && !out.id) out.id = decodeHashPart(part);
+    }
+    return out;
+  }
+  // Write a hash without a navigation (empty = none); path and query stay as they are.
+  const setHash = (h) =>
+    history.replaceState(null, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
   let view = "list";
   {
+    // #view= in the link wins over the view this browser remembers.
     const stored = store.get(store.KEYS.VIEW, "list");
     if (VIEWS.includes(stored)) view = stored;
+    view = parseHash().view || view;
   }
   // The map is the remembered view: fetch Leaflet now, in parallel with the data, not after it.
   if (view === "map") {
@@ -314,7 +373,33 @@
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 2h3v3H8v-3z"/></svg>',
     offline:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 7h20v14H2V7zm2 2v10h16V9H4zm3 2h2v6H7v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM12 3l5 3h-10l5-3z"/></svg>',
+    // Sun over mountains in the brand line weight (logo 06 «Alpen & Sonne», design/logos.html), for the
+    // «nothing for this selection» state.
+    empty:
+      '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="42" cy="21" r="8"/><path d="M42 5v4M42 33v4M26 21h4M54 21h4M30.7 9.7l2.8 2.8M50.5 29.5l2.8 2.8M53.3 9.7l-2.8 2.8M30.7 32.3l2.8-2.8"/><path d="M4 56 22 28l10 16 8-10 20 22"/><path d="M19.5 32l2.5-2.5 2.5 2.5M37.5 37l2.5-2.5 2.5 2.5"/><path d="M4 56h56"/></svg>',
   };
+  // Headline of the empty state: «Kein Dub im Tessin», «Nichts in Bern am Wochenende», «Nichts zu «xy»» …
+  const IM = new Set(["AG", "TG", "TI", "VS", "JU"]); // cantons that take «im», the rest take «in»
+  const QUICK_WHEN = {
+    today: "heute",
+    tomorrow: "morgen",
+    weekend: "am Wochenende",
+    7: "in den nächsten 7 Tagen",
+  };
+  function emptyHeadline(quick) {
+    const q = search.value.trim();
+    const genre = activeGenre && (genreLabel[activeGenre] || activeGenre);
+    const canton = cantons.size === 1 ? [...cantons][0] : "";
+    const what = q ? ` zu «${q}»` : "";
+    if (!genre && !canton && !quick && q) return `Nichts${what}`;
+    if (!genre && !canton && quick) return `${QUICK_EMPTY[quick]} läuft nichts${what}`;
+    const where = canton ? ` ${IM.has(canton) ? "im" : "in"} ${shortRegion(canton)}` : "";
+    const when = quick ? ` ${QUICK_WHEN[quick]}` : "";
+    if (genre) return `Kein ${genre}${where}${when}${what}`;
+    return where || when ? `Nichts${where}${when}${what}` : "Nichts gefunden";
+  }
+  // Region name for pills and headlines: «Bern», «Deutschland» (no «(grenznah)» – the row says that).
+  const shortRegion = (c) => (ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c));
 
   // Escaped text with the search hit wrapped in <mark> (first occurrence, case-insensitive).
   function markHit(text, q) {
@@ -443,32 +528,165 @@
         : "",
     ].join("");
   }
-  // Every filter except the date range (the histogram in the "Wann" panel uses exactly these).
-  function matchesFilters(s) {
-    const q = search.value.trim().toLowerCase();
+  // Every filter except the date range (the histogram in the "Wann" panel uses exactly these). `o` replaces
+  // single filters for what-if counts (countWith): { q, cantons, radius, genre }.
+  function matchesFilters(s, o = {}) {
+    const q = "q" in o ? o.q : search.value.trim().toLowerCase();
+    const cs = "cantons" in o ? o.cantons : cantons;
+    const radius = "radius" in o ? o.radius : radiusKm;
+    const genre = "genre" in o ? o.genre : activeGenre;
     if (shared && !shared[s.id]) return false;
     if (mineOnly && !marks[s.id]) return false;
-    if (cantons.size && !cantons.has(s.canton)) return false;
-    if (radiusKm && here && typeof s.lat === "number" && distanceKm(here, s) > radiusKm) return false;
-    if (activeGenre && !s.genres.includes(activeGenre)) return false;
+    if (cs.size && !cs.has(s.canton)) return false;
+    if (radius && here && typeof s.lat === "number" && distanceKm(here, s) > radius) return false;
+    if (genre && !s.genres.includes(genre)) return false;
     if (!q) return true;
     return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
       .join(" ")
       .toLowerCase()
       .includes(q);
   }
-  const isVisible = (s) =>
-    listMode() ? inList(s) : (!s._past || showPast) && inRange(s) && matchesFilters(s);
+  const isVisible = (s, o = {}) =>
+    listMode() ? inList(s) : (!s._past || showPast) && inRange(s, o) && matchesFilters(s, o);
 
+  // --- Counts helper (§7 S6): how many shows a choice would show, with every other filter as it is. The
+  // chips («dub 4», «Bern 2»), the empty state («Tessin entfernen → 4 Shows») and the month histogram
+  // all count this way, so a number on a control is always the number of rows a tap on it yields.
+  const countWith = (o) => shows.filter((s) => isVisible(s, o)).length;
+  const nShows = (n) => `${n} ${n === 1 ? "Show" : "Shows"}`;
+  // Each active filter as a removable dimension: what it is, how to name it, and what removing it yields.
+  // In a stable order (search, genre, cantons, radius, time) – the pills; the empty state sorts by yield.
+  function activeDims() {
+    const dims = [];
+    const q = search.value.trim();
+    if (q) dims.push({ kind: "q", label: `«${q}»`, count: countWith({ q: "" }) });
+    if (activeGenre)
+      dims.push({
+        kind: "genre",
+        label: genreLabel[activeGenre] || activeGenre,
+        count: countWith({ genre: "" }),
+      });
+    for (const c of cantons) {
+      const rest = new Set(cantons);
+      rest.delete(c);
+      dims.push({ kind: "canton", value: c, label: shortRegion(c), count: countWith({ cantons: rest }) });
+    }
+    if (here && radiusKm)
+      dims.push({ kind: "radius", label: `≤ ${radiusKm} km`, count: countWith({ radius: 0 }) });
+    if (months.size)
+      for (const d of monthList.filter((d) => months.has(monthKey(d)))) {
+        const rest = new Set(months);
+        rest.delete(monthKey(d));
+        dims.push({
+          kind: "month",
+          value: monthKey(d),
+          label: monthLabel(d),
+          count: countWith({ months: rest, range: null }),
+        });
+      }
+    else if (rangeFrom && rangeTo)
+      dims.push({ kind: "range", label: rangeLabel(), count: countWith({ months: new Set(), range: null }) });
+    return dims;
+  }
+  // Remove one filter dimension (a pill, or an offer in the empty state); "all" resets every filter.
+  function removeFilter(kind, value) {
+    if (kind === "all") return resetFilters();
+    if (kind === "q") search.value = "";
+    if (kind === "genre") setGenre("");
+    if (kind === "canton") toggleCanton(value);
+    if (kind === "radius") {
+      radiusKm = 0;
+      updateWhere();
+    }
+    if (kind === "month") {
+      months.delete(value);
+      syncPast();
+    }
+    if (kind === "range") clearRange();
+    renderAndKeepInView();
+  }
+  // Active filters (§3.4) as gold pills under the results row, one per dimension, «Alles zurücksetzen»
+  // only from two on. Nothing in the list mode: there the filters are bypassed, not active.
+  const resultsEl = el("results");
+  function renderPills() {
+    const dims = listMode() ? [] : activeDims();
+    resultsEl.classList.toggle("empty", !dims.length);
+    resultsEl.innerHTML =
+      dims
+        .map(
+          (d) =>
+            `<button type="button" class="fpill" data-remove="${d.kind}"${d.value ? ` data-value="${escape(d.value)}"` : ""} title="Filter «${escape(d.label)}» entfernen" aria-label="Filter ${escape(d.label)} entfernen">${escape(d.label)}<span class="x" aria-hidden="true">✕</span></button>`,
+        )
+        .join("") +
+      (dims.length >= 2
+        ? `<button type="button" class="linkish clear" data-remove="all" title="Alle Filter zurücksetzen">Alles zurücksetzen</button>`
+        : "");
+  }
+  resultsEl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-remove]");
+    if (b) removeFilter(b.dataset.remove, b.dataset.value);
+  });
+  // Chip counts follow the other filters: «dub 4» is what a tap on dub yields right now. The numbers
+  // change, the chips do not move (reserved width in CSS).
+  function updateCounts() {
+    if (listMode()) return;
+    for (const c of genreBar.querySelectorAll(".chip[data-genre]")) {
+      const n = countWith({ genre: c.dataset.genre });
+      const sm = c.querySelector("small");
+      if (sm) sm.textContent = n;
+      c.title = c.dataset.genre
+        ? `Nur ${genreLabel[c.dataset.genre] || c.dataset.genre} anzeigen (${n})`
+        : `Alle Genres anzeigen (${n})`;
+    }
+    for (const c of cantonChips.querySelectorAll(".chip[data-canton]")) {
+      const code = c.dataset.canton;
+      const n = countWith({ cantons: new Set(code ? [code] : []) });
+      const sm = c.querySelector("small");
+      if (sm) sm.textContent = n;
+      c.title = code
+        ? `${regionName(code)}: ${nShows(n)} – anklicken zum Ein-/Ausschalten`
+        : `Alle Kantone anzeigen (${n})`;
+    }
+  }
+
+  // Focus (§5): what had the focus inside a region that render() rebuilds is found again by its place –
+  // the row's data-id (or the calendar day) plus its own tag, classes and data attributes (data-act,
+  // data-state, data-canton, data-view, data-remove …). Gone for good → #results (tabindex=-1), so a
+  // keyboard user never lands on <body> after a filter.
+  const focusRegions = () => [views, status, resultsEl];
+  function focusPath(a) {
+    const part = (n, withClasses) => {
+      let s = n.tagName.toLowerCase();
+      if (withClasses) for (const c of n.classList) if (c !== "fb-on") s += `.${CSS.escape(c)}`;
+      for (const { name, value } of n.attributes)
+        if (name.startsWith("data-")) s += `[${name}="${CSS.escape(value)}"]`;
+      return s;
+    };
+    const scope = a.closest("[data-id], [data-day]");
+    return (scope ? `${part(scope, false)} ` : "") + part(a, true);
+  }
   function render() {
+    const prev = document.activeElement;
+    const path =
+      prev && prev !== document.body && focusRegions().some((r) => r.contains(prev)) ? focusPath(prev) : "";
+    renderInner();
+    if (!path || prev.isConnected) return;
+    const next = focusRegions()
+      .map((r) => r.querySelector(path))
+      .find(Boolean);
+    (next || resultsEl).focus({ preventScroll: true });
+  }
+
+  function renderInner() {
     if (status.classList.contains("loading")) return; // data not in yet: the skeleton stays, init() renders
     const q = search.value.trim().toLowerCase();
-    const visible = shows.filter(isVisible);
+    const visible = shows.filter((s) => isVisible(s));
 
     const filtered = Boolean(
       cantons.size || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
     );
-    el("clear-filters").hidden = !filtered;
+    renderPills();
+    updateCounts();
     updateMine();
     updateWhen();
     renderedStamp = renderStamp();
@@ -497,14 +715,27 @@
         status.innerHTML = `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
         return;
       }
-      // With a quick pick the empty state names the day and points to the next show instead.
+      // Empty state (§3.8): names the cause («Kein Dub im Tessin»), offers to remove each filter with what
+      // that yields – the removal with the most shows first – and, with a quick pick, points to the next show.
       const quick = quickActive();
       const next = quick && shows.find((x) => !x._past && matchesFilters(x));
-      const headline = quick ? `${QUICK_EMPTY[quick]} läuft nichts` : "Nichts gefunden";
+      const dims = activeDims().sort((a, b) => b.count - a.count); // the richest removal first
+      const fixes = dims
+        .map(
+          (d) =>
+            `<button type="button" class="chip fix${d.count ? "" : " none"}" data-remove="${d.kind}"${d.value ? ` data-value="${escape(d.value)}"` : ""} title="Filter «${escape(d.label)}» entfernen">${escape(d.label)} entfernen <b>→ ${nShows(d.count)}</b></button>`,
+        )
+        .join("");
       const hint = next
         ? `<p>Nächste Show: <a href="#${next._short}" title="Zur Show in der Liste springen"><strong>${escape(next.title)}</strong></a>, ${escape(dayShort(next))} in ${escape(next.city)}</p>`
-        : `<p>Keine Konzerte für diese Auswahl.</p>`;
-      status.innerHTML = `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">${headline}</p>${hint}<button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`;
+        : "";
+      status.innerHTML =
+        `<p class="state-icon">${STATE_ICONS.empty}</p><p class="big">${escape(emptyHeadline(quick))}</p>` +
+        `<p>Für diese Auswahl gibt es gerade nichts.</p>${hint}` +
+        (fixes ? `<div class="fixes">${fixes}</div>` : "") +
+        (dims.length >= 2
+          ? `<button type="button" class="linkish reset" id="reset" title="Alle Filter zurücksetzen">Alles zurücksetzen</button>`
+          : "");
       return;
     }
     status.innerHTML = "";
@@ -611,7 +842,7 @@
         if (!shows.length) return;
         render();
         // A deep-linked row was rebuilt just now: keep its highlight.
-        const target = findShow(decodeHashPart(location.hash.slice(1)));
+        const target = findShow(parseHash().id);
         const row = target && document.getElementById(target.id);
         if (row) row.classList.add("highlight");
       })
@@ -655,37 +886,44 @@
       pastCount = shows.filter((s) => s._past).length;
       dataUpdated = data.updated ? Date.parse(data.updated) || 0 : 0;
       setupWhen();
-      // Canton chips (multi-select, with counts) inside the Wo panel: Swiss cantons A–Z, the
-      // neighbouring countries at the end.
-      const perCanton = new Map();
-      for (const s of shows) perCanton.set(s.canton, (perCanton.get(s.canton) || 0) + 1);
-      const used = [...perCanton.keys()].sort(
-        (a, b) =>
-          (ABROAD[a] ? 1 : 0) - (ABROAD[b] ? 1 : 0) || regionName(a).localeCompare(regionName(b), "de"),
-      );
-      el("canton-chips").innerHTML =
+      // Canton chips (multi-select, with counts) inside the Wo panel, grouped like the spec's <optgroup>s:
+      // Deutschschweiz · Romandie · Ticino · Grenznah, A–Z inside a group; cantons without an upcoming
+      // show are not listed. The counts are filled by updateCounts() on every render.
+      const upcoming = new Set(shows.filter((s) => !s._past).map((s) => s.canton));
+      const groups = REGIONS.map(([name, codes]) => [
+        name,
+        codes
+          .filter((c) => upcoming.has(c))
+          .sort((a, b) => shortRegion(a).localeCompare(shortRegion(b), "de")),
+      ]).filter(([, codes]) => codes.length);
+      cantonChips.innerHTML =
         `<button type="button" class="chip" data-canton="" aria-pressed="true" title="Alle Kantone anzeigen">Alle</button>` +
-        used
-          .map((c) => {
-            const name = ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c);
-            const title = `${regionName(c)}: ${perCanton.get(c)} ${perCanton.get(c) === 1 ? "Show" : "Shows"} – anklicken zum Ein-/Ausschalten`;
-            return `<button type="button" class="chip${ABROAD[c] ? " abroad" : ""}" data-canton="${escape(c)}" aria-pressed="false" title="${escape(title)}"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(name)}<small>${perCanton.get(c)}</small></button>`;
-          })
+        groups
+          .map(
+            ([name, codes]) =>
+              `<div class="canton-group" role="group" aria-label="${escape(name)}"><span class="group-label">${escape(name)}</span>` +
+              codes
+                .map(
+                  (c) =>
+                    `<button type="button" class="chip${ABROAD[c] ? " abroad" : ""}" data-canton="${escape(c)}" aria-pressed="false"><img src="img/cantons/${escape(c)}.svg" alt="" width="14" height="16">${escape(shortRegion(c))}<small></small></button>`,
+                )
+                .join("") +
+              `</div>`,
+          )
           .join("");
       updateWhere();
 
       // Genre chips: one toggle per genre that occurs at least once, in the order of data/genres.json
-      // (unknown slugs go last, alphabetically).
-      const counts = new Map();
-      for (const s of shows) for (const g of s.genres) counts.set(g, (counts.get(g) || 0) + 1);
+      // (unknown slugs go last, alphabetically). Counts come from updateCounts().
+      const genres = new Set(shows.flatMap((s) => s.genres));
       const rank = (g) => (genreOrder.includes(g) ? genreOrder.indexOf(g) : genreOrder.length);
       genreBar.innerHTML =
         `<button type="button" class="chip" data-genre="" aria-pressed="true" title="Alle Genres anzeigen">Alle</button>` +
-        [...counts]
-          .sort((a, b) => rank(a[0]) - rank(b[0]) || a[0].localeCompare(b[0]))
+        [...genres]
+          .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
           .map(
-            ([g, n]) =>
-              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false" title="Nur ${escape(genreLabel[g] || g)} anzeigen (${n})">${escape(genreLabel[g] || g)}<small>${n}</small></button>`,
+            (g) =>
+              `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(genreLabel[g] || g)}<small></small></button>`,
           )
           .join("");
       chipRow.scrollLeft = 0; // the row starts at «Alle», whatever snapped before the chips existed
@@ -803,30 +1041,32 @@
     radiusKm = 0;
     updateWhere();
     search.value = "";
-    activeGenre = "";
+    setGenre("");
     mineOnly = false;
     clearRange();
     if (shared) {
       shared = null;
-      history.replaceState(null, "", location.pathname + location.search);
+      setHash("");
     }
-    for (const c of genreBar.querySelectorAll(".chip"))
-      c.setAttribute("aria-pressed", String(c.dataset.genre === ""));
-    chipRow.scrollTo({ left: 0 });
     render();
   }
   status.addEventListener("click", (e) => {
     if (e.target.id === "reset") {
       resetFilters();
       search.focus();
+      return;
     }
+    const b = e.target.closest("[data-remove]");
+    if (b) removeFilter(b.dataset.remove, b.dataset.value);
   });
-  el("clear-filters").addEventListener("click", resetFilters);
 
-  // Direct links: #<show id> scrolls to the show and highlights it (clearing filters if needed).
+  // Direct links (one parser, §7 S6): #m=… opens a shared list, #view=… switches the view, #<short hash or
+  // id> scrolls to the show and highlights it (clearing filters if needed).
   function revealFromHash() {
-    if (/^#(mine|m)=/.test(location.hash)) return showShared();
-    const target = findShow(decodeHashPart(location.hash.slice(1)));
+    const h = parseHash();
+    if (h.mine) return showShared(h.mine);
+    if (h.view && h.view !== view && !listMode()) setView(h.view);
+    const target = findShow(h.id);
     if (!target) return;
     const id = target.id;
     if (target._past && !showPast) showPast = true;
@@ -877,6 +1117,7 @@
 
   // --- Wo: canton chips (multi-select) + own position (+ radius) behind the pin button ---
   const toggleWhere = el("toggle-where");
+  const cantonChips = el("canton-chips");
   function toggleCanton(code) {
     if (cantons.has(code)) cantons.delete(code);
     else cantons.add(code);
@@ -899,7 +1140,7 @@
     toggleWhere.classList.toggle("located", Boolean(here));
     toggleWhere.setAttribute("aria-pressed", String(Boolean(cantons.size || (here && radiusKm))));
     toggleWhere.title = label ? `Wo: ${label} (ändern)` : "Wo: Kantone wählen oder meinen Standort verwenden";
-    for (const c of el("canton-chips").querySelectorAll(".chip"))
+    for (const c of cantonChips.querySelectorAll(".chip"))
       c.setAttribute(
         "aria-pressed",
         String(c.dataset.canton ? cantons.has(c.dataset.canton) : !cantons.size),
@@ -909,7 +1150,7 @@
       r.setAttribute("aria-pressed", String(Number(r.dataset.radius) === radiusKm));
   }
   toggleWhere.addEventListener("click", () => setPanel(openPanel === "where" ? null : "where"));
-  el("canton-chips").addEventListener("click", (e) => {
+  cantonChips.addEventListener("click", (e) => {
     const c = e.target.closest(".chip[data-canton]");
     if (!c) return;
     if (c.dataset.canton) toggleCanton(c.dataset.canton);
@@ -959,7 +1200,7 @@
           const n = near[0];
           const when = `${dowFmt.format(n.s._day).replace(".", "")} ${n.s._day.getDate()}.${n.s._day.getMonth() + 1}.`;
           geoStatus.innerHTML =
-            `<span class="geo-pin">📍</span> Nächste Show: ` +
+            `<svg class="geo-pin" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg><span class="sr">Standort gefunden. </span>Nächste Show: ` +
             `<a href="#${n.s._short}" title="Zur Show in der Liste springen"><strong>${escape(n.s.title)}</strong></a>, ${escape(when)} in ${escape(n.s.city)} · ` +
             `<span class="dist" title="Luftlinie von deinem Standort">${formatKm(n.km)}${sbbLink(n.s)}</span>`;
         } else {
@@ -1014,14 +1255,6 @@
   // Only keep well-formed entries; anything else in storage is ignored.
   for (const [id, st] of Object.entries(store.get(store.KEYS.MARKS, {}) || {}))
     if (st === "interested" || st === "going") marks[id] = st;
-  // Hash parts come from a URL someone typed or pasted: never let a bad escape throw.
-  const decodeHashPart = (t) => {
-    try {
-      return decodeURIComponent(t);
-    } catch {
-      return t;
-    }
-  };
   let mineOnly = false;
   let shared = null; // { id: state } from a #m=… link: the list is filtered to those shows
   const toggleMine = el("toggle-mine");
@@ -1267,11 +1500,10 @@
 
   // A friend's list (#m=…): the page switches to the list mode with exactly those shows; the friend's "going"
   // marks show as a small chip. Nothing is written to the visitor's marks until «Alle merken».
-  function showShared() {
+  function showShared(raw) {
     shared = {};
     sharedBy = "";
     // New form #m=<short><g|i>,…[,von:<Name>] ; old form #mine=<id>:<g|i>,… still accepted.
-    const raw = location.hash.replace(/^#(mine|m)=/, "");
     for (const part of raw.split(",")) {
       if (part.startsWith("von:")) {
         sharedBy = decodeHashPart(part.slice(4)).trim().slice(0, 40);
@@ -1291,7 +1523,7 @@
     // The visitor's own link (every marked show, nothing else): that is simply "Meine Shows".
     if (ids.length === markedShows().length && ids.every((id) => marks[id])) {
       shared = null;
-      history.replaceState(null, "", location.pathname + location.search);
+      setHash("");
       mineOnly = true;
     }
     if (ids.some((id) => findShow(id)?._past)) {
@@ -1321,7 +1553,6 @@
   const listUrl = () => (shared ? `${location.origin}${location.pathname}${location.hash}` : mineUrl());
   const listTitle = () => (shared ? "Reggae-Shows" : "Meine Reggae-Shows");
   const listShareText = () => `${listTitle()}: ${listUrl()}`;
-  const SHARED_HASH = /^#(mine|m)=/;
   // The only hook: every render() ends here (via updateMine).
   function syncListMode() {
     const on = listMode();
@@ -1336,8 +1567,7 @@
     if (!on) {
       // Leaving the mode by any exit (✕, Esc, ★, last mark gone, reset): a #m= link that «Liste teilen» or a
       // friend put into the address bar goes too. Not on the first render, which precedes revealFromHash().
-      if (was && SHARED_HASH.test(location.hash))
-        history.replaceState(null, "", location.pathname + location.search);
+      if (was && parseHash().mine) setHash("");
       return;
     }
     if (!was && openPanel) setPanel(null); // fold Wo/Wann away; their settings survive
@@ -1394,9 +1624,12 @@
   const monthLabel = (d) =>
     `${shortMonthFmt.format(d).replace(".", "")}${d.getFullYear() === todayStart().getFullYear() ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
   const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
-  const inRange = (s) => {
-    if (months.size) return months.has(monthKey(s._day));
-    return !(rangeFrom && rangeTo) || (s._day >= rangeFrom && s._day <= rangeTo);
+  // `o` replaces the time filters for what-if counts: { months: Set, range: [from, to] | null }.
+  const inRange = (s, o = {}) => {
+    const ms = "months" in o ? o.months : months;
+    if (ms.size) return ms.has(monthKey(s._day));
+    const [from, to] = "range" in o ? o.range || [] : [rangeFrom, rangeTo];
+    return !(from && to) || (s._day >= from && s._day <= to);
   };
   // Quick picks (§7 S3: Heute · Morgen · Wochenende · 7 Tage), one exclusive choice; the badge, the chips
   // and the empty state name the pick rather than its dates.
@@ -1507,7 +1740,7 @@
     const quick = quickActive();
     for (const chip of whenPanel.querySelectorAll("[data-quick]"))
       chip.setAttribute("aria-pressed", String(chip.dataset.quick === quick));
-    const n = shows.filter(isVisible).length;
+    const n = shows.filter((s) => isVisible(s)).length;
     whenCount.textContent = active
       ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
       : `${n} ${n === 1 ? "Konzert" : "Konzerte"}, alle kommenden`;
@@ -1562,14 +1795,18 @@
       b.setAttribute("aria-pressed", String(b.dataset.view === view));
   }
   markView();
+  // The segmented control writes #view=calendar / #view=map (a plain link for the list), so a view can be
+  // linked; a show link in the hash is consumed by the switch. Not in the list mode, whose #m= link stays.
   viewSwitch.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-view]");
-    if (btn && btn.dataset.view !== view) setView(btn.dataset.view);
+    if (!btn || btn.dataset.view === view) return;
+    setView(btn.dataset.view);
+    if (!listMode()) setHash(view === "list" ? "" : `view=${view}`);
   });
 
   // Calendar pills and map popups link to the show's row in the list.
   function goToShow(id) {
-    history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+    setHash(encodeURIComponent(id));
     revealFromHash();
   }
 
@@ -2033,16 +2270,22 @@
   chipRow.addEventListener("pointerleave", endDrag);
   chipRow.addEventListener("pointercancel", endDrag);
 
+  // Set the genre ("" = all), press its chip and keep that chip in view (the row scrolls smoothly unless
+  // motion is reduced).
+  function setGenre(g) {
+    activeGenre = g;
+    let btn = null;
+    for (const c of genreBar.querySelectorAll(".chip")) {
+      c.setAttribute("aria-pressed", String(c.dataset.genre === activeGenre));
+      if (c.dataset.genre === activeGenre) btn = c;
+    }
+    if (!activeGenre) chipRow.scrollTo({ left: 0 });
+    else if (btn) btn.scrollIntoView({ inline: "nearest", block: "nearest" });
+  }
   genreBar.addEventListener("click", (e) => {
     const btn = e.target.closest(".chip[data-genre]");
     if (!btn) return;
-    activeGenre = activeGenre === btn.dataset.genre ? "" : btn.dataset.genre;
-    for (const c of genreBar.querySelectorAll(".chip")) {
-      c.setAttribute("aria-pressed", String(c.dataset.genre === activeGenre));
-    }
-    // Keep the chip in view (the row scrolls smoothly unless motion is reduced).
-    if (btn.dataset.genre === "") chipRow.scrollTo({ left: 0 });
-    else btn.scrollIntoView({ inline: "nearest", block: "nearest" });
+    setGenre(activeGenre === btn.dataset.genre ? "" : btn.dataset.genre);
     renderAndKeepInView();
   });
 

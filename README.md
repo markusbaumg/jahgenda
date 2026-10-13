@@ -72,20 +72,27 @@ Makefile                               Everything you can run: `make` shows the 
 
 ### Filters
 
-Search (band, club, town), one genre chip (order and labels from `data/genres.json`, with counts), and two
-dropdown panels hanging from the sticky toolbar — only one is open at a time, closed with ×, Escape, the
-button or a tap outside:
+Search (band, club, town), one genre chip (order and labels from `data/genres.json`; the count on every chip
+is what a tap on it yields under the other filters), and two dropdown panels hanging from the sticky toolbar —
+only one is open at a time, closed with ×, Escape, the button or a tap outside:
 
-- **Wo** — cantons are multi-select chips with counts (Swiss cantons A–Z, neighbouring countries D/F/I/A/FL
-  at the end); the canton badge in a row toggles the same filter. **Mein Standort** asks the browser for the
-  position (also asked once on start; never stored or sent anywhere) and enables a radius (10/25/50 km),
-  distances in every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to
-  the show's town, arrival one hour before the show — `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen»
-  placeholder while the position is unknown.
+- **Wo** — cantons are multi-select chips with counts, grouped Deutschschweiz · Romandie · Ticino · Grenznah
+  (D/F/I/A/FL), cantons without an upcoming show left out; the canton badge in a row toggles the same filter.
+  **Mein Standort** asks the browser for the position (also asked once on start; never stored or sent
+  anywhere) and enables a radius (10/25/50 km), distances in every row with a hover-only **SBB** badge
+  (timetable from the nearest town in `venues.json` to the show's town, arrival one hour before the show —
+  `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen» placeholder while the position is unknown.
 - **Wann** — Heute / Morgen / Wochenende / 7 Tage, or any set of months picked on a clickable month
   histogram (bars = number of shows after the other filters; past months dimmed and switching past shows on).
   The badge in the toolbar names the active choice; nothing is stored across visits. Past shows can also be
   opened from the last row under the list («↑ n vergangene Shows anzeigen»).
+
+Every active filter is a removable gold pill under the results row («Dub ✕ · Bern ✕ · Wochenende ✕»,
+«Alles zurücksetzen» from two on). When nothing matches, the empty state names the cause («Kein Dub im
+Tessin») and offers each removal with what it yields, the richest first. Links: `#<short hash>` (a show),
+`#m=…` (a shared list) and `#view=calendar|map` (the view switch writes it) — combinable with `&`, parsed
+by one `parseHash()`. After every re-render the keyboard focus returns to the same control (row + action,
+canton badge, view button), or to the filter pills line as the fallback — never to `<body>`.
 
 The list itself is time-aware: inside a month the rows are grouped by day (one date cell per day), today and
 tomorrow carry a red HEUTE / MORGEN pill (only while the data is fresher than 48 h), the Fr–So of the coming
