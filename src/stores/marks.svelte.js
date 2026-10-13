@@ -17,7 +17,8 @@ import { nav } from "./history.js";
 import { callout } from "./callout.svelte.js";
 import { live } from "./live.svelte.js";
 import { reveal } from "./reveal.svelte.js";
-import { vevent, icsWrap, safeDecode } from "../lib/index.js";
+import { vevent, icsWrap } from "../lib/index.js";
+import { parseListHash, takeAllMarks } from "../lib/state-hash.js";
 import { dayShort } from "../lib/dates.js";
 import { showUrl, downloadIcs } from "../lib/actions.js";
 import { ID, byId as el, starOf } from "../lib/dom.js";
@@ -276,21 +277,7 @@ export function createMarks() {
   // A friend's list (#m=…): the page switches to the list mode with exactly those shows; the friend's
   // «going» marks show as a small chip. Nothing is written to the visitor's marks until «Alle merken».
   function showShared(raw) {
-    const map = {};
-    let by = "";
-    let missing = 0;
-    for (const part of raw.split(",")) {
-      if (part.startsWith("von:")) {
-        by = safeDecode(part.slice(4)).trim().slice(0, 40);
-        continue;
-      }
-      let token, st;
-      if (part.includes(":")) [token, st] = part.split(":").map(safeDecode);
-      else [token, st] = [safeDecode(part.slice(0, -1)), part.slice(-1)];
-      const show = token && agenda.findShow(token);
-      if (show) map[show.id] = st === "g" ? "going" : "interested";
-      else if (token) missing++;
-    }
+    const { map, by, missing } = parseListHash(raw, (token) => agenda.findShow(token));
     const ids = Object.keys(map);
     const wasOn = listMode;
     if (!ids.length) {
@@ -332,9 +319,7 @@ export function createMarks() {
   // «Alle merken»: never overwrites or downgrades an own mark; the friend's «Ich gehe» stays a chip.
   function takeAll() {
     if (!shared) return;
-    const m = { ...marks };
-    for (const id of Object.keys(shared)) if (!m[id]) m[id] = "interested";
-    marks = m;
+    marks = takeAllMarks(marks, shared);
     save();
     flushSync();
     el(ID.listTitle)?.focus({ preventScroll: true }); // the button turned into text: announce the list

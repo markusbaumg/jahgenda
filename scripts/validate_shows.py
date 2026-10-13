@@ -16,6 +16,7 @@ import difflib
 import json
 import re
 import sys
+import unicodedata
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -314,9 +315,57 @@ def check_days(where, days, d, end, act_keys):
 
 
 def norm_key(name):
-    """Normalised form for near-duplicate detection (venues, artists, same-slot shows):
-    lowercase ASCII letters and digits only. venueKey in src/lib/text.js applies the same rule."""
-    return re.sub(r"[^a-z0-9]+", "", str(name).lower())
+    """Normalised form for near-duplicate detection (venues, artists, same-slot shows): accents folded
+    (NFKD, so «Sinaï» = «Sinai»), then lowercase ASCII letters and digits only. venueKey in src/lib/text.js
+    and act_key in scripts/make_ics.py apply the same rule."""
+    return re.sub(r"[^a-z0-9]+", "", unicodedata.normalize("NFKD", str(name)).lower())
+
+
+# Words a line-up adds to or drops from a sound system's name: «O.B.F Sound System» is «O.B.F».
+ACT_SUFFIXES = ("soundsystem", "sound", "system", "hifi", "international", "int", "crew")
+
+
+def act_core(key):
+    """A norm_key without the trailing ACT_SUFFIXES; never shorter than three characters."""
+    changed = True
+    while changed:
+        changed = False
+        for suffix in ACT_SUFFIXES:
+            if key.endswith(suffix) and len(key) - len(suffix) >= 3:
+                key, changed = key[: -len(suffix)], True
+    return key
+
+
+def check_act_spellings(shows, artists):
+    """SKILL.md §festivals c.: the same act is spelled the same in acts, days and the genre cache. An act
+    without a cache entry is fine (the research budget leaves some for later); an act that IS cached under
+    a variant spelling («Channel One» / «Channel One Sound System», «ruffPack» / «Ruff Pack Int.») is not –
+    the cache lookup misses and the act is researched again."""
+    if not isinstance(shows, dict) or not isinstance(artists, dict):
+        return []
+    cached = artists.get("artists")
+    if not isinstance(cached, dict):
+        return []
+    keys = {artist_key(n) for n in cached}
+    cores = {}
+    for n in cached:
+        cores.setdefault(act_core(artist_key(n)), n)
+    errs = []
+    for i, s in enumerate(shows.get("shows") or []):
+        if not isinstance(s, dict):
+            continue
+        names = list(s.get("acts") or [])
+        days = s.get("days") if isinstance(s.get("days"), dict) else {}
+        names += [a for v in days.values() if isinstance(v, list) for a in v]
+        for a in dict.fromkeys(n for n in names if isinstance(n, str) and n.strip()):
+            k = artist_key(a)
+            twin = cores.get(act_core(k))
+            if k not in keys and twin:
+                errs.append(
+                    f"shows[{i}] ({s.get('id', '?')}): act '{a}' is cached as '{twin}' in artists.json — "
+                    "use the cache spelling in acts and days"
+                )
+    return errs
 
 
 venue_key = artist_key = norm_key
@@ -551,7 +600,11 @@ def check_runs(data):
             if key in r and not isinstance(r[key], list):
                 errs.append(f"{where}: '{key}' must be a list")
         if "runner" in r and not isinstance(r["runner"], str):
-            errs.append(f"{where}: 'runner' must be a string (cloud, local, launchd)")
+            errs.append(f"{where}: 'runner' must be a string (cloud, local, launchd, manual)")
+        if "ok" in r and not isinstance(r["ok"], bool):
+            errs.append(f"{where}: 'ok' must be true or false (a failed run writes ok: false + error)")
+        if r.get("error") is not None and not isinstance(r["error"], str):
+            errs.append(f"{where}: 'error' must be a string or null")
         for j, d in enumerate(r.get("dropped") or []):
             if not (
                 isinstance(d, dict) and isinstance(d.get("title"), str) and isinstance(d.get("why"), str)
@@ -641,6 +694,7 @@ def main(argv):
     artists, e = load(ARTISTS)
     errs += e
     errs += check_artists(artists, allowed)
+    errs += check_act_spellings(shows, artists)
     runs, e = load(RUNS)
     errs += e
     errs += check_runs(runs)

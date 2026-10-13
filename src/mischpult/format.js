@@ -27,7 +27,12 @@ const dayFmt = new Intl.DateTimeFormat("de-CH", {
 export const day = (d) =>
   /^\d{4}-\d{2}-\d{2}$/.test(d || "") ? dayFmt.format(new Date(`${d}T12:00:00`)) : d || "";
 
-export const RUNNER = { cloud: "Cloud-Routine", launchd: "Mac (launchd)", local: "Mac (lokal)" };
+export const RUNNER = {
+  cloud: "Cloud-Routine",
+  launchd: "Mac (launchd)",
+  local: "Mac (lokal)",
+  manual: "Handkorrektur",
+};
 export const SKILL = {
   "scrape-shows": "Konzerte aktualisiert",
   "harvest-bands": "Bands aus Festivals gesammelt",

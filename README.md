@@ -72,6 +72,7 @@ src/lib/actions.js                     … the row actions (.ics, Teilen, Link) 
 src/lib/scroll.js                      … scrolls the page makes itself (the subscribe nudge waits for the visitor's own).
 src/lib/dom.js                         … the ids / classes the stores reach into (focus, scroll, star echo); a contract test checks components render them.
 src/lib/share.js                       … copy to the clipboard (1 s timeout) and navigator.share with the WhatsApp fallback, for every copy/share button.
+src/lib/state-hash.js                  … the pure half of the filter / list stores: quick picks, the #q=…&wann=… hash, #m= list links.
 src/lib/load.js                        … the one fetch helper (data/*.json paths, raw.githubusercontent.com) for the agenda and the Mischpult.
 src/lib/health.js / drops.js           … Mischpult: the watchdog verdict (mirrors check_freshness.py), the dropped-candidate dedupe
                                        (mirrors quality_review.py) and the «Gehört rein» issue link.
@@ -269,8 +270,10 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   `scripts/validate_shows.py` checks the shape of `status.json` like that of the other data files, so a
   malformed heartbeat cannot be committed and silently blind the watchdog.
 - **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine) and again at 14:17 (GitHub sometimes skips a scheduled fire) and executes
-  `scripts/check_freshness.py`: if the newest timestamp is older than 36 h, the last run reported failure, or
-  shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
+  `scripts/check_freshness.py`: if the newest scrape-shows timestamp (status.json while it holds the
+  scrape-shows heartbeat, the newest scrape-shows run, shows.json `updated` – a harvest-bands run or a hand
+  correction with runner `manual` does not count) is older than 36 h, the newest scrape-shows run reported
+  failure (`ok: false` in status.json or in its runs.json entry), or shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
   and turns the badge above red; when healthy again it closes the issue. `make watchdog` runs the same check
   locally without touching GitHub.
 - **Where to look:** the badge, the `scraper-failed` issue, the Mischpult (below), and the routine's own run

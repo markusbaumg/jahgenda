@@ -117,13 +117,7 @@ test("the line-up opens by day with «Tag offen» and closes again", async ({ pa
 
 test("a search hit inside the line-up opens it and marks the act", async ({ page }) => {
   const [run] = fixture();
-  await page.evaluate(() => {
-    const s = document.getElementById("search");
-    if (!s) return;
-    s.value = "prayzah";
-    s.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-  test.skip(!(await page.locator("#search").count()), "the search field arrives with the filter-bar story");
+  await page.fill("#q", "prayzah");
   const lineup = page.locator(`[id="${run.id}"] details.lineup`);
   await expect(lineup).toHaveAttribute("open", "");
   await expect(lineup.locator("mark")).toHaveText("Prayzah");

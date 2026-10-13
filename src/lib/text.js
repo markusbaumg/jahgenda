@@ -9,9 +9,11 @@ export const parseDay = (s) => {
   return new Date(y, m - 1, d);
 };
 
-// The validator's artist_key / venue key rule: lowercase ASCII letters and digits only.
+// The validator's artist_key / venue key rule (norm_key): accents folded (NFKD, «Sinaï» = «Sinai»), then
+// lowercase ASCII letters and digits only.
 export const venueKey = (name) =>
   String(name)
+    .normalize("NFKD")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "");
 

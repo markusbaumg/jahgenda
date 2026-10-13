@@ -1,7 +1,23 @@
 // Keyboard and screen-reader basics: skip links first, toolbar buttons with names that say what is
-// set, the focus never dropped to <body> after a reset, no tab stops on other-month calendar days.
+// set, the focus never dropped to <body> after a reset, no tab stops on other-month calendar days –
+// and an axe-core pass (WCAG 2.x A/AA) over every view, so a nameless control cannot slip in again.
 const { test, expect } = require("@playwright/test");
+const { default: AxeBuilder } = require("@axe-core/playwright");
 const { useFixture, openList, pill, clickChip } = require("./helpers");
+
+// axe on the current state. The entry animations fade rows in; mid-fade, axe measures half-transparent
+// text and reports contrast that a visitor never sees – so animations are off and the page gets a beat.
+async function axe(page, what) {
+  await page.waitForTimeout(300);
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .exclude(".leaflet-container") // third-party map widget (tiles, attribution from OSM)
+    .analyze();
+  const report = violations.map(
+    (v) => `${v.id} (${v.impact}): ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`,
+  );
+  expect(report, `axe on ${what}`).toEqual([]);
+}
 
 test.beforeEach(async ({ page }) => {
   await useFixture(page);
@@ -121,4 +137,48 @@ test("at 200 % text size nothing overlaps and the page does not scroll sideways 
   const pill = await date.locator(".dow.now").boundingBox();
   const title = await page.locator("#list .day.today .title").first().boundingBox();
   expect(pill.x + pill.width).toBeLessThanOrEqual(title.x);
+});
+
+test.describe("axe-core finds no WCAG A/AA violation", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+  });
+
+  test("list, open panels and the KI note", async ({ page }) => {
+    await axe(page, "the list");
+    await page.click("#toggle-where");
+    await expect(page.locator("#where-panel")).toBeVisible();
+    await axe(page, "the Wo panel");
+    await page.click("#toggle-when");
+    await axe(page, "the Wann panel");
+    await page.keyboard.press("Escape");
+    await page.locator("#note summary").click();
+    await axe(page, "the open KI note");
+  });
+
+  test("calendar, map and Meine Shows", async ({ page, isMobile }) => {
+    await page.locator('#view-switch [data-view="calendar"]').click();
+    await expect(page.locator("#calendar .cal-grid")).toBeVisible();
+    await axe(page, "the calendar");
+    await page.locator('#view-switch [data-view="map"]').click();
+    await expect(page.locator("#map-view")).toBeVisible();
+    await axe(page, "the map");
+    await page.locator('#view-switch [data-view="list"]').click();
+    const row = page.locator("#list .show").first();
+    if (!isMobile) await row.hover();
+    await row.locator(".act.star").click();
+    await page.click("#toggle-mine");
+    await expect(page.locator("body")).toHaveClass(/list-mode/);
+    await axe(page, "Meine Shows");
+  });
+
+  test("Mischpult, every tab", async ({ page }) => {
+    // The Prompt tab reads SKILL.md & co. from GitHub; a stub keeps the test offline.
+    await page.route("https://raw.githubusercontent.com/**", (route) => route.fulfill({ body: "# Test\n" }));
+    for (const id of ["status", "laeufe", "aussortiert", "quellen", "prompt", "genres"]) {
+      await page.goto(`/mischpult.html#${id}`);
+      await expect(page.locator('[role="tabpanel"]:visible').first()).toBeVisible();
+      await axe(page, `Mischpult #${id}`);
+    }
+  });
 });

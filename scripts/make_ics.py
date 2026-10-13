@@ -15,6 +15,7 @@ Usage: python3 scripts/make_ics.py [outdir]
 import json
 import re
 import sys
+import unicodedata
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -54,7 +55,7 @@ DOW = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 def act_key(name):
     """Same rule as validate_shows.artist_key: «DUB INC.» in days is «Dub Inc» in acts."""
-    return re.sub(r"[^a-z0-9]+", "", str(name).lower())
+    return re.sub(r"[^a-z0-9]+", "", unicodedata.normalize("NFKD", str(name)).lower())
 
 
 def lineup(s):

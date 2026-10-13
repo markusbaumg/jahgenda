@@ -81,7 +81,9 @@ rotation). When a source is huge, take the next 6 months, not everything.
    c. **Line-up.** `acts` = every act name on the line-up page, exactly as written, in page order. Strip
       country suffixes «(JM)», «(FR)»; «Sound System» stays when it is part of the name. Normalise names
       through `artists.json` (step 4.2), so the same act is spelled the same in `acts`, `days` and the
-      cache. Leave out acts whose headliner is under **Excluded**.
+      cache — «Channel One» on the poster is `Channel One Sound System` when that is the cache key, and
+      «O.B.F Sound System» is `O.B.F`. The validator rejects an act that is cached under a variant
+      spelling (case, punctuation, accents and a trailing Sound System / Sound / HiFi / Int. / Crew). Leave out acts whose headliner is under **Excluded**.
    d. **Days.** `days` ONLY when the page names a day next to the act (date, weekday or «Day 1» →
       `date` + offset). Never guess a day. Ignore stages.
    e. **Genres.** `festival` + the 3 most frequent genres of the acts (cache as in step 4). Per festival
@@ -98,10 +100,23 @@ Rules while collecting:
 
 - **Never invent a show.** Every candidate must come from a page you actually opened. Record that page as
   `source_url`.
+- **Cancellations carry forward.** Before you add a candidate, look through the `dropped` lists of the
+  `data/runs.json` entries (all of them, also `"runner": "manual"` hand corrections) for the same date +
+  venue. If an earlier run dropped it as cancelled («abgesagt», «cancelled», «annulé»), add it only after
+  you opened the venue's event page or the ticket page (`url` / `tickets`) and it no longer says so — and
+  name that page as `source_url`. Otherwise drop it again with the same reason. A cancellation on the
+  venue's or the ticket shop's page beats an aggregator (Skalender, Eventfrog lists, search tiles) that
+  still lists the date.
 - If a page does not load (timeout, 403, bot wall), skip it after one retry and list it in the run log.
   Do not try to get around bot protection — use the other sources for that venue instead.
 - Dates: `YYYY-MM-DD` local date. If only a weekday and day are given, resolve them against the page's
   month/year context. If you cannot pin the date, drop the candidate.
+- **A start–end range is one show.** Ticket pages (Eventfrog above all) give every event a `startDate` and an
+  `endDate`; an end on the next day (often the placeholder 23:59) is just the night running late. Write ONE
+  show on the start date — never one show per night, never a «2. Nacht», and no `end_date` range — unless
+  the page itself names separate nights or days (two dates with their own start times, «Day 1 / Day 2»,
+  a festival line-up by day), or calls the event a festival, open air or weekender – that stays one entry
+  with `end_date` as in the detection rule of step 2.5 (Festivals).
 - Time: `HH:MM` (24h), door or start time if shown; otherwise omit.
 - Links must work: a `url` or `tickets` you write (new or kept) that answers 404/410 — the part after `#` is
   never sent, so `…/programm.html#/events/123` is dead when `programm.html` is — is replaced: `url` by the
@@ -280,9 +295,11 @@ Commit even when no show changed (message `Scraper run: no changes (<total> tota
 If the validator reports problems, fix the data and run the command again. **Never commit data that does
 not validate.** If you cannot make it pass, or anything else stops the run: revert the data
 (`git checkout -- data/shows.json data/artists.json data/venues.json data/venues.web.json scraper/bands.md`), write
-`data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with the same
-error in `notes`, validate, and commit + push only those two files — so the failure is visible on
-the Mischpult (tab «Status») and the watchdog, and the site keeps the last good data.
+`data/status.json` with `"ok": false` and a one-line `"error"`, prepend a `runs.json` entry with
+`"ok": false`, the same `"error"` and the error in `notes`, validate, and commit + push only those two files
+— so the failure is visible on the Mischpult (tab «Status») and the watchdog, and the site keeps the last
+good data. The `ok`/`error` in the run entry matter: `/harvest-bands` overwrites `status.json` later, and the
+watchdog then still finds the failure in the newest scrape-shows run.
 If the push is rejected because `main` moved: `git pull --rebase origin main`, then push again (once).
 
 ## 8. Report

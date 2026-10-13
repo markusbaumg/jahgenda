@@ -244,6 +244,29 @@ class Keys(unittest.TestCase):
         self.assertNotEqual(V.artist_key("Dub Inc"), V.artist_key("Dub Incorporated"))
         self.assertEqual(V.venue_key(123), "123")
 
+    def test_keys_fold_accents(self):
+        self.assertEqual(V.artist_key("Sinaï Sound System"), V.artist_key("Sinai Sound System"))
+        self.assertEqual(V.venue_key("Schüür"), "schuur")
+
+    def test_an_act_cached_under_a_variant_spelling_is_an_error(self):
+        artists = {
+            "artists": {"Channel One Sound System": {}, "O.B.F": {}, "Ruff Pack Int.": {}, "Dub Inc": {}}
+        }
+        shows = {
+            "shows": [
+                {"id": "a", "acts": ["Channel One", "Dub Inc", "Unknown Act"]},
+                {"id": "b", "acts": ["O.B.F Sound System"], "days": {"2026-11-13": ["ruffPack"]}},
+            ]
+        }
+        errs = V.check_act_spellings(shows, artists)
+        self.assertEqual(len(errs), 3, errs)
+        self.assertIn("act 'Channel One' is cached as 'Channel One Sound System'", errs[0])
+        self.assertIn("act 'O.B.F Sound System' is cached as 'O.B.F'", errs[1])
+        self.assertIn("act 'ruffPack' is cached as 'Ruff Pack Int.'", errs[2])
+        # an act not researched yet, or spelled like its cache key, is fine
+        ok = {"shows": [{"id": "c", "acts": ["DUB INC.", "Brand New Act"]}]}
+        self.assertEqual(V.check_act_spellings(ok, artists), [])
+
 
 class StatusChecks(unittest.TestCase):
     """data/status.json, the heartbeat: the exact shape the skills write and the watchdog reads."""
@@ -376,3 +399,11 @@ class RunRunner(unittest.TestCase):
         self.assertTrue(
             any("'runner' must be a string" in e for e in V.check_runs({"runs": [dict(base, runner=3)]}))
         )
+
+    def test_run_entry_may_carry_ok_and_error(self):
+        base = {"skill": "scrape-shows", "at": "2026-10-13T06:14:00+02:00", "added": 0, "total": 1}
+        self.assertEqual(V.check_runs({"runs": [dict(base, ok=False, error="ENOTFOUND")]}), [])
+        self.assertEqual(V.check_runs({"runs": [dict(base, ok=True, error=None)]}), [])
+        errs = V.check_runs({"runs": [dict(base, ok="no", error=3)]})
+        self.assertTrue(any("'ok' must be true or false" in e for e in errs), errs)
+        self.assertTrue(any("'error' must be a string or null" in e for e in errs), errs)

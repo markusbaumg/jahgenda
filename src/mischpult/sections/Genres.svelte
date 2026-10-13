@@ -11,7 +11,10 @@
 {#if !files.genres}
   <p class="bad" role="status">data/genres.json konnte nicht geladen werden.</p>
 {:else}
-  <div class="mp-tbl">
+  <!-- A table without links: the box itself takes the focus, so it scrolls sideways from the keyboard too
+       (axe scrollable-region-focusable). -->
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex (a scrollable region must be focusable, WCAG 2.1.1) -->
+  <div class="mp-tbl" tabindex="0" role="region" aria-label="Genres">
     <table>
       <thead><tr><th>Slug</th><th>Label</th><th>Deckt ab</th></tr></thead>
       <tbody>

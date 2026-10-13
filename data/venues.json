@@ -255,11 +255,11 @@
     "Club Vaudeville": {
       "city": "Lindau",
       "canton": "D",
-      "lat": 47.5484,
-      "lon": 9.6861,
+      "lat": 47.5513,
+      "lon": 9.7233,
       "url": "https://www.club-vaudeville.de/",
       "scrape": true,
-      "hint": "Lindau (Bodensee), nearby region D. Programme on the homepage. Reggae relevance: high — books ska/reggae touring acts (Dubioza Kolektiv)."
+      "hint": "Lindau (Bodensee), nearby region D. Von-Behring-Strasse 6-8, Reutin (Nominatim amenity/nightclub), not on the island. Programme on the homepage. Reggae relevance: high — books ska/reggae touring acts (Dubioza Kolektiv)."
     },
     "Conrad Sohm": {
       "city": "Dornbirn",
@@ -379,13 +379,13 @@
       "hint": "Server-rendered cards: title, 'Elefantehuus Liestal', 'Do., 15. Oktober 2026 20:00 Uhr', eventfrog tickets. Reggae relevance: low — blues/soul/tribute nights, a cappella."
     },
     "Elysia": {
-      "city": "Basel",
-      "canton": "BS",
-      "lat": 47.5518,
-      "lon": 7.5847,
+      "city": "Münchenstein",
+      "canton": "BL",
+      "lat": 47.5317,
+      "lon": 7.6075,
       "url": "https://www.elysia.ch/",
       "scrape": false,
-      "hint": "Next.js page with an empty events div; the JSON API https://www.elysia.ch/api/events returns [{slug,title,date 'YYYY-MM-DD',presstext}]. Reggae relevance: low — house/techno club nights."
+      "hint": "Frankfurt-Strasse 36 on the Dreispitz, 4142 Münchenstein (BL), not Basel city. Next.js page with an empty events div; the JSON API https://www.elysia.ch/api/events returns [{slug,title,date 'YYYY-MM-DD',presstext}]. Reggae relevance: low — house/techno club nights."
     },
     "ESSE Musicbar": {
       "city": "Winterthur",
