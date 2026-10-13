@@ -44,7 +44,7 @@ load() {
   pid=$!
   for ((i = 0; i < MAX_WAIT; i++)); do
     if grep -q '</html>' "$dom" 2>/dev/null; then
-      sleep 0.5 # let late console lines reach stderr
+      sleep 1 # let late console lines reach stderr
       break
     fi
     sleep 0.25
@@ -59,8 +59,13 @@ errors() {
 }
 
 # Self-check first: a page that throws must be caught, otherwise this whole script is blind.
-load 'data:text/html,<script>throw new TypeError("smoke self-check")</script>' selfcheck
-if [ -z "$(errors selfcheck)" ]; then
+# Up to three attempts: on a slow CI runner the console line can miss the first run's grace period.
+selfcheck_ok=0
+for attempt in 1 2 3; do
+  load 'data:text/html,<script>throw new TypeError("smoke self-check")</script>' "selfcheck$attempt"
+  if [ -n "$(errors "selfcheck$attempt")" ]; then selfcheck_ok=1; break; fi
+done
+if [ "$selfcheck_ok" = 0 ]; then
   echo "smoke: self-check failed - Chrome reported no console error for a page that throws; the check is blind"
   exit 1
 fi

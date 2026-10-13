@@ -94,3 +94,43 @@ class AppShell(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReadmeLayout(unittest.TestCase):
+    """README «Layout of the repo» must name every page, script, data file, scraper file and workflow."""
+
+    def test_every_repo_file_is_in_the_layout_block(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        m = re.search(r"## Layout of the repo\n\n```\n(.*?)```", readme, re.S)
+        self.assertIsNotNone(m, "README has no «Layout of the repo» block")
+        block = m.group(1)
+        patterns = [
+            "*.html",
+            "*.js",
+            "scripts/*.py",
+            "scripts/*.sh",
+            "data/*.json",
+            "scraper/*",
+            ".github/workflows/*.yml",
+        ]
+        files = [p for pat in patterns for p in ROOT.glob(pat) if p.is_file()]
+        missing = sorted(
+            str(p.relative_to(ROOT))
+            for p in files
+            if p.name not in block and str(p.relative_to(ROOT)) not in block
+        )
+        self.assertEqual(missing, [], f"add these to the README layout block: {missing}")
+
+
+class SmokeCoverage(unittest.TestCase):
+    """scripts/smoke.sh must load every public page of the repo root, or a new page ships untested."""
+
+    def test_every_root_page_is_smoke_tested(self):
+        smoke = (ROOT / "scripts" / "smoke.sh").read_text(encoding="utf-8")
+        m = re.search(r"^for page in (.+?); do$", smoke, re.M)
+        self.assertIsNotNone(m, "smoke.sh has no `for page in … ; do` loop")
+        tested = set(m.group(1).split())
+        pages = {p.name for p in ROOT.glob("*.html")}
+        self.assertEqual(
+            sorted(pages - tested), [], f"add these pages to the smoke loop: {sorted(pages - tested)}"
+        )
