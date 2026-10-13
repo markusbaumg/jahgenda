@@ -18,22 +18,23 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
   const heute = page.locator('#when-panel [data-quick="today"]');
   await heute.click();
   await expect(heute).toHaveAttribute("aria-pressed", "true");
-  await expect(badge).toHaveText(/^\d{1,2}\.\d{1,2}\.$/); // "13.10."
+  await expect(badge).toHaveText("Heute"); // the badge names the quick pick, not its dates
   await expect(count).toHaveText("1 Konzert im Zeitraum"); // the fixture has exactly one show today
   await expect(page.locator("#list .show")).toHaveCount(1);
-  await expect(results(page)).toHaveText(/für diese Auswahl · .* · \d{1,2}\.\d{1,2}\.$/);
+  await expect(results(page)).toHaveText(/für diese Auswahl · .* · Heute$/);
 
   const week = page.locator('#when-panel [data-quick="7"]');
   await week.click();
   await expect(week).toHaveAttribute("aria-pressed", "true");
   await expect(heute).toHaveAttribute("aria-pressed", "false");
-  await expect(badge).toHaveText(/^\d{1,2}\.\d{1,2}\.–\d{1,2}\.\d{1,2}\.$/);
+  await expect(badge).toHaveText("7 Tage");
   await expect(count).toHaveText("2 Konzerte im Zeitraum"); // today + 3 days
 
   const weekend = page.locator('#when-panel [data-quick="weekend"]');
   await weekend.click();
   await expect(weekend).toHaveAttribute("aria-pressed", "true");
-  await expect(badge).toHaveText(/\d{1,2}\.\d{1,2}\./);
+  await expect(badge).toHaveText("Wochenende");
+  await expect(weekend).toHaveAttribute("title", /^Wochenende \d{1,2}\.\d{1,2}\.–\d{1,2}\.\d{1,2}\./); // the dates live in the tooltip
 
   await page.click("#when-reset");
   await expect(badge).toBeHidden();

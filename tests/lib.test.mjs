@@ -139,3 +139,80 @@ test("sbbUrl: arrival one hour before the show, 20:00 default, encoded towns, em
   assert.equal(lib.sbbUrl(show(), ""), "");
   assert.equal(lib.sbbUrl(show(), "Bern"), "");
 });
+
+test("parseHash: a show, a shared list, a view, combinations, bad escapes", () => {
+  assert.deepEqual(lib.parseHash("#1tsjh1k"), { id: "1tsjh1k", mine: "", view: "" });
+  assert.deepEqual(lib.parseHash("#2026-10-16-dub-collective-bern"), {
+    id: "2026-10-16-dub-collective-bern",
+    mine: "",
+    view: "",
+  });
+  assert.deepEqual(lib.parseHash("#m=1tsjh1ki,8457szg,von:Kusi"), {
+    id: "",
+    mine: "1tsjh1ki,8457szg,von:Kusi",
+    view: "",
+  });
+  assert.deepEqual(
+    lib.parseHash("#mine=2026-10-16-dub-collective-bern:g").mine,
+    "2026-10-16-dub-collective-bern:g",
+  );
+  assert.deepEqual(lib.parseHash("#view=calendar"), { id: "", mine: "", view: "calendar" });
+  assert.deepEqual(lib.parseHash("#view=map&1tsjh1k"), { id: "1tsjh1k", mine: "", view: "map" });
+  assert.deepEqual(lib.parseHash("#1tsjh1k&view=map"), { id: "1tsjh1k", mine: "", view: "map" });
+  assert.equal(lib.parseHash("#view=nope").view, "", "unknown views are ignored");
+  assert.equal(lib.parseHash("#view=foo", ["foo"]).view, "foo");
+  assert.equal(lib.parseHash("#a%20b").id, "a b");
+  assert.equal(lib.parseHash("#%E0%A4%A").id, "%E0%A4%A", "a bad escape stays as typed, never throws");
+  assert.deepEqual(lib.parseHash(""), { id: "", mine: "", view: "" });
+  assert.deepEqual(lib.parseHash(undefined), { id: "", mine: "", view: "" });
+});
+
+test("festival (end_date): one all-day event over the range, line-up in the description, Google dates", () => {
+  const fest = show({
+    id: "2027-07-16-reeds-festival-pfaeffikon",
+    date: "2027-07-16",
+    end_date: "2027-07-18",
+    time: "18:00",
+    title: "Reeds Festival 2027",
+    acts: ["Alborosie", "Dub Inc", "Iration"],
+    days: { "2027-07-17": ["Alborosie"], "2027-07-16": ["Dub Inc"] },
+    url: "https://www.reeds-festival.ch/",
+  });
+  const ics = lib.icsFor(fest, { url: PAGE, now: NOW });
+  assert.ok(ics.includes("DTSTART;VALUE=DATE:20270716\r\nDTEND;VALUE=DATE:20270719"), "DTEND is exclusive");
+  assert.ok(!ics.includes("T180000"), "the door time is not a start time");
+  assert.ok(
+    ics.includes(
+      "DESCRIPTION:Fr 16.7.: Dub Inc\\nSa 17.7.: Alborosie\\nTag offen: Iration\\nhttps://www.reeds-festival.ch/\\n" +
+        PAGE,
+    ),
+    ics,
+  );
+  const u = new URL(lib.gcalUrl(fest, { url: PAGE }));
+  assert.equal(u.searchParams.get("dates"), "20270716/20270719");
+  assert.ok(u.searchParams.get("details").startsWith("Fr 16.7.: Dub Inc\n"));
+  // across a month boundary, and a normal show is untouched
+  assert.ok(
+    lib
+      .icsFor(show({ end_date: "2026-11-01", time: "" }), { url: PAGE, now: NOW })
+      .includes("DTEND;VALUE=DATE:20261102"),
+  );
+  assert.ok(
+    lib.icsFor(show(), { url: PAGE, now: NOW }).includes("DTSTART;TZID=Europe/Zurich:20261016T203000"),
+  );
+});
+
+test("lineupLines and dateText", () => {
+  assert.deepEqual(lib.lineupLines({ acts: [] }), []);
+  assert.deepEqual(lib.lineupLines({ acts: ["A", "B"] }), ["A, B"]);
+  assert.deepEqual(
+    lib.lineupLines({ acts: ["A", "B", "C"], days: { "2027-07-18": ["C"], "2027-07-16": ["a"] } }),
+    ["Fr 16.7.: a", "So 18.7.: C", "Tag offen: B"],
+  );
+  // a day's spelling may differ in case and punctuation (the validator's artist_key rule): no «Tag offen»
+  assert.deepEqual(lib.lineupLines({ acts: ["Dub Inc"], days: { "2027-07-16": ["DUB INC."] } }), [
+    "Fr 16.7.: DUB INC.",
+  ]);
+  assert.equal(lib.dateText(show()), "Fr 16.10.2026");
+  assert.equal(lib.dateText(show({ date: "2027-07-16", end_date: "2027-07-18" })), "Fr 16.7. – So 18.7.2027");
+});

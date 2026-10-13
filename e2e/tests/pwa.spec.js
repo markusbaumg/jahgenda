@@ -44,7 +44,8 @@ test("«Aktualisieren» after a new worker installs reloads the page", async ({ 
   // A deploy: the browser treats a worker registered under a new script URL (same scope) as a new
   // version – it installs it and pwa.js gets its updatefound event, like after a real deploy.
   await page.evaluate(() => navigator.serviceWorker.register("sw.js?e2e=two"));
-  const toast = page.locator(".toast");
+  // By its text, not by .toast: the (hidden) «Rückgängig» toast of Meine Shows shares the class.
+  const toast = page.getByText("Neue Version von Jahgenda");
   await expect(toast).toBeVisible({ timeout: 15_000 });
   await expect(toast).toContainText("Neue Version");
   await Promise.all([page.waitForNavigation({ timeout: 15_000 }), toast.locator("button").click()]);

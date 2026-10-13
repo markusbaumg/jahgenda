@@ -14,10 +14,12 @@ Reggae shows in Switzerland are scattered over dozens of club websites, ticket s
 Jahgenda collects them in a single fast list (UI in German, docs in English):
 
 - grouped by month, past shows disappear automatically (can be shown on request)
+- festivals as one multi-day entry (card with line-up by day, «läuft» while it runs)
 - filters by canton (click a coat of arms to filter) and genre, full-text search
 - genre chips per show, acts line for multi-band bills, canton coats of arms / country flags
 - "In Kalender" (.ics), WhatsApp share and direct link per show; nearest-show hint from your location
-- installable as an app on the phone (PWA: offline, own icon, update toast)
+- installable as an app on the phone (PWA: offline, own icon, update toast; the install sticker shows from
+  the second visit and never over a panel or the map)
 - subscribable calendar feeds: `webcal://markusbaumg.github.io/jahgenda/jahgenda.ics` (all shows) and
   `jahgenda-<canton>.ics` per canton — built by CI from `data/shows.json` on every deploy (`make ics`)
 - no login, no ads, no tracking
@@ -38,6 +40,7 @@ callout.js                             One callout component for every nudge (in
 log.html                               Public scraper log (renders data/runs.json).
 review.html                            Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
 mischpult.html                         The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
+img/fonts/jahdisplay.woff2             Display face (Anton subset, OFL): wordmark, day numbers, month heads.
 data/shows.json                        The shows. Written by the scraper.
 data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag.
 data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
@@ -72,33 +75,66 @@ Makefile                               Everything you can run: `make` shows the 
 
 ### Filters
 
-Search (band, club, town), one genre chip (order and labels from `data/genres.json`, with counts), and two
-dropdown panels hanging from the sticky toolbar — only one is open at a time, closed with ×, Escape, the
-button, a tap outside or the Back button. The active filters live in the URL hash
-(`#q=…&g=ska&wo=ZH,BE&r=25&wann=weekend`), so a filtered view survives a reload, can be bookmarked and sent
-with «Link zu dieser Auswahl»:
+Search (band, club, town — accents, umlauts and the spoken short names fold: geneve = Genève, Züri = Zürich),
+one genre chip (order and labels from `data/genres.json`; the count on every chip is what a tap on it yields
+under the other filters), and two dropdown panels hanging from the sticky toolbar — only one is open at a
+time, closed with ×, Escape, the button, a tap outside or the Back button. The active filters live in the
+URL hash (`#q=…&g=ska&f=festival&wo=ZH,BE&r=25&wann=weekend`), so a filtered view survives a reload, can be
+bookmarked and sent with «Link zu dieser Auswahl»:
 
-- **Wo** — cantons are multi-select chips with counts (Swiss cantons A–Z, neighbouring countries D/F/I/A/FL
-  at the end); the canton badge in a row toggles the same filter. **Mein Standort** asks the browser for the
-  position (only on a tap – on start just silently when the browser already allows it; never stored or sent
-  anywhere) and enables a radius (10/25/50 km),
-  distances in every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to
-  the show's town, arrival one hour before the show — `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen»
-  placeholder while the position is unknown.
-- **Wann** — Heute / Wochenende / 7 Tage, or any set of months picked on a clickable month histogram (bars
-  = number of shows after the other filters; past months dimmed and switching past shows on). The badge in
-  the toolbar names the active choice; nothing is stored across visits.
+- **Wo** — cantons are multi-select chips with counts, grouped Deutschschweiz · Romandie · Ticino · Grenznah
+  (D/F/I/A/FL), cantons without an upcoming show left out; the canton badge in a row toggles the same filter.
+  **Mein Standort** asks the browser for the position (only on a tap – on start just silently when the
+  browser already allows it; never stored or sent anywhere) and enables a radius (10/25/50 km), distances in
+  every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to the show's
+  town, arrival one hour before the show — `lib.sbbUrl`, tested; also an «SBB» action in the row for touch
+  screens) and a «Distanz & Zug anzeigen» placeholder while the position is unknown.
+- **Wann** — Heute / Morgen / Wochenende / 7 Tage, or any set of months picked on a clickable month
+  histogram (bars = number of shows after the other filters; past months dimmed and switching past shows on).
+  The badge in the toolbar names the active choice; nothing is stored across visits. Past shows can also be
+  opened from the last row under the list («↑ n vergangene Shows anzeigen»).
+
+Every active filter is a removable gold pill under the results row («Dub ✕ · Bern ✕ · Wochenende ✕»,
+«Alles zurücksetzen» from two on). When nothing matches, the empty state names the cause («Kein Dub im
+Tessin») and offers each removal with what it yields, the richest first. Links: `#<short hash>` (a show),
+`#m=…` (a shared list) and `#view=calendar|map` — combinable with `&`, parsed by one `parseHash()`; a stale
+show link says that the show is gone instead of silently showing everything. After every re-render the
+keyboard focus returns to the same control (row + action, canton badge, view button), or to the filter pills
+line as the fallback — never to `<body>`.
+
+The list itself is time-aware: inside a month the rows are grouped by day (one date cell per day), today and
+tomorrow carry a red HEUTE / MORGEN pill (only while the data is fresher than 48 h), the Fr–So of the coming
+weekend are red with a «Wochenende» rule before them, and past rows are muted with the word «vorbei».
+
+**Festivals** (`design/festival-spec.md`): a show with `end_date` is one range entry – a card with a tricolor
+top edge and the cross mark as a watermark, sitting in its start month with a «FR–SO» / «16–18» date cell
+(«LÄUFT» while it runs) and a ghost row «↳ … läuft noch bis So 1. Aug.» under the head of every later month it
+reaches into. Shows with six or more acts show the first four and fold the rest into «▸ Alle 12 Acts nach
+Tag» (per day from `days`, a search hit opens it). «Festival» is a format chip of its own next to the genres,
+calendar export and Google link span the whole range, calendar dots and map pins use the gold festival role.
 
 ### Views
 
-The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list, next to
-«Filter zurücksetzen»; the browser remembers the choice and the Back button returns from a switch; the result
-count stands next to the switch and, with the month span and the data stamp, in the footer bar). The calendar
-is a month grid (Mo–So, ‹ › and "Heute") with one pill per show;
-on the phone it becomes a compact grid with dots and the list of the tapped day below. The map loads Leaflet
-1.9.4 and OpenStreetMap tiles on first open only, shows one marker per venue (popup with the shows there),
-your own location on request, and shows without coordinates below under "Ohne Standort". A tap on a show in
-the calendar or the map jumps to its row in the list.
+The filtered shows are available as **Liste**, **Kalender** or **Karte** (switch above the list; the browser
+remembers the choice and the Back button returns from a switch; the result count stands next to the switch
+and, with the month span and the data stamp, in the footer bar). The calendar is a month grid (Mo–So, ‹ ›
+and "Heute", the month in the display face on the tricolor rule, today with a gold ring) with one pill per
+show (genre colour, «★» and green for «Ich gehe»); on the phone it becomes a compact grid with dots and the
+list of the tapped day below. The map (rounded frame) loads Leaflet 1.9.4 and OpenStreetMap tiles on first
+open only – offline it says «Karte braucht Netz» and points to the list – shows one striped pin per venue
+(popup with the shows there; gold centre = festival, star = «Ich gehe»), your own location on request, and
+shows without coordinates below under "Ohne Standort". A tap on a show in the calendar or the map jumps to
+its row in the list.
+
+**Motion and performance** (`design/ui-revamp.md` §4): every duration is a token (`--t-1` … `--t-4`,
+`--ease-tape`, `--ease-skank`, `--stagger`), all set to 0 ms under `prefers-reduced-motion` – the top
+stripe draws in once on load, the first ten rows enter staggered after a filter change (inside a view
+transition where the browser has one, else an opacity dip), the fader / echo on marking, a gold hairline
+under a stuck month head, the pulsing ring while the position is being located, the install sticker that
+slides in with the skank ease and can be swiped away. Month sections use `content-visibility: auto`; the
+canton coats of arms are svgo-optimised and the service worker precaches only the ones that occur in
+`data/shows.json`; the display face is a 9 KB self-hosted subset, preloaded. `prefers-contrast: more` and
+`forced-colors` get their own rules, and at 200 % zoom (viewports under 500 px high) the bar unsticks.
 
 ## Scraper
 
@@ -301,7 +337,7 @@ No dependencies beyond Python 3, Node (for prettier via npx) and the GitHub CLI.
 `e2e/` is a small [Playwright](https://playwright.dev) project that drives the real page in a browser:
 desktop Chrome (1280×800) and an iPhone 13 emulated in Chromium. One spec per area – list, search and
 genre chips, the Wo and Wann panels, the three views (the map really loads Leaflet), Meine Shows with
-share link and `.ics` download, the phone action sheet, mocked geolocation, and every page (`index.html`,
+share link and `.ics` download, the phone layout of the row actions, mocked geolocation, and every page (`index.html`,
 `log.html`, `review.html`, `mischpult.html`) loading without console errors. The interaction tests run
 against a fixture served in place of `data/shows.json` (dates relative to today), so they do not depend
 on what the scraper found; the load and console checks use the real data.

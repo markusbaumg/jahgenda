@@ -12,6 +12,7 @@ Exit code 0 = valid, 1 = problems found (printed one per line).
 The list of allowed genre slugs is read from data/genres.json.
 """
 
+import difflib
 import json
 import re
 import sys
@@ -67,6 +68,11 @@ URL_RE = re.compile(r"^https?://")
 LAT = (45.4, 48.3)
 LON = (5.4, 11.0)
 MAX_GENRES = 3
+# Range entries (festivals, open airs, weekenders: design/festival-spec.md) carry `end_date` and may add
+# `festival` to their music genres; a range longer than this is a season, not an event.
+MAX_FESTIVAL_GENRES = 4
+MAX_FESTIVAL_DAYS = 14
+MAX_ACTS = 40
 
 SHOW_REQUIRED = {"id": str, "date": str, "title": str, "venue": str, "city": str, "canton": str}
 SHOW_OPTIONAL = {
@@ -78,6 +84,8 @@ SHOW_OPTIONAL = {
     "lon": (int, float),
     "genres": list,
     "acts": list,
+    "end_date": str,
+    "days": dict,
 }
 ARTIST_FIELDS = {"genres", "source", "checked", "festivals", "tour_checked"}
 VENUE_REQUIRED = {"city": str, "canton": str, "lat": (int, float), "lon": (int, float)}
@@ -158,7 +166,7 @@ def check_slogans(data):
     return errs
 
 
-def check_genres(where, genres, allowed):
+def check_genres(where, genres, allowed, limit=MAX_GENRES):
     if not isinstance(genres, list):
         return [f"{where}: 'genres' must be a list"]
     errs = []
@@ -167,8 +175,8 @@ def check_genres(where, genres, allowed):
             errs.append(f"{where}: genre '{g}' must be a lowercase slug like 'roots' or 'lovers-rock'")
         elif allowed and g not in allowed:
             errs.append(f"{where}: genre '{g}' is not in data/genres.json")
-    if len(genres) > MAX_GENRES:
-        errs.append(f"{where}: at most {MAX_GENRES} genres")
+    if len(genres) > limit:
+        errs.append(f"{where}: at most {limit} genres")
     if len(set(map(str, genres))) != len(genres):
         errs.append(f"{where}: duplicate genre")
     return errs
@@ -196,17 +204,32 @@ def check_show(s, i, allow_past, today, allowed):
 
     if not ID_RE.match(s["id"]):
         errs.append(f"{where}: id must look like 'YYYY-MM-DD-slug'")
+    d = end = None
     try:
         d = datetime.strptime(s["date"], "%Y-%m-%d").date()
     except ValueError:
         errs.append(f"{where}: date must be YYYY-MM-DD")
-    else:
+    if "end_date" in s:
+        try:
+            end = datetime.strptime(s["end_date"], "%Y-%m-%d").date()
+        except ValueError:
+            errs.append(f"{where}: end_date must be YYYY-MM-DD")
+    if d is not None:
         if not s["id"].startswith(s["date"]):
             errs.append(f"{where}: id must start with the show's date")
-        if not allow_past and d < today:
-            errs.append(f"{where}: date {s['date']} is in the past")
+        # A running festival is not past: its last day counts.
+        if not allow_past and (end or d) < today:
+            errs.append(f"{where}: date {s.get('end_date') or s['date']} is in the past")
         if d > today + timedelta(days=2 * 366):
             errs.append(f"{where}: date {s['date']} is more than two years ahead")
+        if end is not None:
+            if end <= d:
+                errs.append(f"{where}: end_date must be after date")
+            elif (end - d).days > MAX_FESTIVAL_DAYS:
+                errs.append(
+                    f"{where}: end_date is more than {MAX_FESTIVAL_DAYS} days after date — "
+                    "a season, not an event"
+                )
 
     if s.get("time") and not TIME_RE.match(s["time"]):
         errs.append(f"{where}: time must be HH:MM")
@@ -224,10 +247,57 @@ def check_show(s, i, allow_past, today, allowed):
         if not (LAT[0] <= s["lat"] <= LAT[1] and LON[0] <= s["lon"] <= LON[1]):
             errs.append(f"{where}: coordinates are outside Switzerland and its border region")
     if "genres" in s:
-        errs += check_genres(where, s["genres"], allowed)
-    for a in s.get("acts", []):
+        errs += check_genres(where, s["genres"], allowed, MAX_FESTIVAL_GENRES if end else MAX_GENRES)
+    if end and "festival" not in (s.get("genres") or []):
+        errs.append(f"{where}: a show with end_date must carry the genre 'festival'")
+    acts = s.get("acts", [])
+    seen_acts = {}
+    for a in acts:
         if not isinstance(a, str) or not a.strip():
             errs.append(f"{where}: every entry in 'acts' must be a non-empty string")
+            continue
+        k = artist_key(a)
+        if k in seen_acts:
+            errs.append(f"{where}: act '{a}' is a near-duplicate of '{seen_acts[k]}' — keep one spelling")
+        seen_acts[k] = a
+    if len(acts) > MAX_ACTS:
+        errs.append(f"{where}: more than {MAX_ACTS} acts — a line-up, not a festival history")
+    if "days" in s:
+        errs += check_days(where, s["days"], d, end, seen_acts)
+    return errs
+
+
+def check_days(where, days, d, end, act_keys):
+    """`days` = {"YYYY-MM-DD": ["Act", …]}: every key inside [date, end_date], every act in `acts`
+    (compared through artist_key; a miss names the closest spelling), no act twice on one day."""
+    if end is None:
+        return [f"{where}: 'days' needs 'end_date'"]
+    errs = []
+    for key, acts in days.items():
+        try:
+            day = datetime.strptime(str(key), "%Y-%m-%d").date()
+        except ValueError:
+            errs.append(f"{where}: days key '{key}' must be YYYY-MM-DD")
+            continue
+        if d is not None and not (d <= day <= end):
+            errs.append(f"{where}: days key '{key}' lies outside {d}..{end}")
+        if not isinstance(acts, list) or not acts:
+            errs.append(f"{where}: days['{key}'] must be a non-empty list of acts")
+            continue
+        seen = set()
+        for a in acts:
+            if not isinstance(a, str) or not a.strip():
+                errs.append(f"{where}: days['{key}'] has an empty act name")
+                continue
+            k = artist_key(a)
+            if k in seen:
+                errs.append(f"{where}: act '{a}' is listed twice on {key}")
+            seen.add(k)
+            if k not in act_keys:
+                close = [n for kk, n in act_keys.items() if kk.startswith(k) or k.startswith(kk)]
+                close = close or difflib.get_close_matches(a, list(act_keys.values()), n=1, cutoff=0.6)
+                hint = f" — did you mean '{close[0]}'?" if close else ""
+                errs.append(f"{where}: days act '{a}' is not in acts{hint}")
     return errs
 
 
@@ -337,6 +407,49 @@ def check_shows(data, allow_past, allowed, venue_keys=None, venues=None):
             )
         elif source == "scraper" and venues is not None and isinstance(s.get("venue"), str):
             errs += check_show_venue(s, i, venues.get(venue_keys.get(venue_key(s["venue"]), s["venue"])))
+    return errs + check_ranges(shows)
+
+
+def festival_slug(title):
+    """Title without a four-digit year, as a key: 'Reeds Festival 2027' → 'reedsfestival'."""
+    return norm_key(re.sub(r"\b(19|20)\d{2}\b", "", str(title)))
+
+
+def check_ranges(shows):
+    """Second pass over range entries (end_date): the same festival twice in one year is a duplicate, and
+    a show without end_date at the same venue inside the range is the old one-entry-per-day pattern —
+    its acts belong into the festival's acts/days."""
+    ranges = []
+    for i, s in enumerate(shows):
+        if not isinstance(s, dict) or not isinstance(s.get("end_date"), str):
+            continue
+        try:
+            d = datetime.strptime(str(s.get("date")), "%Y-%m-%d").date()
+            end = datetime.strptime(s["end_date"], "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        ranges.append((i, s, d, end))
+    errs = []
+    seen = {}
+    for i, s, d, end in ranges:
+        key = (festival_slug(s.get("title")), d.year)
+        if key in seen:
+            errs.append(f"shows[{i}] ({s.get('id')}): duplicate festival — same as {seen[key]}")
+        else:
+            seen[key] = s.get("id")
+    for j, t in enumerate(shows):
+        if not isinstance(t, dict) or "end_date" in t or not isinstance(t.get("venue"), str):
+            continue
+        try:
+            td = datetime.strptime(str(t.get("date")), "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        for i, s, d, end in ranges:
+            if i != j and venue_key(s.get("venue")) == venue_key(t["venue"]) and d <= td <= end:
+                errs.append(
+                    f"shows[{j}] ({t.get('id')}): lies inside the range of {s.get('id')} at the same venue — "
+                    "merge it into that festival's acts/days"
+                )
     return errs
 
 

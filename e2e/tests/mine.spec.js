@@ -10,18 +10,27 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
   const row = page.locator("#list .show").first();
   const star = row.locator(".act.star");
   if (!isMobile) await row.hover(); // desktop reveals the actions on hover
+  // The ★ is always in the toolbar: muted and «disabled» until something is marked.
   const toggle = page.locator("#toggle-mine");
-  await expect(toggle).toBeHidden();
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveClass(/empty/);
+  await expect(toggle).toHaveAttribute("aria-disabled", "true");
+  await expect(toggle.locator("b")).toHaveText("0");
 
   await star.click();
   await expect(row).toHaveClass(/interested/);
-  await expect(star).toHaveText("Interessiert");
-  await expect(toggle).toBeVisible();
+  await expect(star).toHaveAttribute("aria-pressed", "true");
+  await expect(star.locator(".lbl")).toHaveText("Gemerkt: Interessiert");
+  await expect(toggle).not.toHaveClass(/empty/);
   await expect(toggle.locator("b")).toHaveText("1");
 
-  await star.click();
+  // The state is a two-segment toggle inside the marked row (the star never cycles: a second tap un-marks).
+  const seg = row.locator(".mark-seg");
+  await expect(seg.locator('[data-state="interested"]')).toHaveAttribute("aria-pressed", "true");
+  await seg.locator('[data-state="going"]').click();
   await expect(row).toHaveClass(/going/);
-  await expect(star).toHaveText("Ich gehe");
+  await expect(seg.locator('[data-state="going"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(star.locator(".lbl")).toHaveText("Gemerkt: Ich gehe");
 
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
@@ -29,12 +38,13 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
   await expect(panel).toBeVisible();
   await expect(page.locator("#list .show")).toHaveCount(1);
 
-  // Share link: the WhatsApp button carries the same #m=<short>g link that «Liste teilen» copies.
+  // Share link: «Teilen» is the WhatsApp link where navigator.share is missing (the test browser) and
+  // carries the same #m=<short>g link that «Link» copies.
   const wa = await page.locator("#mine-wa").getAttribute("href");
   expect(decodeURIComponent(wa)).toMatch(/#m=[a-z0-9]+g$/);
-  const share = panel.locator('[data-mine="share"]');
-  await share.click();
-  await expect(share.locator("span")).toHaveText(/^Kopiert|Kopieren nicht möglich/);
+  const copy = panel.locator('[data-mine="link"]');
+  await copy.click();
+  await expect(copy.locator(".fb")).toHaveText(/^Kopiert|Link in Adresszeile/);
   const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(() => "");
   if (copied) expect(copied).toMatch(/#m=[a-z0-9]+g$/);
 
@@ -46,7 +56,7 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
   await useFixture(fp);
   await fp.goto(`/${link}`);
   await expect(fp.locator("#list .show")).toHaveCount(1);
-  await expect(fp.locator("#list .show .tag-chip.going")).toHaveText("geht hin");
+  await expect(fp.locator("#list .show .goes")).toHaveText("geht hin"); // the friend's «Ich gehe», green words
   await expect(fp.locator("#results-text")).toHaveText(/^Geteilte Liste · 1 Show/);
   await expect(fp.locator("body")).toHaveClass(/list-shared/);
   await fp.click("#list-close"); // «Zurück zur Agenda» in the list-mode header
@@ -61,7 +71,7 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
 });
 
 test("the per-show calendar button downloads one .ics", async ({ page, isMobile }) => {
-  test.skip(isMobile, "the phone keeps this action in the sheet (see phone.spec.js)");
+  test.skip(isMobile, "the phone's inline action is covered in phone.spec.js");
   await useFixture(page);
   await openList(page);
   const row = page.locator("#list .show").first();

@@ -18,7 +18,9 @@ A concert, party or session where **at least one act** clearly belongs to one of
 
 Also included:
 
-- Reggae festivals and reggae stages at bigger festivals (one entry per day)
+- Reggae festivals, open airs and weekenders over several days **as ONE entry with `end_date`** – never one
+  entry per day. Reggae stages at mixed festivals (Afro-Pfingsten) likewise one entry with `end_date`,
+  `acts` = only the reggae acts (data model: design/festival-spec.md)
 - DJ nights where reggae / dancehall / ska is the main focus (e.g. "Roots Night", "Selecta Night")
 - Tribute nights to reggae artists
 

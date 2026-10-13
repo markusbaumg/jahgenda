@@ -16,11 +16,13 @@ test("typing while the data loads keeps the skeleton; a 500 shows an error with 
     await route.fulfill({ status: 500, body: "nope" });
   });
   await page.goto("/");
-  await expect(page.locator("#list .skeleton")).toBeVisible();
+  const skeleton = page.locator("#status .skeleton"); // the six skeleton day groups live in #status
+  await expect(skeleton).toBeVisible();
   await page.fill("#q", "dub");
   await page.waitForTimeout(200);
-  await expect(page.locator("#list .skeleton")).toBeVisible();
-  await expect(page.locator("#status")).toHaveText("");
+  await expect(skeleton).toBeVisible();
+  // Nothing but the sr loading line: no false «Noch nichts im Kalender» (the skeleton itself has no text).
+  await expect(page.locator("#status")).toHaveText("Lade Konzerte …");
 
   release();
   await expect(page.locator("#status .big")).toHaveText("Daten konnten nicht geladen werden"); // online, so not «Kein Empfang»
@@ -45,7 +47,7 @@ test("a search with no result while scrolled brings «Nichts gefunden» into vie
   await page.evaluate(() => (document.querySelector(".foot").style.minHeight = "3000px"));
   await page.evaluate(() => window.scrollTo(0, 1200));
   await page.fill("#q", "zzzz");
-  await expect(page.locator("#status .big")).toHaveText("Nichts gefunden");
+  await expect(page.locator("#status .big")).toHaveText("Nichts zu «zzzz»"); // the empty state names the cause
   await page.waitForTimeout(300); // the bar grows a row when it sticks; the page corrects once more
   const box = await page.locator("#status").boundingBox();
   const bar = await page.locator("#filters").boundingBox();

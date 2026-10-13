@@ -26,6 +26,7 @@ const SHELL = [
   "manifest.webmanifest",
   "img/about.jpg",
   "img/logo/jahgenda.svg",
+  "img/fonts/jahdisplay.woff2",
   "img/icons/icon-192.png",
   "img/icons/icon-512.png",
 ];
@@ -36,8 +37,25 @@ const DATA = ["data/shows.json", "data/genres.json", "data/venues.json", "data/s
 // is otherwise worse than airplane mode: nothing at all would appear). The fetch goes on in the
 // background and refreshes the cache for the next visit.
 const NETWORK_TIMEOUT = 4000;
-// The canton flags are not precached (31 files, most for cantons without a show): the fetch handler
-// stores every same-origin file on first use, so the flags that were actually seen stay available offline.
+// Canton flags: only the ones of cantons that occur in data/shows.json are precached (read from the copy
+// just fetched into the data cache); the fetch handler stores any other same-origin file on first use.
+async function precacheCantons() {
+  try {
+    const [shell, data] = await Promise.all([caches.open(SHELL_CACHE), caches.open(DATA_CACHE)]);
+    const res = await data.match("data/shows.json");
+    const json = res ? await res.json() : null;
+    const cantons = new Set((json && json.shows ? json.shows : []).map((s) => s.canton).filter(Boolean));
+    await Promise.all(
+      [...cantons].map((c) =>
+        shell
+          .add(new Request(`img/cantons/${encodeURIComponent(c)}.svg`, { cache: "reload" }))
+          .catch(() => {}),
+      ),
+    );
+  } catch {
+    /* best effort: a flag that is missing is fetched on first use */
+  }
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -52,7 +70,7 @@ self.addEventListener("install", (event) => {
         .then((cache) =>
           Promise.all(DATA.map((u) => cache.add(new Request(u, { cache: "reload" })).catch(() => {}))),
         ),
-    ]),
+    ]).then(precacheCantons),
   );
 });
 

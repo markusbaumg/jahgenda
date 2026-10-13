@@ -1,7 +1,7 @@
 // Keyboard and screen-reader basics: skip links first, toolbar buttons with names that say what is
 // set, the focus never dropped to <body> after a reset, no tab stops on other-month calendar days.
 const { test, expect } = require("@playwright/test");
-const { useFixture, openList } = require("./helpers");
+const { useFixture, openList, pill } = require("./helpers");
 
 test.beforeEach(async ({ page }) => {
   await useFixture(page);
@@ -20,7 +20,7 @@ test("skip links are the first tab stops and jump to the agenda and the footer",
   expect(await page.evaluate(() => document.activeElement.closest("#list") !== null)).toBe(true);
 });
 
-test("Wo, Wann and ★ announce what is set; a reset keeps the focus on the search", async ({
+test("Wo, Wann and ★ announce what is set; a reset never drops the focus to <body>", async ({
   page,
   isMobile,
 }) => {
@@ -38,10 +38,19 @@ test("Wo, Wann and ★ announce what is set; a reset keeps the focus on the sear
   if (!isMobile) await expect(where.locator(".icon-word")).toBeHidden(); // the badge takes the word's place
   await page.keyboard.press("Escape");
   await expect(page.locator("#results-count")).toHaveText("2 Konzerte");
-  await page.locator("#clear-filters").focus();
+  // Removing the filter from the keyboard: the pill is gone after the re-render, so the focus moves to the
+  // active-filter line (#results, tabindex=-1) – never to <body>.
+  await pill(page, "canton", "BE").focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#results")).toBeFocused();
+  await expect(where).toHaveAttribute("aria-label", "Wo: alle Orte");
+  // A reset from the empty state puts the focus back on the search.
+  await page.fill("#q", "xyzzy");
+  await page.locator('#genres .chip[data-genre="ska"]').click();
+  await page.locator("#status #reset").focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#q")).toBeFocused();
-  await expect(where).toHaveAttribute("aria-label", "Wo: alle Orte");
+  await expect(page.locator("#q")).toHaveValue("");
 
   const row = page.locator("#list .show").first();
   const star = row.locator(".act.star");

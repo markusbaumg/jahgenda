@@ -1,6 +1,6 @@
 // The list: loads with month headings (real data), search and genre chips filter (fixture).
 const { test, expect } = require("@playwright/test");
-const { FIXTURE, useFixture, openList, results } = require("./helpers");
+const { FIXTURE, useFixture, openList, results, chipCount, pill } = require("./helpers");
 
 test("loads the real data and groups shows by month", async ({ page }) => {
   await page.goto("/");
@@ -28,7 +28,7 @@ test.describe("with fixture data", () => {
     await page.fill("#q", "Dub Station");
     await expect(rows).toHaveCount(1);
     await expect(results(page)).toHaveText(/^1 Konzert für diese Auswahl/);
-    await expect(page.locator("#clear-filters")).toBeVisible();
+    await expect(pill(page, "q")).toHaveText(/«Dub Station»/); // the search as a removable pill
 
     await page.fill("#q", "luzern");
     await expect(rows).toHaveCount(FIXTURE.perCanton.LU);
@@ -52,8 +52,11 @@ test.describe("with fixture data", () => {
     }
 
     await page.fill("#q", "xyzzy");
-    await expect(page.locator("#status .big")).toHaveText("Nichts gefunden");
-    await page.click("#status #reset");
+    await expect(page.locator("#status .big")).toHaveText("Nichts zu «xyzzy»"); // names the cause
+    // The empty state offers to remove the search with what that yields (the only filter: no «Alles zurücksetzen»).
+    const fix = page.locator('#status .fix[data-remove="q"]');
+    await expect(fix).toHaveText(new RegExp(`«xyzzy» entfernen → ${FIXTURE.upcoming} Shows`));
+    await fix.click();
     await expect(rows).toHaveCount(FIXTURE.upcoming);
     await expect(page.locator("#q")).toHaveValue("");
   });
@@ -63,7 +66,7 @@ test.describe("with fixture data", () => {
     await expect(chips.first()).toHaveText("Alle");
     await expect(chips.first()).toHaveAttribute("aria-pressed", "true");
     const ska = page.locator('#genres .chip[data-genre="ska"]');
-    await expect(ska.locator("small")).toHaveText(String(FIXTURE.ska));
+    await expect(ska.locator("small")).toHaveText(chipCount(FIXTURE.ska));
 
     await ska.click();
     await expect(ska).toHaveAttribute("aria-pressed", "true");

@@ -101,14 +101,57 @@
       .replace(/,/g, "\\,")
       .replace(/\n/g, "\\n");
 
-  const description = (show, url) => `${safeUrl(show.url) || ""}\n${url}`.trim();
+  // ---- Festivals (design/festival-spec.md) ------------------------------------------------------
+  // A show with `end_date` is a range entry. Its line-up as text lines: one per day from `days`
+  // («Fr 16.7.: Dub Inc, Mellow Mood»), then the acts without a day («Tag offen: …»); without days the
+  // flat list. Empty without acts. Used by the calendar export (.ics, Google) and the share text.
+  const dowShort = (d) => new Intl.DateTimeFormat("de-CH", { weekday: "short" }).format(d).replace(".", "");
+  const dm = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
+  function lineupLines(show) {
+    const acts = (show.acts || []).map(String);
+    const days = show.days && typeof show.days === "object" ? show.days : {};
+    const keys = Object.keys(days).sort();
+    if (!acts.length && !keys.length) return [];
+    if (!keys.length) return [acts.join(", ")];
+    const placed = new Set();
+    const out = [];
+    for (const key of keys) {
+      const list = (days[key] || []).map(String);
+      const d = parseDay(key);
+      out.push(`${dowShort(d)} ${dm(d)}: ${list.join(", ")}`);
+      for (const a of list) placed.add(venueKey(a)); // the validator's artist_key rule
+    }
+    const rest = acts.filter((a) => !placed.has(venueKey(a)));
+    if (rest.length) out.push(`Tag offen: ${rest.join(", ")}`);
+    return out;
+  }
+
+  // «Fr 16.7.2026» for a show, «Fr 16.7. – So 18.7.2027» for a range entry.
+  function dateText(show) {
+    const a = parseDay(show.date);
+    if (!show.end_date) return `${dowShort(a)} ${dm(a)}${a.getFullYear()}`;
+    const b = parseDay(show.end_date);
+    return `${dowShort(a)} ${dm(a)} – ${dowShort(b)} ${dm(b)}${b.getFullYear()}`;
+  }
+
+  // The day after a calendar day as YYYYMMDD (exclusive DTEND of an all-day event).
+  const nextDayStamp = (s) => {
+    const day = parseDay(s);
+    return localStamp(new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1)).slice(0, 8);
+  };
+
+  const description = (show, url) =>
+    [...(show.end_date ? lineupLines(show) : []), safeUrl(show.url) || "", url].filter(Boolean).join("\n");
 
   // One VEVENT (as lines) for a show. opts: { url: the show's page on Jahgenda, now: Date for
   // DTSTAMP, status: "CONFIRMED" | "TENTATIVE" | undefined }.
   function vevent(show, opts) {
     const { url = "", now = new Date(), status } = opts || {};
     let when;
-    if (show.time) {
+    if (show.end_date) {
+      // A festival is one all-day event over the whole range; its door time is not a start time.
+      when = `DTSTART;VALUE=DATE:${show.date.replace(/-/g, "")}\r\nDTEND;VALUE=DATE:${nextDayStamp(show.end_date)}`;
+    } else if (show.time) {
       const [start, end] = showSpan(show);
       when = `DTSTART;TZID=${TZID}:${localStamp(start)}\r\nDTEND;TZID=${TZID}:${localStamp(end)}`;
     } else {
@@ -147,13 +190,13 @@
   function gcalUrl(show, opts) {
     const { url = "" } = opts || {};
     let dates;
-    if (show.time) {
+    if (show.end_date) {
+      dates = `${show.date.replace(/-/g, "")}/${nextDayStamp(show.end_date)}`;
+    } else if (show.time) {
       const [start, end] = showSpan(show);
       dates = `${localStamp(start)}/${localStamp(end)}`;
     } else {
-      const day = parseDay(show.date);
-      const next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
-      dates = `${show.date.replace(/-/g, "")}/${localStamp(next).slice(0, 8)}`;
+      dates = `${show.date.replace(/-/g, "")}/${nextDayStamp(show.date)}`;
     }
     const p = new URLSearchParams({
       action: "TEMPLATE",
@@ -179,8 +222,34 @@
     return `https://www.sbb.ch/de?${p}`;
   }
 
+  // ---- Links --------------------------------------------------------------------------------
+  // One parser for every hash the page writes or accepts: #<short hash or id> (a show), #m=<list> /
+  // #mine=<list> (a shared list) and #view=<name> (the view switch); parts may be combined with "&" in
+  // any order, e.g. #view=map&m=…. Returns { id, mine, view } with "" for what is absent; a bad escape in
+  // the id never throws. `views` lists the view names that count.
+  function parseHash(hash, views = ["list", "calendar", "map"]) {
+    const out = { id: "", mine: "", view: "" };
+    for (const part of String(hash || "")
+      .replace(/^#/, "")
+      .split("&")) {
+      if (/^(mine|m)=/.test(part)) out.mine = part.replace(/^(mine|m)=/, "");
+      else if (part.startsWith("view=")) {
+        const v = part.slice(5);
+        if (views.includes(v)) out.view = v;
+      } else if (part && !out.id) {
+        try {
+          out.id = decodeURIComponent(part);
+        } catch {
+          out.id = part;
+        }
+      }
+    }
+    return out;
+  }
+
   return {
     shortId,
+    parseHash,
     venueKey,
     safeUrl,
     escape,
@@ -191,5 +260,7 @@
     icsFor,
     gcalUrl,
     sbbUrl,
+    lineupLines,
+    dateText,
   };
 });
