@@ -95,6 +95,13 @@ Rules while collecting:
 
 - **Never invent a show.** Every candidate must come from a page you actually opened. Record that page as
   `source_url`.
+- **Cancellations carry forward.** Before you add a candidate, look through the `dropped` lists of the
+  `data/runs.json` entries (all of them, also `"runner": "manual"` hand corrections) for the same date +
+  venue. If an earlier run dropped it as cancelled («abgesagt», «cancelled», «annulé»), add it only after
+  you opened the venue's event page or the ticket page (`url` / `tickets`) and it no longer says so — and
+  name that page as `source_url`. Otherwise drop it again with the same reason. A cancellation on the
+  venue's or the ticket shop's page beats an aggregator (Skalender, Eventfrog lists, search tiles) that
+  still lists the date.
 - If a page does not load (timeout, 403, bot wall), skip it after one retry and list it in the run log.
   Do not try to get around bot protection — use the other sources for that venue instead.
 - Dates: `YYYY-MM-DD` local date. If only a weekday and day are given, resolve them against the page's
