@@ -280,6 +280,17 @@
   // callout.js loads after this file: always look it up when needed.
   const callout = () => window.jahCallout;
   let nudgeQuietUntil = 0; // no nudge for a moment after a filter interaction or a deep-link landing
+  // A nudge (install, subscribe) waits while the visitor is busy with a panel, the sheet, the map, a
+  // filter they just touched, or has just landed on a shared show. callout.js is the last script on the
+  // page, and the agenda can be in before it has run (a cached or fixture response beats a busy server):
+  // the blocker is handed over once both are there, whichever comes last.
+  const nudgeBlocked = () =>
+    Boolean(openPanel) || !sheet.hidden || view === "map" || Date.now() < nudgeQuietUntil;
+  function armCallout() {
+    if (callout()) callout().setBlocker(nudgeBlocked);
+    else if (document.readyState === "loading")
+      document.addEventListener("DOMContentLoaded", armCallout, { once: true });
+  }
 
   const shareText = (s) =>
     `${s.title} – ${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.${s._day.getFullYear()}` +
@@ -760,12 +771,6 @@
         stampText = `Stand: ${stampFmt.format(new Date(data.updated))}${note}${old}`;
         updateStamp();
       }
-      // A nudge (install, subscribe) waits while the visitor is busy with a panel, the sheet, the map,
-      // a filter they just touched, or has just landed on a shared show.
-      if (callout())
-        callout().setBlocker(
-          () => Boolean(openPanel) || !sheet.hidden || view === "map" || Date.now() < nudgeQuietUntil,
-        );
       render();
       revealFromHash();
       loadVenues();
@@ -2238,5 +2243,6 @@
   });
 
   search.addEventListener("input", renderAndKeepInView);
+  armCallout();
   init();
 })();
