@@ -4,6 +4,7 @@
    * month if needed. Ported from the list branch of app.js renderInner(). */
   import DayGroup from "./DayGroup.svelte";
   import { agenda, isFestival } from "../stores/agenda.svelte.js";
+  import { ui } from "../stores/filters.svelte.js";
   import {
     monthStart,
     addDays,
@@ -35,7 +36,7 @@
     // The «Wochenende» rule is drawn once, before the first day of the coming weekend – not while a
     // Heute / Morgen / Wochenende quick pick already says which days these are.
     const [wkStart, wkEnd] = weekendRange(agenda.today || todayStart());
-    let ruleDue = true;
+    let ruleDue = !["today", "tomorrow", "weekend"].includes(ui.quickActive());
     return [...map.values()]
       .sort((a, b) => a.key.localeCompare(b.key))
       .map((g) => {

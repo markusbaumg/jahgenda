@@ -1,11 +1,33 @@
 <script>
   /* #status: the loading skeleton (six skeleton day groups in the final grid), the error state with its
    * retry, and the empty states. Copy and markup as in index.html / app.js. The filter-aware empty state
-   * («Kein Dub im Tessin» with the fixes) arrives with the filter bar story. */
+   * («Kein Dub im Tessin» with the fixes) is filters/EmptyState.svelte. */
   import { agenda } from "../stores/agenda.svelte.js";
+  import EmptyState from "./filters/EmptyState.svelte";
 
   let { onretry } = $props();
   const offline = $derived(agenda.loadState === "error" && navigator.onLine === false);
+
+  // The only recovery must be on screen: on a 320 px phone and in landscape the card (header + bar +
+  // results row above it) ends below the fold – the page scrolls just far enough to show the button.
+  function revealRetry() {
+    const btn = document.getElementById("retry");
+    const status = document.getElementById("status");
+    const bar = document.getElementById("filters");
+    if (!btn || !status) return;
+    const below = btn.getBoundingClientRect().bottom + 16 - innerHeight;
+    if (below <= 0) return;
+    const underBar = status.getBoundingClientRect().top + window.scrollY - (bar ? bar.offsetHeight : 0) - 8;
+    window.scrollTo({ top: Math.min(underBar, window.scrollY + below) });
+  }
+  $effect(() => {
+    if (agenda.loadState !== "error") return;
+    revealRetry();
+    // The display face may still be loading: once it is in, the heading is a few px taller.
+    document.fonts.ready.then(revealRetry);
+    const t = setTimeout(revealRetry, 300);
+    return () => clearTimeout(t);
+  });
 </script>
 
 <div
@@ -59,25 +81,7 @@
       <p class="big">Noch nichts im Kalender</p>
       <p>Sobald der Scraper etwas findet, steht es hier.</p>
     {:else}
-      <!-- Sun over mountains in the brand line weight (logo 06 «Alpen & Sonne», design/logos.html). -->
-      <p class="state-icon">
-        <svg
-          viewBox="0 0 64 64"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          ><circle cx="42" cy="21" r="8" /><path
-            d="M42 5v4M42 33v4M26 21h4M54 21h4M30.7 9.7l2.8 2.8M50.5 29.5l2.8 2.8M53.3 9.7l-2.8 2.8M30.7 32.3l2.8-2.8"
-          /><path d="M4 56 22 28l10 16 8-10 20 22" /><path
-            d="M19.5 32l2.5-2.5 2.5 2.5M37.5 37l2.5-2.5 2.5 2.5"
-          /><path d="M4 56h56" /></svg
-        >
-      </p>
-      <p class="big">Nichts für diese Auswahl</p>
-      <p>Für diese Auswahl gibt es gerade nichts.</p>
+      <EmptyState />
     {/if}
   {/if}
 </div>
