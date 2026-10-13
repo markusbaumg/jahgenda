@@ -22,7 +22,7 @@ test("typing while the data loads keeps the skeleton; a 500 shows an error with 
   await page.waitForTimeout(200);
   await expect(skeleton).toBeVisible();
   // Nothing but the sr loading line: no false «Noch nichts im Kalender» (the skeleton itself has no text).
-  await expect(page.locator("#status")).toHaveText("Lade Konzerte …");
+  await expect(page.locator("#status")).toHaveText("Lade Shows …");
 
   release();
   await expect(page.locator("#status .big")).toHaveText("Daten konnten nicht geladen werden"); // online, so not «Kein Empfang»

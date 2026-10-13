@@ -13,7 +13,7 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
   const badge = page.locator("#toggle-when b");
   const count = page.locator("#when-count");
   await expect(badge).toBeHidden();
-  await expect(count).toHaveText(`Alle ${FIXTURE.upcoming} kommenden Konzerte`);
+  await expect(count).toHaveText(`Alle ${FIXTURE.upcoming} kommenden Shows`);
 
   const panel = page.locator("#when-panel");
   const heute = page.locator('#when-panel [data-quick="today"]');
@@ -26,7 +26,7 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
   await expect(panel).toBeVisible();
   await expect(heute).toHaveAttribute("aria-pressed", "true");
   await expect(badge).toHaveText("Heute"); // the badge names the quick pick, not its dates
-  await expect(count).toHaveText("1 Konzert im Zeitraum"); // the fixture has exactly one show today
+  await expect(count).toHaveText("1 Show im Zeitraum"); // the fixture has exactly one show today
   await expect(page.locator("#list .show")).toHaveCount(1);
   await expect(results(page)).toHaveText(/für diese Auswahl · .* · Heute$/);
 
@@ -37,7 +37,7 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
   await expect(week).toHaveAttribute("aria-pressed", "true");
   await expect(heute).toHaveAttribute("aria-pressed", "false");
   await expect(badge).toHaveText("7 Tage");
-  await expect(count).toHaveText("2 Konzerte im Zeitraum"); // today + 3 days
+  await expect(count).toHaveText("2 Shows im Zeitraum"); // today + 3 days
 
   const weekend = page.locator('#when-panel [data-quick="weekend"]');
   await weekend.click();
@@ -67,8 +67,8 @@ test("month histogram: a bar per month, click selects the month", async ({ page 
   const [, hMax] = heights.find(([n]) => n === Math.max(...heights.map(([n]) => n)));
   for (const [n, h] of heights)
     if (n && n < Math.max(...heights.map(([n]) => n))) expect(h).toBeLessThan(hMax - 4);
-  // Every bar has an accessible name with the unit, e.g. «Oktober 2026, 4 Konzerte».
-  await expect(bars.first()).toHaveAttribute("aria-label", /^\S+ \d{4}, \d+ Konzerte?$/);
+  // Every bar has an accessible name with the unit, e.g. «Oktober 2026, 4 Shows».
+  await expect(bars.first()).toHaveAttribute("aria-label", /^\S+ \d{4}, \d+ Shows?$/);
   // The year suffix appears at most once per year in the labels.
   const labels = await bars.locator("span").allTextContents();
   const years = labels.filter((l) => /’\d\d/.test(l)).map((l) => l.slice(-2));
@@ -83,7 +83,7 @@ test("month histogram: a bar per month, click selects the month", async ({ page 
   await bar.click();
   await expect(bar).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("#toggle-when b")).toHaveText(label);
-  await expect(page.locator("#when-count")).toHaveText(`${n} Konzerte im Zeitraum`);
+  await expect(page.locator("#when-count")).toHaveText(`${n} Shows im Zeitraum`);
   await expect(page.locator("#list .show")).toHaveCount(n);
   await expect(page.locator("#when-months .bar.dim").first()).toBeVisible(); // the others dim
 

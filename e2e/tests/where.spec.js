@@ -50,7 +50,7 @@ test("cantons are a multi-select with counts; «Alle» resets", async ({ page })
 
   await chip("BE").click();
   await expect(page.locator("#list .show")).toHaveCount(ZH + BE);
-  await expect(results(page)).toHaveText(new RegExp(`^${ZH + BE} Konzerte für diese Auswahl`));
+  await expect(results(page)).toHaveText(new RegExp(`^${ZH + BE} Shows für diese Auswahl`));
   await expect(badge).toHaveText("ZH · BE");
   await expect(page.locator("#where-panel")).toBeVisible(); // choosing does not close the panel
 

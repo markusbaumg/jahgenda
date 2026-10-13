@@ -643,7 +643,7 @@
     const url = safeUrl(s.url);
     // A title with a URL is recognisable as a link: dotted gold underline, «↗» and sr text.
     const title = url
-      ? `<a class="ext" href="${escape(url)}" target="_blank" rel="noopener" title="Konzertseite beim Veranstalter öffnen">${escape(s.title)}<span class="ext-mark" aria-hidden="true">↗</span><span class="sr"> (öffnet externe Seite)</span></a>`
+      ? `<a class="ext" href="${escape(url)}" target="_blank" rel="noopener" title="Seite des Veranstalters öffnen">${escape(s.title)}<span class="ext-mark" aria-hidden="true">↗</span><span class="sr"> (öffnet externe Seite)</span></a>`
       : escape(s.title);
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
     // Genres are muted words at the end of the meta line; the active genre chip is not repeated.
@@ -895,10 +895,10 @@
   // change, the chips do not move (reserved width in CSS).
   function updateCounts() {
     if (listMode()) return;
-    // Screen readers hear «Reggae, 75 Konzerte»: the unit sits in the count as sr text, so the accessible
+    // Screen readers hear «Reggae, 75 Shows»: the unit sits in the count as sr text, so the accessible
     // name still contains the visible words (an aria-label with the same words would not).
     const count = (n) =>
-      `<span class="sr">, </span>${n}<span class="sr"> ${n === 1 ? "Konzert" : "Konzerte"}</span>`;
+      `<span class="sr">, </span>${n}<span class="sr"> ${n === 1 ? "Show" : "Shows"}</span>`;
     // A chip with nothing behind it under the other filters (Wo under «Heute»: 20 of 21 cantons at 0) is
     // dimmed, so the live ones stand out; it stays tappable – the empty state then offers the way back.
     const dimEmpty = (c, n) =>
@@ -1035,17 +1035,17 @@
     syncFilterHash();
     const span = monthSpan(visible);
     const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
-    // Festivals are counted apart from the concerts: «12 Konzerte · 1 Festival · Juli 2027».
+    // Festivals are counted apart from the concerts: «12 Shows · 1 Festival · Juli 2027».
     const nFest = visible.filter(isFestival).length;
     const nConc = visible.length - nFest;
     const festNote = nFest ? `${nConc ? " · " : ""}${nFest} ${nFest === 1 ? "Festival" : "Festivals"}` : "";
-    const concerts = nConc ? `${nConc} ${nConc === 1 ? "Konzert" : "Konzerte"}` : "";
+    const concerts = nConc ? `${nConc} ${nConc === 1 ? "Show" : "Shows"}` : "";
     resultsText.textContent = shared
       ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
       : `${concerts}${festNote}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
     resultsLive.textContent = resultsText.textContent;
     // The count where the list begins (the full line with the span is in the footer bar).
-    el("results-count").textContent = `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}`;
+    el("results-count").textContent = `${visible.length} ${visible.length === 1 ? "Show" : "Shows"}`;
 
     list.hidden = v !== "list";
     calendarEl.hidden = v !== "calendar";
@@ -1442,8 +1442,8 @@
       status.innerHTML =
         `<p class="state-icon">${STATE_ICONS.offline}</p>` +
         `<p class="big">${offline ? "Kein Empfang" : "Daten konnten nicht geladen werden"}</p>` +
-        `<p>${offline ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es." : "Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen."}</p>` +
-        `<button type="button" class="primary" id="retry" title="Konzerte nochmals laden">Nochmals versuchen</button>`;
+        `<p>${offline ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es." : "Die Shows konnten nicht geladen werden. Bitte später nochmals versuchen."}</p>` +
+        `<button type="button" class="primary" id="retry" title="Shows nochmals laden">Nochmals versuchen</button>`;
       // The only recovery must be on screen: on a 320 px phone and in landscape the card (header + bar +
       // results row above it) ends below the fold – the page scrolls just far enough to show the button.
       const revealRetry = () => {
@@ -2523,7 +2523,7 @@
         if (d < thisMonth) cls.push("past");
         if (months.size && !months.has(k)) cls.push("dim");
         if (monthKey(d) === monthKey(thisMonth)) cls.push("today");
-        const count = n === 1 ? "1 Konzert" : `${n} Konzerte`;
+        const count = n === 1 ? "1 Show" : `${n} Shows`;
         const title = `${monthFmt.format(d)}: ${count}${d < thisMonth ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`;
         return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" aria-label="${escape(`${monthFmt.format(d)}, ${count}`)}" title="${escape(title)}" style="--h:${(n / max).toFixed(2)}"><b>${n || ""}</b><i></i><span>${monthLabel(d, i)}</span></button>`;
       })
@@ -2541,10 +2541,10 @@
     }
     const n = shows.filter(isVisible).length;
     whenCount.textContent = active
-      ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
+      ? `${n} ${n === 1 ? "Show" : "Shows"} im Zeitraum`
       : n === 1
-        ? "1 kommendes Konzert"
-        : `Alle ${n} kommenden Konzerte`;
+        ? "1 kommende Show"
+        : `Alle ${n} kommenden Shows`;
   }
 
   toggleWhen.addEventListener("click", () => setPanel(openPanel === "when" ? null : "when"));
@@ -2693,7 +2693,7 @@
       if (key === calDay) cls.push("selected");
       if (d < today) cls.push("past");
       if (dow === 0 || dow === 5 || dow === 6) cls.push("weekend");
-      const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Konzert" : "Konzerte"}` : ""}`;
+      const label = `${longDayFmt.format(d)}${items.length ? `, ${items.length} ${items.length === 1 ? "Show" : "Shows"}` : ""}`;
       const other = d.getMonth() !== m;
       cells.push(`
         <div class="${cls.join(" ")}" data-day="${key}">
@@ -2730,7 +2730,7 @@
     const before = [...visible].reverse().find((s) => s._day < new Date(y, m, 1));
     const emptyNote = inThisMonth
       ? ""
-      : `<p class="cal-empty cal-month-empty">Keine Konzerte im ${escape(monthFmt.format(calMonth))}.${
+      : `<p class="cal-empty cal-month-empty">Keine Shows im ${escape(monthFmt.format(calMonth))}.${
           after
             ? ` Nächste Show: <a href="#${after._short}" data-id="${escape(after.id)}">${escape(after.title)}</a>, ${escape(shortDate(after._day))}`
             : before
@@ -2759,7 +2759,7 @@
         ${
           selected.length
             ? `<div class="shows">${renderDays(selected)}</div>`
-            : `<p class="cal-empty">Keine Konzerte an diesem Tag.</p>`
+            : `<p class="cal-empty">Keine Shows an diesem Tag.</p>`
         }
       </section>`;
   }

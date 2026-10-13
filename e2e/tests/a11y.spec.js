@@ -37,7 +37,7 @@ test("Wo, Wann and ★ announce what is set; a reset never drops the focus to <b
   await expect(where).toHaveAttribute("aria-label", "Wo: BE");
   if (!isMobile) await expect(where.locator(".icon-word")).toBeHidden(); // the badge takes the word's place
   await page.keyboard.press("Escape");
-  await expect(page.locator("#results-count")).toHaveText("2 Konzerte");
+  await expect(page.locator("#results-count")).toHaveText("2 Shows");
   // Removing the filter from the keyboard: the pill is gone after the re-render, so the focus moves to the
   // active-filter line (#results, tabindex=-1) – never to <body>.
   await pill(page, "canton", "BE").focus();

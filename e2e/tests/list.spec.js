@@ -10,7 +10,7 @@ test("loads the real data and groups shows by month", async ({ page }) => {
   const headings = page.locator("#list h2.month");
   expect(await headings.count()).toBeGreaterThan(0);
   await expect(headings.first()).toHaveText(/\d{4}$/); // "Oktober 2026"
-  await expect(results(page)).toHaveText(/^\d+ Konzerte? · /);
+  await expect(results(page)).toHaveText(/^\d+ Shows? · /);
   await expect(page.locator("#updated")).toHaveText(/^Stand: /);
 });
 
@@ -41,11 +41,11 @@ test.describe("with fixture data", () => {
   test("search filters by title, venue and town", async ({ page }) => {
     const rows = page.locator("#list .show");
     await expect(rows).toHaveCount(FIXTURE.upcoming);
-    await expect(results(page)).toHaveText(new RegExp(`^${FIXTURE.upcoming} Konzerte · `));
+    await expect(results(page)).toHaveText(new RegExp(`^${FIXTURE.upcoming} Shows · `));
 
     await page.fill("#q", "Dub Station");
     await expect(rows).toHaveCount(1);
-    await expect(results(page)).toHaveText(/^1 Konzert für diese Auswahl/);
+    await expect(results(page)).toHaveText(/^1 Show für diese Auswahl/);
     await expect(pill(page, "q")).toHaveText(/«Dub Station»/); // the search as a removable pill
 
     await page.fill("#q", "luzern");
@@ -90,7 +90,7 @@ test.describe("with fixture data", () => {
     await expect(ska).toHaveAttribute("aria-pressed", "true");
     await expect(chips.first()).toHaveAttribute("aria-pressed", "false");
     await expect(page.locator("#list .show")).toHaveCount(FIXTURE.ska);
-    await expect(results(page)).toHaveText(new RegExp(`^${FIXTURE.ska} Konzerte für diese Auswahl`));
+    await expect(results(page)).toHaveText(new RegExp(`^${FIXTURE.ska} Shows für diese Auswahl`));
 
     await ska.click(); // same chip again = off
     await expect(chips.first()).toHaveAttribute("aria-pressed", "true");

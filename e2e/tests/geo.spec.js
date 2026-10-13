@@ -23,7 +23,7 @@ test("distances appear and the radius chips filter", async ({ page }) => {
   await page.locator('#where-radius [data-radius="10"]').click();
   await expect(page.locator("#toggle-where b")).toHaveText("≤ 10 km");
   await expect(page.locator("#list .show")).toHaveCount(2); // the two Bern shows
-  await expect(results(page)).toHaveText(/^2 Konzerte für diese Auswahl/);
+  await expect(results(page)).toHaveText(/^2 Shows für diese Auswahl/);
 
   await page.locator('#where-radius [data-radius="0"]').click();
   await expect(page.locator("#toggle-where b")).toBeHidden();

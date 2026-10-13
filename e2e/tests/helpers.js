@@ -106,9 +106,9 @@ function watchErrors(page, origin) {
 
 const results = (page) => page.locator("#results-text");
 
-// The count on a chip («Ska 2») carries its unit as screen-reader text (", 2 Konzerte"), so the
+// The count on a chip («Ska 2») carries its unit as screen-reader text (", 2 Shows"), so the
 // accessible name still contains the visible words. Matches the whole <small>.
-const chipCount = (n) => new RegExp(`^, ${n} Konzert${n === 1 ? "" : "e"}$`);
+const chipCount = (n) => new RegExp(`^, ${n} Show${n === 1 ? "" : "s"}$`);
 // The active-filter pill of one dimension (q, genre, format, canton, radius, month, range) on the results row.
 const pill = (page, kind, value) =>
   page.locator(`#results .fpill[data-remove="${kind}"]${value ? `[data-value="${value}"]` : ""}`);
