@@ -629,7 +629,7 @@
   let sheetTrigger = null; // the "⋯" button that opened it (gets the focus back)
 
   function openSheet(btn, s, row) {
-    closeSheet();
+    closeSheet({ keepHistory: true });
     sheetShow = s;
     sheetRow = row;
     sheetTrigger = btn;
@@ -648,6 +648,7 @@
       sheetPanel.style.right = `${Math.max(8, innerWidth - r.right)}px`;
     }
     sheetActions.querySelector(".act").focus();
+    pushOverlay("sheet");
   }
   // The sheet's star mirrors the row's state (label and colour).
   function syncSheetMark() {
@@ -656,12 +657,13 @@
     sheetPanel.classList.toggle("going", st === "going");
     sheetActions.querySelector(".star span").textContent = MARK_LABEL[st];
   }
-  function closeSheet() {
+  function closeSheet(opts = {}) {
     if (sheet.hidden) return;
     sheet.hidden = true;
     sheetTrigger.setAttribute("aria-expanded", "false");
     if (sheetTrigger.isConnected) sheetTrigger.focus();
     sheetShow = sheetRow = sheetTrigger = null;
+    if (!opts.keepHistory) popOverlay();
   }
   sheet.addEventListener("click", async (e) => {
     if (e.target.closest("[data-close]")) return closeSheet();
@@ -694,7 +696,7 @@
   addEventListener("resize", () => {
     if (sheet.classList.contains("popover")) closeSheet();
   });
-  phoneMq.addEventListener("change", closeSheet);
+  phoneMq.addEventListener("change", () => closeSheet());
 
   function resetFilters() {
     cantons.clear();
@@ -729,31 +731,75 @@
     const id = target.id;
     if (target._past && !showPast) showPast = true;
     if (target._past) pastAuto = false; // the link asked for it, so a later range reset keeps it
-    // Rows only exist in the list view; the calendar and the map link here.
+    // Rows only exist in the list view; the calendar and the map link here. An open panel would
+    // cover the row (the «Am nächsten bei dir» link sits inside the Wo panel).
     if (view !== "list") setView("list");
+    if (openPanel) setPanel(null);
     if (!document.getElementById(id)) resetFilters();
     const row = document.getElementById(id);
     if (!row) return;
     row.classList.remove("highlight");
     void row.offsetWidth; // restart the animation
     row.classList.add("highlight");
+    quietScrollUntil = Date.now() + 2000;
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     row.scrollIntoView({ block: "start", behavior: motion });
   }
   window.addEventListener("hashchange", revealFromHash);
 
+  // --- History: the Back button (or swipe) closes an open Wo/Wann panel or the action sheet and returns
+  // from a view switch or a calendar/map → list jump, instead of leaving the site – the reflex on phones.
+  // Overlays and view switches push one entry each; filters never do (they live in the hash, see
+  // syncFilterHash, written with replaceState so a filter click does not flood the history).
+  const histState = (extra) => ({ jah: 1, view, ...extra });
+  history.replaceState(histState(), "");
+  let overlayEntry = false; // the current entry is one we pushed for an overlay
+  let pendingBack = 0; // history.back() calls of our own: their popstate must not close what opened since
+  let fromHistory = false; // closing because the visitor went back, not by ×/Esc/outside click
+  function pushOverlay(name) {
+    if (overlayEntry) history.replaceState(histState({ overlay: name }), "");
+    else history.pushState(histState({ overlay: name }), "");
+    overlayEntry = true;
+  }
+  function popOverlay() {
+    if (fromHistory || !overlayEntry) return;
+    overlayEntry = false;
+    pendingBack++;
+    history.back();
+  }
+  window.addEventListener("popstate", (e) => {
+    if (pendingBack > 0) {
+      pendingBack--;
+      return;
+    }
+    overlayEntry = false;
+    fromHistory = true;
+    if (openPanel) setPanel(null);
+    if (!sheet.hidden) closeSheet();
+    fromHistory = false;
+    const st = e.state && e.state.jah ? e.state : null;
+    if (st && st.view && st.view !== view && !listMode()) setView(st.view);
+  });
+
   // --- Filter panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ---
-  // Open with the toolbar button, close with ×, Escape, the button again or a click/tap outside.
+  // Open with the toolbar button, close with ×, Escape, the button again, a click/tap outside or Back.
   const filtersForm = el("filters");
   const PANELS = { where: ["toggle-where", "where-panel"], when: ["toggle-when", "when-panel"] };
   let openPanel = null;
   function setPanel(name) {
+    const was = openPanel;
     openPanel = name;
     for (const [key, [btn, panel]] of Object.entries(PANELS)) {
       el(panel).hidden = key !== name;
       el(btn).setAttribute("aria-expanded", String(key === name));
     }
     if (name === "when") updateWhen();
+    if (name) {
+      pushOverlay(name);
+      // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
+      const first = el(PANELS[name][1]).querySelector(".chip:not([hidden])");
+      if (first) first.focus({ preventScroll: true });
+    } else if (was) popOverlay();
   }
   filtersForm.addEventListener("click", (e) => {
     const close = e.target.closest(".panel-close");
@@ -1290,12 +1336,17 @@
 
   // --- Views: Liste | Kalender | Karte ---
   // All three show the same filtered shows (`lastVisible`); render() dispatches to them.
-  function setView(next) {
+  function setView(next, opts = {}) {
     if (!VIEWS.includes(next)) return;
     view = next;
     store.set(store.KEYS.VIEW, view);
     markView();
+    if (opts.push) history.pushState(histState(), "");
+    else history.replaceState(histState(), "");
     render();
+    // A switch to the calendar or the map brings that view up under the bar (on a phone it would
+    // otherwise start two thirds down the screen, behind the hero).
+    if (opts.push && next !== "list") scrollViewsUnderBar();
   }
   function markView() {
     for (const b of viewSwitch.querySelectorAll("[data-view]"))
@@ -1304,12 +1355,15 @@
   markView();
   viewSwitch.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-view]");
-    if (btn && btn.dataset.view !== view) setView(btn.dataset.view);
+    if (btn && btn.dataset.view !== view) setView(btn.dataset.view, { push: true });
   });
 
-  // Calendar pills and map popups link to the show's row in the list.
+  // Calendar pills and map popups link to the show's row in the list – with the same short hash the
+  // share links use, as a history entry of its own (Back returns to the calendar or the map).
   function goToShow(id) {
-    history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+    const s = shows.find((x) => x.id === id);
+    if (!s) return;
+    history.pushState(histState({ view: "list" }), "", `#${s._short}`);
     revealFromHash();
   }
 
@@ -1646,10 +1700,11 @@
   });
   // Nudge once: after the visitor has scrolled into the list (not on the first second).
   let nudged = false;
+  let quietScrollUntil = 0; // a scroll the page made itself (deep link, view switch) is not the visitor's
   window.addEventListener(
     "scroll",
     () => {
-      if (nudged || window.scrollY < 600 || !shows.length) return;
+      if (nudged || window.scrollY < 600 || !shows.length || Date.now() < quietScrollUntil) return;
       nudged = true;
       setTimeout(() => showSubscribe(false), 1500);
     },
@@ -1674,11 +1729,25 @@
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
+  const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
   function renderAndKeepInView() {
     render();
     if (views.hidden) return;
-    const listTop = views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
-    if (window.scrollY > listTop) window.scrollTo({ top: listTop });
+    const listTop = viewsTop();
+    if (window.scrollY > listTop) {
+      quietScrollUntil = Date.now() + 1000;
+      window.scrollTo({ top: listTop });
+    }
+  }
+  // Scroll down (never up) until the views start right under the bar. The bar grows by a row once
+  // it sticks, so the target is checked again a moment later.
+  function scrollViewsUnderBar() {
+    if (views.hidden || window.scrollY >= viewsTop()) return;
+    quietScrollUntil = Date.now() + 1500;
+    window.scrollTo({ top: viewsTop() });
+    setTimeout(() => {
+      if (window.scrollY < viewsTop()) window.scrollTo({ top: viewsTop() });
+    }, 80);
   }
 
   // Scroll arrows for the chip row: only shown when there is something hidden in that direction.
