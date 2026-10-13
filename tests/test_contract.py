@@ -1,5 +1,5 @@
 """Drift tests for lists that live in several files and break the PWA silently when they disagree:
-the region codes (validator, app.js, sw.js, img/cantons/*.svg) and the app-shell file list
+the region codes (validator, app.js, img/cantons/*.svg) and the app-shell file list
 (sw.js SHELL, the BUILD hash input in pages.yml, the Makefile). Stdlib only. Run: make test"""
 
 import importlib.util
@@ -54,10 +54,8 @@ def makefile_var(name):
 
 
 class Regions(unittest.TestCase):
-    def test_validator_app_worker_and_svgs_agree(self):
-        m = re.search(r'const CANTONS =\s*"([^"]+)"', SW)
-        self.assertTrue(m, 'const CANTONS = "..." not found in sw.js')
-        self.assertEqual(set(m.group(1).split()), V.REGIONS, "sw.js CANTONS vs validator")
+    def test_validator_app_and_svgs_agree(self):
+        # (sw.js no longer lists the flags: they are cached on first use, not precached.)
         self.assertEqual(js_object_keys(APP, "CANTONS"), V.CANTONS, "app.js CANTONS vs validator")
         self.assertEqual(js_object_keys(APP, "ABROAD"), V.ABROAD, "app.js ABROAD vs validator")
         svgs = {p.stem for p in (ROOT / "img" / "cantons").glob("*.svg")}

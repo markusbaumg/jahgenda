@@ -61,9 +61,19 @@
     const stored = store.get(store.KEYS.VIEW, "list");
     if (VIEWS.includes(stored)) view = stored;
   }
+  // The map is the remembered view: fetch Leaflet now, in parallel with the data, not after it.
+  if (view === "map") {
+    const l = document.createElement("link");
+    l.rel = "preload";
+    l.as = "script";
+    l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    l.crossOrigin = "";
+    document.head.appendChild(l);
+  }
   let lastVisible = []; // the currently filtered shows, for view-only re-renders
   const status = el("status");
   const resultsText = el("results-text");
+  const resultsLive = el("results-live"); // screen readers: the count after every filter change
   let showPast = false;
   let pastCount = 0;
   const cantons = new Set(); // selected canton / region codes (empty = all)
@@ -332,7 +342,7 @@
           }
           <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${here ? dist : ""}${genreWords}${past}${here ? "" : dist}</p>
         </div>
-        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
+        <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy" decoding="async">${escape(s.canton)}</button>
         <div class="foot-row">
             ${shared && shared[s.id] === "going" ? `<div class="tags"><span class="tag-chip going">geht hin</span></div>` : ""}
             <div class="actions">
@@ -452,6 +462,7 @@
       mapRest.innerHTML = "";
       views.hidden = true;
       resultsText.textContent = "";
+      resultsLive.textContent = ""; // #status (role=status) announces the empty state itself
       if (listMode()) {
         status.innerHTML = `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Diese Liste ist leer</p><p>Keine der Shows ist mehr in der Agenda.</p><button type="button" class="primary" id="reset" title="Zurück zur Agenda">Zurück zur Agenda</button>`;
         return;
@@ -477,6 +488,7 @@
     resultsText.textContent = shared
       ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
       : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
+    resultsLive.textContent = resultsText.textContent;
 
     list.hidden = v !== "list";
     calendarEl.hidden = v !== "calendar";
@@ -555,11 +567,37 @@
     })
     .catch(() => {});
 
+  // The venue database (large: it carries the scraper's notes) is not needed for the first paint –
+  // the venue names become links and the SBB start town is known a moment later. render() is
+  // idempotent, so a second pass is cheap.
+  function loadVenues() {
+    fetch(VENUES_URL, { cache: "no-cache" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((v) => {
+        for (const [name, info] of Object.entries((v && v.venues) || {})) {
+          if (!info) continue;
+          if (safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
+          if (typeof info.lat === "number" && typeof info.lon === "number" && info.city)
+            venuePlaces.push({ city: info.city, lat: info.lat, lon: info.lon });
+        }
+        if (!venuePlaces.length && !Object.keys(venueSites).length) return;
+        updateHomeCity();
+        if (!shows.length) return;
+        render();
+        // A deep-linked row was rebuilt just now: keep its highlight.
+        const target = findShow(decodeHashPart(location.hash.slice(1)));
+        const row = target && document.getElementById(target.id);
+        if (row) row.classList.add("highlight");
+      })
+      .catch(() => {
+        /* venues.json is optional for the page */
+      });
+  }
+
   async function init() {
     try {
-      const [res, vres, gres] = await Promise.all([
+      const [res, gres] = await Promise.all([
         fetch(DATA_URL, { cache: "no-cache" }),
-        fetch(VENUES_URL, { cache: "no-cache" }).catch(() => null),
         fetch(GENRES_URL, { cache: "no-cache" }).catch(() => null),
       ]);
       try {
@@ -575,17 +613,6 @@
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      try {
-        const v = vres && vres.ok ? await vres.json() : null;
-        for (const [name, info] of Object.entries((v && v.venues) || {})) {
-          if (!info) continue;
-          if (safeUrl(info.url)) venueSites[venueKey(name)] = info.url;
-          if (typeof info.lat === "number" && typeof info.lon === "number" && info.city)
-            venuePlaces.push({ city: info.city, lat: info.lat, lon: info.lon });
-        }
-      } catch {
-        /* venues.json is optional for the page */
-      }
 
       const today = todayStart();
       shows = (data.shows || [])
@@ -645,10 +672,14 @@
       status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
       revealFromHash();
+      loadVenues();
       autoLocate();
     } catch (err) {
       console.error(err);
       status.classList.remove("loading");
+      // The skeleton rows go, so the message is the first thing under the bar (not below the fold).
+      list.innerHTML = "";
+      views.hidden = true;
       status.innerHTML = `<p class="state-icon">${STATE_ICONS.offline}</p><p class="big">Kein Empfang</p><p>Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen.</p>`;
     }
   }
@@ -819,7 +850,8 @@
     row.classList.remove("highlight");
     void row.offsetWidth; // restart the animation
     row.classList.add("highlight");
-    row.scrollIntoView({ block: "start", behavior: "smooth" });
+    const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    row.scrollIntoView({ block: "start", behavior: motion });
   }
   window.addEventListener("hashchange", revealFromHash);
 
@@ -1530,8 +1562,9 @@
       renderCalendar(lastVisible);
       return;
     }
+    // The whole day cell selects the day (the number button stays for keyboard and screen readers).
     const cell = e.target.closest("[data-day]");
-    if (cell && e.target.closest(".cal-num")) {
+    if (cell) {
       calDay = cell.dataset.day;
       renderCalendar(lastVisible);
     }
@@ -1673,6 +1706,8 @@
                 `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
             )
             .join("")}</ul>`,
+          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone.
+          { maxWidth: Math.min(300, mapEl.clientWidth - 70), autoPanPadding: [24, 24] },
         )
         .addTo(markerLayer);
       points.push([s.lat, s.lon]);
@@ -1689,8 +1724,9 @@
 
     const rest = visible.filter((s) => !hasPos(s));
     mapRest.innerHTML =
-      `<p class="map-legend"><span class="pin-mini"></span>Venue mit Shows (Zahl = Anzahl) ` +
-      `<span class="pin-mini star">★</span>«Ich gehe»${here ? ` <span class="pin-mini you"></span>du` : ""}</p>` +
+      `<p class="map-legend"><span class="legend-item"><span class="pin-mini"></span>Venue mit Shows (Zahl = Anzahl)</span> ` +
+      `<span class="legend-item"><span class="pin-mini star">★</span>«Ich gehe»</span>` +
+      `${here ? ` <span class="legend-item"><span class="pin-mini you"></span>du</span>` : ""}</p>` +
       (rest.length
         ? `<section><h2 class="month">Ohne Standort</h2><div class="shows">${renderDays(rest)}</div></section>`
         : "");

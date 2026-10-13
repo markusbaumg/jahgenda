@@ -123,6 +123,13 @@ def assess(now, max_age):
         if ok is False:
             reason = status.get("error") or status.get("message") or "no reason given"
             problems.append(f"last run reported failure: {reason}")
+            # A failed run (e.g. the cloud routine without network) does not mean the agenda is stale:
+            # say how old the data itself is, so the owner knows whether visitors are affected.
+            data_at = stamps.get("shows.json updated")
+            if data_at:
+                data_age = now - data_at
+                verdict = "still fresh" if data_age <= max_age else "also stale"
+                info.append(f"agenda data itself: {fmt(data_at)} ({hours(data_age):.1f} h ago) — {verdict}")
     else:
         info.append("status.json: missing (no run has written the heartbeat yet)")
 

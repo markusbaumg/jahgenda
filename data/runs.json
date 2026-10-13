@@ -3,6 +3,40 @@
   "runs": [
     {
       "skill": "scrape-shows",
+      "at": "2026-10-13T03:11:32+02:00",
+      "added": 0,
+      "updated": 0,
+      "removed": 0,
+      "total": 99,
+      "failed_sources": [
+        "https://skalender.net/ (ENOTFOUND)",
+        "https://www.petzi.ch/en/search/?q=reggae (ENOTFOUND)"
+      ],
+      "dropped": [],
+      "notes": [
+        "Kein Netzzugang: WebFetch scheitert mit ENOTFOUND (skalender.net, petzi.ch) – Umgebung braucht Network access = Full"
+      ],
+      "sources": [
+        {
+          "name": "Skalender",
+          "url": "https://skalender.net/",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "ENOTFOUND"
+        },
+        {
+          "name": "Petzi",
+          "url": "https://www.petzi.ch/en/search/?q=reggae",
+          "status": "failed",
+          "found": 0,
+          "kept": 0,
+          "error": "ENOTFOUND"
+        }
+      ]
+    },
+    {
+      "skill": "scrape-shows",
       "at": "2026-10-13T01:47:54+02:00",
       "added": 14,
       "updated": 0,

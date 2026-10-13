@@ -41,8 +41,9 @@ guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
 Keep a scratch list of candidates (title, acts, date, time, venue, city, canton, url, tickets, source_url).
 `url` is the event page (venue or promoter), `tickets` the ticket-shop link when the page has one (Petzi,
 Eventfrog, Ticketcorner, Starticket, Eventim, See Tickets, the venue's own shop). Budget:
-the whole run should stay under roughly **120 page fetches and 40 web searches**. When a source is huge,
-take the next 6 months, not everything.
+the whole run should stay under roughly **120 page fetches and 40 web searches** — the steps below are sized
+for that (≈ 21 search queries + 15 watchlist searches; the run is daily, so the rest comes around by
+rotation). When a source is huge, take the next 6 months, not everything.
 
 1. **Agendas** (`agendas`): open each one, read its `hint` (it says which page and how the events are
    written), collect everything that could match `criteria.md`, in Switzerland or in the nearby regions,
@@ -54,10 +55,10 @@ take the next 6 months, not everything.
    where the previous run's log says it stopped). Use the venue's
    name as the key is written, plus its `city`, `canton`, `lat`, `lon` for the entry.
 3. **Web search** (`search_queries`): run each distinct query once per month for the current and the next
-   two months. `{monat}` is the month name in the language of the query, `{jahr}` the year; a query without
+   month (two months; the third month ahead is covered by the agendas, the venue pages and later runs). `{monat}` is the month name in the language of the query, `{jahr}` the year; a query without
    `{monat}` runs once. Open at most 3 promising results per query.
 4. **Band watchlist**: the acts under **Included** in `bands.md`, plus the acts under **Suggestions** if the
-   setting says `yes`. Pick the 20 of them whose `tour_checked` in `data/artists.json` is oldest or missing.
+   setting says `yes`. Pick the 15 of them whose `tour_checked` in `data/artists.json` is oldest or missing.
    For each, search `"<name>" konzert schweiz <year> OR <year+1>` (French variant for Romandie acts) and open
    the act's tour-dates page if there is one. Keep Swiss and nearby-region dates. Afterwards set
    `tour_checked` to today for every act you checked, found or not; if the act has no cache entry yet,
