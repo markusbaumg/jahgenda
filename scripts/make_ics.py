@@ -48,11 +48,39 @@ def fold(line):
     return "\r\n".join(out)
 
 
+DOW = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+
+
+def lineup(s):
+    """The line-up as text lines: one per day from `days` («Fr 13.11.: A, B»), then the acts without a
+    day («Tag offen: …»), or the flat list when there are no days. Empty without acts."""
+    acts = s.get("acts") or []
+    days = s.get("days") or {}
+    if not acts and not days:
+        return []
+    if not days:
+        return [", ".join(acts)]
+    out, placed = [], set()
+    for key in sorted(days):
+        day = datetime.strptime(key, "%Y-%m-%d")
+        out.append(f"{DOW[day.weekday()]} {day.day}.{day.month}.: {', '.join(days[key])}")
+        placed |= {a.casefold() for a in days[key]}
+    rest = [a for a in acts if a.casefold() not in placed]
+    if rest:
+        out.append("Tag offen: " + ", ".join(rest))
+    return out
+
+
 def vevent(s, stamp):
     uid = f"{s['id']}@jahgenda"
     d = s["date"].replace("-", "")
     lines = ["BEGIN:VEVENT", f"UID:{uid}", f"DTSTAMP:{stamp}"]
-    if s.get("time"):
+    if s.get("end_date"):
+        # A festival (design/festival-spec.md): all-day over the whole range, DTEND exclusive = last day + 1.
+        last = datetime.strptime(s["end_date"], "%Y-%m-%d") + timedelta(days=1)
+        lines.append(f"DTSTART;VALUE=DATE:{d}")
+        lines.append(f"DTEND;VALUE=DATE:{last.strftime('%Y%m%d')}")
+    elif s.get("time"):
         h, m = (int(x) for x in s["time"].split(":"))
         start = datetime.strptime(s["date"], "%Y-%m-%d").replace(hour=h, minute=m)
         end = start + timedelta(hours=DEFAULT_HOURS)
@@ -63,10 +91,12 @@ def vevent(s, stamp):
         lines.append(f"DTSTART;VALUE=DATE:{d}")
         lines.append(f"DTEND;VALUE=DATE:{nxt.strftime('%Y%m%d')}")
     acts = " · ".join(s.get("acts") or [])
-    summary = s["title"] if not acts or acts == s["title"] else f"{s['title']} ({acts})"
+    summary = s["title"] if s.get("end_date") or not acts or acts == s["title"] else f"{s['title']} ({acts})"
     lines.append(f"SUMMARY:{esc(summary)}")
     lines.append(f"LOCATION:{esc(s['venue'] + ', ' + s['city'])}")
     desc = [", ".join(g for g in s.get("genres") or [])]
+    if s.get("end_date"):
+        desc += lineup(s)
     if s.get("url"):
         desc.append(s["url"])
     if s.get("tickets"):
@@ -119,7 +149,7 @@ def main(argv):
     data = json.loads(SHOWS.read_text(encoding="utf-8"))
     today = date.today().isoformat()
     shows = sorted(
-        (s for s in data.get("shows", []) if s.get("date", "") >= today),
+        (s for s in data.get("shows", []) if (s.get("end_date") or s.get("date", "")) >= today),
         key=lambda s: (s["date"], s.get("time", "")),
     )
     stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")

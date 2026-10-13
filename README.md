@@ -14,6 +14,7 @@ Reggae shows in Switzerland are scattered over dozens of club websites, ticket s
 Jahgenda collects them in a single fast list (UI in German, docs in English):
 
 - grouped by month, past shows disappear automatically (can be shown on request)
+- festivals as one multi-day entry (card with line-up by day, «läuft» while it runs)
 - filters by canton (click a coat of arms to filter) and genre, full-text search
 - genre chips per show, acts line for multi-band bills, canton coats of arms / country flags
 - "In Kalender" (.ics), WhatsApp share and direct link per show; nearest-show hint from your location
@@ -97,6 +98,13 @@ canton badge, view button), or to the filter pills line as the fallback — neve
 The list itself is time-aware: inside a month the rows are grouped by day (one date cell per day), today and
 tomorrow carry a red HEUTE / MORGEN pill (only while the data is fresher than 48 h), the Fr–So of the coming
 weekend are red with a «Wochenende» rule before them, and past rows are muted with the word «vorbei».
+
+**Festivals** (`design/festival-spec.md`): a show with `end_date` is one range entry – a card with a tricolor
+top edge and the cross mark as a watermark, sitting in its start month with a «FR–SO» / «16–18» date cell
+(«LÄUFT» while it runs) and a ghost row «↳ … läuft noch bis So 1. Aug.» under the head of every later month it
+reaches into. Shows with six or more acts show the first four and fold the rest into «▸ Alle 12 Acts nach
+Tag» (per day from `days`, a search hit opens it). «Festival» is a format chip of its own next to the genres,
+calendar export and Google link span the whole range, calendar dots and map pins use the gold festival role.
 
 ### Views
 

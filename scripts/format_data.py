@@ -20,9 +20,11 @@ DATA = ROOT / "data"
 SHOW_ORDER = [
     "id",
     "date",
+    "end_date",
     "time",
     "title",
     "acts",
+    "days",
     "venue",
     "city",
     "canton",

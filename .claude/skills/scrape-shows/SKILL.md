@@ -21,8 +21,8 @@ guess; timestamps are `TZ=Europe/Zurich date -Iseconds` (always with an offset).
    always counts, an act under **Excluded** never does. Read the setting line
    `Search suggestions automatically: yes|no` — it decides whether acts under **Suggestions** are part of
    the watchlist (step 2.4). Match names case-insensitively, ignoring punctuation and anything after ` — `.
-3. `scraper/sources.json` — agenda pages, nearby regions and search queries (`festivals` is used by
-   `/harvest-bands`, not here).
+3. `scraper/sources.json` — agenda pages, nearby regions and search queries; `festivals` is used by
+   `/harvest-bands` **and** by step 2.5 (the Swiss and nearby ones).
 4. `data/venues.json` — the venue database: city, canton, coordinates, programme `url`, `scrape` flag and a
    parsing `hint` per venue. Venues with `"scrape": true` are crawled in step 2.2. **Every show's `venue`
    must exist here** (the validator checks, matching case-insensitively and ignoring punctuation) and the
@@ -63,6 +63,33 @@ rotation). When a source is huge, take the next 6 months, not everything.
    the act's tour-dates page if there is one. Keep Swiss and nearby-region dates. Afterwards set
    `tour_checked` to today for every act you checked, found or not; if the act has no cache entry yet,
    create a complete one (step 4.3) — never an entry with only `tour_checked`.
+5. **Festivals** (`scraper/sources.json` → `festivals`, only those whose `where` is in Switzerland or a
+   nearby place from `criteria.md`; festivals abroad stay with `/harvest-bands`): open each festival's
+   line-up page from its `hint` once (budget: at most 8 festival pages per run, on top of the limits
+   above). Extract in this order and stop as soon as a step is not possible:
+
+   a. **Dates.** Only an explicit range of days counts («16.–18. Juli 2027», ticket dates). If the page
+      only says «Sommer 2027» or «Juli 2027» → write NO entry; put one line into `runs.json` → `notes`
+      («Reeds 2027: Datum noch nicht publiziert»). That is the existing rule «date not determinable →
+      leave it out»; there is no TBA state.
+   b. **Place.** `venue` = the grounds, as the festival names them. It must be in `data/venues.json` —
+      like every new venue, create it with `city`, `canton`, `lat`, `lon`, `"scrape": false` (coordinates
+      of the grounds, else the town centre plus a `hint`). Copy the show's `lat`/`lon` from there.
+   c. **Line-up.** `acts` = every act name on the line-up page, exactly as written, in page order. Strip
+      country suffixes «(JM)», «(FR)»; «Sound System» stays when it is part of the name. Normalise names
+      through `artists.json` (step 4.2), so the same act is spelled the same in `acts`, `days` and the
+      cache. Leave out acts whose headliner is under **Excluded**.
+   d. **Days.** `days` ONLY when the page names a day next to the act (date, weekday or «Day 1» →
+      `date` + offset). Never guess a day. Ignore stages.
+   e. **Genres.** `festival` + the 3 most frequent genres of the acts (cache as in step 4). Per festival
+      and run research at most 8 acts that are not cached yet; the rest keeps the previous genres and
+      comes around next run. With empty `acts`: `["festival", "reggae"]`.
+
+   Detection outside sources.json: every candidate from agendas, venue pages or search that covers 2–14
+   consecutive days under ONE name at ONE place (festival, open air, weekender, «2 Nächte») is also
+   written as one entry with `end_date` — never as one entry per day. Slug for `id` and merge: `name`
+   from sources.json if the festival is listed there (so the key stays stable even when the page says
+   «REEDS 27»); otherwise the festival name without the year, ASCII, lowercase.
 
 Rules while collecting:
 
@@ -102,7 +129,8 @@ Do not add acts you dropped. Change nothing else in `bands.md`.
 ## 4. Genres per act (with cache)
 
 Each show gets `genres`: 1–3 slugs **from `data/genres.json`** — no other slugs, the
-validator rejects them. Build the list from the acts:
+validator rejects them (a festival entry with `end_date`: `festival` + up to 3 music slugs). Build the
+list from the acts:
 
 1. Split the title into acts and store **all of them** in `acts`, headliner first: main act, every named
    support band, guest DJs and sound systems — look on the event page for lines like "Support: …",
@@ -136,11 +164,39 @@ Only these fields are allowed per artist: `genres, source, checked, festivals, t
 2. **Merge with existing shows** by the same rule (date + venue). A match keeps the existing `id` and takes
    the fresher fields. No match → new show with
    `id` = `<date>-<slug of headliner or title>-<slug of city>` (ASCII, lowercase, hyphens).
-3. Drop past shows (date < today). Sort by date, then time, then title.
+3. Drop past shows: gone when `(end_date or date) < today` — a running festival stays. Sort by date,
+   then time, then title.
 4. Set `"source": "scraper"` and `"updated"` to the current time in ISO 8601 with offset.
 
+Festival entries (with `end_date`) are NOT merged by date + venue but by the key
+`slug(name) + year of date` (dates shift by a day, venue names vary):
+
+- Match → keep the existing `id`. If `date` moved, write a new `id` (it must start with `date`), the old
+  one goes, note «Datum verschoben» in `notes`.
+- **Line-up page loaded** → `acts` = the page's list in page order. If the new list is SHORTER than the
+  existing one, keep the existing list and log it («Reeds 2027: Line-up kürzer als zuvor, nicht
+  übernommen») — this protects against half-loaded pages; a real cancellation is corrected by a human or
+  the next stable run.
+- **Line-up page NOT loaded (timeout, 403, bot wall) → leave `acts` and `days` untouched, only log it in
+  `failed_sources`. Never shrink a line-up because of a load error.**
+- `days`: union per day, never shrink — unless an act is no longer in `acts`; then remove it from `days`
+  too (the validator requires days ⊆ acts).
+- Keep `end_date` when the new page does not show the dates.
+- **Agenda day lines** (Petzi «Reeds Festival – Samstag», Skalender day entries, Eventfrog ticket lines)
+  whose normalised title contains the name of a known festival and whose date lies within its
+  `[date, end_date]` are NOT shows of their own: take their acts into `acts` and — because the agenda line
+  carries a concrete date — into `days[<date>]`. Before the official running order this is the main
+  source of day assignments.
+- A show of its own at the same venue inside the range does not exist (validator error); an afterparty
+  in another club stays a normal show.
+- A festival counts as 1 in added/updated/removed/total. `notes` gets one line per festival touched:
+  «Reeds 2027: 12 Acts, 3 Tage, 2 ohne Tag».
+
 Allowed fields per show — nothing else:
-`id, date, time, title, acts, venue, city, canton, url, tickets, source_url, lat, lon, genres`.
+`id, date, end_date, time, title, acts, days, venue, city, canton, url, tickets, source_url, lat, lon,
+genres`. `end_date` (last day, after `date`, at most 14 days later) marks a range entry — a festival, open
+air or weekender; `days` (`{"YYYY-MM-DD": ["Act", …]}`, only with `end_date`) lists the acts per day when
+the source names the day; both per design/festival-spec.md.
 
 Write the files, then run `python3 scripts/format_data.py` — it sorts shows, artists and venues and fixes
 the layout, so you need not care about formatting.

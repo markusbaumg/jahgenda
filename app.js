@@ -139,8 +139,12 @@
   let radiusKm = 0; // 0 = no distance filter; only applies once the position is known
   const search = el("q");
   const genreBar = el("genres"); // genre chips
+  const formatBar = el("formats"); // format chips (Festival) – a group of its own, not a genre (§3.3)
   const chipRow = el("chips"); // the scrolling chip row (frozen height, arrows, drag)
   let activeGenre = "";
+  let activeFormat = ""; // "" or "festival"
+  const FORMAT_LABEL = { festival: "Festival" };
+  const isFestival = (s) => Boolean(s._end);
 
   const monthFmt = new Intl.DateTimeFormat("de-CH", {
     month: "long",
@@ -181,6 +185,12 @@
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   };
+  // Past and running (festival-spec.md §4): a range entry is past only after its last day, and «läuft»
+  // while today lies inside [date, end_date]. Computed at load and again when the tab comes back.
+  function setTimeFlags(s, today) {
+    s._past = (s._end || s._day) < today;
+    s._now = Boolean(s._end) && s._day <= today && today <= s._end;
+  }
 
   // --- Time dimension (design/ui-revamp.md §7 S3) ---
   // The coming weekend is Fri–Sun of this week until Sunday is over (on a Saturday it is the current one).
@@ -293,9 +303,40 @@
 
   const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
 
+  // «Fr 16.7.2026» for a show, «Fr 16.7. – So 18.7.2027» for a festival (same as lib.dateText).
+  const dmy = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
+  const dateText = (s) =>
+    s._end
+      ? `${dowFmt.format(s._day).replace(".", "")} ${dmy(s._day)} – ${dowFmt.format(s._end).replace(".", "")} ${dmy(s._end)}${s._end.getFullYear()}`
+      : `${dowFmt.format(s._day).replace(".", "")} ${dmy(s._day)}${s._day.getFullYear()}`;
+  // Festival line-up as text lines (same as lib.lineupLines): one per day, then «Tag offen: …».
+  function lineupLines(s) {
+    const days = s.days && typeof s.days === "object" ? s.days : {};
+    const keys = Object.keys(days).sort();
+    if (!s.acts.length && !keys.length) return [];
+    if (!keys.length) return [s.acts.join(", ")];
+    const placed = new Set();
+    const out = [];
+    for (const key of keys) {
+      const list = (days[key] || []).map(String);
+      const d = parseDay(key);
+      out.push(`${dowFmt.format(d).replace(".", "")} ${dmy(d)}: ${list.join(", ")}`);
+      for (const a of list) placed.add(a.toLowerCase());
+    }
+    const rest = s.acts.filter((a) => !placed.has(a.toLowerCase()));
+    if (rest.length) out.push(`Tag offen: ${rest.join(", ")}`);
+    return out;
+  }
   const shareText = (s) =>
-    `${s.title} – ${dowFmt.format(s._day).replace(".", "")} ${s._day.getDate()}.${s._day.getMonth() + 1}.${s._day.getFullYear()}` +
-    `${s.time ? ` ${s.time}` : ""} · ${s.venue}, ${s.city}\n${showUrl(s)}`;
+    s._end
+      ? `${s.title} – ${dateText(s)} · ${s.venue}, ${s.city}` +
+        `${s.acts.length ? `\nmit ${s.acts.slice(0, 4).join(", ")}${s.acts.length > 4 ? ` +${s.acts.length - 4}` : ""}` : ""}\n${showUrl(s)}`
+      : `${s.title} – ${dateText(s)}${s.time ? ` ${s.time}` : ""} · ${s.venue}, ${s.city}\n${showUrl(s)}`;
+  // The day after a calendar day as YYYYMMDD (exclusive DTEND of an all-day event).
+  const nextDayStamp = (d) =>
+    localStamp(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)).slice(0, 8);
+  const calDescription = (s) =>
+    [...(s._end ? lineupLines(s) : []), safeUrl(s.url) || "", showUrl(s)].filter(Boolean).join("\n");
 
   // One VEVENT for a show (floating local time, so it lands at the right hour in Switzerland).
   function vevent(s, status) {
@@ -308,7 +349,10 @@
         .replace(/,/g, "\\,")
         .replace(/\n/g, "\\n");
     let when;
-    if (s.time) {
+    if (s._end) {
+      // A festival is one all-day event over the whole range; its door time is not a start time.
+      when = `DTSTART;VALUE=DATE:${s.date.replace(/-/g, "")}\r\nDTEND;VALUE=DATE:${nextDayStamp(s._end)}`;
+    } else if (s.time) {
       const [start, end] = showSpan(s);
       when = `DTSTART:${localStamp(start)}\r\nDTEND:${localStamp(end)}`;
     } else {
@@ -321,7 +365,7 @@
       when,
       `SUMMARY:${esc(s.title)}`,
       `LOCATION:${esc(`${s.venue}, ${s.city}`)}`,
-      `DESCRIPTION:${esc(`${safeUrl(s.url) || ""}\n${showUrl(s)}`.trim())}`,
+      `DESCRIPTION:${esc(calDescription(s))}`,
       `URL:${showUrl(s)}`,
       ...(status ? [`STATUS:${status}`] : []),
       "END:VEVENT",
@@ -337,12 +381,13 @@
   // "Add to Google Calendar" link (works in the Google Calendar app and on the web).
   function gcalUrl(s) {
     let dates;
-    if (s.time) {
+    if (s._end) {
+      dates = `${s.date.replace(/-/g, "")}/${nextDayStamp(s._end)}`;
+    } else if (s.time) {
       const [start, end] = showSpan(s);
       dates = `${localStamp(start)}/${localStamp(end)}`;
     } else {
-      const next = new Date(s._day.getFullYear(), s._day.getMonth(), s._day.getDate() + 1);
-      dates = `${s.date.replace(/-/g, "")}/${localStamp(next).slice(0, 8)}`;
+      dates = `${s.date.replace(/-/g, "")}/${nextDayStamp(s._day)}`;
     }
     const p = new URLSearchParams({
       action: "TEMPLATE",
@@ -350,7 +395,7 @@
       dates,
       ctz: "Europe/Zurich",
       location: `${s.venue}, ${s.city}`,
-      details: `${safeUrl(s.url) || ""}\n${showUrl(s)}`.trim(),
+      details: calDescription(s),
     });
     return `https://calendar.google.com/calendar/render?${p}`;
   }
@@ -390,7 +435,11 @@
   const qLabel = (q) => (q.length > 24 ? `${q.slice(0, 22).trimEnd()}…` : q);
   function emptyHeadline(quick) {
     const q = search.value.trim();
-    const genre = activeGenre && (genreLabel[activeGenre] || activeGenre);
+    // «Kein Dub», «Kein Festival», «Kein Dub-Festival»
+    const genreWord = activeGenre && (genreLabel[activeGenre] || activeGenre);
+    const genre = activeFormat
+      ? `${genreWord ? `${genreWord}-` : ""}${FORMAT_LABEL[activeFormat]}`
+      : genreWord;
     const what = q ? ` zu «${qLabel(q)}»` : "";
     // Where: «im Tessin», «in Bern, Zürich», «in 4 Kantonen», «im Umkreis von 25 km».
     const codes = [...cantons];
@@ -431,6 +480,41 @@
 
   // One row inside a day group (see renderDays), §3.6: the 3-line stack (title, acts, meta), the side column
   // (coat of arms + abbreviation as a filter button, the star) and the actions line under the stack.
+  // Line-up block (festival-spec.md §3.1): with more than 5 acts (festival or not) the acts line shows the
+  // first 4 and a <details class="lineup"> holds the rest – by day when `days` exists, else the flat list.
+  // Open when the visitor opened it before (openIds), when a search hit sits inside it, or from a deep
+  // link. A festival without acts says «Line-up folgt».
+  const LINEUP_PREVIEW = 4;
+  const LINEUP_FROM = 6;
+  function lineupHtml(s, q, hit) {
+    const n = s.acts.length;
+    const open = hit || openIds.has(s.id);
+    const days = s.days && typeof s.days === "object" ? s.days : {};
+    const keys = Object.keys(days)
+      .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(days[k]) && days[k].length)
+      .sort();
+    const actList = (list) =>
+      `<span class="a">${list.map((a) => `<span>${markHit(String(a), q)}</span>`).join("")}</span>`;
+    let body;
+    if (keys.length) {
+      const placed = new Set();
+      body = keys
+        .map((k) => {
+          for (const a of days[k]) placed.add(String(a).toLowerCase());
+          const d = parseDay(k);
+          return `<span class="d">${dowFmt.format(d).replace(".", "")} ${d.getDate()}.</span>${actList(days[k])}`;
+        })
+        .join("");
+      const rest = s.acts.filter((a) => !placed.has(a.toLowerCase()));
+      if (rest.length) body += `<span class="d">Tag offen</span>${actList(rest)}`;
+    } else body = `<span class="d sr">Acts</span>${actList(s.acts)}`;
+    const label = keys.length ? `Alle ${n} Acts nach Tag` : `Alle ${n} Acts`;
+    return (
+      `<details class="lineup${open ? " is-open" : ""}"${open ? " open" : ""}>` +
+      `<summary aria-label="Line-up anzeigen (${n} Acts)" title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
+      `<div class="lineup-body"><div><div class="days">${body}</div></div></div></details>`
+    );
+  }
   function renderShow(s) {
     const url = safeUrl(s.url);
     // A title with a URL is recognisable as a link: dotted gold underline, «↗» and sr text.
@@ -440,9 +524,12 @@
     const time = s.time ? `<time>${escape(s.time)}</time> · ` : "";
     // Genres are muted words at the end of the meta line; the active genre chip is not repeated.
     const genreWords = s.genres
-      .filter((g) => g !== activeGenre)
+      .filter((g) => g !== activeGenre && g !== activeFormat)
       .map((g) => ` · <span class="genre">${escape(genreLabel[g] || g)}</span>`)
       .join("");
+    // Festival (§3.7): «3 Tage» leads the meta line, the door time (a weekender) follows.
+    const nDays = s._end ? Math.round((s._end - s._day) / 864e5) + 1 : 0;
+    const daysWord = nDays ? `<span class="ndays">${nDays} Tage</span> · ` : "";
     // With a known position the distance sits before the genres (§3.6); the hover-only placeholder that
     // asks for the position goes last, so its invisible width leaves no hole in the line.
     const dist = distanceLabel(s);
@@ -451,15 +538,19 @@
     // A search hit inside the line-up is highlighted, and the line (clamped to 2 lines on phones) opens up.
     const q = search.value.trim().toLowerCase();
     const hit = hasActs && Boolean(q) && s.acts.some((a) => a.toLowerCase().includes(q));
-    const acts = hasActs
-      ? `<p class="acts${hit ? " hit" : ""}">${s.acts.map((a) => `<span>${markHit(a, q)}</span>`).join("")}</p>`
+    const long = s.acts.length >= LINEUP_FROM;
+    const preview = long ? s.acts.slice(0, LINEUP_PREVIEW) : s.acts;
+    let acts = hasActs
+      ? `<p class="acts${hit ? " hit" : ""}">${preview.map((a) => `<span>${markHit(a, q)}</span>`).join("")}</p>`
       : "";
+    if (long) acts += lineupHtml(s, q, hit);
+    else if (s._end && !s.acts.length) acts = `<p class="acts none">Line-up folgt</p>`;
     return `
-      <li class="show${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
+      <li class="show${s._past ? " past" : ""}${s._end ? " festival" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <div class="body">
           <h3 class="title">${title}</h3>
           ${acts}
-          <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${here ? dist : ""}${genreWords}${past}${here ? "" : dist}</p>
+          <p class="meta">${daysWord}${time}${venueLink(s)} · ${escape(s.city)}${here ? dist : ""}${genreWords}${past}${here ? "" : dist}</p>
         </div>
         <div class="side">
           <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" aria-pressed="${cantons.has(s.canton)}" aria-label="${escape(cantonLabel(s.canton))}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy" decoding="async">${escape(s.canton)}</button>
@@ -482,41 +573,65 @@
     const tomorrow = addDays(today, 1);
     const [wkStart, wkEnd] = weekendRange(today);
     const fresh = isFresh();
+    // A festival (§3.7) is a card of its own with a range date cell, never grouped with the day's shows.
     const days = new Map();
     for (const s of items) {
-      if (!days.has(s.date)) days.set(s.date, []);
-      days.get(s.date).push(s);
+      const key = s._end ? `${s.date}/${s.id}` : s.date;
+      if (!days.has(key)) days.set(key, []);
+      days.get(key).push(s);
     }
     let ruleDue = weekendRule;
     return [...days]
-      .map(([date, rows]) => {
-        const d = rows[0]._day;
+      .map(([, rows]) => {
+        const s0 = rows[0];
+        const d = s0._day;
+        const end = s0._end || d;
+        const date = s0.date;
         const isToday = sameDay(d, today);
         const isTomorrow = sameDay(d, tomorrow);
-        const inWeekend = d >= wkStart && d <= wkEnd;
+        const inWeekend = d <= wkEnd && end >= wkStart;
         const cls = ["day"];
-        if (rows[0]._past) cls.push("past");
+        if (s0._past) cls.push("past");
         if (inWeekend) cls.push("weekend");
         if (isToday) cls.push("today");
+        if (s0._end) cls.push("festival");
         let rule = "";
         if (ruleDue && inWeekend) {
           ruleDue = false;
           rule = `<p class="rule-weekend"><span>Wochenende</span></p>`;
         }
-        const pill = fresh && (isToday || isTomorrow) ? (isToday ? "Heute" : "Morgen") : "";
-        const dow = pill
-          ? `<span class="dow now">${pill}</span>`
-          : `<span class="dow">${dowFmt.format(d).replace(".", "")}</span>`;
-        // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
-        const label = `${pill ? `${pill}, ` : ""}${fullDayFmt.format(d)}`;
+        let dow, num, label, datetime;
+        if (s0._end) {
+          // «FR–SO» over «16–18»; across a month boundary «30» over «–1.8.»; «LÄUFT» while it runs.
+          const sameMonth = d.getMonth() === end.getMonth() && d.getFullYear() === end.getFullYear();
+          dow = s0._now
+            ? `<span class="dow now live">Läuft</span>`
+            : `<span class="dow range">${dowFmt.format(d).replace(".", "")}–${dowFmt.format(end).replace(".", "")}</span>`;
+          num = sameMonth
+            ? `<span class="num range">${d.getDate()}–${end.getDate()}</span>`
+            : `<span class="num range">${d.getDate()}</span><span class="day-end">–${end.getDate()}.${end.getMonth() + 1}.</span>`;
+          label = `${s0._now ? "Läuft, " : ""}${fullDayFmt.format(d)} bis ${fullDayFmt.format(end)}`;
+          datetime = `${date}/${s0.end_date}`;
+        } else {
+          const pill = fresh && (isToday || isTomorrow) ? (isToday ? "Heute" : "Morgen") : "";
+          dow = pill
+            ? `<span class="dow now">${pill}</span>`
+            : `<span class="dow">${dowFmt.format(d).replace(".", "")}</span>`;
+          num = `<span class="num">${d.getDate()}</span>`;
+          // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
+          label = `${pill ? `${pill}, ` : ""}${fullDayFmt.format(d)}`;
+          datetime = date;
+        }
         return `${rule}
         <section class="${cls.join(" ")}" data-date="${escape(date)}">
-          <time class="date" datetime="${escape(date)}" aria-label="${escape(label)}">${dow}<span class="num">${d.getDate()}</span></time>
+          <time class="date" datetime="${escape(datetime)}" aria-label="${escape(label)}">${dow}${num}</time>
           <ul class="day-shows">${rows.map(renderShow).join("")}</ul>
         </section>`;
       })
       .join("");
   }
+  // The line-up disclosures stay open across re-renders (render() rebuilds the DOM on every keystroke).
+  const openIds = new Set();
 
   // The actions line of a row (§3.6): Kalender (.ics) · Google · Teilen · Link, plus «Tickets ↗» and
   // «Infos ↗» when the show has those URLs. Links carry their href, buttons carry data-act – both are
@@ -550,11 +665,13 @@
     const cs = "cantons" in o ? o.cantons : cantons;
     const radius = "radius" in o ? o.radius : radiusKm;
     const genre = "genre" in o ? o.genre : activeGenre;
+    const format = "format" in o ? o.format : activeFormat;
     if (shared && !shared[s.id]) return false;
     if (mineOnly && !marks[s.id]) return false;
     if (cs.size && !cs.has(s.canton)) return false;
     if (radius && here && typeof s.lat === "number" && distanceKm(here, s) > radius) return false;
     if (genre && !s.genres.includes(genre)) return false;
+    if (format && !s.genres.includes(format)) return false;
     if (!q) return true;
     return [s.title, s.venue, s.city, regionName(s.canton), ...s.genres, ...s.acts]
       .join(" ")
@@ -581,6 +698,8 @@
         label: genreLabel[activeGenre] || activeGenre,
         count: countWith({ genre: "" }),
       });
+    if (activeFormat)
+      dims.push({ kind: "format", label: FORMAT_LABEL[activeFormat], count: countWith({ format: "" }) });
     for (const c of cantons) {
       const rest = new Set(cantons);
       rest.delete(c);
@@ -608,6 +727,7 @@
     if (kind === "all") return resetFilters();
     if (kind === "q") search.value = "";
     if (kind === "genre") setGenre("");
+    if (kind === "format") setFormat("");
     if (kind === "canton") toggleCanton(value);
     if (kind === "radius") {
       radiusKm = 0;
@@ -652,6 +772,12 @@
       c.title = c.dataset.genre
         ? `Nur ${genreLabel[c.dataset.genre] || c.dataset.genre} anzeigen (${n})`
         : `Alle Genres anzeigen (${n})`;
+    }
+    for (const c of formatBar.querySelectorAll(".chip[data-format]")) {
+      const n = countWith({ format: c.dataset.format });
+      const sm = c.querySelector("small");
+      if (sm) sm.textContent = n;
+      c.title = `Nur Festivals anzeigen (${n})`;
     }
     for (const c of cantonChips.querySelectorAll(".chip[data-canton]")) {
       const code = c.dataset.canton;
@@ -698,7 +824,14 @@
     const visible = shows.filter((s) => isVisible(s));
 
     const filtered = Boolean(
-      cantons.size || activeGenre || q || mineOnly || shared || rangeActive() || (here && radiusKm),
+      cantons.size ||
+        activeGenre ||
+        activeFormat ||
+        q ||
+        mineOnly ||
+        shared ||
+        rangeActive() ||
+        (here && radiusKm),
     );
     renderPills();
     updateCounts();
@@ -757,9 +890,14 @@
     views.hidden = false;
     const span = monthSpan(visible);
     const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
+    // Festivals are counted apart from the concerts: «12 Konzerte · 1 Festival · Juli 2027».
+    const nFest = visible.filter(isFestival).length;
+    const nConc = visible.length - nFest;
+    const festNote = nFest ? `${nConc ? " · " : ""}${nFest} ${nFest === 1 ? "Festival" : "Festivals"}` : "";
+    const concerts = nConc ? `${nConc} ${nConc === 1 ? "Konzert" : "Konzerte"}` : "";
     resultsText.textContent = shared
       ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
-      : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
+      : `${concerts}${festNote}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
     resultsLive.textContent = resultsText.textContent;
 
     list.hidden = v !== "list";
@@ -779,11 +917,22 @@
       return;
     }
 
+    // Month groups, keyed sortably; a festival sits in its start month and leaves a ghost row («↳ … läuft
+    // noch bis So 1. Aug.») at the top of every later month it touches – creating that month if needed.
     const groups = new Map();
-    for (const s of visible) {
-      const key = monthFmt.format(s._day);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(s);
+    const group = (d) => {
+      const key = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+      if (!groups.has(key)) groups.set(key, { first: monthStart(d), items: [], ghosts: [] });
+      return groups.get(key);
+    };
+    for (const s of visible) group(s._day).items.push(s);
+    for (const s of visible.filter(isFestival)) {
+      for (
+        let m = monthStart(addDays(monthStart(s._day), 32));
+        m <= s._end;
+        m = addDays(m, 32), m = monthStart(m)
+      )
+        group(m).ghosts.push(s);
     }
 
     // The «Wochenende» rule is drawn once, before the first day of the coming weekend – not while a Heute /
@@ -791,22 +940,35 @@
     const [wkStart, wkEnd] = weekendRange(todayStart());
     let ruleDue = !["today", "tomorrow", "weekend"].includes(quickActive());
     list.innerHTML = [...groups]
-      .map(([, items]) => {
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, { first, items, ghosts }]) => {
         const weekendRule = ruleDue && items.some((s) => s._day >= wkStart && s._day <= wkEnd);
         if (weekendRule) ruleDue = false;
+        const ghostRows = ghosts
+          .map(
+            (s) =>
+              `<p class="ghost"><a href="#${s._short}" title="Zum Festival in der Liste springen"><span class="arrow" aria-hidden="true">↳</span> ${escape(s.title)} läuft noch bis ${escape(endLabel(s))}</a></p>`,
+          )
+          .join("");
         return `
         <section>
-          <h2 class="month">${escape(monthNameFmt.format(items[0]._day))} <span class="year">${items[0]._day.getFullYear()}</span></h2>
-          <div class="shows">${renderDays(items, { weekendRule })}</div>
+          <h2 class="month">${escape(monthNameFmt.format(first))} <span class="year">${first.getFullYear()}</span></h2>
+          <div class="shows">${ghostRows}${renderDays(items, { weekendRule })}</div>
         </section>`;
       })
       .join("");
   }
+  // «So 1. Aug.» – the last day of a festival for the ghost row.
+  const endLabel = (s) =>
+    `${dowFmt.format(s._end).replace(".", "")} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
 
   // "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
   function monthSpan(visible) {
     const first = visible[0]._day;
-    const last = visible[visible.length - 1]._day;
+    const last = visible.reduce(
+      (m, s) => (s._end && s._end > m ? s._end : m),
+      visible[visible.length - 1]._day,
+    );
     return first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
       ? monthFmt.format(first)
       : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
@@ -820,7 +982,7 @@
     if (document.visibilityState !== "visible" || !shows.length) return;
     if (renderStamp() === renderedStamp) return;
     const today = todayStart();
-    for (const s of shows) s._past = s._day < today;
+    for (const s of shows) setTimeFlags(s, today);
     pastCount = shows.filter((s) => s._past).length;
     render();
   });
@@ -892,11 +1054,15 @@
         .map((s) => ({
           ...s,
           _day: parseDay(s.date),
+          // A range entry (festival-spec.md): end_date after date, else it is a normal show.
+          _end:
+            /^\d{4}-\d{2}-\d{2}$/.test(s.end_date || "") && s.end_date > s.date ? parseDay(s.end_date) : null,
           genres: Array.isArray(s.genres) ? s.genres.map((g) => String(g).toLowerCase()) : [],
           acts: Array.isArray(s.acts) ? s.acts.map(String).filter(Boolean) : [],
         }))
-        .map((s) => ({ ...s, _past: s._day < today, _short: shortId(s.id) }))
+        .map((s) => ({ ...s, _short: shortId(s.id) }))
         .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
+      for (const s of shows) setTimeFlags(s, today);
 
       pastCount = shows.filter((s) => s._past).length;
       dataUpdated = data.updated ? Date.parse(data.updated) || 0 : 0;
@@ -930,17 +1096,26 @@
 
       // Genre chips: one toggle per genre that occurs at least once, in the order of data/genres.json
       // (unknown slugs go last, alphabetically). Counts come from updateCounts().
+      // «Festival» is a format, not a genre (§3.3): its own chip group after the genres.
       const genres = new Set(shows.flatMap((s) => s.genres));
       const rank = (g) => (genreOrder.includes(g) ? genreOrder.indexOf(g) : genreOrder.length);
       genreBar.innerHTML =
         `<button type="button" class="chip" data-genre="" aria-pressed="true" title="Alle Genres anzeigen">Alle</button>` +
         [...genres]
+          .filter((g) => !FORMAT_LABEL[g])
           .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
           .map(
             (g) =>
               `<button type="button" class="chip" data-genre="${escape(g)}" aria-pressed="false">${escape(genreLabel[g] || g)}<small></small></button>`,
           )
           .join("");
+      formatBar.innerHTML = Object.keys(FORMAT_LABEL)
+        .filter((f) => genres.has(f))
+        .map(
+          (f) =>
+            `<button type="button" class="chip" data-format="${f}" aria-pressed="false">${FORMAT_LABEL[f]}<small></small></button>`,
+        )
+        .join("");
       chipRow.scrollLeft = 0; // the row starts at «Alle», whatever snapped before the chips existed
       updateChipArrows();
 
@@ -1057,6 +1232,7 @@
     updateWhere();
     search.value = "";
     setGenre("");
+    setFormat("");
     mineOnly = false;
     clearRange();
     if (shared) {
@@ -1094,6 +1270,13 @@
     row.classList.remove("highlight");
     void row.offsetWidth; // restart the animation
     row.classList.add("highlight");
+    // A shared link lands on the open line-up.
+    const lineup = row.querySelector("details.lineup");
+    if (lineup && !lineup.open) {
+      lineup.open = true;
+      lineup.classList.add("is-open");
+      openIds.add(id);
+    }
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
     row.scrollIntoView({ block: "start", behavior: motion });
   }
@@ -1640,11 +1823,17 @@
     `${shortMonthFmt.format(d).replace(".", "")}${d.getFullYear() === todayStart().getFullYear() ? "" : ` ’${String(d.getFullYear()).slice(2)}`}`;
   const rangeActive = () => Boolean(months.size || (rangeFrom && rangeTo));
   // `o` replaces the time filters for what-if counts: { months: Set, range: [from, to] | null }.
+  // A festival counts for every month and every quick range it touches.
   const inRange = (s, o = {}) => {
     const ms = "months" in o ? o.months : months;
-    if (ms.size) return ms.has(monthKey(s._day));
+    const end = s._end || s._day;
+    if (ms.size) {
+      for (let m = monthStart(s._day); m <= end; m = monthStart(addDays(m, 32)))
+        if (ms.has(monthKey(m))) return true;
+      return false;
+    }
     const [from, to] = "range" in o ? o.range || [] : [rangeFrom, rangeTo];
-    return !(from && to) || (s._day >= from && s._day <= to);
+    return !(from && to) || (s._day <= to && end >= from);
   };
   // Quick picks (§7 S3: Heute · Morgen · Wochenende · 7 Tage), one exclusive choice; the badge, the chips
   // and the empty state name the pick rather than its dates.
@@ -1833,7 +2022,8 @@
     dub: "var(--green-text)",
     soundsystem: "var(--green-text)",
   };
-  const genreColor = (s) => GENRE_COLORS[s.genres.find((g) => GENRE_COLORS[g])] || "var(--gold)";
+  const genreColor = (s) =>
+    s._end ? "var(--gold)" : GENRE_COLORS[s.genres.find((g) => GENRE_COLORS[g])] || "var(--gold)";
 
   // Kalender: a Monday-first month grid. On narrow screens the cells only show dots
   // and the shows of the selected day are listed below the grid (see style.css).
@@ -1855,10 +2045,14 @@
     const monthKey = `${y}-${pad2(m + 1)}`;
     const inMonth = (k) => k.startsWith(monthKey);
 
+    // A festival is on the grid on each of its days.
     const byDay = new Map();
     for (const s of visible) {
-      if (!byDay.has(s.date)) byDay.set(s.date, []);
-      byDay.get(s.date).push(s);
+      for (let d = s._day; d <= (s._end || s._day); d = addDays(d, 1)) {
+        const key = dayKey(d);
+        if (!byDay.has(key)) byDay.set(key, []);
+        byDay.get(key).push(s);
+      }
     }
 
     // Selected day: next day with shows from today on, else today, else the first day with shows.
@@ -2044,12 +2238,15 @@
     const STAR = "M14 7.6l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z";
     const pinIcon = (kind, count) => {
       const id = `pin${++pinSeq}`;
+      // Centre by role (§3.12): dark dot = venue, gold star = «Ich gehe», gold dot = festival.
       const centre =
         kind === "going"
           ? `<circle cx="14" cy="13.5" r="7.5" fill="#14110e"/><path d="${STAR}" fill="#f2b632"/>`
-          : `<circle cx="14" cy="13.5" r="5.5" fill="#14110e"/>`;
+          : kind === "festival"
+            ? `<circle cx="14" cy="13.5" r="6.5" fill="#14110e"/><circle cx="14" cy="13.5" r="4" fill="#f2b632"/>`
+            : `<circle cx="14" cy="13.5" r="5.5" fill="#14110e"/>`;
       return L.divIcon({
-        className: "pin-icon" + (kind === "going" ? " going" : ""),
+        className: `pin-icon${kind === "going" ? " going" : ""}${kind === "festival" ? " festival" : ""}`,
         html:
           `<svg viewBox="0 0 28 40" width="28" height="40" aria-hidden="true">` +
           `<clipPath id="${id}"><path d="${PIN_PATH}"/></clipPath>` +
@@ -2070,7 +2267,8 @@
       iconAnchor: [11, 11],
       popupAnchor: [0, -12],
     });
-    const pinKind = (items) => (items.some((x) => marks[x.id] === "going") ? "going" : "venue");
+    const pinKind = (items) =>
+      items.some((x) => marks[x.id] === "going") ? "going" : items.some(isFestival) ? "festival" : "venue";
     for (const { s, items } of venues.values()) {
       L.marker([s.lat, s.lon], {
         icon: pinIcon(pinKind(items), items.length),
@@ -2104,6 +2302,7 @@
     mapRest.innerHTML =
       `<p class="map-legend"><span class="legend-item"><span class="pin-mini"></span>Venue mit Shows (Zahl = Anzahl)</span> ` +
       `<span class="legend-item"><span class="pin-mini star">★</span>«Ich gehe»</span>` +
+      `${visible.some(isFestival) ? ` <span class="legend-item"><span class="pin-mini fest"></span>Festival</span>` : ""}` +
       `${here ? ` <span class="legend-item"><span class="pin-mini you"></span>du</span>` : ""}</p>` +
       (rest.length
         ? `<section><h2 class="month">Ohne Standort</h2><div class="shows">${renderDays(rest)}</div></section>`
@@ -2302,6 +2501,57 @@
     if (!btn) return;
     setGenre(activeGenre === btn.dataset.genre ? "" : btn.dataset.genre);
     renderAndKeepInView();
+  });
+  // Format chips (Festival): a toggle of its own next to the genre, so «Dub» + «Festival» = dub festivals.
+  function setFormat(f) {
+    activeFormat = f;
+    for (const c of formatBar.querySelectorAll(".chip[data-format]"))
+      c.setAttribute("aria-pressed", String(c.dataset.format === activeFormat));
+  }
+  formatBar.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip[data-format]");
+    if (!btn) return;
+    setFormat(activeFormat === btn.dataset.format ? "" : btn.dataset.format);
+    if (activeFormat) btn.scrollIntoView({ inline: "nearest", block: "nearest" });
+    renderAndKeepInView();
+  });
+
+  // Line-up disclosure (§4: grid-template-rows 0fr → 1fr over --t-3). Opening: the browser opens the
+  // <details>, the class animates the body in on the next frame. Closing: the click is intercepted, the body
+  // animates out, then the <details> closes. Reduced motion: 0 ms transitions fire no transitionend, so it
+  // closes at once. The open state is remembered per show (openIds) across re-renders.
+  views.addEventListener(
+    "toggle",
+    (e) => {
+      const d = e.target;
+      if (!(d instanceof HTMLDetailsElement) || !d.classList.contains("lineup")) return;
+      const row = d.closest(".show");
+      if (!row) return;
+      if (d.open) {
+        openIds.add(row.dataset.id);
+        requestAnimationFrame(() => d.classList.add("is-open"));
+      } else openIds.delete(row.dataset.id);
+    },
+    true,
+  );
+  views.addEventListener("click", (e) => {
+    const summary = e.target.closest("details.lineup > summary");
+    if (!summary) return;
+    const d = summary.parentElement;
+    if (!d.open || d.dataset.closing) return;
+    e.preventDefault();
+    d.dataset.closing = "1";
+    d.classList.remove("is-open");
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      delete d.dataset.closing;
+      d.open = false;
+    };
+    if (reducedMotion.matches) return finish();
+    d.querySelector(".lineup-body").addEventListener("transitionend", finish, { once: true });
+    setTimeout(finish, 450);
   });
 
   // Search: debounced 120 ms so typing does not re-render on every key.
