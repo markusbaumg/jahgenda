@@ -18,7 +18,7 @@ import { callout } from "../../stores/callout.svelte.js";
 import { agenda } from "../../stores/agenda.svelte.js";
 import { regionName } from "../../lib/regions.js";
 import { parseHash } from "../../lib/hash.js";
-import { quietScroll, isQuietScroll } from "../views/scroll.js";
+import { quietScroll, isQuietScroll } from "../../lib/scroll.js";
 import { t } from "../../i18n/core.js";
 import { copyText } from "../../lib/share.js";
 
@@ -48,7 +48,7 @@ export function quiet(ms) {
   quietUntil = Math.max(quietUntil, Date.now() + ms);
 }
 /** The page scrolls by itself for `ms` (deep link, keepInView, scroll restoration): no scroll nudge.
- * One clock for the whole page: views/scroll.js, which the filter and view stores mark too. */
+ * One clock for the whole page: lib/scroll.js, which the filter and view stores mark too. */
 export { quietScroll };
 /** Another reason to wait (returns true while busy). */
 export function addBusy(fn) {

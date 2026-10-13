@@ -1,10 +1,10 @@
 /* The button actions of a row (§3.6): Kalender (.ics), Teilen (navigator.share, else WhatsApp) and Link.
  * Google, Tickets, Infos and SBB are plain links. Ported from app.js runAction(); each action resolves to
- * the feedback word the row flashes next to the icon ("" = say nothing). The calendar and the map reuse
- * the rows, so these live beside the row component, not inside it. */
-import { icsFor, dateText } from "../../lib/index.js";
-import { t } from "../../i18n/core.js";
-import { copyText, shareOr, waLink } from "../../lib/share.js";
+ * the feedback word the row flashes next to the icon ("" = say nothing). The calendar, the map and the
+ * Meine-Shows store reuse them, so they live in src/lib (no component code; stores never import components). */
+import { icsFor, dateText } from "./index.js";
+import { t } from "../i18n/core.js";
+import { copyText, shareOr, waLink } from "./share.js";
 
 // The page link of a show: the short per-show hash (#k3f9zq), the contract of every shared link.
 export const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;

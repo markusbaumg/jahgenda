@@ -7,7 +7,7 @@
 import { agenda } from "./agenda.svelte.js";
 import { ui, VIEWS } from "./filters.svelte.js";
 import { revealFromHash } from "./reveal.svelte.js";
-import { quietScroll } from "../components/views/scroll.js";
+import { quietScroll } from "../lib/scroll.js";
 import { nav } from "./history.js";
 
 export { VIEWS };

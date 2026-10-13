@@ -9,7 +9,7 @@
   import { ABROAD, regionName, cantonLabel } from "../lib/regions.js";
   import { createFlasher } from "../stores/feedback.svelte.js";
   import { highlighted } from "../stores/reveal.svelte.js";
-  import { showUrl as linkOf, waUrl as waOf, saveIcs, shareShow, copyLink } from "./list/actions.js";
+  import { showUrl as linkOf, waUrl as waOf, saveIcs, shareShow, copyLink } from "../lib/actions.js";
   // Line-up block (festival-spec.md §3.1): with more than 5 acts (festival or not) the acts line shows
   // the first 4 and Lineup.svelte holds the rest. A festival without acts says «Line-up folgt».
   import Lineup from "./festival/Lineup.svelte";

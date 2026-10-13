@@ -52,12 +52,11 @@ src/stores/filters.svelte.js           Filter UI state: open panel, view, Wann r
 src/components/filters/                The filter bar (search, Wo / Wann toggles, genre chips, panels), results row, empty state, past footer, URL / history glue.
 src/stores/reveal.svelte.js            Deep links #<short>: scroll under the bar, highlight, stale-link note.
 src/stores/feedback.svelte.js          Feedback words of the row actions («Kopiert» …) for 1.2 s; announced through live.svelte.js.
-src/components/list/                   Row actions (.ics, Teilen, Link) and the stale-link note (LinkNote).
+src/components/list/                   The stale-link note (LinkNote) and the list styles.
 src/stores/marks.svelte.js             Meine Shows: marks (jahStore), star / state / undo, list mode, #m= links, list share + .ics.
 src/components/mine/                   ★ toolbar toggle, list head («Zurück zur Agenda»), list panel, undo toast.
 src/stores/views.svelte.js             Kalender / Karte state on top of ui.view: calendar month/day, list mode, pill/popup jumps.
-src/components/views/                  Calendar (month grid, day list), MapView (Leaflet on demand, pins, clusters),
-                                       scroll.js (scrolls the page makes itself).
+src/components/views/                  Calendar (month grid, day list), MapView (Leaflet on demand, pins, clusters).
 src/stores/festival.svelte.js          Open line-ups (kept across re-renders, deep links).
 src/components/callout/                One sticker for every nudge (Callout.svelte) and the nudges (install, subscribe): snooze or «Nie mehr zeigen».
 src/stores/callout.svelte.js           The callout queue: one at a time, one nudge per visit, waits while the page is busy.
@@ -69,6 +68,9 @@ src/lib/calendar.js                    … .ics / Google Calendar / SBB links, f
 src/lib/dates.js / regions.js          … the formatters (in the page language) and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
+src/lib/actions.js                     … the row actions (.ics, Teilen, Link) – rows and the Meine-Shows store use them.
+src/lib/scroll.js                      … scrolls the page makes itself (the subscribe nudge waits for the visitor's own).
+src/lib/dom.js                         … the ids / classes the stores reach into (focus, scroll, star echo); a contract test checks components render them.
 src/lib/share.js                       … copy to the clipboard (1 s timeout) and navigator.share with the WhatsApp fallback, for every copy/share button.
 src/lib/load.js                        … the one fetch helper (data/*.json paths, raw.githubusercontent.com) for the agenda and the Mischpult.
 src/lib/health.js / drops.js           … Mischpult: the watchdog verdict (mirrors check_freshness.py), the dropped-candidate dedupe

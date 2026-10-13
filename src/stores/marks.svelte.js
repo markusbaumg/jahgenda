@@ -19,7 +19,8 @@ import { live } from "./live.svelte.js";
 import { reveal } from "./reveal.svelte.js";
 import { vevent, icsWrap, safeDecode } from "../lib/index.js";
 import { dayShort } from "../lib/dates.js";
-import { showUrl, downloadIcs } from "../components/list/actions.js";
+import { showUrl, downloadIcs } from "../lib/actions.js";
+import { ID, byId as el, starOf } from "../lib/dom.js";
 import { copyText, shareOr, waLink } from "../lib/share.js";
 import { FLASH_MS } from "./feedback.svelte.js";
 import { t } from "../i18n/core.js";
@@ -60,7 +61,6 @@ export const UNDO_MS = 8000;
 export const LONG_PRESS = 500;
 
 const jah = () => (typeof window !== "undefined" ? window.jahStore : null);
-const el = (id) => document.getElementById(id);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Write a hash without a navigation (empty = none); path and query stay as they are.
 const setHash = (h) =>
@@ -116,7 +116,7 @@ export function createMarks() {
   function echo(id) {
     if (reducedMotion()) return;
     flushSync();
-    const star = document.querySelector(`.show[data-id="${CSS.escape(id)}"] .star`);
+    const star = starOf(id);
     const icon = star && star.querySelector("svg");
     if (!icon) return;
     for (let i = 0; i < 3; i++) {
@@ -199,10 +199,10 @@ export function createMarks() {
     const id = undo && undo.id;
     undo = null;
     // The focus never vanishes with the toast: back to the row's star (or the ★ in the bar).
-    const toast = el("undo");
+    const toast = el(ID.undo);
     if (toast && toast.contains(document.activeElement)) {
-      const star = id && document.querySelector(`.show[data-id="${CSS.escape(id)}"] .star`);
-      (star || el("toggle-mine")).focus({ preventScroll: true });
+      const star = id && starOf(id);
+      (star || el(ID.toggleMine)).focus({ preventScroll: true });
     }
   }
   function restore() {
@@ -231,8 +231,8 @@ export function createMarks() {
     if (ui.openPanel) nav.quietly(() => ui.setPanel(null));
   }
   const scrollToList = () => {
-    const panel = el("mine-panel");
-    ui.scrollUnderBar(!panel || panel.hidden ? el("views") : panel);
+    const panel = el(ID.minePanel);
+    ui.scrollUnderBar(!panel || panel.hidden ? el(ID.views) : panel);
   };
 
   // The ★ in the toolbar. Returns the word the button says when there is nothing to show yet.
@@ -269,8 +269,8 @@ export function createMarks() {
       sharedMissing = 0;
       clearListHash();
     });
-    const toggle = el("toggle-mine");
-    (toggle && !toggle.hidden ? toggle : el("q"))?.focus({ preventScroll: true });
+    const toggle = el(ID.toggleMine);
+    (toggle && !toggle.hidden ? toggle : el(ID.q))?.focus({ preventScroll: true });
   }
 
   // A friend's list (#m=…): the page switches to the list mode with exactly those shows; the friend's
@@ -326,7 +326,7 @@ export function createMarks() {
     if (ids.some((id) => agenda.findShow(id)?._past)) ui.setShowPast(true);
     if (!wasOn) foldPanel();
     flushSync();
-    tick().then(() => el("list-title")?.focus({ preventScroll: true })); // opened from a link: announce it
+    tick().then(() => el(ID.listTitle)?.focus({ preventScroll: true })); // opened from a link: announce it
   }
 
   // «Alle merken»: never overwrites or downgrades an own mark; the friend's «Ich gehe» stays a chip.
@@ -337,7 +337,7 @@ export function createMarks() {
     marks = m;
     save();
     flushSync();
-    el("list-title")?.focus({ preventScroll: true }); // the button turned into text: announce the list
+    el(ID.listTitle)?.focus({ preventScroll: true }); // the button turned into text: announce the list
   }
 
   // Direct links: #m=… opens a shared list; a hash without it closes a friend's list that was open.
@@ -409,7 +409,7 @@ export function createMarks() {
         ui.applyFilter(() => {
           mineOnly = false;
         });
-        el("toggle-mine")?.focus({ preventScroll: true });
+        el(ID.toggleMine)?.focus({ preventScroll: true });
       },
     });
     window.addEventListener("hashchange", fromHash);

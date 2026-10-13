@@ -13,6 +13,7 @@
  * Callout.svelte renders `current`; the store drives the timing (the .show class one frame after the
  * sticker is in, hidden 300 ms after it left) exactly as callout.js did. */
 import { tick } from "svelte";
+import { ID, byId } from "../lib/dom.js";
 
 const SNOOZE_DAYS = 30;
 const RETRY_MS = 1500;
@@ -88,7 +89,7 @@ export function createCallout() {
     current = null;
     hideHost();
     if (hadFocus) {
-      const back = force && opener && opener.isConnected ? opener : document.getElementById("views");
+      const back = force && opener && opener.isConnected ? opener : byId(ID.views);
       if (back) back.focus({ preventScroll: true });
     }
     opener = null;

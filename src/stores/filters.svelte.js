@@ -21,7 +21,8 @@ import {
 } from "../lib/dates.js";
 import { t } from "../i18n/core.js";
 import { CANTONS, ABROAD, shortRegion } from "../lib/regions.js";
-import { quietScroll } from "../components/views/scroll.js";
+import { quietScroll } from "../lib/scroll.js";
+import { ID, CLASS, byId as el } from "../lib/dom.js";
 import { nav } from "./history.js";
 import { callout as calloutStore } from "./callout.svelte.js";
 
@@ -94,7 +95,6 @@ export const parseHash = (hash = location.hash) =>
 
 const jahStore = () => (typeof window !== "undefined" ? window.jahStore : null);
 const callout = () => calloutStore;
-const el = (id) => document.getElementById(id);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function createFilterUi() {
@@ -453,12 +453,12 @@ function createFilterUi() {
   nav.on("ownBack", () => syncFilterHash()); // a filter picked while the panel was open lived on the entry just left
 
   // --- Panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ------------------
-  const PANELS = { where: "toggle-where", when: "toggle-when" };
-  const PANEL_IDS = { where: "where-panel", when: "when-panel" };
+  const PANELS = { where: ID.toggleWhere, when: ID.toggleWhen };
+  const PANEL_IDS = { where: ID.wherePanel, when: ID.whenPanel };
   // The panel's max-height counts from the bar's real bottom edge: at the top of the page the bar is not
   // stuck yet and sits under the header, so the panel would otherwise run past the fold.
   function fitPanel() {
-    const form = el("filters");
+    const form = el(ID.filters);
     if (!form) return;
     const bottom = Math.max(0, form.getBoundingClientRect().bottom);
     form.style.setProperty("--panel-top", `${Math.round(bottom)}px`);
@@ -472,7 +472,7 @@ function createFilterUi() {
       nav.pushOverlay(name);
       if (callout()) callout().suspend(); // a sticker never covers the panel's last rows
       // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
-      const first = el(PANEL_IDS[name]).querySelector(".chip:not([hidden])");
+      const first = el(PANEL_IDS[name]).querySelector(`.${CLASS.chip}:not([hidden])`);
       if (first) first.focus({ preventScroll: true });
     } else if (was) nav.popOverlay();
   }
@@ -502,14 +502,14 @@ function createFilterUi() {
     }
     flushSync();
     // A switch to the calendar or the map brings that view up under the bar.
-    if (opts.push && next !== "list") scrollUnderBar(el("views"));
+    if (opts.push && next !== "list") scrollUnderBar(el(ID.views));
   }
 
   // --- Scrolling and focus around a filter change ----------------------------------------------------
   const underBar = (elm) =>
-    elm.getBoundingClientRect().top + window.scrollY - (el("filters")?.offsetHeight || 0) - 8;
+    elm.getBoundingClientRect().top + window.scrollY - (el(ID.filters)?.offsetHeight || 0) - 8;
   function scrollUnderBar(target) {
-    const views = el("views");
+    const views = el(ID.views);
     if (!target || !views || views.hidden || window.scrollY >= underBar(target)) return;
     quietScroll(1500);
     window.scrollTo({ top: underBar(target) });
@@ -521,9 +521,9 @@ function createFilterUi() {
   // of the results is the results row (count, view switch, pills), so a filter can be undone where it
   // was made (in the list mode: the Meine-Shows panel with the list actions).
   function keepInView() {
-    const views = el("views");
-    const status = el("status");
-    const row = listMode ? el("mine-panel") : document.querySelector(".results-row");
+    const views = el(ID.views);
+    const status = el(ID.status);
+    const row = listMode ? el(ID.minePanel) : document.querySelector(`.${CLASS.resultsRow}`);
     if (!views || !status) return;
     const target = views.hidden ? status : row;
     if (views.hidden && !status.textContent.trim()) return;
@@ -540,7 +540,7 @@ function createFilterUi() {
   // Focus (§5): what had the focus inside a region the change rebuilds is found again by its place – the
   // row's data-id (or the calendar day) plus its own tag, classes and data attributes. Gone for good →
   // #results (tabindex=-1), so a keyboard user never lands on <body> after a filter.
-  const focusRegions = () => ["views", "status", "results"].map(el).filter(Boolean);
+  const focusRegions = () => [ID.views, ID.status, ID.results].map(el).filter(Boolean);
   function focusPath(a) {
     const part = (n, withClasses) => {
       let s = n.tagName.toLowerCase();
@@ -574,7 +574,7 @@ function createFilterUi() {
         const next = focusRegions()
           .map((r) => r.querySelector(path))
           .find(Boolean);
-        (next || el("results"))?.focus({ preventScroll: true });
+        (next || el(ID.results))?.focus({ preventScroll: true });
       }
     };
     const settle = () => {
@@ -584,7 +584,7 @@ function createFilterUi() {
     if (document.startViewTransition && !reducedMotion()) {
       document.startViewTransition(swap).updateCallbackDone.then(settle, settle);
     } else {
-      const list = el("list");
+      const list = el(ID.list);
       if (list) {
         list.classList.remove("dip");
         void list.offsetWidth; // restart the dip
@@ -606,7 +606,7 @@ function createFilterUi() {
     const next = focusRegions()
       .map((r) => r.querySelector(path))
       .find(Boolean);
-    (next || el("results"))?.focus({ preventScroll: true });
+    (next || el(ID.results))?.focus({ preventScroll: true });
   }
   function removeFilter(kind, value) {
     if (kind === "all") return resetFilters();
