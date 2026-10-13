@@ -120,3 +120,17 @@ class ReadmeLayout(unittest.TestCase):
             if p.name not in block and str(p.relative_to(ROOT)) not in block
         )
         self.assertEqual(missing, [], f"add these to the README layout block: {missing}")
+
+
+class SmokeCoverage(unittest.TestCase):
+    """scripts/smoke.sh must load every public page of the repo root, or a new page ships untested."""
+
+    def test_every_root_page_is_smoke_tested(self):
+        smoke = (ROOT / "scripts" / "smoke.sh").read_text(encoding="utf-8")
+        m = re.search(r"^for page in (.+?); do$", smoke, re.M)
+        self.assertIsNotNone(m, "smoke.sh has no `for page in … ; do` loop")
+        tested = set(m.group(1).split())
+        pages = {p.name for p in ROOT.glob("*.html")}
+        self.assertEqual(
+            sorted(pages - tested), [], f"add these pages to the smoke loop: {sorted(pages - tested)}"
+        )
