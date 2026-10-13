@@ -6,7 +6,8 @@
         "ska"
       ],
       "source": "https://fr.wikipedia.org/wiki/8°6_Crew",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Akeem Garrison": {
       "genres": [
@@ -14,7 +15,8 @@
         "reggae"
       ],
       "source": "https://soundcharts.com/en/artist/0b5a5afe-e562-11e8-a6e0-00163ec5a2fb",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Alborosie": {
       "genres": [
@@ -56,7 +58,8 @@
         "rocksteady"
       ],
       "source": "https://basementroots.bandcamp.com",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Baspa Ricardo": {
       "genres": [],
@@ -73,7 +76,8 @@
         "ska"
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/alternativ/luzern/rude-und-rebel-ska-fest_AcTf6rt",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Bee": {
       "genres": [],
@@ -90,8 +94,11 @@
       "checked": "2026-10-13"
     },
     "Boundless Vibes Hifi": {
-      "genres": [],
-      "source": "",
+      "genres": [
+        "soundsystem",
+        "reggae"
+      ],
+      "source": "https://www.kuppel-basel.ch/programm/boundless-vibes-hifi",
       "checked": "2026-10-13"
     },
     "Boxmen Family": {
@@ -109,14 +116,16 @@
         "dub"
       ],
       "source": "https://de.wikipedia.org/wiki/Brain_Damage_(Band)",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Breakfast Mood": {
       "genres": [
         "reggae"
       ],
       "source": "https://www.rsi.ch/rete-tre/programmi/intrattenimento/reggae-yard/Revelation-il-secondo-lavoro-dei-Breakfast-Mood--3084041.html",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Brushy One String": {
       "genres": [
@@ -135,20 +144,30 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Bush Doctors Sound System": {
+      "genres": [
+        "soundsystem",
+        "dub"
+      ],
+      "source": "https://legroove.ch/agenda/sub-a-dub-2/",
+      "checked": "2026-10-13"
+    },
     "Cali P": {
       "genres": [
         "dancehall",
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Cali_P",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Call Me Malcolm": {
       "genres": [
         "ska-punk"
       ],
       "source": "https://www.billigpeoplebooking.de/en/band/call-me-malcolm-gb/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Canastron": {
       "genres": [
@@ -156,7 +175,8 @@
         "rocksteady"
       ],
       "source": "https://www.festivalinfo.nl/artist/133728/Canastron/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Candela": {
       "genres": [],
@@ -180,7 +200,8 @@
         "dub"
       ],
       "source": "https://53.festivalcervantino.gob.mx/artista/1663/channel-one-sound-system?lan=en",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Chris Biomassa": {
       "genres": [],
@@ -206,7 +227,8 @@
         "dub"
       ],
       "source": "https://www.rockit.it/de-strangers/biografia",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Dj Doctor Belise": {
       "genres": [],
@@ -247,7 +269,8 @@
         "soundsystem"
       ],
       "source": "https://de.wikipedia.org/wiki/Jugglerz",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "DJ Tarsi": {
       "genres": [],
@@ -283,7 +306,8 @@
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Dub_Spencer_%26_Trance_Hill",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Dubioza Kolektiv": {
       "genres": [
@@ -292,7 +316,8 @@
         "dub"
       ],
       "source": "https://en.wikipedia.org/wiki/Dubioza_Kolektiv",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Dubkasm": {
       "genres": [
@@ -300,7 +325,8 @@
         "roots"
       ],
       "source": "https://dubkasm.bandcamp.com/music",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "EKR": {
       "genres": [],
@@ -318,7 +344,8 @@
         "roots"
       ],
       "source": "https://www.reggaeville.com/artist-details/elijah-salomon/about/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Elimb'a Mbo": {
       "genres": [],
@@ -338,17 +365,34 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Famara": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Famara",
+      "checked": "2026-10-13"
+    },
     "Fleuve Congo": {
       "genres": [
         "ska",
         "reggae"
       ],
       "source": "https://www.swissinfo.ch/eng/fleuve-congo-airlines/8221226",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Fluffy Machine": {
       "genres": [],
       "source": "https://fluffymachine.bandcamp.com",
+      "checked": "2026-10-13"
+    },
+    "Forrest Children Sound System": {
+      "genres": [
+        "soundsystem",
+        "dancehall",
+        "dub"
+      ],
+      "source": "https://rumpeltum.ch/portfolio/17-10-forrest-children-sound-system/",
       "checked": "2026-10-13"
     },
     "Frères Cirad": {
@@ -376,13 +420,23 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-13"
     },
+    "Golden Roots Soundsystem": {
+      "genres": [
+        "soundsystem",
+        "roots",
+        "dub"
+      ],
+      "source": "https://cafete.ch/",
+      "checked": "2026-10-13"
+    },
     "Goulamas'K": {
       "genres": [
         "ska-punk",
         "ska"
       ],
       "source": "https://www.jds.fr/artistes/goulamas-k-8342_N",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Hanna Mercy": {
       "genres": [],
@@ -404,19 +458,29 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Ironworks Dread": {
+      "genres": [
+        "dub",
+        "roots"
+      ],
+      "source": "https://legroove.ch/agenda/sub-a-dub-2/",
+      "checked": "2026-10-13"
+    },
     "Jahcoustix": {
       "genres": [
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Jahcoustix",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Jahneration": {
       "genres": [
         "reggae"
       ],
       "source": "https://www.ostrodareggae.com/en/jahneration-france",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-13"
     },
     "Jamaram": {
       "genres": [
@@ -515,6 +579,14 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Los Billtones": {
+      "genres": [
+        "ska",
+        "reggae"
+      ],
+      "source": "https://www.albani.ch/de/programm/1319/Los-Billtones-CH-Warm-Up-Alex-aka-The-AmpliFire.html",
+      "checked": "2026-10-13"
+    },
     "Los Fastidios": {
       "genres": [],
       "source": "https://it.wikipedia.org/wiki/Los_Fastidios",
@@ -598,7 +670,7 @@
     },
     "MØNTY": {
       "genres": [],
-      "source": "",
+      "source": "https://www.dynamo.ch/veranstaltung/10-years-dmb-records-skabooom-monty-burning-fuses",
       "checked": "2026-10-13"
     },
     "Nightmanager": {
@@ -679,6 +751,15 @@
     "Quatre in Toulouse": {
       "genres": [],
       "source": "",
+      "checked": "2026-10-13"
+    },
+    "Radio Rhum Reggae": {
+      "genres": [
+        "soundsystem",
+        "reggae",
+        "dub"
+      ],
+      "source": "https://bikinitest.ch/1232/voir/2026/10/17",
       "checked": "2026-10-13"
     },
     "Rakoon": {
@@ -805,8 +886,11 @@
       "tour_checked": "2026-10-13"
     },
     "Skaboom": {
-      "genres": [],
-      "source": "",
+      "genres": [
+        "ska-punk",
+        "ska"
+      ],
+      "source": "https://skalender.net/artists/skaboom/",
       "checked": "2026-10-13"
     },
     "Skarface": {

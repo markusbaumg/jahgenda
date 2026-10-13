@@ -198,6 +198,27 @@ class ShowDetails(unittest.TestCase):
         self.assertEqual(V.check_shows(doc(show(venue="Nowhere"), source="mock"), False, ALLOWED, keys), [])
         self.assertTrue(V.check_shows(doc(show(venue="Nowhere")), False, ALLOWED, keys))
 
+    def test_scraped_show_must_sit_at_its_venue(self):
+        keys = {"dachstock": "Dachstock"}
+        venues = {"Dachstock": {"city": "Bern", "canton": "BE", "lat": 46.95, "lon": 7.44}}
+        ok = show(venue="Dachstock", canton="BE", lat=46.951, lon=7.441)
+        self.assertEqual(V.check_shows(doc(ok), False, ALLOWED, keys, venues), [])
+        errs = V.check_shows(
+            doc(show(venue="Dachstock", canton="ZH", lat=46.95, lon=7.44)), False, ALLOWED, keys, venues
+        )
+        self.assertTrue(any("canton 'ZH' but venue" in e for e in errs))
+        errs = V.check_shows(
+            doc(show(venue="Dachstock", canton="BE", lat=47.38, lon=8.53)), False, ALLOWED, keys, venues
+        )
+        self.assertTrue(any("not at venue" in e for e in errs))
+        # mock data and shows without coordinates are left alone
+        self.assertEqual(
+            V.check_shows(
+                doc(show(venue="Dachstock", canton="ZH"), source="mock"), False, ALLOWED, keys, venues
+            ),
+            [],
+        )
+
 
 class Keys(unittest.TestCase):
     def test_venue_and_artist_keys_normalise_case_and_punctuation(self):

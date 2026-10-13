@@ -2839,3 +2839,162 @@ a:hover {
 .actions .act:hover {
   color: var(--gold);
 }
+
+/* --- Listenmodus (★ Meine Shows / geteilte Liste): only the list, a slim header with ✕ in the sticky bar.
+   body.list-mode folds every other filter away; the ★ button keeps its place at the right (still pressed). --- */
+.list-mode .filters > :not(.list-head):not(.toolbar),
+.list-mode .toolbar > :not(#toggle-mine),
+.list-mode .when-panel,
+.list-mode .where-panel,
+.list-mode .results {
+  display: none;
+}
+.list-mode .toolbar {
+  position: absolute;
+  top: 10px;
+  right: 0;
+}
+.list-mode.list-shared .toolbar {
+  display: none;
+}
+.list-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 54px 10px 0; /* room for the ★ at the right */
+  animation: list-in 0.18s ease-out;
+}
+.list-mode.list-shared .list-head {
+  padding-right: 0;
+}
+.list-head[hidden] {
+  display: none;
+}
+.list-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 13px 0 11px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.list-close i,
+.list-title i {
+  font-style: normal;
+}
+.list-close b {
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.list-close:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.list-close:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.list-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.list-title:focus {
+  outline: none;
+}
+.list-title svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+}
+.list-title svg path {
+  fill: currentColor;
+}
+.list-shared .list-title svg {
+  color: var(--green-text);
+}
+.list-title .t {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.list-title .n {
+  flex: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.list-mode .mine-panel {
+  margin-top: 4px;
+}
+.list-shared .mine-panel {
+  border-left-color: var(--green);
+}
+.mine-panel .take {
+  color: var(--bg);
+  background: var(--green-text);
+  border-color: var(--green-text);
+  font-weight: 700;
+}
+.mine-panel .take:hover {
+  color: var(--bg);
+  background: var(--green);
+}
+.mine-panel .take[disabled] {
+  color: var(--muted);
+  background: none;
+  border-color: var(--line);
+  cursor: default;
+}
+.mine-panel .take[hidden] {
+  display: none;
+}
+@keyframes list-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (max-width: 600px) {
+  /* Phones: the list actions as a 2-up grid of thumb-sized buttons (an odd last one spans the row). */
+  .list-mode .mine-panel .mine-note {
+    flex: 1 1 100%;
+  }
+  .list-mode .mine-panel .act {
+    flex: 1 1 45%;
+    justify-content: center;
+    height: auto;
+    min-height: 44px;
+  }
+}
+@media (max-width: 480px) {
+  .list-close span i,
+  .list-title i {
+    display: none; /* phones: "✕ Zurück", "Liste von Kusi", no month span; wider: "✕ Zurück zur Agenda", "Geteilte Liste von Kusi · Oktober 2026" */
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .list-head {
+    animation: none;
+  }
+}

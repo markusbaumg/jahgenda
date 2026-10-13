@@ -139,6 +139,7 @@
 
   // The town nearest to the user's position (from the venue list) – the "von" of the SBB timetable link.
   let homeCity = "";
+  let geoDeclined = false; // the browser said no: no «Distanz & Zug anzeigen» placeholder in the rows
   function updateHomeCity() {
     if (!here || !venuePlaces.length) return;
     const near = venuePlaces.map((p) => ({ p, km: distanceKm(here, p) })).sort((a, b) => a.km - b.km)[0];
@@ -358,7 +359,8 @@
       .toLowerCase()
       .includes(q);
   }
-  const isVisible = (s) => (!s._past || showPast) && inRange(s) && matchesFilters(s);
+  const isVisible = (s) =>
+    listMode() ? inList(s) : (!s._past || showPast) && inRange(s) && matchesFilters(s);
 
   function render() {
     if (status.classList.contains("loading")) return; // data not in yet: the skeleton stays, init() renders
@@ -372,43 +374,41 @@
     updateMine();
     updateWhen();
     lastVisible = visible;
+    const v = listMode() ? "list" : view; // the list mode always shows the list; the stored view returns on close
     if (!visible.length) {
       list.innerHTML = "";
       calendarEl.innerHTML = "";
       mapRest.innerHTML = "";
       views.hidden = true;
       resultsText.textContent = "";
-      status.innerHTML = shows.some((s) => !s._past)
-        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`
-        : `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
+      status.innerHTML = listMode()
+        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Diese Liste ist leer</p><p>Keine der Shows ist mehr in der Agenda.</p><button type="button" class="primary" id="reset" title="Zurück zur Agenda">Zurück zur Agenda</button>`
+        : shows.some((s) => !s._past)
+          ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`
+          : `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
       return;
     }
     status.innerHTML = "";
     views.hidden = false;
-    const first = visible[0]._day;
-    const last = visible[visible.length - 1]._day;
-    const span =
-      first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
-        ? monthFmt.format(first)
-        : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
+    const span = monthSpan(visible);
     const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
     resultsText.textContent = shared
       ? `Geteilte Liste · ${visible.length} ${visible.length === 1 ? "Show" : "Shows"} · ${span}${rangeNote}`
       : `${visible.length} ${visible.length === 1 ? "Konzert" : "Konzerte"}${filtered ? " für diese Auswahl" : ""} · ${span}${rangeNote}`;
 
-    list.hidden = view !== "list";
-    calendarEl.hidden = view !== "calendar";
-    mapView.hidden = view !== "map";
+    list.hidden = v !== "list";
+    calendarEl.hidden = v !== "calendar";
+    mapView.hidden = v !== "map";
     // Only the active view keeps its rows: the calendar's day list and the map's
     // "Ohne Standort" list reuse the row ids, and #id links must find the list row.
-    if (view !== "list") list.innerHTML = "";
-    if (view !== "calendar") calendarEl.innerHTML = "";
-    if (view !== "map") mapRest.innerHTML = "";
-    if (view === "calendar") {
+    if (v !== "list") list.innerHTML = "";
+    if (v !== "calendar") calendarEl.innerHTML = "";
+    if (v !== "map") mapRest.innerHTML = "";
+    if (v === "calendar") {
       renderCalendar(visible);
       return;
     }
-    if (view === "map") {
+    if (v === "map") {
       renderMap(visible);
       return;
     }
@@ -429,6 +429,15 @@
         </section>`,
       )
       .join("");
+  }
+
+  // "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
+  function monthSpan(visible) {
+    const first = visible[0]._day;
+    const last = visible[visible.length - 1]._day;
+    return first.getMonth() === last.getMonth() && first.getFullYear() === last.getFullYear()
+      ? monthFmt.format(first)
+      : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
   }
 
   // Tagline: one of the slogans (same lines as on the stickers), rotating by day.
@@ -845,7 +854,6 @@
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
     );
   }
-  let geoDeclined = false; // no placeholder in the rows once the browser said no
   locateBtn.addEventListener("click", locate);
   list.addEventListener("click", (e) => {
     if (e.target.closest(".geo-ask")) locate();
@@ -912,10 +920,11 @@
       .join(",");
 
   minePanel.innerHTML =
-    `<span class="mine-note">Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» – der Link zeigt genau diese Shows.</span>` +
-    `<button type="button" class="act" data-mine="ics" title="Meine Shows als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
-    `<button type="button" class="act" data-mine="share" title="Link zu meiner Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
-    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Meine Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
+    `<span class="mine-note"></span>` +
+    `<button type="button" class="act take" data-mine="take" title="Alle Shows dieser Liste in meine Shows übernehmen" hidden>${ICONS.star}<span>Alle merken</span></button>` +
+    `<button type="button" class="act" data-mine="ics" title="Diese Liste als .ics speichern (Apple, Outlook …)">${ICONS.cal}<span>Kalender exportieren (.ics)</span></button>` +
+    `<button type="button" class="act" data-mine="share" title="Link zu dieser Liste kopieren">${ICONS.link}<span>Liste teilen</span></button>` +
+    `<a class="act" id="mine-wa" href="#" target="_blank" rel="noopener" title="Diese Liste per WhatsApp teilen">${ICONS.wa}<span>WhatsApp</span></a>`;
 
   // The ★ button is always there; without marks it is muted and only explains itself (title).
   function updateMine() {
@@ -926,9 +935,21 @@
     toggleMine.setAttribute("aria-pressed", String(mineOnly));
     toggleMine.title = mineOnly ? "Wieder alle Shows anzeigen" : "Nur meine Shows anzeigen";
     toggleMine.querySelector("b").textContent = n;
-    minePanel.hidden = !mineOnly || n === 0;
-    if (!minePanel.hidden)
-      el("mine-wa").href = `https://wa.me/?text=${encodeURIComponent(`Meine Reggae-Shows: ${mineUrl()}`)}`;
+    minePanel.hidden = !listMode() || !listShows().length;
+    if (!minePanel.hidden) {
+      el("mine-wa").href =
+        `https://wa.me/?text=${encodeURIComponent(`${shared ? "Reggae-Shows" : "Meine Reggae-Shows"}: ${listUrl()}`)}`;
+      const take = minePanel.querySelector(".take");
+      take.hidden = !shared;
+      take.disabled = Boolean(shared) && Object.keys(shared).every((id) => marks[id]);
+      take.querySelector("span").textContent = take.disabled ? "Alle gemerkt ✓" : "Alle merken";
+      minePanel.querySelector(".mine-note").textContent = !shared
+        ? "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken»."
+        : take.disabled
+          ? "Diese Shows sind in deinen Shows (★) gespeichert."
+          : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.";
+    }
+    syncListMode();
   }
 
   function cycleMark(s, row) {
@@ -959,44 +980,133 @@
     if (!btn) return;
     if (btn.dataset.mine === "ics")
       downloadIcs(
-        icsWrap(markedShows().flatMap((s) => vevent(s, marks[s.id] === "going" ? "CONFIRMED" : "TENTATIVE"))),
-        "meine-shows.ics",
+        icsWrap(listShows().flatMap((s) => vevent(s, listMark(s) === "going" ? "CONFIRMED" : "TENTATIVE"))),
+        shared ? "geteilte-shows.ics" : "meine-shows.ics",
       );
     if (btn.dataset.mine === "share") {
+      // The #m= link is the shareable artefact: it goes to the clipboard and into the address bar.
+      const url = listUrl();
+      if (!shared) history.replaceState(null, "", url);
       const label = btn.querySelector("span");
       try {
-        await navigator.clipboard.writeText(mineUrl());
-        label.textContent = "Link kopiert";
+        await Promise.race([
+          navigator.clipboard.writeText(url),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
+        ]);
+        label.textContent = "Kopiert";
       } catch {
         label.textContent = "Kopieren nicht möglich";
       }
       setTimeout(() => (label.textContent = "Liste teilen"), 1500);
     }
+    if (btn.dataset.mine === "take" && shared) {
+      // Never overwrites or downgrades an own mark; the friend's "Ich gehe" stays a "geht hin" chip.
+      for (const id of Object.keys(shared)) if (!marks[id]) marks[id] = "interested";
+      saveMarks();
+      render();
+    }
   });
 
-  // A friend's list (#m=…): the list is simply filtered to those shows; the friend's "going" marks show as
-  // a small chip. "✕ Filter zurücksetzen" leaves the shared view. Nothing is written to the visitor's marks.
+  // A friend's list (#m=…): the page switches to the list mode with exactly those shows; the friend's "going"
+  // marks show as a small chip. Nothing is written to the visitor's marks until «Alle merken».
   function showShared() {
     shared = {};
-    // New form #m=<short><g|i>,… ; old form #mine=<id>:<g|i>,… still accepted.
+    sharedBy = "";
+    // New form #m=<short><g|i>,…[,von:<Name>] ; old form #mine=<id>:<g|i>,… still accepted.
     const raw = location.hash.replace(/^#(mine|m)=/, "");
     for (const part of raw.split(",")) {
+      if (part.startsWith("von:")) {
+        sharedBy = decodeHashPart(part.slice(4)).trim().slice(0, 40);
+        continue;
+      }
       let token, st;
       if (part.includes(":")) [token, st] = part.split(":").map(decodeHashPart);
       else [token, st] = [decodeHashPart(part.slice(0, -1)), part.slice(-1)];
       const show = token && findShow(token);
       if (show) shared[show.id] = st === "g" ? "going" : "interested";
     }
-    if (!Object.keys(shared).length) {
+    const ids = Object.keys(shared);
+    if (!ids.length) {
       shared = null;
       return;
     }
-    if (Object.keys(shared).some((id) => findShow(id)?._past)) {
+    // The visitor's own link (every marked show, nothing else): that is simply "Meine Shows".
+    if (ids.length === markedShows().length && ids.every((id) => marks[id])) {
+      shared = null;
+      history.replaceState(null, "", location.pathname + location.search);
+      mineOnly = true;
+    }
+    if (ids.some((id) => findShow(id)?._past)) {
       showPast = true;
       pastAuto = false;
     }
     render();
+    el("list-title").focus({ preventScroll: true }); // opened from a link: announce the heading
   }
+
+  // --- Listenmodus: ★ Meine Shows or a friend's list (#m=…) shows only that list. body.list-mode folds every
+  // other filter away (CSS); a slim header in the sticky bar carries ✕ "Zurück zur Agenda", title and count.
+  // The ★ stays in place (pressed) and Esc closes too. #mine-panel below holds the list actions.
+  // Filters are bypassed, not cleared: search, Wo, genre, Wann and the view come back 1:1 on close.
+  const listHead = el("list-head");
+  const BASE_TITLE = document.title;
+  let sharedBy = ""; // optional "von:<Name>" token in a #m= link
+  listHead.innerHTML =
+    `<button type="button" class="list-close" id="list-close" title="Zurück zur Agenda (Esc)" aria-label="Zurück zur Agenda"><b aria-hidden="true">✕</b><span>Zurück<i> zur Agenda</i></span></button>` +
+    `<h2 class="list-title" id="list-title" tabindex="-1"></h2>`;
+  function listMode() {
+    return Boolean(shared || mineOnly);
+  }
+  const inList = (s) => Boolean(shared ? shared[s.id] : marks[s.id]);
+  const listMark = (s) => (shared ? shared[s.id] : marks[s.id]);
+  const listShows = () => shows.filter(inList);
+  const listUrl = () => (shared ? `${location.origin}${location.pathname}${location.hash}` : mineUrl());
+  const SHARED_HASH = /^#(mine|m)=/;
+  // The only hook: every render() ends here (via updateMine).
+  function syncListMode() {
+    const on = listMode();
+    const was = document.body.classList.contains("list-mode");
+    document.body.classList.toggle("list-mode", on);
+    document.body.classList.toggle("list-shared", Boolean(shared));
+    listHead.hidden = !on;
+    filtersForm.setAttribute("role", on ? "region" : "search");
+    if (on) filtersForm.setAttribute("aria-labelledby", "list-title");
+    else filtersForm.removeAttribute("aria-labelledby");
+    document.title = on ? `${shared ? "Geteilte Liste" : "Meine Shows"} · Jahgenda` : BASE_TITLE;
+    if (!on) {
+      // Leaving the mode by any exit (✕, Esc, ★, last mark gone, reset): a #m= link that «Liste teilen» or a
+      // friend put into the address bar goes too. Not on the first render, which precedes revealFromHash().
+      if (was && SHARED_HASH.test(location.hash))
+        history.replaceState(null, "", location.pathname + location.search);
+      return;
+    }
+    if (!was && openPanel) setPanel(null); // fold Wo/Wann away; their settings survive
+    const l = listShows();
+    const n = l.length;
+    const span = n ? `<i> · ${monthSpan(l)}</i>` : ""; // phones drop the months (the heading below has them)
+    el("list-title").innerHTML = shared
+      ? `${ICONS.star}<span class="t">${sharedBy ? `<i>Geteilte </i>Liste von ${escape(sharedBy)}` : "Geteilte Liste"}</span><b class="n">${n} ${n === 1 ? "Show" : "Shows"}${span}</b>`
+      : `${ICONS.star}<span class="t">Meine Shows</span><b class="n">${n}${span}</b>`;
+  }
+  function closeListMode() {
+    mineOnly = false;
+    shared = null;
+    sharedBy = "";
+    renderAndKeepInView(); // → syncListMode strips a #m= hash
+    (toggleMine.hidden ? search : toggleMine).focus({ preventScroll: true });
+  }
+  listHead.addEventListener("click", (e) => {
+    if (e.target.closest("#list-close")) closeListMode();
+  });
+  // Capture phase, so that the action sheet and the Wo/Wann panels (which own Esc while open) go first.
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape" || !listMode() || !sheet.hidden || openPanel) return;
+      closeListMode();
+    },
+    true,
+  );
 
   // --- Wann: quick picks (Heute / Wochenende / 7 Tage) or any set of months. ---
   // The choice lives for this visit only (nothing is stored). Default = no range = everything upcoming.
