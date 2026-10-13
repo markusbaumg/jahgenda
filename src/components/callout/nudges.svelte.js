@@ -16,7 +16,7 @@
 import { untrack } from "svelte";
 import { callout } from "../../stores/callout.svelte.js";
 import { agenda } from "../../stores/agenda.svelte.js";
-import { regionName } from "../../lib/regions.js";
+import { shortRegion } from "../../lib/regions.js";
 import { parseHash } from "../../lib/hash.js";
 import { quietScroll, isQuietScroll } from "../views/scroll.js";
 import { t } from "../../i18n/core.js";
@@ -62,7 +62,8 @@ export function showSubscribe(force) {
   callout.show({
     id: "subscribe",
     force,
-    title: canton ? t("sub.titleRegion", { name: regionName(canton) }) : t("sub.title"),
+    // Short name («Deutschland», not «Deutschland (grenznah)»): the headline fits one line at 375 px.
+    title: canton ? t("sub.titleRegion", { code: canton, name: shortRegion(canton) }) : t("sub.title"),
     text: t("sub.text"),
     actions: [
       {

@@ -328,7 +328,7 @@ export default {
   "callout.neverTitle": "Diesen Hinweis nie mehr anzeigen",
   "callout.closeTitle": "Später wieder zeigen (30 Tage)",
   "callout.closeAria": "Schliessen – in 30 Tagen wieder zeigen",
-  "sub.titleRegion": "Shows in {name} in deinem Kalender",
+  "sub.titleRegion": ({ code, name }) => `Shows ${inRegion(code, name)} im Kalender`, // «Shows im Tessin im Kalender»
   "sub.title": "Alle Shows in deinem Kalender",
   "sub.text": "Einmal abonnieren – danach hält sich der Kalender selbst aktuell.",
   "sub.apple": "Apple / Outlook",
