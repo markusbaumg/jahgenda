@@ -137,5 +137,30 @@
     return `https://calendar.google.com/calendar/render?${p}`;
   }
 
-  return { shortId, venueKey, safeUrl, escape, distanceKm, parseDay, vevent, icsWrap, icsFor, gcalUrl };
+  // SBB timetable link from the visitor's town to the show's town, arriving `lead` minutes before the
+  // show (20:00 when the show has no time). Empty when there is no origin or it is the show's own town.
+  function sbbUrl(show, from, opts) {
+    const { lead = 60 } = opts || {};
+    if (!from || !show.city || from === show.city) return "";
+    const [h, m] = (show.time || "20:00").split(":").map(Number);
+    const day = parseDay(show.date);
+    const arrive = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m - lead);
+    const time = `${pad2(arrive.getHours())}:${pad2(arrive.getMinutes())}`;
+    const p = `von=${encodeURIComponent(from)}&nach=${encodeURIComponent(show.city)}&date=${show.date}&time=${encodeURIComponent(time)}&moment=ARRIVAL`;
+    return `https://www.sbb.ch/de?${p}`;
+  }
+
+  return {
+    shortId,
+    venueKey,
+    safeUrl,
+    escape,
+    distanceKm,
+    parseDay,
+    vevent,
+    icsWrap,
+    icsFor,
+    gcalUrl,
+    sbbUrl,
+  };
 });

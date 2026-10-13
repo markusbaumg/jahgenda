@@ -223,6 +223,7 @@
               <section class="run">
                 <h3>${escape(names[r.skill] || r.skill)} <time datetime="${escape(r.at)}">${escape(when)}</time></h3>
                 <div class="counts">
+                  ${r.runner ? `<span class="count">${escape({ cloud: "Cloud-Routine", launchd: "Mac (launchd)", local: "Mac (lokal)" }[r.runner] || r.runner)}</span>` : ""}
                   ${r.added ? `<span class="count add">+${r.added} neu</span>` : ""}
                   ${r.updated ? `<span class="count">~${r.updated} geändert</span>` : ""}
                   ${r.removed ? `<span class="count rem">−${r.removed} entfernt</span>` : ""}

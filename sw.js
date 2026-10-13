@@ -1,5 +1,6 @@
 /* Jahgenda service worker.
- * - App shell (HTML/CSS/JS/icons) is precached and served cache-first.
+ * - App shell (HTML/CSS/JS/icons) is precached and served cache-first; other same-origin files
+ *   (canton flags, …) are cached on first use.
  * - data/*.json is network-first with the cached copy as offline fallback, so the agenda is always
  *   fresh when online and still readable offline.
  * - Leaflet from unpkg is cached on first use; map tiles are never cached.
@@ -28,18 +29,14 @@ const SHELL = [
   "img/icons/icon-192.png",
   "img/icons/icon-512.png",
 ];
-const CANTONS =
-  "AG AI AR BE BL BS FR GE GL GR JU LU NE NW OW SG SH SO SZ TG TI UR VD VS ZG ZH D F I A FL".split(" ");
+// The canton flags are not precached (31 files, most for cantons without a show): the fetch handler
+// stores every same-origin file on first use, so the flags that were actually seen stay available offline.
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(SHELL_CACHE).then((cache) =>
       // cache: "reload" bypasses the HTTP cache, so a new worker never precaches a stale shell.
-      cache.addAll(
-        [...SHELL, ...CANTONS.map((c) => `img/cantons/${c}.svg`)].map(
-          (u) => new Request(u, { cache: "reload" }),
-        ),
-      ),
+      cache.addAll(SHELL.map((u) => new Request(u, { cache: "reload" }))),
     ),
   );
 });

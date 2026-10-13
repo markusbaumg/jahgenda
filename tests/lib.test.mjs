@@ -116,3 +116,16 @@ test("gcalUrl: timed and all-day dates, Zurich timezone, trimmed details, encode
   const unsafe = new URL(lib.gcalUrl(show({ url: "javascript:alert(1)" }), { url: PAGE }));
   assert.equal(unsafe.searchParams.get("details"), PAGE, "non-http urls are dropped");
 });
+
+test("sbbUrl: arrival one hour before the show, 20:00 default, encoded towns, empty without origin or in town", () => {
+  assert.equal(
+    lib.sbbUrl(show(), "Sursee"),
+    "https://www.sbb.ch/de?von=Sursee&nach=Bern&date=2026-10-16&time=19%3A30&moment=ARRIVAL",
+  );
+  assert.equal(lib.sbbUrl(show({ time: "" }), "Zürich").split("&time=")[1], "19%3A00&moment=ARRIVAL");
+  assert.equal(lib.sbbUrl(show({ time: "00:30" }), "Zürich").split("&time=")[1], "23%3A30&moment=ARRIVAL");
+  assert.ok(lib.sbbUrl(show({ city: "Genève" }), "Zürich").includes("von=Z%C3%BCrich&nach=Gen%C3%A8ve"));
+  assert.equal(lib.sbbUrl(show(), "Zürich", { lead: 90 }).split("&time=")[1], "19%3A00&moment=ARRIVAL");
+  assert.equal(lib.sbbUrl(show(), ""), "");
+  assert.equal(lib.sbbUrl(show(), "Bern"), "");
+});

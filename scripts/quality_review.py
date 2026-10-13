@@ -9,6 +9,7 @@ Usage: python3 scripts/quality_review.py [--days 7]
 
 import json
 import os
+import re
 import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -47,6 +48,41 @@ def collect(days):
     return out
 
 
+DATE_IN_TITLE = re.compile(r"\b(\d{1,2})\.(\d{1,2})\.(?:(\d{4}))?")
+
+
+def drop_key(d):
+    """Same candidate dropped by several runs → one key: the first words of the title (before « @ », « – »,
+    a bracket or a colon) plus the date (the `date` field, or a «DD.MM.» the prompt wrote into the title)."""
+    title = re.split(r" @ | – | - |\(|:", str(d.get("title") or ""), maxsplit=1)[0]
+    words = re.sub(r"[^a-z0-9äöüéèàç ]", " ", title.lower()).split()[:3]
+    day = d.get("date") or ""
+    if not day:
+        m = DATE_IN_TITLE.search(str(d.get("title") or ""))
+        if m:
+            day = f"{m.group(1).zfill(2)}.{m.group(2).zfill(2)}"
+    elif re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(day)):
+        day = f"{day[8:10]}.{day[5:7]}"
+    return (" ".join(words), day)
+
+
+def dedupe(items):
+    """Keep one entry per candidate (the most complete one: date + venue + url), newest run first,
+    and remember in how many runs it was dropped."""
+    best, order = {}, []
+    for at, d, r in items:
+        k = drop_key(d)
+        score = sum(bool(d.get(f)) for f in ("date", "venue", "city", "url"))
+        if k not in best:
+            best[k] = [at, d, r, score, 1]
+            order.append(k)
+        else:
+            best[k][4] += 1
+            if score > best[k][3] or (score == best[k][3] and at > best[k][0]):
+                best[k][:4] = [at, d, r, score]
+    return [(b[0], dict(b[1], runs=b[4]), b[2]) for b in (best[k] for k in order)]
+
+
 def body_for(items, days):
     lines = [
         f"The scraper dropped **{len(items)} candidate(s)** in the last {days} days. Please skim them for",
@@ -57,8 +93,9 @@ def body_for(items, days):
     for at, d, r in sorted(items, key=lambda x: x[0], reverse=True):
         where = ", ".join(x for x in (d.get("venue"), d.get("city")) if x)
         link = f" ([Quelle]({d['url']}))" if d.get("url") else ""
+        times = f" (in {d['runs']} Läufen)" if d.get("runs", 1) > 1 else ""
         lines.append(
-            f"- **{d.get('title', '?')}** · {d.get('date', '?')} · {where}{link} — {d.get('why', '')}"
+            f"- **{d.get('title', '?')}** · {d.get('date', '?')} · {where}{link} — {d.get('why', '')}{times}"
         )
     sources = {}
     for _, _, r in items:
@@ -91,7 +128,7 @@ def main(argv):
     days = 7
     if "--days" in argv:
         days = int(argv[argv.index("--days") + 1])
-    items = collect(days)
+    items = dedupe(collect(days))
     if not items:
         print("nothing dropped in the period – no issue")
         return 0

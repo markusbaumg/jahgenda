@@ -34,7 +34,10 @@ index.html / style.css / app.js        The page. No build step, no framework.
 store.js                               Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 lib.js                                 Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 pwa.js / sw.js / manifest.webmanifest  Installable app: install banner, offline cache, update toast.
+callout.js                             One callout component for every nudge (install, subscribe): snooze or «Nie mehr zeigen».
 log.html                               Public scraper log (renders data/runs.json).
+review.html                            Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
+mischpult.html                         The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
 data/shows.json                        The shows. Written by the scraper.
 data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag.
 data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
@@ -53,15 +56,35 @@ scripts/check_freshness.py             Watchdog: data stale or last run failed �
 scripts/check_venues.py                Re-checks venue coordinates against OpenStreetMap (make venues-check).
 scripts/smoke.sh                       Loads the pages in headless Chrome, fails on JS errors (make check).
 scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahgenda.svg.
+scripts/make_ics.py                    Builds the subscribable calendar feeds (jahgenda.ics + one per region) before deploy.
+scripts/make_stickers.py               Renders the promo stickers in design/stickers/ (make stickers).
+scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
 e2e/                                   End-to-end tests in a real browser (Playwright; make e2e).
 design/                                Logo variants, festival spec, other design documents.
 .github/workflows/pages.yml            Validates data, stamps the service worker, deploys on every push to main.
 .github/workflows/validate.yml         CI: `make ci` (lint, validate, test, smoke, format check) + e2e job on every push and PR.
+.github/workflows/quality-review.yml   Mondays: scripts/quality_review.py opens the review issue (label quality).
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.
 Makefile                               Everything you can run: `make` shows the help.
 ```
+
+### Filters
+
+Search (band, club, town), one genre chip (order and labels from `data/genres.json`, with counts), and two
+dropdown panels hanging from the sticky toolbar — only one is open at a time, closed with ×, Escape, the
+button or a tap outside:
+
+- **Wo** — cantons are multi-select chips with counts (Swiss cantons A–Z, neighbouring countries D/F/I/A/FL
+  at the end); the canton badge in a row toggles the same filter. **Mein Standort** asks the browser for the
+  position (also asked once on start; never stored or sent anywhere) and enables a radius (10/25/50 km),
+  distances in every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to
+  the show's town, arrival one hour before the show — `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen»
+  placeholder while the position is unknown.
+- **Wann** — Heute / Wochenende / 7 Tage, or any set of months picked on a clickable month histogram (bars
+  = number of shows after the other filters; past months dimmed and switching past shows on). The badge in
+  the toolbar names the active choice; nothing is stored across visits.
 
 ### Views
 

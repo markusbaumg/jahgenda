@@ -96,3 +96,11 @@ Setting: **Search suggestions automatically: yes**
 - Waskabi — ska, ska-punk, reggae, found via Jazzkantine
 - Zaï — dub, roots, found via Le Romandie
 - Zion Step — reggae, found via Mahogany Hall
+- Skaboom — ska-punk, ska, found via Dynamo
+- Famara — reggae, found via Kulturkarussell Rössli
+- Los Billtones — ska, reggae, found via Albani
+- Golden Roots Soundsystem — soundsystem, roots, dub, found via Cafete
+- Forrest Children Sound System — soundsystem, dancehall, dub, found via Rümpeltum
+- Boundless Vibes Hifi — soundsystem, reggae, found via Kuppel
+- Ironworks Dread — dub, roots, found via Le Groove
+- Radio Rhum Reggae — soundsystem, reggae, dub, found via Bikini Test

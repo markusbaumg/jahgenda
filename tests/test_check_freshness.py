@@ -94,6 +94,20 @@ class Assess(unittest.TestCase):
         self.write("status.json", self.status(ok=False, error=None))
         self.assertIn("last run reported failure: no reason given", self.assess()[1])
 
+    def test_failed_run_still_tells_how_old_the_data_is(self):
+        self.write("status.json", self.status(ok=False, error="no network"))
+        self.write("shows.json", self.shows(hours_ago=3))
+        lines = self.assess()[1]
+        self.assertTrue(
+            any(
+                line.startswith("agenda data itself:") and "3.0 h ago) — still fresh" in line
+                for line in lines
+            ),
+            lines,
+        )
+        self.write("shows.json", self.shows(hours_ago=40))
+        self.assertTrue(any("40.0 h ago) — also stale" in line for line in self.assess()[1]))
+
     def test_zero_shows_is_fine_for_mock_data_but_not_for_the_scraper(self):
         self.write("status.json", self.status())
         self.write("shows.json", self.shows(n=0, source="mock"))

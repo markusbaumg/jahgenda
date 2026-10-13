@@ -8,6 +8,9 @@
     <meta name="theme-color" content="#14110e" />
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
+    <!-- Karte: Leaflet and the tiles come from two other origins; the handshakes start now, not on the tap. -->
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
     <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -35,6 +38,7 @@
     <main class="wrap">
       <div id="stuck-sentinel" aria-hidden="true"></div>
       <form class="filters" id="filters" role="search" onsubmit="return false">
+        <div id="list-head" class="list-head" aria-live="polite" hidden></div>
         <a class="mini-brand" href="#top" aria-label="Nach oben" title="Nach oben"
           ><img src="img/logo/jahgenda.svg" alt="" width="20" height="20" /><span class="wordmark"
             >Jah<span>genda</span></span
@@ -257,7 +261,7 @@
         </div>
       </form>
 
-      <p id="results" class="results" aria-live="polite">
+      <p id="results" class="results">
         <span id="view-switch" class="seg" role="group" aria-label="Ansicht">
           <button type="button" data-view="list" aria-pressed="true" title="Als Liste anzeigen">
             <svg
@@ -330,6 +334,8 @@
           ✕ Filter zurücksetzen
         </button>
       </p>
+      <!-- Screen readers hear the result count after every filter change (the visible count is in the footer). -->
+      <p class="sr" id="results-live" role="status" aria-live="polite"></p>
       <div id="mine-panel" class="mine-panel" hidden></div>
       <div id="views">
         <div id="list">
