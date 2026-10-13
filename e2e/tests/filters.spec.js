@@ -25,10 +25,11 @@ test("filters are written to the hash and restored after a reload", async ({ pag
   await expect(page.locator("#q")).toHaveValue("fiesta");
   await expect(page.locator('#genres .chip[data-genre="ska"]')).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("#toggle-where b")).toHaveText("ZH");
-  await expect(page.locator("#toggle-when b")).toHaveText(/^\d{1,2}\.\d{1,2}\.–\d{1,2}\.\d{1,2}\.$/);
-  await expect(page.locator("#status .big")).toHaveText("Nichts gefunden");
+  await expect(page.locator("#toggle-when b")).toHaveText("7 Tage"); // the badge names the quick pick
+  // The empty state names every active dimension («Kein Ska in Zürich in den nächsten 7 Tagen zu «fiesta»»).
+  await expect(page.locator("#status .big")).toHaveText(/^Kein Ska in Zürich .*7 Tagen zu «fiesta»$/);
 
-  await page.click("#status #reset");
+  await page.click("#status #reset"); // «Alles zurücksetzen» (offered from two filters on)
   await expect(page).not.toHaveURL(/#/);
   await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
   await expect(page.locator("#share-filters")).toBeHidden();
@@ -47,14 +48,10 @@ test("a filter link opens filtered; «Link zu dieser Auswahl» copies it", async
   if (copied) expect(copied).toMatch(/#g=reggae&wo=BE,LU$/);
 
   // A show link copied from a row keeps its hash; the filters come back into the URL on the next change.
+  // The actions line is inline on every width (icon-only 44 px targets on the phone, see phone.spec.js).
   const row = page.locator("#list .show").first();
-  if (isMobile) {
-    await row.locator(".act.more").click();
-    await page.locator('.sheet [data-act="link"]').click();
-  } else {
-    await row.hover();
-    await row.locator('[data-act="link"]').click();
-  }
+  if (!isMobile) await row.hover();
+  await row.locator('[data-act="link"]').click();
   await expect(page).toHaveURL(/#[a-z0-9]{5,8}$/);
   await page.locator('#genres .chip[data-genre=""]').click();
   await expect(page).toHaveURL(/#wo=BE,LU$/);
