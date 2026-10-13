@@ -553,6 +553,11 @@ a[href]:focus-visible,
 .chips-wrap {
   position: relative;
   height: var(--bar-chips);
+  /* The chip row scrolls inside its box: without a minimum of 0 a flex/grid parent lets the wrap grow to the
+   * chips' content width (seen at 200 % text size with Linux fonts in CI) and the page scrolls sideways. */
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .chips {
   display: flex;
