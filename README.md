@@ -45,6 +45,10 @@ src/components/Status.svelte           Loading skeleton, error state with retry,
 src/components/Footer.svelte           «Über Jahgenda» and the bottom bar (result count, data stamp, links).
 src/components/Icon.svelte             The inline SVG icons of the row actions.
 src/stores/agenda.svelte.js            The reactive store: shows + derived fields, genres, venues, filters, visible list.
+src/components/callout/                One sticker for every nudge (Callout.svelte) and the nudges (install, subscribe): snooze or «Nie mehr zeigen».
+src/stores/callout.svelte.js           The callout queue: one at a time, one nudge per visit, waits while the page is busy.
+src/stores/history.js                  Back button (panels, Meine Shows, views, calendar/map jumps) and scroll restoration.
+src/stores/live.svelte.js              Live regions: the results line (#results-live) and the feedback words (#feedback).
 src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
@@ -52,9 +56,8 @@ src/lib/dates.js / regions.js          … de-CH formatters and calendar arithme
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 public/                                Static files, copied as they are into dist/ (img/, fonts, manifest, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
-public/pwa.js / sw.js                  Installable app: install banner, offline cache, update toast (sw.js is stamped by the build).
+public/pwa.js / sw.js                  Installable app: offline cache, update toast (sw.js is stamped by the build).
 public/manifest.webmanifest            The web app manifest (name, icons, colours).
-public/callout.js                      One callout component for every nudge (install, subscribe): snooze or «Nie mehr zeigen».
 public/log.html                        Public scraper log (renders data/runs.json).
 public/review.html                     Dropped candidates per run with a «Gehört rein» button (linked from mischpult.html only).
 public/mischpult.html                  The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
