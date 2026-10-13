@@ -39,9 +39,10 @@ test("Back after a calendar pill jump returns to the calendar", async ({ page, i
   await page.goBack();
   await expect(page.locator("#calendar")).toBeVisible();
   await expect(page.locator('#view-switch [data-view="calendar"]')).toHaveAttribute("aria-pressed", "true");
-  await expect(page).not.toHaveURL(/#/);
+  await expect(page).toHaveURL(/#view=calendar$/); // the view travels in the hash, like the filters
   await page.goBack();
   await expect(page.locator("#list")).toBeVisible();
+  await expect(page).not.toHaveURL(/#/);
   await onSite(page);
 });
 
@@ -58,6 +59,35 @@ test("Back returns from a view switch on the phone", async ({ page, isMobile }) 
   await expect(page.locator('#view-switch [data-view="list"]')).toHaveAttribute("aria-pressed", "true");
   await onSite(page);
   // One more Back now leaves (the switch's entry was the only one).
+  await page.goBack();
+  await expect(page).toHaveURL("about:blank");
+});
+
+test("Back closes Meine Shows instead of leaving the page", async ({ page, isMobile }) => {
+  const row = page.locator("#list .show").first();
+  if (!isMobile) await row.hover();
+  await row.locator(".act.star").click();
+  await page.click("#toggle-mine");
+  await expect(page.locator("body")).toHaveClass(/list-mode/);
+  await expect(page.locator("#list-head")).toBeVisible();
+  // The list actions are the point of the view: they are on screen right after the tap, not under the bar.
+  const link = page.locator('#mine-panel [data-mine="link"]');
+  await expect(link).toBeInViewport();
+  const bar = await page.locator("#filters").boundingBox();
+  const panel = await page.locator("#mine-panel").boundingBox();
+  expect(panel.y).toBeGreaterThanOrEqual(bar.y + bar.height - 1);
+  await page.goBack();
+  await expect(page.locator("body")).not.toHaveClass(/list-mode/);
+  await expect(page.locator("#list-head")).toBeHidden();
+  await onSite(page);
+  await expect(page.locator("#list .show")).toHaveCount(6);
+  await expect(page.locator("#toggle-mine")).toBeFocused();
+  // ✕ pops the entry again: one Back now leaves.
+  await page.click("#toggle-mine");
+  await expect(page.locator("body")).toHaveClass(/list-mode/);
+  await page.click("#list-close");
+  await expect(page.locator("body")).not.toHaveClass(/list-mode/);
+  await page.waitForTimeout(200);
   await page.goBack();
   await expect(page).toHaveURL("about:blank");
 });

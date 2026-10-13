@@ -42,11 +42,12 @@ review.html                            Dropped candidates per run with a «Gehö
 mischpult.html                         The owners' control panel: sources, venues, prompt, rules, runs. Hidden, noindex.
 img/fonts/jahdisplay.woff2             Display face (Anton subset, OFL): wordmark, day numbers, month heads.
 data/shows.json                        The shows. Written by the scraper.
-data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag.
+data/venues.json                       Venue database: coordinates, canton, programme URL, scrape flag, scraper notes.
+data/venues.web.json                   Derived by format_data.py: the venues trimmed to what the page reads (city, lat, lon, url).
 data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
 data/artists.json                      Genre cache per act (Wikipedia / band website).
 data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
-data/slogans.json                      Taglines (header, sticky bar, stickers).
+data/slogans.json                      Taglines (stickers; the same list is inline in index.html for the header).
 data/status.json                       Heartbeat of the last run (ok, at, counts). Written by every skill run.
 scraper/criteria.md                    What counts as reggae? Nearby places abroad.
 scraper/bands.md                       Which bands are in, which are out, suggestions to review. Hand-curated.
@@ -54,7 +55,7 @@ scraper/sources.json                   Agenda sites, festivals, nearby regions, 
 .claude/skills/scrape-shows/           The scraper itself: a Claude Code skill (a prompt), not code.
 .claude/skills/harvest-bands/          Collects acts from festival line-ups as suggestions for bands.md.
 scripts/validate_shows.py              Validates data/*.json. Runs in CI and at the end of every scraper run.
-scripts/format_data.py                 Canonical formatting of data/*.json (small diffs).
+scripts/format_data.py                 Canonical formatting of data/*.json (small diffs); writes data/venues.web.json.
 scripts/check_freshness.py             Watchdog: data stale or last run failed → GitHub issue `scraper-failed`.
 scripts/check_venues.py                Re-checks venue coordinates against OpenStreetMap (make venues-check).
 scripts/smoke.sh                       Loads the pages in headless Chrome, fails on JS errors (make check).

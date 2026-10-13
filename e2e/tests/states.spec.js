@@ -55,12 +55,12 @@ test("a search with no result while scrolled brings «Nichts gefunden» into vie
   expect(box.y).toBeLessThan(bar.y + bar.height + 200);
 });
 
-test("a shared show link lands with the row under the sticky bar, also after venues.json re-renders", async ({
+test("a shared show link lands with the row under the sticky bar, also after venues.web.json re-renders", async ({
   page,
 }) => {
   await useFixture(page);
-  // venues.json arrives late, after the first scroll – the rows above the target grow by then.
-  await page.route("**/data/venues.json", async (route) => {
+  // venues.web.json arrives late, after the first scroll – the rows above the target grow by then.
+  await page.route("**/data/venues.web.json", async (route) => {
     await new Promise((r) => setTimeout(r, 700));
     await route.continue();
   });
@@ -92,4 +92,41 @@ test("a link to a show that is gone says so instead of silently showing everythi
   await page.goto("/#m=zzzzzzzi,yyyyyyyg");
   await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
   await expect(page.locator(".link-note")).toContainText("Die Shows aus diesem Link sind vorbei");
+});
+
+test("the error's «Nochmals versuchen» is on screen without scrolling – also at 320×568 and in landscape", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, "phone only");
+  await useFixture(page);
+  await page.route("**/data/shows.json", (route) => route.fulfill({ status: 500, body: "nope" }));
+  for (const [width, height] of [
+    [320, 568],
+    [568, 320],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    const retry = page.locator("#status #retry");
+    await expect(retry).toBeVisible();
+    await page.waitForTimeout(400); // the page scrolls the button into the fold
+    const box = await retry.boundingBox();
+    expect(box.y + box.height, `${width}×${height}`).toBeLessThanOrEqual(height);
+    expect(box.y, `${width}×${height}`).toBeGreaterThanOrEqual(0);
+  }
+});
+
+test("«Distanz & Zug anzeigen» in a row with the position blocked opens the Wo panel with the message", async ({
+  page,
+  context,
+}) => {
+  await context.clearPermissions(); // never granted: the browser answers the request with a denial
+  await useFixture(page);
+  await openList(page);
+  const ask = page.locator("#list .show .geo-ask").first();
+  await expect(ask).toHaveCount(1);
+  await ask.click({ force: true }); // hover-only on the desktop
+  await expect(page.locator("#where-panel")).toBeVisible();
+  await expect(page.locator("#geo-status")).toContainText("Standort im Browser blockiert");
+  await expect(page.locator("#list .show .geo-ask")).toHaveCount(0); // the placeholders go, the panel says why
 });

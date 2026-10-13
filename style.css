@@ -35,8 +35,8 @@
 
   /* typography (16 px base; nothing in the agenda below --fs-1) */
   --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "JahDisplay", "JahDisplay Fallback", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial,
-    sans-serif;
+  --font-display: "JahDisplay", "JahDisplay Fallback", "JahDisplay Fallback Condensed",
+    "JahDisplay Fallback Sans", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
   --fs-0: 0.78rem;
   --fs-1: 0.8125rem;
   --fs-2: 0.875rem;
@@ -60,7 +60,7 @@
   --s-7: 48px;
   --wrap: 760px;
   --gutter: 16px;
-  --date-w: 48px;
+  --date-w: 3rem; /* 48 px – in rem, so the HEUTE / MORGEN pill still fits the column at 200 % text size */
   --side-w: 44px;
   --tap: 44px;
   --bar-top: 48px;
@@ -94,7 +94,7 @@
   :root {
     --bar-top: 56px;
     --bar-chips: 40px; /* 96 px bar on desktop */
-    --date-w: 64px;
+    --date-w: 4rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -121,6 +121,29 @@
   src: local("Impact"), local("Arial Narrow Bold"), local("ArialNarrow-Bold");
   font-weight: 400 900;
   size-adjust: 95%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+/* Phones have neither Impact nor Arial Narrow, so the face above never matched there and the lockup
+ * painted 39 % too wide in a light sans until the woff2 arrived. One face per platform, each with its
+ * own size-adjust (measured on «JAHGENDA» against Anton: Helvetica Neue Condensed Bold 88 %, Helvetica /
+ * Arial Bold 69 %, Roboto Bold taken as Arial's); the line-box overrides are shared. */
+@font-face {
+  font-family: "JahDisplay Fallback Condensed";
+  src: local("HelveticaNeue-CondensedBold"), local("Helvetica Neue Condensed Bold");
+  font-weight: 400 900;
+  size-adjust: 88%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "JahDisplay Fallback Sans";
+  src: local("Roboto Bold"), local("Roboto-Bold"), local("Arial Bold"), local("Arial-BoldMT"),
+    local("Helvetica Neue Bold"), local("HelveticaNeue-Bold");
+  font-weight: 400 900;
+  size-adjust: 69%;
   ascent-override: 124%;
   descent-override: 35%;
   line-gap-override: 0%;
@@ -261,12 +284,16 @@ body::after {
 /* Every link gets the same gold ring as the buttons (not the browser's blue one). */
 a[href]:focus-visible,
 .leaflet-container a:focus-visible,
-#views:focus-visible,
 #foot:focus-visible,
 .show:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
   border-radius: 4px;
+}
+/* The skip link lands on the whole agenda: no ring around 14 000 px of list (its top edge peeked out
+ * under the bar as a stray gold bar); the next Tab is the first row. */
+#views:focus-visible {
+  outline: none;
 }
 #q::placeholder {
   color: var(--muted); /* the browser grey was 3.8:1 */
@@ -292,7 +319,9 @@ a[href]:focus-visible,
   gap: 10px;
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-d3);
+  /* Never wider than the column: mark (1em) + gap + JAHGENDA (≈3.9em) ≤ 100vw − 2 gutters, so a 200 %
+   * text size does not push the one unbreakable word past the edge (sideways page scroll). */
+  font-size: min(var(--fs-d3), calc((100vw - 42px) / 5));
   font-weight: 400;
   font-synthesis: none;
   letter-spacing: 0.01em;
@@ -531,6 +560,7 @@ a[href]:focus-visible,
   height: var(--bar-chips);
   padding: 1px 0 3px;
   cursor: grab;
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
   user-select: none;
   overflow-x: auto;
   overflow-y: hidden;
@@ -650,6 +680,9 @@ a[href]:focus-visible,
     border-color: var(--muted);
   }
 }
+.chip.is-empty {
+  opacity: 0.45; /* 0 under the other filters: dimmed, still tappable (updateCounts) */
+}
 .chip:active {
   transform: scale(0.96);
 }
@@ -734,9 +767,13 @@ a[href]:focus-visible,
   opacity: 1;
 }
 .geo-ask {
-  padding: 0;
+  position: relative;
+  display: inline-block;
+  min-height: 24px; /* WCAG 2.5.8: a 24 px target, not an 18 px text line */
+  padding: 2px 0;
   font: inherit;
-  font-size: 0.85em;
+  font-size: 0.9em;
+  line-height: 1.4;
   color: var(--muted);
   background: none;
   border: 0;
@@ -746,7 +783,7 @@ a[href]:focus-visible,
 /* Separator and button fade in together on hover (nothing is left dangling while hidden). */
 .geo-hint {
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--t-2) var(--ease-tape);
 }
 .show:hover .geo-hint,
 .geo-hint:focus-within {
@@ -761,6 +798,12 @@ a[href]:focus-visible,
 @media (hover: none) {
   .geo-hint {
     opacity: 0.7;
+  }
+  /* Touch: the hit area grows upwards into the meta line (downwards the icon row is next). */
+  .geo-ask::after {
+    content: "";
+    position: absolute;
+    inset: -10px -6px -2px;
   }
 }
 /* SBB timetable: a small red badge next to the distance, revealed on hover (always on touch screens). */
@@ -931,8 +974,17 @@ a[href]:focus-visible,
 }
 .results-row .share-filters {
   order: 4;
+  position: relative;
   font-size: var(--fs-1);
   min-height: 24px;
+  /* The same dotted rule as «Alles zurücksetzen» right above it: muted text without it read as a caption. */
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.results-row .share-filters::after {
+  content: ""; /* 44 px hit area on touch, like the pills */
+  position: absolute;
+  inset: -10px -4px;
 }
 .results-row .share-filters[hidden] {
   display: none;
@@ -957,6 +1009,7 @@ a[href]:focus-visible,
   white-space: nowrap;
   cursor: pointer;
   list-style: none;
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1359,6 +1412,21 @@ a[href]:focus-visible,
 .map-view .leaflet-container a.leaflet-popup-close-button {
   color: var(--muted);
 }
+/* The × is a thumb-sized target hanging over the wrapper's corner; the venue line keeps clear of it. */
+.map-view .leaflet-container a.leaflet-popup-close-button {
+  top: -2px;
+  right: -2px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 26px;
+  line-height: 40px;
+  text-align: center;
+}
+.map-view .leaflet-popup-content > strong:first-child {
+  display: inline-block;
+  max-width: calc(100% - 26px);
+}
 /* Several venues in one house share a pin: the popup lists them one after the other. */
 .map-view .popup-venue {
   margin: 8px 0 0;
@@ -1366,18 +1434,78 @@ a[href]:focus-visible,
 /* Touch screens: finger-sized zoom buttons, and a map that fits a phone held sideways. */
 @media (hover: none) {
   .map-view .leaflet-touch .leaflet-bar a {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
   }
+  /* The shows in a popup are rows a thumb can tell apart (44 px, a hairline between them). */
+  .map-view .leaflet-container .popup-shows li + li {
+    border-top: 1px solid var(--line-soft);
+  }
+  .map-view .leaflet-container .popup-shows a {
+    display: block;
+    min-height: 44px;
+    padding: 11px 0;
+    box-sizing: border-box;
+  }
+}
+/* Several pins on one spot (the start view of a portrait phone): one cluster badge, a tap zooms in. */
+.cluster-icon {
+  background: none;
+  border: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.cluster-icon span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #14110e;
+  border: 3px solid var(--gold);
+  box-shadow:
+    0 0 0 2px #14110e,
+    0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.cluster-icon b {
+  color: #f3ead8;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.cluster-icon:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+/* While the first tiles are on their way the frame says so (the pins float on a plain square until then). */
+.map.tiles-pending::after {
+  content: "Karte lädt …";
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 500;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(20, 17, 14, 0.8);
+  color: var(--muted);
+  font-size: var(--fs-1);
+  pointer-events: none;
 }
 @media (max-height: 500px) {
   .map {
     min-height: 240px;
   }
-  .filters,
   #list .month {
     position: static;
+  }
+  /* Unstuck, but still the containing block of the Wo/Wann dropdowns (position: absolute; top: 100%) and
+   * of its own ::before plate – `static` sent the panels to the end of the page and let the plate's
+   * negative inset widen the document by one gutter (16 px sideways scroll in landscape). */
+  .filters {
+    position: relative;
   }
 }
 .popup-shows {
@@ -1442,6 +1570,16 @@ a[href]:focus-visible,
 .status .state-icon svg {
   width: 48px;
   height: 48px;
+}
+/* Short or very narrow screens (a phone held sideways, 320 px): the card drops its icon and some padding,
+ * so the message and its button («Nochmals versuchen») need no scroll. */
+@media (max-height: 600px), (max-width: 340px) {
+  .status .state-icon {
+    display: none;
+  }
+  .status {
+    padding: 20px 16px;
+  }
 }
 /* The offers of the empty state (§3.8): «Tessin entfernen → 4 Shows», the richest first; the yield in
  * green, 0 in muted. «Alles zurücksetzen» as a quiet link under them. */
@@ -1961,7 +2099,10 @@ a[href]:focus-visible,
   }
   .foot-row {
     grid-column: 1 / -1;
-    margin-top: -4px;
+    /* 4 px (not −4): 8 px of dead space between the star's 44 px box in the side column and the «Infos»
+     * link under it (a low tap on the star opened the organiser's page), and between the «Distanz & Zug»
+     * text and the icon row. Costs ~11 px per row. */
+    margin-top: 7px;
     min-height: 38px;
   }
   .actions {
@@ -1971,12 +2112,24 @@ a[href]:focus-visible,
     gap: 0;
     margin-left: -13px; /* the icon (18 px, centred in 44 px) lines up with the title */
   }
+  /* A tap on a row of a hidden view (the calendar's day list) must never widen the layout viewport. */
+  .cal-day,
+  .foot-row {
+    overflow-x: clip;
+  }
   .show .actions .act {
     margin: -3px 0;
   }
   /* The star tucks 6 px under the coat-of-arms button, so the side column stays within a short row. */
   .side .star {
     margin-top: -6px;
+  }
+}
+/* The narrowest phones (320 px): six 44 px targets are 264 px, the line has 243 – the targets shrink to
+ * 40 px so the last one («Infos») is not cut by the viewport edge. */
+@media (max-width: 339px) {
+  .show .actions .act {
+    width: 40px;
   }
 }
 /* The star in the side column: 44 × 44, icon only (the word lives in the tooltip and for screen readers);
@@ -2043,6 +2196,7 @@ a[href]:focus-visible,
   max-width: 100%;
   padding: 3px 4px 2px;
   white-space: nowrap;
+  overflow: hidden; /* never painted over the title, whatever the text size */
   border-radius: var(--r-1);
   font-family: var(--font-display);
   font-weight: 400;
@@ -2317,6 +2471,17 @@ a[href]:focus-visible,
   color: var(--text);
   overflow-wrap: anywhere;
 }
+/* 320 px: the acts column had 107 px next to the day label (2–3 words per line, an 800 px card); the
+ * label goes above its acts. From 360 px the side-by-side grid of design/festival-spec.md §3.5 stands. */
+@media (max-width: 359px) {
+  .days {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .days .d:not(:first-child) {
+    padding-top: 8px;
+  }
+}
 .days .d {
   padding-top: 2px;
   font-size: var(--fs-1);
@@ -2540,6 +2705,7 @@ a[href]:focus-visible,
 /* --- Meine Shows (§7 S5): star = Merken on/off, state toggle in marked rows, echo, undo toast, panel --- */
 .act.star {
   -webkit-touch-callout: none; /* the long press (= Ich gehe) must not open the touch menu */
+  -webkit-user-select: none; /* Safari only honours the prefixed property */
   user-select: none;
 }
 .act.star svg path {
@@ -2669,7 +2835,9 @@ a[href]:focus-visible,
 @media (max-width: 599px) {
   .mark-slot {
     flex: 1 1 100%;
-    margin: 4px 0 3px; /* 3 px: the 44 px hit area of the segments ends where the action targets begin */
+    /* 11 px: 8 px of dead space between the segments' 44 px hit area and the action targets below (a tap
+     * 8 px under the «Interessiert» pill opened Google Kalender in a new tab). Costs 8 px per marked row. */
+    margin: 4px 0 11px;
   }
 }
 @media (min-width: 600px) {
@@ -2708,11 +2876,23 @@ a[href]:focus-visible,
   border: 1px solid var(--line);
   box-shadow: var(--sh-2);
 }
+/* One line, also at 320 px: a long title is the part that gets the ellipsis, the verb «entfernt» and the
+ * Rückgängig button always survive. */
+.toast.undo {
+  flex-wrap: nowrap;
+}
 .toast.undo span {
-  max-width: 60vw;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  max-width: calc(100vw - 180px); /* what is left beside the button */
+  white-space: nowrap;
+}
+.toast.undo .t {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 600;
 }
 .toast.undo button {
   min-height: 32px;
@@ -3215,8 +3395,11 @@ a {
   right: 8px;
   top: 100%;
   z-index: 4;
-  max-height: calc(100vh - var(--bar-h, 120px) - 24px);
-  max-height: calc(100dvh - var(--bar-h, 120px) - 24px); /* iOS: the visible viewport, not the full one */
+  /* The panel hangs from the bar's real bottom edge: --panel-top is written by app.js when a panel opens
+   * and while the page scrolls under it (the bar sits ~160 px lower while the header is still visible,
+   * so a value fixed to --bar-h would cut the lowest chips off below the fold). */
+  max-height: calc(100vh - var(--panel-top, var(--bar-h, 120px)) - 24px);
+  max-height: calc(100dvh - var(--panel-top, var(--bar-h, 120px)) - 24px); /* iOS: the visible viewport */
   overflow: auto;
   padding: 10px 14px 14px;
   background: var(--surface);
@@ -3416,6 +3599,31 @@ a {
   }
   .note-long {
     display: none;
+  }
+}
+/* Phones (≤ 599): the results row is one line – ⓘ · «98 Konzerte» · Liste|Kalender|Karte (design §3.4
+ * draws one line at 375; the view switch stood alone on a second line with an empty left half, 46 px
+ * of fold lost above the list). The note pill is its icon; the words stay its accessible name. */
+@media (max-width: 599px) {
+  .note-pill summary {
+    padding: 0 8px;
+  }
+  .note-short,
+  .note-long {
+    display: inline;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .note-pill .chev {
+    display: none;
+  }
+}
+@media (max-width: 340px) {
+  .seg button {
+    padding: 0 12px; /* 288 px: ⓘ + «100 Konzerte» + the switch still fit on the line */
   }
 }
 
@@ -3666,19 +3874,29 @@ a {
   background: var(--gold);
   border-color: var(--gold);
 }
+/* «Nie mehr zeigen» is the quiet text option beside the real action (design/ui-revamp.md §3.9) – not a
+ * red button that reads as the sticker's call to action. */
 .callout-never {
   margin-left: auto;
   min-height: 40px;
   font: inherit;
   font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  background: var(--red);
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
   border: 0;
-  border-radius: 999px;
-  padding: 0 12px;
+  padding: 0 4px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
   cursor: pointer;
   white-space: nowrap;
+}
+/* The smallest phones (320 px): the sticker stays a sticker (no icon, so the text runs the full width),
+ * not a sheet over the whole first row. */
+@media (max-width: 360px) {
+  .callout-icon {
+    display: none;
+  }
 }
 /* × is a 44 px target; the negative margins keep it in the corner where the 26 px glyph box was. */
 .callout-close {
@@ -3701,7 +3919,7 @@ a {
     border-color: var(--gold);
   }
   .callout-never:hover {
-    filter: brightness(1.1);
+    color: var(--text);
   }
   .callout-close:hover {
     color: var(--text);
@@ -3930,6 +4148,19 @@ a:visited {
     display: none; /* phones: "✕ Zurück", "Liste von Kusi", no month span; wider: "✕ Zurück zur Agenda", "Geteilte Liste von Kusi · Oktober 2026" */
   }
 }
+/* 320 px: the ✕ alone (44 px round, aria-label «Zurück zur Agenda»), so «Meine Shows» and «Liste von
+ * Seraina» – the one thing the head has to say – are not the part that gets the ellipsis. */
+@media (max-width: 359px) {
+  .list-close {
+    justify-content: center;
+    min-width: 44px;
+    padding: 0;
+    gap: 0;
+  }
+  .list-close span {
+    display: none;
+  }
+}
 
 /* The word next to the pin and the calendar icon: from tablet width up, until a badge takes its place. */
 .icon-word {
@@ -3949,10 +4180,61 @@ a:visited {
     display: inline;
   }
 }
-/* Touch: chips and the small text buttons reach a finger-sized height. */
+/* Touch: chips and the small text buttons reach a finger-sized height – 36 px drawn, 44 px hit
+ * (design/ui-revamp.md: every target ≥ 44 px on touch). The chips keep their drawn box and their row
+ * pitch grows to 44, so neighbouring hit areas touch but never overlap. */
 @media (hover: none) {
   .chip {
     min-height: 36px;
+  }
+  .chip::after {
+    inset: -4px -2px;
+  }
+  /* The genre row is a 36 px scroller that clips the chips' extension: the scroller grows to 44 px
+   * (2 px into the toolbar's gap above, 6 px past the bar's bottom edge – both transparent) while the
+   * bar and the drawn chips stay where they are. */
+  .chips {
+    height: 44px;
+    margin: -2px 0 -6px;
+    padding: 3px 0 5px;
+  }
+  .chips .chip::after {
+    inset: -4px -2px -6px; /* a pixel more than the scroller shows: its clip edge is the 44 px line */
+  }
+  /* Panels: 44 px row pitch for the canton chips and the quick picks (the chips were 6 px apart). */
+  .canton-chips,
+  .when-quick,
+  .where-row,
+  .where-radius {
+    gap: 8px;
+  }
+  .panel-close {
+    position: relative;
+  }
+  .panel-close::after,
+  .seg button::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+  }
+  .seg button {
+    position: relative;
+  }
+  .seg button::after {
+    inset: -4px 0;
+  }
+  /* The chip row's scroll arrows (28 px, kept on touch: a swipe is not the only way to the end of the
+   * row) get the chips' 44 px hit band – vertically the scroller's own, 8 px sideways. */
+  .scroll-btn::after {
+    content: "";
+    position: absolute;
+    inset: -7px -9px -11px;
+  }
+  .cal-today {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding: 0 8px;
   }
   #when-reset {
     padding: 8px 0;
@@ -4099,9 +4381,18 @@ html {
  * bleed into it by design). */
 #list > section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 600px;
+  /* The placeholder height of a skipped month follows its row count (app.js writes --rows per section:
+   * ~145 px per phone row, ~108 px on desktop, plus the head), so a fast flick to the footer does not
+   * grow the document by a thousand pixels on the way; `auto` keeps the real size once laid out. */
+  --row-est: 145px;
+  contain-intrinsic-size: auto calc(var(--rows, 4) * var(--row-est) + 60px);
   margin: 0 calc(-1 * var(--gutter));
   padding: 0 var(--gutter);
+}
+@media (min-width: 768px) {
+  #list > section {
+    --row-est: 108px;
+  }
 }
 
 /* Preferences (§5). Reduced motion: colour states stay, nothing moves (the duration tokens are 0 ms;

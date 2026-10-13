@@ -99,6 +99,23 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class Slogans(unittest.TestCase):
+    """The tagline list is inline in index.html (picked before the first paint) and in data/slogans.json
+    (stickers, validator): the two must stay the same list."""
+
+    def test_inline_slogans_equal_the_data_file(self):
+        import json
+
+        html = (ROOT / "index.html").read_text(encoding="utf-8")
+        m = re.search(r'<script type="application/json" id="slogans">(.*?)</script>', html, re.S)
+        self.assertIsNotNone(m, "index.html has no inline slogans block")
+        inline = json.loads(m.group(1))
+        data = json.loads((ROOT / "data" / "slogans.json").read_text(encoding="utf-8"))["slogans"]
+        self.assertEqual(inline, data, "index.html #slogans vs data/slogans.json")
+        default = 'id="tagline">' + inline[0].replace("&", "&amp;")
+        self.assertIn(default, html, "the default tagline is the first slogan")
+
+
 class ReadmeLayout(unittest.TestCase):
     """README «Layout of the repo» must name every page, script, data file, scraper file and workflow."""
 

@@ -89,3 +89,56 @@ test("only one panel is open at a time", async ({ page }) => {
   await expect(page.locator("#where-panel")).toBeVisible();
   await expect(page.locator("#when-panel")).toBeHidden();
 });
+
+test("the open panel never runs past the fold – also at the top of the page and in landscape", async ({
+  page,
+}) => {
+  // At scrollY 0 the bar is not stuck yet (it sits under the header): the panel's height counts from the
+  // bar's real bottom edge, not from --bar-h.
+  const probe = async () => {
+    const panel = page.locator("#where-panel");
+    await expect(panel).toBeVisible();
+    const bar = await page.locator("#filters").boundingBox();
+    const box = await panel.boundingBox();
+    const vh = page.viewportSize().height;
+    expect(box.y).toBeGreaterThanOrEqual(bar.y + bar.height - 1);
+    expect(box.y + box.height).toBeLessThanOrEqual(vh);
+    const maxH = await panel.evaluate((p) => parseFloat(getComputedStyle(p).maxHeight));
+    expect(Math.round(maxH)).toBe(Math.round(vh - box.y - 24));
+    // The inner scroll reaches the last chip.
+    await panel.evaluate((p) => (p.scrollTop = p.scrollHeight));
+    await expect(panel.locator(".chip:not([hidden])").last()).toBeInViewport();
+  };
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await page.click("#toggle-where");
+  await probe();
+  await page.keyboard.press("Escape");
+  // Landscape / 200 % zoom (viewport under 500 px high): the bar unsticks but stays the panel's anchor –
+  // the panel hangs from the bar, not from the end of the page, and nothing widens the document.
+  await page.setViewportSize({ width: 568, height: 320 });
+  await page.click("#toggle-where");
+  await probe();
+  const [sw, cw] = await page.evaluate(() => [
+    document.documentElement.scrollWidth,
+    document.documentElement.clientWidth,
+  ]);
+  expect(sw).toBe(cw);
+});
+
+test("cantons with nothing behind them under the other filters are dimmed, still tappable", async ({
+  page,
+}) => {
+  await page.click("#toggle-when");
+  await page.locator('#when-panel [data-quick="today"]').click(); // one show today, in Bern
+  await expect(page.locator("#when-panel")).toBeHidden();
+  await page.click("#toggle-where");
+  const chips = page.locator("#canton-chips .chip[data-canton]");
+  await expect(chips.filter({ hasText: "Bern" })).not.toHaveClass(/is-empty/);
+  await expect(chips.filter({ hasText: "Zürich" })).toHaveClass(/is-empty/);
+  await expect(chips.filter({ hasText: "Zürich" })).toHaveCSS("opacity", "0.45");
+  await expect(page.locator('#canton-chips .chip[data-canton=""]')).not.toHaveClass(/is-empty/); // «Alle»
+  await chips.filter({ hasText: "Zürich" }).click(); // still a filter: the empty state offers the way back
+  await expect(chips.filter({ hasText: "Zürich" })).toHaveAttribute("aria-pressed", "true");
+  await expect(chips.filter({ hasText: "Zürich" })).not.toHaveClass(/is-empty/); // pressed never dims
+  await expect(page.locator("#status .big")).toHaveText(/Zürich/);
+});

@@ -42,6 +42,7 @@ test("a filter link opens filtered; «Link zu dieser Auswahl» copies it", async
   await expect(results(page)).toHaveText(/^2 Konzerte für diese Auswahl/);
   await expect(page.locator("#toggle-where b")).toHaveText("BE · LU");
   const share = page.locator("#share-filters");
+  await expect(share).toHaveCSS("text-decoration-line", "underline"); // the page's dotted action affordance, not a caption
   await share.click();
   await expect(share.locator("span")).toHaveText(/^Kopiert|Link in Adresszeile/);
   const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(() => "");
@@ -55,4 +56,51 @@ test("a filter link opens filtered; «Link zu dieser Auswahl» copies it", async
   await expect(page).toHaveURL(/#[a-z0-9]{5,8}$/);
   await page.locator('#genres .chip[data-genre=""]').click();
   await expect(page).toHaveURL(/#wo=BE,LU$/);
+});
+
+test("the view switch writes #view=…, Liste removes it, and a reload keeps the view", async ({ page }) => {
+  await useFixture(page);
+  await openList(page);
+  await page.locator('#view-switch [data-view="calendar"]').click();
+  await expect(page).toHaveURL(/#view=calendar$/);
+  await page.locator('#genres .chip[data-genre="ska"]').click();
+  await expect(page).toHaveURL(/#g=ska&view=calendar$/); // a filter keeps the view in the hash
+  await page.reload();
+  await expect(page.locator("#calendar .cal-grid")).toBeVisible();
+  await expect(page.locator('#view-switch [data-view="calendar"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('#genres .chip[data-genre="ska"]')).toHaveAttribute("aria-pressed", "true");
+  await page.locator('#view-switch [data-view="list"]').click();
+  await expect(page).toHaveURL(/#g=ska$/);
+  await expect(page.locator("#list .show")).toHaveCount(FIXTURE.ska);
+});
+
+test("a filter link arriving on the open page is applied, and the plain address starts afresh", async ({
+  page,
+}) => {
+  await useFixture(page);
+  await page.goto("/#g=reggae&wo=ZH");
+  await expect(page.locator("#list .show")).toHaveCount(1); // Rocksteady Social
+  // A bookmark or a friend's «Link zu dieser Auswahl» tapped in this tab: a fragment navigation.
+  await page.evaluate(() => {
+    location.hash = "#g=ska";
+  });
+  await expect(page).toHaveURL(/#g=ska$/); // not written back to the old filters
+  await expect(page.locator("#list .show")).toHaveCount(FIXTURE.ska);
+  await expect(page.locator('#genres .chip[data-genre="ska"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#toggle-where b")).toBeHidden(); // the canton went with the old hash
+  await page.reload();
+  await expect(page.locator("#list .show")).toHaveCount(FIXTURE.ska);
+  // The plain address (an empty fragment) resets the filters like a fresh load.
+  await page.evaluate(() => {
+    location.hash = "";
+  });
+  await expect(page).not.toHaveURL(/#./);
+  await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming);
+  await expect(page.locator('#genres .chip[data-genre=""]')).toHaveAttribute("aria-pressed", "true");
+  // A view in the arriving hash is applied too.
+  await page.evaluate(() => {
+    location.hash = "#view=calendar";
+  });
+  await expect(page.locator("#calendar .cal-grid")).toBeVisible();
+  await expect(page).toHaveURL(/#view=calendar$/);
 });

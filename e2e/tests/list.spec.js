@@ -20,6 +20,24 @@ test.describe("with fixture data", () => {
     await openList(page);
   });
 
+  test("a reload and Back from another page land where the visitor was, not at the end", async ({ page }) => {
+    // The browser's own restoration lands in the skeleton page and scroll anchoring then drags the visitor to
+    // the footer as the list is inserted; the page remembers the offset itself (history.state).
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await page.waitForTimeout(600); // the offset is written once the scrolling stops
+    await page.reload();
+    await expect(page.locator("#list .show").first()).toBeAttached();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(360);
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(440);
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await page.waitForTimeout(600);
+    await page.goto("/log.html");
+    await page.goBack();
+    await expect(page.locator("#list .show").first()).toBeAttached();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(260);
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(340);
+  });
+
   test("search filters by title, venue and town", async ({ page }) => {
     const rows = page.locator("#list .show");
     await expect(rows).toHaveCount(FIXTURE.upcoming);

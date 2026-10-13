@@ -206,3 +206,52 @@ class Main(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WebVenues(unittest.TestCase):
+    """data/venues.web.json: derived from venues.json, the fields the page reads; --check keeps it in sync."""
+
+    def test_keeps_only_the_page_fields_and_drops_non_dicts(self):
+        data = {
+            "venues": {
+                "Zed": {"city": "Chur", "canton": "GR", "lat": 46.8, "lon": 9.5},
+                "Dachstock": {
+                    "city": "Bern",
+                    "canton": "BE",
+                    "lat": 46.95,
+                    "lon": 7.44,
+                    "url": "https://x",
+                    "scrape": True,
+                    "hint": "notes",
+                },
+                "Broken": None,
+            }
+        }
+        out = json.loads(F.web_venues(data))["venues"]
+        self.assertEqual(list(out), ["Dachstock", "Zed"])
+        self.assertEqual(out["Dachstock"], {"city": "Bern", "lat": 46.95, "lon": 7.44, "url": "https://x"})
+        self.assertEqual(out["Zed"], {"city": "Chur", "lat": 46.8, "lon": 9.5})
+
+    def test_check_fails_when_the_derived_file_is_stale_and_write_fixes_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            F.DATA = Path(tmp)
+            try:
+                venues = {"venues": {"V": {"city": "Bern", "hint": "x"}}}
+                (F.DATA / "venues.json").write_text(F.format_venues(venues))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(F.main(["--check"]), 1)  # derived file missing
+                    self.assertEqual(F.main([]), 0)
+                    self.assertEqual(F.main(["--check"]), 0)
+                self.assertEqual(
+                    json.loads((F.DATA / "venues.web.json").read_text()), {"venues": {"V": {"city": "Bern"}}}
+                )
+                (F.DATA / "venues.web.json").write_text("{}\n")
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(F.main(["--check"]), 1)  # stale
+            finally:
+                F.DATA = ROOT / "data"
+
+    def test_the_page_and_the_worker_read_the_derived_file(self):
+        app = (ROOT / "app.js").read_text(encoding="utf-8")
+        self.assertIn('const VENUES_URL = "data/venues.web.json"', app)
+        self.assertIn('"data/venues.web.json"', (ROOT / "sw.js").read_text(encoding="utf-8"))

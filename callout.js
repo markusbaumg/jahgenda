@@ -1,6 +1,7 @@
 /* One callout ("sticker") for every nudge on the page — install the app, subscribe to the calendar, …
- * Same look, same place (bottom), same controls: × (snooze 30 days) and a clearly visible red
- * "Nie mehr zeigen" (never again). Only one callout is on screen at a time; the others wait their turn.
+ * Same look, same place (bottom), same controls: × (snooze 30 days) and a quiet text button
+ * "Nie mehr zeigen" (never again) beside the real actions. Only one callout is on screen at a time; the
+ * others wait their turn.
  * Dismissals live in jahStore under "callout.<id>".
  *
  * A nudge (force: false) never interrupts: it waits while the page says it is busy (open panel or
@@ -37,8 +38,12 @@
     host.innerHTML =
       `<div class="callout-icon"><img src="img/logo/jahgenda.svg" alt="" width="40" height="40" /></div>` +
       `<div class="callout-body"></div>` +
-      `<button type="button" class="callout-close" title="Später wieder zeigen (30 Tage)" aria-label="Schliessen">&times;</button>`;
-    document.body.appendChild(host);
+      `<button type="button" class="callout-close" title="Später wieder zeigen (30 Tage)" aria-label="Schliessen – in 30 Tagen wieder zeigen">&times;</button>`;
+    // Before the footer (not at the very end of the body): a keyboard user reaches the sticker a few
+    // Tabs after the list, not a thousand stops later.
+    const foot = document.getElementById("foot");
+    if (foot) foot.before(host);
+    else document.body.appendChild(host);
     host.querySelector(".callout-close").addEventListener("click", () => close("snooze"));
     // Swipe down to dismiss (touch, §3.9): the sticker follows the finger and snaps away past 40 px.
     let swipe = null;
@@ -125,7 +130,12 @@
     if (!force && how !== "done") nudgeDone = true;
     current = null;
     hideHost();
-    if (force && opener && opener.isConnected && host.contains(document.activeElement)) opener.focus();
+    // The focus never vanishes with the callout: back to the opener (explicit request) or – a nudge closed
+    // from the keyboard – to the agenda, so the next Tab does not restart at the top of the page.
+    if (host.contains(document.activeElement)) {
+      const back = force && opener && opener.isConnected ? opener : document.getElementById("views");
+      if (back) back.focus({ preventScroll: true });
+    }
     opener = null;
     setTimeout(next, 300);
   }

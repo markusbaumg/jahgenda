@@ -15,8 +15,15 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
   await expect(badge).toBeHidden();
   await expect(count).toHaveText(`Alle ${FIXTURE.upcoming} kommenden Konzerte`);
 
+  const panel = page.locator("#when-panel");
   const heute = page.locator('#when-panel [data-quick="today"]');
   await heute.click();
+  // A quick pick is a single choice: the panel closes on the tap (the rows are the point), the focus
+  // goes to the toggle like after Escape; the month bars below keep the panel open (multi-select).
+  await expect(panel).toBeHidden();
+  await expect(page.locator("#toggle-when")).toBeFocused();
+  await page.click("#toggle-when");
+  await expect(panel).toBeVisible();
   await expect(heute).toHaveAttribute("aria-pressed", "true");
   await expect(badge).toHaveText("Heute"); // the badge names the quick pick, not its dates
   await expect(count).toHaveText("1 Konzert im Zeitraum"); // the fixture has exactly one show today
@@ -25,6 +32,8 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
 
   const week = page.locator('#when-panel [data-quick="7"]');
   await week.click();
+  await expect(panel).toBeHidden();
+  await page.click("#toggle-when");
   await expect(week).toHaveAttribute("aria-pressed", "true");
   await expect(heute).toHaveAttribute("aria-pressed", "false");
   await expect(badge).toHaveText("7 Tage");
@@ -32,6 +41,8 @@ test("quick picks set a range, badge and count; Zurücksetzen clears", async ({ 
 
   const weekend = page.locator('#when-panel [data-quick="weekend"]');
   await weekend.click();
+  await expect(panel).toBeHidden();
+  await page.click("#toggle-when");
   await expect(weekend).toHaveAttribute("aria-pressed", "true");
   await expect(badge).toHaveText("Wochenende");
   await expect(weekend).toHaveAttribute("title", /^Wochenende \d{1,2}\.\d{1,2}\.–\d{1,2}\.\d{1,2}\./); // the dates live in the tooltip

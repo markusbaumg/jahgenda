@@ -116,7 +116,16 @@
         text:
           `Tippe ${isIPad ? "oben rechts" : "unten"} auf <b>Teilen</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg> ` +
           `und dann auf <b>«Zum Home-Bildschirm»</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3z"/></svg>. Markierungen gelten pro App.`,
-        actions: [],
+        // A friendly primary (snooze), so «Nie mehr zeigen» is not the only – and the biggest – button of
+        // a nudge that wants the opposite.
+        actions: [
+          {
+            label: "Alles klar",
+            primary: true,
+            title: "Verstanden – später wieder erinnern",
+            onClick: (close) => close("snooze"),
+          },
+        ],
       });
     }, 2500);
   }

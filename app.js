@@ -1,8 +1,7 @@
 (() => {
   const DATA_URL = "data/shows.json";
-  const VENUES_URL = "data/venues.json";
+  const VENUES_URL = "data/venues.web.json"; // venues.json trimmed to city/lat/lon/url (format_data.py)
   const GENRES_URL = "data/genres.json";
-  const SLOGANS_URL = "data/slogans.json";
   let genreOrder = []; // slugs in display order (from data/genres.json)
   let genreLabel = {}; // slug → label
   let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
@@ -117,7 +116,7 @@
   }
   // Write a hash without a navigation (empty = none); path and query stay as they are.
   const setHash = (h) =>
-    history.replaceState(null, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
+    history.replaceState(history.state, "", `${location.pathname}${location.search}${h ? `#${h}` : ""}`);
   let view = "list";
   {
     // #view= in the link wins over the view this browser remembers.
@@ -319,14 +318,18 @@
     if (!url) return "";
     return `<a class="sbb" href="${url}" target="_blank" rel="noopener" title="SBB-Fahrplan ${escape(homeCity)} → ${escape(s.city)}, Ankunft eine Stunde vor der Show" aria-label="SBB-Fahrplan nach ${escape(s.city)}">SBB</a>`;
   }
+  const coarse = matchMedia("(hover: none)"); // touch screens: the placeholder below cannot wait for a hover
+  let geoHints = 0; // placeholders rendered in this pass (renderInner resets it)
   function distanceLabel(s) {
     if (typeof s.lat !== "number" || typeof s.lon !== "number") return "";
     // No position yet: a placeholder that only shows on hover and asks for it (gone once declined).
     // The separator travels with the button (both only show on hover), so no lone «·» ends the line.
-    if (!here)
-      return geoDeclined
-        ? ""
-        : `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
+    // On a touch screen it is always visible, so it stands once, in the first row: 98 identical
+    // lines made most rows a line longer (the Wo panel has «Mein Standort» for everyone else).
+    if (!here) {
+      if (geoDeclined || (coarse.matches && geoHints++)) return "";
+      return `<span class="geo-hint"> · <button type="button" class="geo-ask" title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung">Distanz &amp; Zug anzeigen</button></span>`;
+    }
     return ` · <span class="dist" title="Luftlinie von deinem Standort">${formatKm(distanceKm(here, s))}${sbbLink(s)}</span>`;
   }
 
@@ -344,7 +347,9 @@
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3zM5 5h6v2H5v12h12v-6h2v8H3V5h2z"/></svg>',
     ticket:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7zm2 0v2.2A4 4 0 0 1 5 14.8V17h14v-2.2a4 4 0 0 1 0-5.6V7H5zm5 2h2v6h-2V9zm4 0h2v6h-2V9z"/></svg>',
-    gcal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm3.5 2.5h5v1.6h-3.3v1h3v1.5h-3v1.2h3.4v1.6h-5.1z"/></svg>',
+    // Google Calendar: the same frame as the .ics calendar, but with its «31» – a glyph that reads as
+    // Google's calendar next to the plain one (the old «E» looked like a second .ics on a phone).
+    gcal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6z"/><text x="12" y="17.6" text-anchor="middle" font-family="system-ui, sans-serif" font-size="8.5" font-weight="800" fill="currentColor">31</text></svg>',
     cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zm-1 8v10h12V10H6zm2 2h3v3H8v-3z"/></svg>',
     wa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.2 14.8l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 0 1 12 4zm-3 4.5c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.8-.9c-.3-.1-.5-.1-.6.1l-.9 1.1c-.2.2-.3.2-.6.1a6.5 6.5 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.4.1-.2 0-.4 0-.5l-.9-2c-.2-.5-.4-.4-.6-.4H9z"/></svg>',
     link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0 1.4 4 4 0 0 1-5.7-5.7l3-3a4 4 0 0 1 5.6 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.8 0l-3 3a2 2 0 0 0 2.9 2.9 1 1 0 0 1 1.4 0zm2.8-2.8a1 1 0 0 1 0-1.4 4 4 0 0 1 5.7 5.7l-3 3a4 4 0 0 1-5.6 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.8 0l3-3a2 2 0 0 0-2.9-2.9 1 1 0 0 1-1.4 0z"/></svg>',
@@ -375,7 +380,8 @@
   // just touched, or has just landed on a shared show. callout.js is the last script on the page, and
   // the agenda can be in before it has run (a cached or fixture response beats a busy server): the
   // blocker is handed over once both are there, whichever comes last.
-  const nudgeBlocked = () => Boolean(openPanel) || view === "map" || Date.now() < nudgeQuietUntil;
+  const nudgeBlocked = () =>
+    Boolean(openPanel) || view === "map" || Date.now() < nudgeQuietUntil || !undoToast.hidden;
   function armCallout() {
     if (callout()) callout().setBlocker(nudgeBlocked);
     else if (document.readyState === "loading")
@@ -623,7 +629,7 @@
     const label = keys.length ? `Alle ${n} Acts nach Tag` : `Alle ${n} Acts`;
     return (
       `<details class="lineup${open ? " is-open" : ""}"${open ? " open" : ""}>` +
-      `<summary aria-label="Line-up anzeigen (${n} Acts)" title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
+      `<summary title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
       `<div class="lineup-body"><div><div class="days">${body}</div></div></div></details>`
     );
   }
@@ -893,10 +899,15 @@
     // name still contains the visible words (an aria-label with the same words would not).
     const count = (n) =>
       `<span class="sr">, </span>${n}<span class="sr"> ${n === 1 ? "Konzert" : "Konzerte"}</span>`;
+    // A chip with nothing behind it under the other filters (Wo under «Heute»: 20 of 21 cantons at 0) is
+    // dimmed, so the live ones stand out; it stays tappable – the empty state then offers the way back.
+    const dimEmpty = (c, n) =>
+      c.classList.toggle("is-empty", n === 0 && c.getAttribute("aria-pressed") !== "true");
     for (const c of genreBar.querySelectorAll(".chip[data-genre]")) {
       const n = countWith({ genre: c.dataset.genre });
       const sm = c.querySelector("small");
       if (sm) sm.innerHTML = count(n);
+      dimEmpty(c, n);
       const name = genreLabel[c.dataset.genre] || c.dataset.genre;
       c.title = c.dataset.genre ? `Nur ${name} anzeigen (${n})` : `Alle Genres anzeigen (${n})`;
     }
@@ -904,6 +915,7 @@
       const n = countWith({ format: c.dataset.format });
       const sm = c.querySelector("small");
       if (sm) sm.innerHTML = count(n);
+      dimEmpty(c, n);
       c.title = `Nur Festivals anzeigen (${n})`;
     }
     for (const c of cantonChips.querySelectorAll(".chip[data-canton]")) {
@@ -911,6 +923,7 @@
       const n = countWith({ cantons: new Set(code ? [code] : []) });
       const sm = c.querySelector("small");
       if (sm) sm.innerHTML = count(n);
+      dimEmpty(c, n);
       c.title = code
         ? `${regionName(code)}: ${nShows(n)} – anklicken zum Ein-/Ausschalten`
         : `Alle Kantone anzeigen (${n})`;
@@ -947,6 +960,7 @@
 
   function renderInner() {
     if (loadState !== "ready") return; // data not in yet (or an error): the skeleton / message stays
+    geoHints = 0;
     const q = search.value.trim().toLowerCase();
     const visible = shows.filter((s) => isVisible(s));
 
@@ -1084,7 +1098,7 @@
           )
           .join("");
         return `
-        <section>
+        <section style="--rows: ${items.length}">
           <h2 class="month">${escape(monthNameFmt.format(first))} <span class="year">${first.getFullYear()}</span></h2>
           <div class="shows">${ghostRows}${renderDays(items, { weekendRule })}</div>
         </section>`;
@@ -1128,12 +1142,13 @@
     `${dowFmt.format(s._end).replace(".", "")} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
 
   // --- Filter state in the URL: #q=…&g=…&wo=ZH,BE&r=25&wann=weekend|today|7|2026-10,2026-11&past=1 ---
-  // Written with replaceState (a filter tap never adds a history entry), read once on load. A filtered
-  // view can thus be reloaded, bookmarked and sent as a link; show links (#<short>) and list links
-  // (#m=…) keep the hash for themselves and are never overwritten.
-  const FILTER_HASH = /^#?[a-z]+=/;
-  // A list link (#m=…) or a view link (#view=…) is not a filter hash, even when combined with "&".
-  const isFilterHash = (h) => FILTER_HASH.test(h) && !/(^#?|&)(mine|m|view)=/.test(h);
+  // Written with replaceState (a filter tap never adds a history entry), read on load and whenever such
+  // a hash arrives on the open page (applyStateHash). A filtered view can thus be reloaded, bookmarked
+  // and sent as a link; the view travels in the same hash (view=calendar|map, nothing for the list); show
+  // links (#<short>) and list links (#m=…) keep the hash for themselves and are never overwritten.
+  const STATE_HASH = /^#?[a-z]+=[^&]*(&[a-z]+=[^&]*)*$/;
+  // Only key=value parts and no list link (#m=…), even when combined with "&".
+  const isStateHash = (h) => STATE_HASH.test(h) && !/(^#?|&)(mine|m)=/.test(h);
   function filterParams() {
     const p = new URLSearchParams();
     const q = search.value.trim();
@@ -1160,18 +1175,23 @@
     if (showPast && !pastAuto) p.set("past", "1");
     return p.toString().replace(/%2C/g, ",");
   }
+  // The filters plus the view (#g=dub&view=map); "" for the plain list without a filter.
+  const stateParams = () => [filterParams(), view !== "list" ? `view=${view}` : ""].filter(Boolean).join("&");
+  const stateUrl = () => {
+    const p = stateParams();
+    return p ? `#${p}` : location.pathname + location.search;
+  };
   let filterTouched = false; // the render follows a filter tap (not a deep-link landing re-render)
   function syncFilterHash() {
     if (loadState !== "ready" || listMode()) return;
     const h = location.hash;
     // A show link (#<short>) stays while the page lands on it; a filter tap afterwards replaces it.
-    if (h && !isFilterHash(h) && !filterTouched) return;
-    const next = filterParams();
-    if (next === h.slice(1)) return;
-    history.replaceState(history.state, "", next ? `#${next}` : location.pathname + location.search);
+    if (h && !isStateHash(h) && !filterTouched) return;
+    if (stateParams() === h.slice(1)) return;
+    history.replaceState(history.state, "", stateUrl());
   }
   function readFilterHash() {
-    if (!isFilterHash(location.hash)) return;
+    if (!isStateHash(location.hash)) return;
     const p = new URLSearchParams(location.hash.slice(1));
     search.value = (p.get("q") || "").slice(0, 80);
     const g = p.get("g") || "";
@@ -1192,6 +1212,28 @@
     }
     if (p.get("past") === "1") showPast = true;
     updateWhere();
+  }
+  // A state hash arriving on the open page – a bookmark or a friend's «Link zu dieser Auswahl» tapped
+  // in this tab, a URL typed over the page, the plain address to start afresh – wins over the filters in
+  // memory, as on load. Before, the popstate handler wrote the old filters back over it and the link was
+  // silently lost. Show and list links are revealFromHash's business; the list mode keeps its own hash.
+  function applyStateHash() {
+    if (loadState !== "ready" || listMode()) return;
+    const h = location.hash;
+    if (h && !isStateHash(h)) return;
+    if (h.replace(/^#/, "") === stateParams()) return;
+    cantons.clear();
+    radiusKm = 0;
+    search.value = "";
+    setGenre("");
+    setFormat("");
+    clearRange();
+    showPast = false;
+    pastAuto = false;
+    readFilterHash();
+    const v = parseHash().view || "list";
+    if (v !== view) setView(v);
+    renderAndKeepInView();
   }
   // «Link zu dieser Auswahl»: the address bar already holds it – into the clipboard it goes.
   el("share-filters").addEventListener("click", async (e) => {
@@ -1232,23 +1274,18 @@
     render();
   });
 
-  // Tagline: one of the slogans (same lines as on the stickers), rotating by day.
-  fetch(SLOGANS_URL, { cache: "no-cache" })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => {
-      const list = (d && d.slogans) || [];
-      if (!list.length) return;
-      const line = list[Math.floor(Math.random() * list.length)];
-      const tag = el("tagline");
-      if (tag) tag.textContent = line;
-      const mini = el("mini-tag");
-      if (mini) mini.textContent = line;
-    })
-    .catch(() => {});
+  // Tagline: the inline script in index.html picked one of the slogans before the first paint (a fetch
+  // used to replace the default line ~2 s after it was painted on slow 4G); the sticky bar mirrors it.
+  {
+    const mini = el("mini-tag");
+    const tag = el("tagline");
+    if (mini && tag) mini.textContent = tag.textContent;
+  }
 
-  // The venue database (large: it carries the scraper's notes) is not needed for the first paint –
-  // the venue names become links and the SBB start town is known a moment later. render() is
-  // idempotent, so a second pass is cheap.
+  // The venue database is not needed for the first paint – the venue names become links and the SBB
+  // start town is known a moment later. render() is idempotent, so a second pass is cheap. The page
+  // reads the derived venues.web.json (the fields used here, ~6 KB gzipped); data/venues.json itself is
+  // 100 KB, 60 % of it the scraper's notes, and used to be fetched on every visit.
   function loadVenues() {
     fetch(VENUES_URL, { cache: "no-cache" })
       .then((r) => (r.ok ? r.json() : null))
@@ -1384,6 +1421,11 @@
       }
       status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
+      if (savedScrollY && !parseHash().id && !parseHash().mine) {
+        quietScrollUntil = Date.now() + 1500;
+        window.scrollTo(0, savedScrollY); // back to the rows the visitor was looking at (history, above)
+      }
+      savedScrollY = 0;
       revealFromHash();
       loadVenues();
       autoLocate();
@@ -1402,6 +1444,20 @@
         `<p class="big">${offline ? "Kein Empfang" : "Daten konnten nicht geladen werden"}</p>` +
         `<p>${offline ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es." : "Die Konzerte konnten nicht geladen werden. Bitte später nochmals versuchen."}</p>` +
         `<button type="button" class="primary" id="retry" title="Konzerte nochmals laden">Nochmals versuchen</button>`;
+      // The only recovery must be on screen: on a 320 px phone and in landscape the card (header + bar +
+      // results row above it) ends below the fold – the page scrolls just far enough to show the button.
+      const revealRetry = () => {
+        const btn = el("retry");
+        if (!btn) return;
+        const below = btn.getBoundingClientRect().bottom + 16 - innerHeight;
+        if (below <= 0) return;
+        quietScrollUntil = Date.now() + 1500;
+        window.scrollTo({ top: Math.min(underBar(status), window.scrollY + below) });
+      };
+      revealRetry();
+      // The display face may still be loading: once it is in, the heading is a few px taller.
+      document.fonts.ready.then(revealRetry);
+      setTimeout(revealRetry, 300);
     }
   }
   function retry() {
@@ -1483,7 +1539,7 @@
       }
     }
     if (act === "link") {
-      history.replaceState(null, "", `#${s._short}`);
+      history.replaceState(history.state, "", `#${s._short}`);
       try {
         await navigator.clipboard.writeText(showUrl(s));
         flashWord(btn, "Kopiert");
@@ -1553,6 +1609,13 @@
   function revealFromHash() {
     const h = parseHash();
     if (h.mine) return showShared(h.mine);
+    if (shared) {
+      // The #m= link left the address bar (Back, or a new link): the friend's list goes with it.
+      shared = null;
+      sharedBy = "";
+      sharedMissing = 0;
+      render();
+    }
     if (h.view && h.view !== view && !listMode()) setView(h.view);
     if (!h.id) return; // nothing, or the filter state
     const target = findShow(h.id);
@@ -1602,7 +1665,36 @@
   // Overlays and view switches push one entry each; filters never do (they live in the hash, see
   // syncFilterHash, written with replaceState so a filter click does not flood the history).
   const histState = (extra) => ({ jah: 1, view, ...extra });
+  // Reload, tab restore (iOS evicts tabs freely) and Back from log.html: left to the browser, the scroll
+  // offset is restored into the skeleton page (clamped to its bottom, footer in view) and scroll anchoring
+  // then keeps the footer in view while the list is inserted above it – the visitor lands in April. So the
+  // offset travels in the history entry (written when the page goes away) and is restored after the
+  // first render, before a show link (if any) takes over.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  let savedScrollY = history.state && history.state.jah ? Number(history.state.sy) || 0 : 0;
   history.replaceState(histState(), "");
+  const rememberScroll = () => {
+    if (!history.state || !history.state.jah || history.state.sy === Math.round(window.scrollY)) return;
+    try {
+      history.replaceState({ ...history.state, sy: Math.round(window.scrollY) }, "");
+    } catch {
+      /* Safari caps replaceState at 100 per 30 s – then the last written offset stands */
+    }
+  };
+  // Written once the scrolling stops (a reload discards what pagehide writes) and when the tab goes away.
+  let scrollMemo = 0;
+  window.addEventListener(
+    "scroll",
+    () => {
+      clearTimeout(scrollMemo);
+      scrollMemo = setTimeout(rememberScroll, 400);
+    },
+    { passive: true },
+  );
+  window.addEventListener("pagehide", rememberScroll);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") rememberScroll();
+  });
   let overlayEntry = false; // the current entry is one we pushed for an overlay
   let pendingBack = 0; // history.back() calls of our own: their popstate must not close what opened since
   let fromHistory = false; // closing because the visitor went back, not by ×/Esc/outside click
@@ -1623,12 +1715,32 @@
       syncFilterHash(); // a filter picked while the panel was open lived on the entry just left
       return;
     }
-    overlayEntry = false;
-    fromHistory = true;
-    if (openPanel) setPanel(null);
-    fromHistory = false;
     const st = e.state && e.state.jah ? e.state : null;
+    fromHistory = true;
+    if (openPanel) {
+      // Back behaves like Escape: the focus returns to the toggle, the next Tab continues from there.
+      const btn = PANELS[openPanel][0];
+      setPanel(null);
+      el(btn).focus({ preventScroll: true });
+    }
+    // Meine Shows pushed an entry of its own (★): Back closes it – unless the entry landed on IS that one
+    // (returning from a view switch made while the list was open).
+    const onMine = Boolean(st && st.overlay === "mine" && mineOnly);
+    overlayEntry = onMine;
+    if (mineOnly && !onMine) {
+      mineOnly = false;
+      renderAndKeepInView();
+      toggleMine.focus({ preventScroll: true });
+    }
+    fromHistory = false;
     if (st && st.view && st.view !== view && !listMode()) setView(st.view);
+    // An entry without our state is a navigation the page did not make (a URL typed, a link tapped in
+    // this tab): a state hash is applied here; a show or list link is left for revealFromHash (the
+    // hashchange event follows) instead of being written over with the filters.
+    if (!st) {
+      applyStateHash();
+      if (location.hash && !isStateHash(location.hash)) return;
+    }
     syncFilterHash();
   });
 
@@ -1646,6 +1758,7 @@
     }
     if (name === "when") updateWhen();
     if (name) {
+      fitPanel();
       pushOverlay(name);
       if (callout()) callout().suspend(); // a sticker never covers the panel's last rows
       // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
@@ -1653,6 +1766,15 @@
       if (first) first.focus({ preventScroll: true });
     } else if (was) popOverlay();
   }
+  // The panel's max-height counts from the bar's real bottom edge (style.css .filters .panel): at the top
+  // of the page the bar is not stuck yet and sits under the header, so the panel would otherwise run
+  // ~135 px past the fold with its last chips unreachable.
+  function fitPanel() {
+    const bottom = Math.max(0, filtersForm.getBoundingClientRect().bottom);
+    filtersForm.style.setProperty("--panel-top", `${Math.round(bottom)}px`);
+  }
+  window.addEventListener("scroll", () => openPanel && fitPanel(), { passive: true });
+  window.addEventListener("resize", () => openPanel && fitPanel());
   filtersForm.addEventListener("click", (e) => {
     const close = e.target.closest(".panel-close");
     if (!close) return;
@@ -1784,6 +1906,9 @@
           geoStatus.textContent = blocked
             ? "Standort im Browser blockiert. In den Website-Einstellungen freigeben, dann nochmals «Mein Standort» tippen."
             : "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+        // Asked from a row: the message lives in the Wo panel (next to «Mein Standort», which it names) –
+        // without opening it, the only visible effect of the tap was the placeholder vanishing.
+        if (opts.fromRow && !openPanel) setPanel("where");
         render();
         keepRevealed();
       },
@@ -1792,7 +1917,7 @@
   }
   locateBtn.addEventListener("click", () => locate());
   list.addEventListener("click", (e) => {
-    if (e.target.closest(".geo-ask")) locate();
+    if (e.target.closest(".geo-ask")) locate({ fromRow: true });
   });
   // On start: silently when permission was granted before – nothing else. A browser that has never been
   // asked waits for a tap on «Mein Standort» or «Distanz & Zug anzeigen»; one that said no is left alone.
@@ -1919,7 +2044,10 @@
     else delete marks[s.id];
     saveMarks();
     if (mineOnly && !next) {
-      if (!markedShows().length) mineOnly = false;
+      if (!markedShows().length) {
+        popOverlay(); // the last mark went: the list closes, its history entry with it
+        mineOnly = false;
+      }
       render();
       return;
     }
@@ -1958,28 +2086,47 @@
       setTimeout(() => g.remove(), 1500); // whatever happens to the animation
     }
   }
-  // Undo toast «Entfernt · Rückgängig» (4 s): one at a time, the newest un-mark wins.
+  // Undo toast «‹Titel› entfernt · Rückgängig» (8 s, WCAG 2.2.1: the clock stops while the toast is hovered
+  // or focused): one at a time, the newest un-mark wins. It sits right after the views in the DOM, so a
+  // keyboard user reaches Rückgängig a few Tabs after the row, not behind the footer.
+  const UNDO_MS = 8000;
   let undo = null; // { id, state, mineOnly, timer }
   const undoToast = document.createElement("div");
   undoToast.id = "undo";
   undoToast.className = "toast undo";
   undoToast.setAttribute("role", "status");
   undoToast.hidden = true;
-  undoToast.innerHTML = `<span></span><button type="button" title="Markierung wiederherstellen">Rückgängig</button>`;
-  document.body.appendChild(undoToast);
+  undoToast.innerHTML = `<span><b class="t"></b> entfernt</span><button type="button" title="Markierung wiederherstellen">Rückgängig</button>`;
+  views.after(undoToast);
   function unmark(s, row) {
     const state = marks[s.id];
     if (!state) return;
     undo = { id: s.id, state, mineOnly, timer: 0 };
     setMark(s, "", row);
+    if (row) flashWord(row.querySelector(".star"), "Entfernt");
     undoToast.hidden = false; // shown first, then filled: a live region announces only what changes while visible
-    undoToast.querySelector("span").textContent = `«${s.title}» entfernt`;
-    clearTimeout(undo.timer);
-    undo.timer = setTimeout(hideUndo, 4000);
+    undoToast.querySelector(".t").textContent = `«${s.title}»`;
+    if (callout()) callout().suspend(); // one thing at the bottom edge at a time (the nudge comes back later)
+    undoClock();
   }
+  function undoClock() {
+    if (!undo) return;
+    clearTimeout(undo.timer);
+    undo.timer = setTimeout(hideUndo, UNDO_MS);
+  }
+  undoToast.addEventListener("pointerenter", () => undo && clearTimeout(undo.timer));
+  undoToast.addEventListener("focusin", () => undo && clearTimeout(undo.timer));
+  undoToast.addEventListener("pointerleave", undoClock);
+  undoToast.addEventListener("focusout", undoClock);
   function hideUndo() {
     if (undo) clearTimeout(undo.timer);
+    const id = undo && undo.id;
     undo = null;
+    // The focus never vanishes with the toast: back to the row's star (or the ★ in the bar).
+    if (undoToast.contains(document.activeElement)) {
+      const star = id && document.querySelector(`.show[data-id="${CSS.escape(id)}"] .star`);
+      (star || toggleMine).focus({ preventScroll: true });
+    }
     undoToast.hidden = true;
   }
   undoToast.querySelector("button").addEventListener("click", () => {
@@ -1990,7 +2137,10 @@
     if (!s) return;
     // The list was left because its last show went: open it again. In any list (Meine Shows opened since, or
     // a shared one) the row has to be rendered, so the list is drawn again; in the agenda the row is patched.
-    if (wasMine && !shared) mineOnly = true;
+    if (wasMine && !shared && !mineOnly) {
+      mineOnly = true;
+      pushOverlay("mine");
+    }
     if (listMode()) {
       marks[s.id] = state;
       saveMarks();
@@ -2035,10 +2185,18 @@
   });
 
   toggleMine.addEventListener("click", () => {
-    if (!markedShows().length) return; // nothing marked yet: the tooltip says what the star does
+    if (!markedShows().length) {
+      // Nothing marked yet: on a touch screen the tooltip never shows, so the button says it itself.
+      flashWord(toggleMine, "Zuerst bei einer Show ★ tippen");
+      return;
+    }
     mineOnly = !mineOnly;
-    renderAndKeepInView();
-    if (mineOnly) scrollViewsUnderBar(); // the list of marked shows comes up, not just the gold star
+    // The list is a full-screen mode with its own «Zurück»: Back closes it like a panel (one entry; an
+    // open Wo/Wann panel's entry is taken over, the panel folds away in syncListMode).
+    if (mineOnly) pushOverlay("mine");
+    else popOverlay();
+    // The list actions (Kalender · Teilen · Link) and the rows come up under the bar, not just the gold star.
+    renderAndKeepInView(() => mineOnly && scrollUnderBar(minePanel.hidden ? views : minePanel));
   });
 
   minePanel.addEventListener("click", async (e) => {
@@ -2051,9 +2209,13 @@
       );
     if (btn.dataset.mine === "share") {
       const url = listUrl();
-      if (!shared) history.replaceState(null, "", url);
+      if (!shared) history.replaceState(history.state, "", url);
       try {
-        await navigator.share({ title: listTitle(), text: listTitle(), url });
+        await navigator.share({
+          title: listTitle(),
+          text: `${listTitle()}\n${listShareLines().join("\n")}`,
+          url,
+        });
         flashWord(btn, "Geteilt");
       } catch (err) {
         if (!err || err.name !== "AbortError") flashWord(btn, "Teilen nicht möglich");
@@ -2062,7 +2224,7 @@
     if (btn.dataset.mine === "link") {
       // The #m= link is the shareable artefact: it goes to the clipboard and into the address bar.
       const url = listUrl();
-      if (!shared) history.replaceState(null, "", url);
+      if (!shared) history.replaceState(history.state, "", url);
       try {
         await Promise.race([
           navigator.clipboard.writeText(url),
@@ -2111,6 +2273,7 @@
         );
         history.replaceState(history.state, "", location.pathname + location.search);
       }
+      mineOnly = false; // «hier ist alles, was kommt» must be true: a Meine-Shows mode on screen goes too
       render(); // a list that was on screen before (hashchange) goes
       return;
     }
@@ -2148,7 +2311,15 @@
   const listShows = () => shows.filter(inList);
   const listUrl = () => (shared ? `${location.origin}${location.pathname}${location.hash}` : mineUrl());
   const listTitle = () => (shared ? "Reggae-Shows" : "Meine Reggae-Shows");
-  const listShareText = () => `${listTitle()}: ${listUrl()}`;
+  // The message names the shows («Fr 16.10. Rude & Rebel Ska Fest, Luzern», the first five, «+n weitere»)
+  // and ends with the link – a bare «Meine Reggae-Shows» + link told the friend nothing.
+  const listShareLines = () => {
+    const l = listShows();
+    const lines = l.slice(0, 5).map((s) => `${dayShort(s)} ${s.title}, ${s.city}`);
+    if (l.length > 5) lines.push(`+${l.length - 5} weitere`);
+    return lines;
+  };
+  const listShareText = () => `${listTitle()}\n${listShareLines().join("\n")}\n${listUrl()}`;
   // The only hook: every render() ends here (via updateMine).
   function syncListMode() {
     const on = listMode();
@@ -2166,7 +2337,13 @@
       if (was && parseHash().mine) setHash("");
       return;
     }
-    if (!was && openPanel) setPanel(null); // fold Wo/Wann away; their settings survive
+    if (!was && openPanel) {
+      // Fold Wo/Wann away; their settings survive. Without popping the history entry: the list mode took
+      // it over (pushOverlay("mine") in the ★ handler) or came from a #m= hash navigation.
+      fromHistory = true;
+      setPanel(null);
+      fromHistory = false;
+    }
     const l = listShows();
     const n = l.length;
     const span = n ? `<i> · ${monthSpan(l)}</i>` : ""; // phones drop the months (the heading below has them)
@@ -2175,6 +2352,7 @@
       : `${ICONS.star}<span class="t">Meine Shows</span><b class="n">${n}${span}</b>`;
   }
   function closeListMode() {
+    if (mineOnly) popOverlay(); // the ★ entry goes with the list (a #m= list came from a hash navigation)
     mineOnly = false;
     shared = null;
     sharedBy = "";
@@ -2376,6 +2554,10 @@
     if (quick) {
       if (quickActive() === quick.dataset.quick) clearRange();
       else setRange(...quickRange(quick.dataset.quick));
+      // A single-choice pick is done with one tap: the panel closes and the rows are in view (the month
+      // bars are a multi-select and keep it open). The focus goes to the toggle, as after Escape.
+      setPanel(null);
+      toggleWhen.focus({ preventScroll: true });
     } else if (month) {
       rangeFrom = rangeTo = null;
       if (months.has(month.dataset.month)) months.delete(month.dataset.month);
@@ -2411,8 +2593,12 @@
     view = next;
     store.set(store.KEYS.VIEW, view);
     markView();
-    if (opts.push) history.pushState(histState(), "");
-    else history.replaceState(histState(), "");
+    // The view is written into the hash next to the filters (#view=calendar, nothing for the list), so a
+    // reload or a shared link shows what the visitor saw; a show or list link in the hash stays as it is.
+    const h = location.hash;
+    const url = loadState === "ready" && (!h || isStateHash(h)) ? stateUrl() : undefined;
+    if (opts.push) history.pushState(histState(), "", url);
+    else history.replaceState(histState(), "", url);
     if (callout() && opts.push) {
       callout().suspend(); // a nudge steps aside (the map must stay tappable)
       callout().hide(); // a callout opened on purpose closes with the view it belonged to
@@ -2514,7 +2700,7 @@
           ${
             other
               ? `<span class="cal-num" aria-hidden="true">${d.getDate()}</span>`
-              : `<button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>`
+              : `<button type="button" class="cal-num" aria-pressed="${key === calDay}" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>`
           }
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
@@ -2606,16 +2792,25 @@
         const d = parseDay(calDay);
         calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
       }
+      const hadFocus = cell.contains(document.activeElement);
       renderCalendar(lastVisible);
-      // On the phone the day's shows are listed under the grid – below the fold: bring them up.
+      // The grid was rebuilt: a keyboard user keeps the focus on the day just chosen (§5: never <body>).
+      if (hadFocus) {
+        const btn = calendarEl.querySelector(`[data-day="${calDay}"] .cal-num`);
+        if (btn && btn.focus) btn.focus({ preventScroll: true });
+      }
+      // On the phone the day's shows are listed under the grid – below the fold: bring them up, but only
+      // as far as needed (the grid stays on screen while flicking through days, unless the day's list
+      // is taller than the room under the bar).
       const day = calendarEl.querySelector(".cal-day");
-      if (
-        day &&
-        getComputedStyle(day).display !== "none" &&
-        day.getBoundingClientRect().top > innerHeight - 120
-      ) {
-        quietScrollUntil = Date.now() + 1500;
-        day.scrollIntoView({ block: "start", behavior: "smooth" });
+      if (day && getComputedStyle(day).display !== "none") {
+        const r = day.getBoundingClientRect();
+        const room = innerHeight - 16;
+        if (r.top > innerHeight - 120) {
+          quietScrollUntil = Date.now() + 1500;
+          const by = Math.min(r.bottom - room, r.top - filters.offsetHeight - 40);
+          if (by > 0) window.scrollBy({ top: by, behavior: reducedMotion.matches ? "auto" : "smooth" });
+        }
       }
     }
   });
@@ -2627,6 +2822,61 @@
   let leafletLoading = null;
   let map = null;
   let markerLayer = null;
+  let pins = []; // { lat, lon, marker, shows } – every venue pin of the current render, clustered by zoom
+  let pinSignature = ""; // the grouping of the last layoutPins(): unchanged → the layers (and an open popup) stay
+  let clusterLayer = null;
+  const touch = matchMedia("(hover: none)").matches; // zoom control bottom right, popups sized for a thumb
+
+  // Pins that would sit on top of each other at the current zoom (the whole Mittelland at the start view
+  // of a portrait phone: 57 pins in a 160 px patch, 42 of them unreachable) are folded into one cluster
+  // badge; a tap on it zooms into that group until the pins come apart. Re-run on every zoom.
+  const CLUSTER_PX = 50;
+  function layoutPins() {
+    if (!map || !pins.length) return;
+    const zoom = map.getZoom();
+    const groups = [];
+    for (const p of [...pins].sort((a, b) => b.shows - a.shows)) {
+      const px = map.project([p.lat, p.lon], zoom);
+      const g = groups.find((x) => x.px.distanceTo(px) < CLUSTER_PX);
+      if (g) g.members.push(p);
+      else groups.push({ px, members: [p] });
+    }
+    const signature = groups.map((g) => g.members.map((p) => `${p.lat},${p.lon}`).join("|")).join(";");
+    if (signature === pinSignature) return;
+    pinSignature = signature;
+    if (clusterLayer) clusterLayer.remove();
+    clusterLayer = L.layerGroup().addTo(map);
+    for (const p of pins) p.marker.remove();
+    for (const g of groups) {
+      if (g.members.length === 1) {
+        g.members[0].marker.addTo(markerLayer);
+        continue;
+      }
+      const n = g.members.reduce((sum, p) => sum + p.shows, 0);
+      const lat = g.members.reduce((sum, p) => sum + p.lat, 0) / g.members.length;
+      const lon = g.members.reduce((sum, p) => sum + p.lon, 0) / g.members.length;
+      const title = `${g.members.length} Clubs mit ${n} Shows: hineinzoomen`;
+      const cluster = L.marker([lat, lon], {
+        icon: L.divIcon({
+          className: "cluster-icon",
+          html: `<span><b>${g.members.length}</b></span>`,
+          iconSize: [44, 44],
+          iconAnchor: [22, 40], // sits on its spot like a pin, so pin heads and badges share one height
+        }),
+        title,
+        zIndexOffset: 500,
+      });
+      cluster.on("add", () => cluster.getElement().setAttribute("aria-label", title));
+      cluster.on("click", () => {
+        // (Enter on the focused badge arrives as a click: Leaflet's keyboard handling for markers.)
+        map.fitBounds(
+          g.members.map((p) => [p.lat, p.lon]),
+          { padding: [48, 48], maxZoom: 16 },
+        );
+      });
+      cluster.addTo(clusterLayer);
+    }
+  }
 
   function loadLeaflet() {
     if (window.L) return Promise.resolve();
@@ -2688,10 +2938,9 @@
     }
     if (!map) {
       mapEl.innerHTML = "";
-      map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false });
+      map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: false, zoomSnap: 0.5 }); // half steps: the start view fits the country one notch closer on a portrait phone
       // Leaflet's own controls get German tooltips. On touch screens the zoom buttons sit bottom right,
       // where no popup is ever panned underneath them (popups open at the top left).
-      const touch = matchMedia("(hover: none)").matches;
       L.control
         .zoom({
           zoomInTitle: "Hineinzoomen",
@@ -2702,13 +2951,19 @@
       map.attributionControl.setPrefix(
         '<a href="https://leafletjs.com" title="Leaflet-Website öffnen" target="_blank" rel="noopener">Leaflet</a>',
       );
+      // Until the first tiles are painted the frame is a plain dark square with pins floating on it: a
+      // «Karte lädt …» corner note (CSS .map.tiles-pending) says that the map is still on its way.
+      mapEl.classList.add("tiles-pending");
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         className: "map-tiles",
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
-      }).addTo(map);
+      })
+        .once("load", () => mapEl.classList.remove("tiles-pending"))
+        .addTo(map);
       markerLayer = L.layerGroup().addTo(map);
+      map.on("zoomend", layoutPins);
       // Leaflet stops clicks inside popups from bubbling up to the page, so the
       // show links are handled on the popup element itself (bound once per popup).
       // Keyboard: the focus moves into the popup (first show), Escape closes it, the pin gets it back.
@@ -2744,6 +2999,8 @@
       });
     }
     markerLayer.clearLayers();
+    pins = [];
+    pinSignature = "";
 
     const hasPos = (s) => typeof s.lat === "number" && typeof s.lon === "number";
     // One marker per venue; its popup lists the venue's shows. Venues at (almost) the same spot – the
@@ -2817,29 +3074,30 @@
         riseOnHover: true,
         zIndexOffset: items.length * 10, // the busier pin on top where pins still overlap
         title,
-      })
-        .bindPopup(
-          vs.length === 1
-            ? `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}${showList(items)}`
-            : `<strong>${escape(s.city)}</strong>` +
-                vs
-                  .map(
-                    (v) =>
-                      `<p class="popup-venue"><strong>${escape(v.s.venue)}</strong></p>${showList(v.items)}`,
-                  )
-                  .join(""),
-          // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone; the top-left
-          // padding keeps a tall popup clear of the zoom control.
-          {
-            maxWidth: Math.min(320, mapEl.clientWidth - 70),
-            autoPanPaddingTopLeft: [60, 24],
-            autoPanPaddingBottomRight: [24, 24],
-          },
-        )
-        .addTo(markerLayer);
+      }).bindPopup(
+        vs.length === 1
+          ? `<strong>${escape(s.venue)}</strong> · ${escape(s.city)}${showList(items)}`
+          : `<strong>${escape(s.city)}</strong>` +
+              vs
+                .map(
+                  (v) =>
+                    `<p class="popup-venue"><strong>${escape(v.s.venue)}</strong></p>${showList(v.items)}`,
+                )
+                .join(""),
+        // Leaflet's default popup (300 px + margins + ×) is wider than the map on a phone: the wrapper
+        // (content + 2 × 14 px margin + 2 px) stays one gutter inside the frame on both sides, and the
+        // auto-pan padding never asks for more room than that. On a pointer screen the zoom control
+        // sits top left, so a tall popup keeps clear of it.
+        {
+          maxWidth: Math.min(320, mapEl.clientWidth - 62),
+          autoPanPaddingTopLeft: [touch ? 16 : 60, 24],
+          autoPanPaddingBottomRight: [16, 24],
+        },
+      );
       // Leaflet names a pin by its text (the count badge): give it the venue instead. The element exists
       // once the marker is on the map, which happens after fitBounds() below (the map has no view yet).
       marker.on("add", () => marker.getElement().setAttribute("aria-label", title));
+      pins.push({ lat: s.lat, lon: s.lon, marker, shows: items.length });
       points.push([s.lat, s.lon]);
       if (CANTONS[s.canton]) swiss.push([s.lat, s.lon]);
     }
@@ -2855,6 +3113,7 @@
     const frame = swiss.length ? swiss.concat(here ? [[here.lat, here.lon]] : []) : points;
     if (frame.length) map.fitBounds(frame, { padding: [40, 40], maxZoom: 12 });
     else map.setView([46.8, 8.2], 7);
+    layoutPins();
 
     const rest = visible.filter((s) => !hasPos(s));
     mapRest.innerHTML =
@@ -2988,8 +3247,10 @@
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
-  const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
-  function renderAndKeepInView() {
+  const resultsRow = resultsEl.closest(".results-row");
+  const underBar = (elm) => elm.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
+  const viewsTop = () => underBar(views);
+  function renderAndKeepInView(after) {
     nudgeQuietUntil = Date.now() + 3000; // mid-task: no sticker over the result
     filterTouched = true;
     // Filter change (§4): the swap runs inside a view transition where the browser has one (a --t-2
@@ -2998,22 +3259,31 @@
       render();
       filterTouched = false;
     };
+    // `after` runs once the new DOM is in (the transition's callback is asynchronous), e.g. a scroll
+    // to a panel that only exists after the render.
+    const settle = () => {
+      keepInView();
+      if (after) after();
+    };
     if (document.startViewTransition && !reducedMotion.matches) {
-      document.startViewTransition(swap).updateCallbackDone.then(keepInView, keepInView);
+      document.startViewTransition(swap).updateCallbackDone.then(settle, settle);
     } else {
       list.classList.remove("dip");
       void list.offsetWidth; // restart the dip
       list.classList.add("dip");
       swap();
-      keepInView();
+      settle();
     }
   }
   function keepInView() {
     // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
     // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.
-    const target = views.hidden ? status : views;
+    // The start of the results is the results row: the count, the view switch and the filter pills
+    // («Bern ✕») must be in view after a tap on a row's coat of arms, otherwise the filter cannot be
+    // undone where it was made. In the list mode the row is folded away: the list actions start it.
+    const target = views.hidden ? status : listMode() ? minePanel : resultsRow;
     if (views.hidden && !status.textContent.trim()) return;
-    const top = () => target.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
+    const top = () => underBar(target.hidden ? views : target);
     if (window.scrollY > top()) {
       quietScrollUntil = Date.now() + 1000;
       window.scrollTo({ top: top() });
@@ -3023,16 +3293,17 @@
       }, 80);
     }
   }
-  // Scroll down (never up) until the views start right under the bar. The bar grows by a row once
-  // it sticks, so the target is checked again a moment later.
-  function scrollViewsUnderBar() {
-    if (views.hidden || window.scrollY >= viewsTop()) return;
+  // Scroll down (never up) until the target (the views, or the Meine-Shows panel above them) starts right
+  // under the bar. The bar grows by a row once it sticks, so the target is checked again a moment later.
+  function scrollUnderBar(target) {
+    if (views.hidden || window.scrollY >= underBar(target)) return;
     quietScrollUntil = Date.now() + 1500;
-    window.scrollTo({ top: viewsTop() });
+    window.scrollTo({ top: underBar(target) });
     setTimeout(() => {
-      if (Math.abs(window.scrollY - viewsTop()) > 2) window.scrollTo({ top: viewsTop() });
+      if (Math.abs(window.scrollY - underBar(target)) > 2) window.scrollTo({ top: underBar(target) });
     }, 80);
   }
+  const scrollViewsUnderBar = () => scrollUnderBar(views);
 
   // Scroll arrows for the chip row: only shown when there is something hidden in that direction.
   const chipWrap = chipRow.parentElement;
