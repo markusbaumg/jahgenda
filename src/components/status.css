@@ -1,0 +1,170 @@
+/* Status box (src/components/Status.svelte, filters/EmptyState.svelte): loading skeleton, empty state, error,
+ * the link note above the list. */
+/* Empty / loading / error state: a clear box where the list would be. */
+/* One line above the list after a share link that leads nowhere any more. */
+.link-note {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-left: 3px solid var(--gold);
+  background: rgba(242, 182, 50, 0.08);
+  border-radius: 0 8px 8px 0;
+}
+.status {
+  margin: 20px 0 8px;
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.status p {
+  margin: 0;
+}
+.status .big {
+  margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-d1);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0.02em;
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  color: var(--text);
+  text-wrap: balance;
+}
+.status .state-icon {
+  margin-bottom: 12px;
+  color: var(--faint);
+}
+.status .state-icon svg {
+  width: 48px;
+  height: 48px;
+}
+/* Short or very narrow screens (a phone held sideways, 320 px): the card drops its icon and some padding,
+ * so the message and its button («Nochmals versuchen») need no scroll. */
+@media (max-height: 600px), (max-width: 340px) {
+  .status .state-icon {
+    display: none;
+  }
+  .status {
+    padding: 20px 16px;
+  }
+}
+/* The offers of the empty state (§3.8): «Tessin entfernen → 4 Shows», the richest first; the yield in
+ * green, 0 in muted. «Alles zurücksetzen» as a quiet link under them. */
+.status .fixes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.status .chip.fix {
+  flex: 0 1 auto; /* a long label wraps inside the box instead of overflowing it on a phone */
+  max-width: 100%;
+  height: auto;
+  min-height: 36px;
+  padding: 7px 12px;
+  line-height: 1.25;
+  color: var(--text);
+  white-space: normal;
+  text-align: left;
+}
+.status .fix b {
+  font-weight: 600;
+  color: var(--green-text);
+  white-space: nowrap;
+}
+.status .fix.none b {
+  color: var(--muted);
+}
+.status .linkish.reset {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap); /* 44 px target (§5) without moving the line: 14 px gap minus the extra height */
+  margin-top: 2px;
+  padding: 0 8px;
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.status button.primary {
+  margin-top: 16px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--on-gold);
+  background: var(--gold);
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 18px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .status button.primary:hover {
+    filter: brightness(1.08);
+  }
+}
+/* Loading: six skeleton rows in the final row grid; only their opacity shimmers (1.2 s). The box keeps the
+ * footer below the fold until the data is in, so the first paint never shifts (CLS 0.12 came from there). */
+.status.loading {
+  min-height: calc(100vh - var(--bar-h, 84px) - 160px);
+}
+.status.loading {
+  margin: var(--s-4) 0 0;
+  padding: 0;
+  text-align: left;
+  border: 0;
+}
+.skeleton .show {
+  min-height: 64px;
+  pointer-events: none;
+}
+.sk {
+  display: block;
+  background: var(--surface);
+  border-radius: var(--r-1);
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+.sk-date {
+  width: 40px;
+  height: 46px;
+  margin: 13px auto 0;
+}
+.sk-bar {
+  width: 72%;
+  height: 15px;
+  margin: 4px 0 8px;
+}
+.sk-bar.short {
+  width: 46%;
+  height: 13px;
+}
+.sk-badge {
+  width: 24px;
+  height: 28px;
+  margin-top: 2px;
+}
+.skeleton .day:nth-child(2) .sk-bar {
+  width: 58%;
+}
+.skeleton .day:nth-child(4) .sk-bar {
+  width: 84%;
+}
+.skeleton .day:nth-child(5) .sk-bar.short {
+  width: 36%;
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.status:empty {
+  display: none;
+}

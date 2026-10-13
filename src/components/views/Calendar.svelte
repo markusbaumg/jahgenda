@@ -1,7 +1,7 @@
 <script>
   /* Kalender: a Monday-first month grid of the filtered shows. Desktop cells carry a pill per show (a tap
    * jumps to the row in the list); on narrow screens the cells only show up to three dots and the shows
-   * of the selected day are listed below the grid (style.css). Dots and pills by genre colour, a legend,
+   * of the selected day are listed below the grid (views.css). Dots and pills by genre colour, a legend,
    * arrows bounded to the months with shows, «Heute», a note for an empty month. Ported from app.js
    * renderCalendar() and its click handler. */
   import DayGroup from "../DayGroup.svelte";
@@ -9,7 +9,6 @@
   import { tick } from "svelte";
   import { agenda } from "../../stores/agenda.svelte.js";
   import { views } from "../../stores/views.svelte.js";
-  import "./views.css";
   import { quietScroll } from "./scroll.js";
   import { pad2, parseDay } from "../../lib/text.js";
   import { addDays, monthFmt, monthStart, dow, todayStart } from "../../lib/dates.js";

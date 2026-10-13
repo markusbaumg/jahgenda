@@ -1,6 +1,5 @@
-/* Festival styles (story #33, M5), moved verbatim out of style.css. Imported by the festival components,
- * so the bundle places them after style.css; no later rule of style.css competes with these selectors
- * (checked: the ≤ 420 px «.date .num» and «.dow.now» rules are less specific or set other properties). */
+/* Festival styles (src/components/festival/). Imported in its place by src/styles/index.css, after the list
+ * rules: the ≤ 420 px «.date .num» and «.dow.now» rules there are less specific or set other properties. */
 
 /* Festival card («dubplate», §3.7, design/festival-spec.md): the day section itself is the card – surface
  * plate, radius, a 3 px tricolor top edge and the cross mark as an 8 % watermark bottom right (never

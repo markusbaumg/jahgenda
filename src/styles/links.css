@@ -1,0 +1,54 @@
+/* Link colours, in one place and on purpose after the component files: «a, a:visited» and «a:hover» have
+ * the specificity of «.foot a» or «.geo-status a» and must win over them (gold on hover, no underline,
+ * visited links keep the site's green). Before moving this file up, check those pairs. */
+/* Links: no underlines anywhere; colour change on hover instead. */
+a {
+  text-decoration: none;
+}
+.about a,
+.foot-links a,
+.notice a,
+.geo-status a {
+  text-decoration: none;
+  border-bottom: 0;
+}
+
+/* Links everywhere: green, no underline, gold on hover — never the browser's blue. */
+a,
+a:visited {
+  color: var(--green-text);
+  text-decoration: none;
+}
+/* The wordmark link in the sticky bar keeps the brand colours (cream «Jah», gold «genda»), visited or not. */
+.mini-brand,
+.mini-brand:visited {
+  color: var(--text);
+}
+.about .authors .heart {
+  color: var(--red-text);
+}
+@media (hover: hover) {
+  a:hover {
+    color: var(--gold);
+  }
+}
+.title a,
+.venue-link,
+.foot-links a,
+.about .authors a {
+  color: inherit;
+}
+.foot-links a {
+  color: var(--muted);
+}
+
+/* Row actions all share one colour (muted → gold on hover); no accent singles one out */
+.actions .act,
+.actions .act:visited {
+  color: var(--muted);
+}
+@media (hover: hover) {
+  .actions .act:hover {
+    color: var(--gold-text);
+  }
+}

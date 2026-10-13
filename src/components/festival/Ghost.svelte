@@ -1,7 +1,6 @@
 <script>
   /* Ghost row (§3.5): «↳ Reeds Festival läuft noch bis So 1. Aug.» right under the head of every later
    * month a festival reaches into; a link to the card in its start month. Ported from app.js render(). */
-  import "./festival.css";
   import { endLabel } from "../../lib/dates.js";
 
   let { show: s } = $props();

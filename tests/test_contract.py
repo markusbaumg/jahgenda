@@ -42,8 +42,10 @@ def shell_files():
 
 
 def built_file(f):
-    """Where a shell file comes from before the build: public/ (static) or the repo root (index.html, and
-    style.css, copied by the jahgenda-static plugin)."""
+    """Where a shell file comes from before the build: public/ (static), the repo root (index.html), or
+    the jahgenda-static plugin (style.css, put together from src/styles/index.css)."""
+    if f == "style.css":
+        return (ROOT / "src" / "styles" / "index.css").is_file()
     return (PUBLIC / f).is_file() or (ROOT / f).is_file()
 
 
@@ -84,8 +86,36 @@ class AppShell(unittest.TestCase):
         self.assertIn('filename: "sw.js"', VITE_CONFIG)
         self.assertIn("__WB_MANIFEST", PAGES)
         self.assertIn("path: dist", PAGES)
-        for f in ("data", "style.css", "design"):
+        for f in ("data", "design"):
             self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
+        self.assertIn(
+            'path.join(outDir, "style.css"), plainStylesheet()',
+            VITE_CONFIG,
+            "no style.css for the static pages",
+        )
+
+    def test_every_stylesheet_is_imported_once(self):
+        # src/styles/index.css is the cascade order of the page; a .css file outside it would be dead or
+        # imported by a component at a position the bundle decides (and the static pages would miss it).
+        index = (ROOT / "src" / "styles" / "index.css").read_text(encoding="utf-8")
+        listed = [
+            (ROOT / "src" / "styles" / p).resolve() for p in re.findall(r'^@import "([^"]+)";', index, re.M)
+        ]
+        self.assertEqual(len(listed), len(set(listed)), "a stylesheet is imported twice")
+        on_disk = {p.resolve() for p in (ROOT / "src").rglob("*.css")} - {
+            (ROOT / "src" / "styles" / "index.css").resolve()
+        }
+        self.assertEqual(
+            sorted(map(str, on_disk - set(listed))), [], "stylesheets missing from src/styles/index.css"
+        )
+        self.assertEqual([p for p in listed if not p.is_file()], [], "index.css imports a missing file")
+        stray = [
+            p
+            for p in (ROOT / "src").rglob("*.svelte")
+            if re.search(r'import "[^"]+\.css"', p.read_text(encoding="utf-8"))
+        ]
+        self.assertEqual(stray, [], "components must not import stylesheets (the order lives in index.css)")
+        self.assertIn('import "./styles/index.css";', (ROOT / "src" / "main.js").read_text(encoding="utf-8"))
 
     def test_manifest_icons_exist_and_paths_are_relative(self):
         icons = re.findall(r'src: "(img/icons/[^"]+)"', VITE_CONFIG)
