@@ -1,14 +1,14 @@
 {
-  "ok": false,
+  "ok": true,
   "skill": "scrape-shows",
-  "at": "2026-10-13T06:12:00+02:00",
+  "at": "2026-10-13T21:51:45+02:00",
   "runner": "cloud",
   "counts": {
-    "added": 0,
+    "added": 4,
     "updated": 0,
     "removed": 0,
-    "total": 99
+    "total": 102
   },
-  "failed_sources": 1,
-  "error": "Kein Netzzugriff: WebFetch ENOTFOUND (skalender.net), curl CONNECT 403 vom Proxy; Environment braucht Network access = Full"
+  "failed_sources": 0,
+  "error": null
 }

@@ -3,6 +3,106 @@
   "runs": [
     {
       "skill": "scrape-shows",
+      "at": "2026-10-13T21:51:45+02:00",
+      "runner": "cloud",
+      "added": 4,
+      "updated": 0,
+      "removed": 0,
+      "total": 102,
+      "failed_sources": [],
+      "dropped": [
+        {
+          "title": "El Flecha Negra",
+          "date": "2026-10-16",
+          "venue": "Kammgarn",
+          "city": "Schaffhausen",
+          "url": "https://kammgarn.ch/event/el-flecha-negra-2/",
+          "why": "Cumbia/Mestizo mit Reggae- und Ska-Anteil, Schwerpunkt unklar (criteria.md: im Zweifel raus)"
+        },
+        {
+          "title": "El Flecha Negra | Esteban Rey",
+          "date": "2026-12-04",
+          "venue": "Sedel",
+          "city": "Luzern",
+          "url": "https://www.petzi.ch/en/events/64999-sedel-el-flecha-negra-esteban-rey/",
+          "why": "Cumbia/Mestizo, Reggae-Bezug nur am Rand (criteria.md)"
+        },
+        {
+          "title": "Saint City Orchestra",
+          "date": "2026-11-06",
+          "venue": "Kufa",
+          "city": "Lyss",
+          "url": "https://www.kufa.ch/event/2026-11-06-saint-city-orchestra/",
+          "why": "Irish Punkrock, kein Ska/Reggae"
+        },
+        {
+          "title": "30 Jahre Slop!",
+          "date": "2027-03-20",
+          "venue": "Galvanik",
+          "city": "Zug",
+          "url": "https://galvanik-zug.ch/programm/30-jahre-slop/",
+          "why": "Punk-/Grunge-Rock, kein Ska"
+        },
+        {
+          "title": "Sean Koch – Europe 2026",
+          "date": "2026-10-18",
+          "venue": "Bierhübeli",
+          "city": "Bern",
+          "url": "https://eventfrog.ch/de/p/konzerte/reggae-ska/sean-koch-europe-2026-bern-7439219449280875981.html",
+          "why": "Indie-Folk/Surf-Folk, Reggae nur als Beiwort"
+        },
+        {
+          "title": "Elias J. Tv Europe Tour",
+          "date": "2026-10-31",
+          "venue": "Stadthalle Bülach",
+          "city": "Bülach",
+          "url": "https://eventfrog.ch/de/p/konzerte/reggae-ska/elias-j-tv-europe-tour-zurich-switzerland-buelach-7439788386003478323.html",
+          "why": "Keine Acts genannt, Genre nicht belegbar"
+        }
+      ],
+      "notes": [
+        "Netzzugriff funktioniert wieder. Verkürzter Lauf: Skalender, Petzi, Eventfrog ausgewertet; Venue-Seiten, Websuchen, Watchlist und Festivals in diesem Lauf nicht geöffnet (kommen per Rotation)."
+      ],
+      "sources": [
+        {
+          "name": "Skalender",
+          "url": "https://skalender.net/",
+          "status": "ok",
+          "found": 94,
+          "kept": 2
+        },
+        {
+          "name": "Petzi",
+          "url": "https://www.petzi.ch/en/search/?q=reggae",
+          "status": "ok",
+          "found": 54,
+          "kept": 2
+        },
+        {
+          "name": "Eventfrog – Reggae & Ska",
+          "url": "https://eventfrog.ch/de/events/ch/reggae-ska-konzerte.html",
+          "status": "ok",
+          "found": 24,
+          "kept": 1
+        },
+        {
+          "name": "watchlist",
+          "url": "",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        },
+        {
+          "name": "Venue-Programme",
+          "url": "",
+          "status": "skipped",
+          "found": 0,
+          "kept": 0
+        }
+      ]
+    },
+    {
+      "skill": "scrape-shows",
       "at": "2026-10-13T06:12:00+02:00",
       "added": 0,
       "updated": 0,
