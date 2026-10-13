@@ -2,10 +2,12 @@
 when several runs dropped it. Run: make test"""
 
 import importlib.util
+import sys
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))  # for the shared ghapi.py
 SPEC = importlib.util.spec_from_file_location(
     "quality_review", Path(__file__).resolve().parent.parent / "scripts" / "quality_review.py"
 )

@@ -63,6 +63,7 @@ scripts/make_icons.sh                  Renders the PWA icons from img/logo/jahge
 scripts/make_ics.py                    Builds the subscribable calendar feeds (jahgenda.ics + one per region) before deploy.
 scripts/make_stickers.py               Renders the promo stickers in design/stickers/ (make stickers).
 scripts/quality_review.py              Weekly issue listing what the scraper dropped (false-negative review).
+scripts/ghapi.py                       Shared by the two above: repo/token env, ISO timestamp parser, GitHub REST call.
 scripts/launchd/                       Local fallback job for the daily scrape (macOS launchd).
 tests/                                 Unit tests (python3 -m unittest, node --test for lib.js).
 e2e/                                   End-to-end tests in a real browser (Playwright; make e2e).
