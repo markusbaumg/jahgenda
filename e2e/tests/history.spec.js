@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
   await openList(page);
 });
 
-const onSite = async (page) => expect(page).toHaveURL(/127\.0\.0\.1:4173/);
+const onSite = async (page) => expect(page).toHaveURL(/127\.0\.0\.1:\d+\//);
 
 test("Back closes the Wo panel instead of leaving the page", async ({ page }) => {
   await page.click("#toggle-where");

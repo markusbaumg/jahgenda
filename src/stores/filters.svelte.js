@@ -19,6 +19,7 @@ import {
   dow,
 } from "../lib/dates.js";
 import { CANTONS, ABROAD, shortRegion } from "../lib/regions.js";
+import { quietScroll } from "../components/views/scroll.js";
 
 export const VIEWS = ["list", "calendar", "map"];
 
@@ -510,6 +511,7 @@ function createFilterUi() {
   function scrollUnderBar(target) {
     const views = el("views");
     if (!target || !views || views.hidden || window.scrollY >= underBar(target)) return;
+    quietScroll(1500);
     window.scrollTo({ top: underBar(target) });
     setTimeout(() => {
       if (Math.abs(window.scrollY - underBar(target)) > 2) window.scrollTo({ top: underBar(target) });
@@ -517,16 +519,17 @@ function createFilterUi() {
   }
   // No result: the «Nichts gefunden» box takes the list's place and must come into view; else the start
   // of the results is the results row (count, view switch, pills), so a filter can be undone where it
-  // was made.
+  // was made (in the list mode: the Meine-Shows panel with the list actions).
   function keepInView() {
     const views = el("views");
     const status = el("status");
-    const row = document.querySelector(".results-row");
+    const row = listMode ? el("mine-panel") : document.querySelector(".results-row");
     if (!views || !status) return;
     const target = views.hidden ? status : row;
     if (views.hidden && !status.textContent.trim()) return;
     const top = () => underBar(!target || target.hidden ? views : target);
     if (window.scrollY > top()) {
+      quietScroll(1000);
       window.scrollTo({ top: top() });
       // The bar grows by a row once it sticks: check the target again a moment later.
       setTimeout(() => {

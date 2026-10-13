@@ -19,9 +19,15 @@
   import { feedback } from "./stores/feedback.svelte.js";
   import { initReveal } from "./stores/reveal.svelte.js";
 
+  // M4: the calendar and the map (the view switch itself sits in the results row, M1).
+  import Calendar from "./components/views/Calendar.svelte";
+  import MapView from "./components/views/MapView.svelte";
+  import { views } from "./stores/views.svelte.js";
+
   agenda.load();
   // Rows & deep links (M2): #<short> lands on the row.
   initReveal();
+  views.start();
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
   // The screen reader hears the results line after every filter change (#status announces an empty state).
@@ -58,16 +64,15 @@
     tabindex="-1"
     hidden={agenda.loadState === "error" || (agenda.loadState === "ready" && !hasRows)}
   >
-    <div id="list" hidden={ui.view !== "list"}>
-      {#if hasRows && ui.view === "list"}
+    <!-- Only the active view keeps its rows: the calendar's day list and the map's «Ohne Standort» list
+         reuse the row ids, and #id links must find the list row. -->
+    <div id="list" hidden={views.current !== "list"}>
+      {#if hasRows && views.current === "list"}
         <ShowList shows={agenda.visible} />
       {/if}
     </div>
-    <div id="calendar" class="calendar" hidden={ui.view !== "calendar"}></div>
-    <div id="map-view" class="map-view" hidden={ui.view !== "map"}>
-      <div id="map" class="map" role="region" aria-label="Karte der Clubs"></div>
-      <div id="map-rest"></div>
-    </div>
+    <Calendar shows={agenda.visible} active={hasRows && views.current === "calendar"} />
+    <MapView shows={agenda.visible} active={hasRows && views.current === "map"} />
   </div>
   <Status onretry={() => agenda.load()} />
   <PastFoot />

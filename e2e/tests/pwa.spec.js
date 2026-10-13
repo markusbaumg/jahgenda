@@ -3,7 +3,7 @@
 // so these tests visit the same server as jah.localhost (Chromium resolves *.localhost to loopback).
 const { test, expect } = require("@playwright/test");
 
-const HOST = "http://jah.localhost:4173/";
+const HOST = `http://jah.localhost:${Number(process.env.E2E_PORT) || 4173}/`; // the preview port (playwright.config.js)
 test.use({ serviceWorkers: "allow", baseURL: HOST });
 
 async function workerReady(page) {
