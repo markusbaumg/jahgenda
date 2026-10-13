@@ -462,36 +462,27 @@
   border: 2px solid #14110e;
 }
 
+/* Legend: the same striped pins as on the map (SVG from pinSvg), a mini cluster badge, the blue dot. */
 .pin-mini {
+  display: inline-flex;
+  margin-right: 5px;
+  vertical-align: -4px;
+}
+.pin-mini svg {
+  display: block;
+}
+.cluster-mini {
   display: inline-block;
   width: 12px;
-  height: 16px;
-  margin-right: 5px;
-  vertical-align: -3px;
-  border-radius: 50% 50% 50% 50% / 42% 42% 58% 58%;
-  background: linear-gradient(#d8342f 0 30%, #f2b632 30% 52%, #1e8f4e 52%);
-  border: 1px solid var(--bg);
-  box-shadow: 0 0 0 1px var(--line);
-}
-.pin-mini.star {
-  background: var(--gold);
-  color: var(--bg);
-  font-size: 0.65rem;
-  font-weight: 800;
-  line-height: 14px;
-  text-align: center;
-  border-radius: 50%;
-  width: 16px;
-}
-.pin-mini.fest {
-  background: var(--gold);
-  border-radius: 50%;
-  width: 12px;
   height: 12px;
-  box-shadow: 0 0 0 3px var(--bg, #14110e) inset;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: #14110e;
   border: 2px solid var(--gold);
+  box-shadow: 0 0 0 1px #14110e;
 }
 .pin-mini.you {
+  display: inline-block;
   width: 12px;
   height: 12px;
   border-radius: 50%;

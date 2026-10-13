@@ -347,6 +347,7 @@ export default {
   "map.you": "Your location",
   "map.youHere": "You are here",
   "map.legendClub": "Club with shows (number = how many)",
+  "map.legendCluster": "Several clubs: tap to zoom",
   "map.legendGoing": "“I'm going”",
   "map.legendFestival": "Festival",
   "map.legendYou": "you",

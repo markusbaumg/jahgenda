@@ -111,7 +111,7 @@
       const cluster = L.marker([lat, lon], {
         icon: L.divIcon({
           className: "cluster-icon",
-          html: `<span><b>${g.members.length}</b></span>`,
+          html: `<span><b>${n}</b></span>`, // the shows, as on the pins and in the legend
           iconSize: [44, 44],
           iconAnchor: [22, 40], // sits on its spot like a pin, so pin heads and badges share one height
         }),
@@ -197,28 +197,33 @@
   let pinSeq = 0;
   const PIN_PATH = "M14 1C7 1 1.5 6.5 1.5 13.5c0 9.5 12.5 25 12.5 25s12.5-15.5 12.5-25C26.5 6.5 21 1 14 1z";
   const STAR = "M14 7.6l1.9 3.9 4.3.6-3.1 3 .7 4.3-3.8-2-3.8 2 .7-4.3-3.1-3 4.3-.6z";
-  function pinIcon(kind, count) {
-    const id = `pin${++pinSeq}`;
+  // The pin as SVG markup: the map's markers and the legend draw the very same shape.
+  function pinSvg(kind, id, width = 28, height = 40) {
     const centre =
       kind === "going"
         ? `<circle cx="14" cy="13.5" r="7.5" fill="#14110e"/><path d="${STAR}" fill="#f2b632"/>`
         : kind === "festival"
           ? `<circle cx="14" cy="13.5" r="6.5" fill="#14110e"/><circle cx="14" cy="13.5" r="4" fill="#f2b632"/>`
           : `<circle cx="14" cy="13.5" r="5.5" fill="#14110e"/>`;
+    return (
+      `<svg viewBox="0 0 28 40" width="${width}" height="${height}" aria-hidden="true">` +
+      `<clipPath id="${id}"><path d="${PIN_PATH}"/></clipPath>` +
+      `<g clip-path="url(#${id})"><rect x="0" y="0" width="28" height="12" fill="#d8342f"/>` +
+      `<rect x="0" y="12" width="28" height="9" fill="#f2b632"/><rect x="0" y="21" width="28" height="20" fill="#1e8f4e"/></g>` +
+      `<path d="${PIN_PATH}" fill="none" stroke="#14110e" stroke-width="2"/>${centre}</svg>`
+    );
+  }
+  function pinIcon(kind, count) {
     return window.L.divIcon({
       className: `pin-icon${kind === "going" ? " going" : ""}${kind === "festival" ? " festival" : ""}`,
-      html:
-        `<svg viewBox="0 0 28 40" width="28" height="40" aria-hidden="true">` +
-        `<clipPath id="${id}"><path d="${PIN_PATH}"/></clipPath>` +
-        `<g clip-path="url(#${id})"><rect x="0" y="0" width="28" height="12" fill="#d8342f"/>` +
-        `<rect x="0" y="12" width="28" height="9" fill="#f2b632"/><rect x="0" y="21" width="28" height="20" fill="#1e8f4e"/></g>` +
-        `<path d="${PIN_PATH}" fill="none" stroke="#14110e" stroke-width="2"/>${centre}</svg>` +
-        (count > 1 ? `<b>${count}</b>` : ""),
+      html: pinSvg(kind, `pin${++pinSeq}`) + (count > 1 ? `<b>${count}</b>` : ""),
       iconSize: [28, 40],
       iconAnchor: [14, 39],
       popupAnchor: [0, -34],
     });
   }
+  // Legend icons: mini pins (14 x 20), so no legend entry looks like a cluster badge.
+  const legendPin = (kind) => pinSvg(kind, `legend-pin-${kind}`, 14, 20);
   const showList = (items) =>
     `<ul class="popup-shows">${items
       .map(
@@ -368,10 +373,14 @@
   <div id="map-rest">
     {#if active && leafletReady}
       <p class="map-legend">
-        <span class="legend-item"><span class="pin-mini"></span>{t("map.legendClub")}</span>
-        <span class="legend-item"><span class="pin-mini star">★</span>{t("map.legendGoing")}</span
+        <span class="legend-item"
+          ><span class="pin-mini">{@html legendPin("venue")}</span>{t("map.legendClub")}</span
+        >
+        <span class="legend-item"><span class="cluster-mini"></span>{t("map.legendCluster")}</span>
+        <span class="legend-item"
+          ><span class="pin-mini">{@html legendPin("going")}</span>{t("map.legendGoing")}</span
         >{#if anyFestival}{" "}<span class="legend-item"
-            ><span class="pin-mini fest"></span>{t("map.legendFestival")}</span
+            ><span class="pin-mini">{@html legendPin("festival")}</span>{t("map.legendFestival")}</span
           >{/if}{#if here}{" "}<span class="legend-item"
             ><span class="pin-mini you"></span>{t("map.legendYou")}</span
           >{/if}

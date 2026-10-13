@@ -384,6 +384,7 @@ export default {
   "map.you": "Ta position",
   "map.youHere": "Tu es ici",
   "map.legendClub": "Club avec concerts (chiffre = nombre de concerts)",
+  "map.legendCluster": "Plusieurs clubs : toucher pour zoomer",
   "map.legendGoing": "« J'y vais »",
   "map.legendFestival": "Festival",
   "map.legendYou": "toi",

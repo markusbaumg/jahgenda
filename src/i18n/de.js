@@ -312,6 +312,7 @@ export default {
   "map.you": "Dein Standort",
   "map.youHere": "Du bist hier",
   "map.legendClub": "Club mit Shows (Zahl = Anzahl Shows)",
+  "map.legendCluster": "Mehrere Clubs: antippen zum Zoomen",
   "map.legendGoing": "«Ich gehe»",
   "map.legendFestival": "Festival",
   "map.legendYou": "du",
