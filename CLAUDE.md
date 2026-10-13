@@ -137,4 +137,5 @@ headline at 200 % text size).
   language-free; owner pages and stickers stay German (README «Languages»).
 - **Working style:** big features are built by background workflows in isolated worktrees
   (`.claude/worktrees/…`, gitignored) with a reviewer, then merged by hand into `main`; `make check` must be
-  green before every push; GitHub Pages deploys every push to `main`.
+  green before every push; GitHub Pages deploys every push to `main` once its CI job `ci` (make check) passed
+  (pages.yml runs on `workflow_run` of CI; a red e2e job does not hold the deploy back).

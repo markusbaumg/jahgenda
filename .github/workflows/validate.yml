@@ -1,6 +1,7 @@
 # Runs on every push and pull request: `make ci` = lint (node, ruff, prettier) + validate + test
 # + build (vite) + smoke (headless Chrome against dist/, skipped when absent) + data format.
-# Same as `make check` locally. The deploy (pages.yml) validates the data once more before uploading.
+# Same as `make check` locally. The deploy (pages.yml) waits for this workflow and only ships a push to
+# main whose `ci` job passed; it validates the data once more before uploading.
 # A second job runs the Playwright end-to-end tests (e2e/, same as `make e2e`) against `vite preview`
 # of the build – deliberately not part of `make check`, it needs a browser download and the network
 # (Leaflet, OSM tiles).

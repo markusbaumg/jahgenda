@@ -86,6 +86,20 @@ class AppShell(unittest.TestCase):
         self.assertIn('filename: "sw.js"', VITE_CONFIG)
         self.assertIn("__WB_MANIFEST", PAGES)
         self.assertIn("path: dist", PAGES)
+
+    def test_deploy_waits_for_make_check(self):
+        # Every commit on main must pass make check (CLAUDE.md): pages.yml deploys only after the CI
+        # workflow's job «ci» (make ci) passed for that commit – never straight on push.
+        ci = (ROOT / ".github" / "workflows" / "validate.yml").read_text(encoding="utf-8")
+        self.assertIn("name: CI\n", ci)
+        self.assertIn("\n  ci:\n", ci)
+        self.assertIn("run: make ci", ci)
+        on = PAGES.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+        self.assertNotIn("push:", on)
+        self.assertIn("workflow_run:\n    workflows: [CI]", on)
+        self.assertIn('select(.name == "ci") | .conclusion', PAGES)
+        self.assertIn("needs: gate", PAGES)
+        self.assertIn("ref: ${{ needs.gate.outputs.sha }}", PAGES)
         for f in ("data", "design"):
             self.assertIn(f'["{f}", "{f}"', VITE_CONFIG, f"the build no longer copies {f}/ into dist")
         # The console's Quellen tab reads scraper/sources.json from GitHub raw (the file is not in dist/).

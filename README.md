@@ -119,7 +119,7 @@ scripts/launchd/                       Local fallback job for the daily scrape (
 tests/                                 Unit tests (python3 -m unittest, node --test for src/lib).
 e2e/                                   End-to-end tests in a real browser (Playwright against vite preview; make e2e).
 design/                                Logo variants, festival spec, other design documents (the HTML pages are copied into dist/design).
-.github/workflows/pages.yml            Validates data, builds dist/ (vite, service worker with the injected shell list, .ics feeds), deploys on every push to main.
+.github/workflows/pages.yml            After CI passed `make ci` for a push to main: validates data, builds dist/ (vite, service worker with the injected shell list, .ics feeds), deploys.
 .github/workflows/validate.yml         CI: `make ci` (lint, validate, test, build, smoke, format check) + e2e job on every push and PR.
 .github/workflows/quality-review.yml   Mondays: scripts/quality_review.py opens the review issue (label quality).
 .github/workflows/watchdog.yml         Daily freshness check → issue + badge.
@@ -213,7 +213,7 @@ the result and commits it.
                          │ git push main
                          ▼
             ┌──────────────────────────┐
-            │ GitHub Pages workflow    │ validates again, deploys
+            │ CI, then Pages workflow  │ make check green → validates again, deploys
             └──────────────────────────┘
 
   monthly ──► skill harvest-bands: festival line-ups (Summerjam, Reeds, Lakesplash, …)
