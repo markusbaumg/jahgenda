@@ -2599,7 +2599,7 @@
           ${
             other
               ? `<span class="cal-num" aria-hidden="true">${d.getDate()}</span>`
-              : `<button type="button" class="cal-num" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>`
+              : `<button type="button" class="cal-num" aria-pressed="${key === calDay}" aria-label="${escape(label)}" title="Tag auswählen: ${escape(label)}">${d.getDate()}</button>`
           }
           <span class="cal-dots" aria-hidden="true">${items
             .slice(0, 3)
@@ -2691,16 +2691,25 @@
         const d = parseDay(calDay);
         calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
       }
+      const hadFocus = cell.contains(document.activeElement);
       renderCalendar(lastVisible);
-      // On the phone the day's shows are listed under the grid – below the fold: bring them up.
+      // The grid was rebuilt: a keyboard user keeps the focus on the day just chosen (§5: never <body>).
+      if (hadFocus) {
+        const btn = calendarEl.querySelector(`[data-day="${calDay}"] .cal-num`);
+        if (btn && btn.focus) btn.focus({ preventScroll: true });
+      }
+      // On the phone the day's shows are listed under the grid – below the fold: bring them up, but only
+      // as far as needed (the grid stays on screen while flicking through days, unless the day's list
+      // is taller than the room under the bar).
       const day = calendarEl.querySelector(".cal-day");
-      if (
-        day &&
-        getComputedStyle(day).display !== "none" &&
-        day.getBoundingClientRect().top > innerHeight - 120
-      ) {
-        quietScrollUntil = Date.now() + 1500;
-        day.scrollIntoView({ block: "start", behavior: "smooth" });
+      if (day && getComputedStyle(day).display !== "none") {
+        const r = day.getBoundingClientRect();
+        const room = innerHeight - 16;
+        if (r.top > innerHeight - 120) {
+          quietScrollUntil = Date.now() + 1500;
+          const by = Math.min(r.bottom - room, r.top - filters.offsetHeight - 40);
+          if (by > 0) window.scrollBy({ top: by, behavior: reducedMotion.matches ? "auto" : "smooth" });
+        }
       }
     }
   });

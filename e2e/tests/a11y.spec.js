@@ -69,6 +69,30 @@ test("other-month days in the calendar are not focusable; a tap on one turns the
   await expect(page.locator("#calendar .cal-title")).not.toHaveText(title);
 });
 
+test("choosing a calendar day keeps the focus on it and marks it pressed; the grid stays on screen", async ({
+  page,
+  isMobile,
+}) => {
+  await page.locator('#view-switch [data-view="calendar"]').click();
+  const today = page.locator("#calendar .cal-cell.today .cal-num");
+  await expect(today).toHaveAttribute("aria-pressed", "true"); // today is the preselected day
+  const next = page.locator("#calendar .cal-cell:not(.other):not(.past) .cal-num").nth(3);
+  const day = await next.evaluate((b) => b.closest("[data-day]").dataset.day);
+  await next.focus();
+  await page.keyboard.press("Enter");
+  // The grid is rebuilt on every selection: the focus must land on the new button for the same day.
+  const chosen = page.locator(`#calendar [data-day="${day}"] .cal-num`);
+  await expect(chosen).toBeFocused();
+  await expect(chosen).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('#calendar .cal-num[aria-pressed="true"]')).toHaveCount(1);
+  if (!isMobile) return;
+  // The phone lists the day under the grid: after a tap the grid is still there to pick the next day.
+  await page.locator("#calendar .cal-cell.today").tap();
+  await page.waitForTimeout(600);
+  await expect(page.locator("#calendar .cal-grid")).toBeInViewport({ ratio: 0.5 });
+  await expect(page.locator("#calendar .cal-day .show").first()).toBeInViewport();
+});
+
 test("at 200 % text size nothing overlaps and the page does not scroll sideways (WCAG 1.4.4)", async ({
   page,
 }) => {
