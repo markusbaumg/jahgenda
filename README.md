@@ -75,9 +75,14 @@ button or a tap outside:
   distances in every row with a hover-only **SBB** badge (timetable from the nearest town in `venues.json` to
   the show's town, arrival one hour before the show — `lib.sbbUrl`, tested) and a «Distanz & Zug anzeigen»
   placeholder while the position is unknown.
-- **Wann** — Heute / Wochenende / 7 Tage, or any set of months picked on a clickable month histogram (bars
-  = number of shows after the other filters; past months dimmed and switching past shows on). The badge in
-  the toolbar names the active choice; nothing is stored across visits.
+- **Wann** — Heute / Morgen / Wochenende / 7 Tage, or any set of months picked on a clickable month
+  histogram (bars = number of shows after the other filters; past months dimmed and switching past shows on).
+  The badge in the toolbar names the active choice; nothing is stored across visits. Past shows can also be
+  opened from the last row under the list («↑ n vergangene Shows anzeigen»).
+
+The list itself is time-aware: inside a month the rows are grouped by day (one date cell per day), today and
+tomorrow carry a red HEUTE / MORGEN pill (only while the data is fresher than 48 h), the Fr–So of the coming
+weekend are red with a «Wochenende» rule before them, and past rows are muted with the word «vorbei».
 
 ### Views
 

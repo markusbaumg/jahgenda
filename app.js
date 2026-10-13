@@ -79,6 +79,12 @@
   });
   const monthNameFmt = new Intl.DateTimeFormat("de-CH", { month: "long" });
   const dowFmt = new Intl.DateTimeFormat("de-CH", { weekday: "short" });
+  const fullDayFmt = new Intl.DateTimeFormat("de-CH", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
   const stampFmt = new Intl.DateTimeFormat("de-CH", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -106,6 +112,18 @@
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   };
+
+  // --- Time dimension (design/ui-revamp.md §7 S3) ---
+  // The coming weekend is Fri–Sun of this week until Sunday is over (on a Saturday it is the current one).
+  // Only its DOWs go red, and the «Wochenende» rule is drawn once before its first day in the list.
+  function weekendRange(today) {
+    const dow = today.getDay(); // 0 = Sunday
+    const fri = dow === 0 ? addDays(today, -2) : addDays(today, 5 - dow);
+    return [fri, addDays(fri, 2)];
+  }
+  // HEUTE / MORGEN pills only while the data is fresher than 48 h: stale data must not claim a day.
+  let dataUpdated = 0;
+  const isFresh = () => dataUpdated > 0 && Date.now() - dataUpdated < 48 * 3600 * 1000;
 
   const escape = (s) =>
     String(s ?? "").replace(
@@ -287,9 +305,8 @@
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2 7h20v14H2V7zm2 2v10h16V9H4zm3 2h2v6H7v-6zm4 0h2v6h-2v-6zm4 0h2v6h-2v-6zM12 3l5 3h-10l5-3z"/></svg>',
   };
 
+  // One row inside a day group (see renderDays): content column + canton, then the actions line.
   function renderShow(s) {
-    const d = s._day;
-    const dow = d.getDay();
     const url = safeUrl(s.url);
     const title = url
       ? `<a href="${escape(url)}" target="_blank" rel="noopener" title="Konzertseite beim Veranstalter öffnen">${escape(s.title)}</a>`
@@ -300,12 +317,12 @@
       .filter((g) => g !== activeGenre)
       .map((g) => ` · <span class="genre">${escape(genreLabel[g] || g)}</span>`)
       .join("");
+    // With a known position the distance sits before the genres (§3.6); the hover-only placeholder that
+    // asks for the position goes last, so its invisible width leaves no hole in the line.
+    const dist = distanceLabel(s);
+    const past = s._past ? ` · <span class="vorbei">vorbei</span>` : "";
     return `
-      <li class="show${dow === 0 || dow === 5 || dow === 6 ? " weekend" : ""}${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
-        <time class="date" datetime="${escape(s.date)}">
-          <span class="dow">${dowFmt.format(d).replace(".", "")}</span>
-          <span class="day">${String(d.getDate()).padStart(2, "0")}<i class="dot">.</i></span>
-        </time>
+      <li class="show${s._past ? " past" : ""}${markClass(s)}" id="${escape(s.id)}" data-id="${escape(s.id)}">
         <div>
           <h3 class="title">${title}</h3>
           ${
@@ -313,7 +330,7 @@
               ? `<p class="acts">${s.acts.map((a) => `<span>${escape(a)}</span>`).join("")}</p>`
               : ""
           }
-          <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${distanceLabel(s)}${genreWords}</p>
+          <p class="meta">${time}${venueLink(s)} · ${escape(s.city)}${here ? dist : ""}${genreWords}${past}${here ? "" : dist}</p>
         </div>
         <button type="button" class="canton${ABROAD[s.canton] ? " abroad" : ""}" data-canton="${escape(s.canton)}" title="${escape(regionName(s.canton))} als Filter ein-/ausschalten"><img src="img/cantons/${escape(s.canton)}.svg" alt="" loading="lazy">${escape(s.canton)}</button>
         <div class="foot-row">
@@ -324,6 +341,49 @@
             </div>
           </div>
       </li>`;
+  }
+
+  // Day groups (§3.5): one <section class="day"> per date with a single <time> cell that every show of
+  // that day shares. Today and tomorrow get a red HEUTE / MORGEN pill in the DOW slot while the data is
+  // fresh; Fr/Sa/So of the coming weekend get a red DOW and, in the list, a «Wochenende» rule before the
+  // first of them.
+  function renderDays(items, { weekendRule = false } = {}) {
+    const today = todayStart();
+    const tomorrow = addDays(today, 1);
+    const [wkStart, wkEnd] = weekendRange(today);
+    const fresh = isFresh();
+    const days = new Map();
+    for (const s of items) {
+      if (!days.has(s.date)) days.set(s.date, []);
+      days.get(s.date).push(s);
+    }
+    let ruleDue = weekendRule;
+    return [...days]
+      .map(([date, rows]) => {
+        const d = rows[0]._day;
+        const isToday = sameDay(d, today);
+        const isTomorrow = sameDay(d, tomorrow);
+        const inWeekend = d >= wkStart && d <= wkEnd;
+        const cls = ["day"];
+        if (rows[0]._past) cls.push("past");
+        if (inWeekend) cls.push("weekend");
+        if (isToday) cls.push("today");
+        let rule = "";
+        if (ruleDue && inWeekend) {
+          ruleDue = false;
+          rule = `<p class="rule-weekend"><span>Wochenende</span></p>`;
+        }
+        const dow =
+          fresh && (isToday || isTomorrow)
+            ? `<span class="dow now">${isToday ? "Heute" : "Morgen"}</span>`
+            : `<span class="dow">${dowFmt.format(d).replace(".", "")}</span>`;
+        return `${rule}
+        <section class="${cls.join(" ")}" data-date="${escape(date)}">
+          <time class="date" datetime="${escape(date)}" aria-label="${escape(fullDayFmt.format(d))}">${dow}<span class="num">${d.getDate()}</span></time>
+          <ul class="day-shows">${rows.map(renderShow).join("")}</ul>
+        </section>`;
+      })
+      .join("");
   }
 
   // The per-show actions, shared by the row (short labels) and the action sheet (long labels).
@@ -373,19 +433,39 @@
     el("clear-filters").hidden = !filtered;
     updateMine();
     updateWhen();
+    renderedStamp = renderStamp();
     lastVisible = visible;
     const v = listMode() ? "list" : view; // the list mode always shows the list; the stored view returns on close
+    // «↑ n vergangene Shows anzeigen»: the last row under the list (§3.10). n counts only what the current
+    // filters would bring back, so «Heute» never offers past shows it cannot show. The list mode shows its
+    // past shows anyway, and the other views keep the switch in the Wann panel.
+    const past = listMode() ? 0 : shows.filter((s) => s._past && inRange(s) && matchesFilters(s)).length;
+    listFoot.hidden = !past || v !== "list" || (!visible.length && !showPast);
+    pastFoot.innerHTML = showPast
+      ? `<span class="arrow" aria-hidden="true">↓</span> Vergangene ausblenden`
+      : `<span class="arrow" aria-hidden="true">↑</span> ${past} vergangene ${past === 1 ? "Show" : "Shows"} anzeigen`;
     if (!visible.length) {
       list.innerHTML = "";
       calendarEl.innerHTML = "";
       mapRest.innerHTML = "";
       views.hidden = true;
       resultsText.textContent = "";
-      status.innerHTML = listMode()
-        ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Diese Liste ist leer</p><p>Keine der Shows ist mehr in der Agenda.</p><button type="button" class="primary" id="reset" title="Zurück zur Agenda">Zurück zur Agenda</button>`
-        : shows.some((s) => !s._past)
-          ? `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Nichts gefunden</p><p>Keine Konzerte für diese Auswahl.</p><button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`
-          : `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
+      if (listMode()) {
+        status.innerHTML = `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">Diese Liste ist leer</p><p>Keine der Shows ist mehr in der Agenda.</p><button type="button" class="primary" id="reset" title="Zurück zur Agenda">Zurück zur Agenda</button>`;
+        return;
+      }
+      if (!shows.some((s) => !s._past)) {
+        status.innerHTML = `<p class="state-icon">${STATE_ICONS.calendar}</p><p class="big">Noch nichts im Kalender</p><p>Sobald der Scraper etwas findet, steht es hier.</p>`;
+        return;
+      }
+      // With a quick pick the empty state names the day and points to the next show instead.
+      const quick = quickActive();
+      const next = quick && shows.find((x) => !x._past && matchesFilters(x));
+      const headline = quick ? `${QUICK_EMPTY[quick]} läuft nichts` : "Nichts gefunden";
+      const hint = next
+        ? `<p>Nächste Show: <a href="#${next._short}" title="Zur Show in der Liste springen"><strong>${escape(next.title)}</strong></a>, ${escape(dayShort(next))} in ${escape(next.city)}</p>`
+        : `<p>Keine Konzerte für diese Auswahl.</p>`;
+      status.innerHTML = `<p class="state-icon">${STATE_ICONS.search}</p><p class="big">${headline}</p>${hint}<button type="button" class="primary" id="reset" title="Alle Filter zurücksetzen">Filter zurücksetzen</button>`;
       return;
     }
     status.innerHTML = "";
@@ -420,14 +500,20 @@
       groups.get(key).push(s);
     }
 
+    // The «Wochenende» rule is drawn once, before the first day of the coming weekend – not while a Heute /
+    // Morgen / Wochenende quick pick already says which days these are.
+    const [wkStart, wkEnd] = weekendRange(todayStart());
+    let ruleDue = !["today", "tomorrow", "weekend"].includes(quickActive());
     list.innerHTML = [...groups]
-      .map(
-        ([, items]) => `
+      .map(([, items]) => {
+        const weekendRule = ruleDue && items.some((s) => s._day >= wkStart && s._day <= wkEnd);
+        if (weekendRule) ruleDue = false;
+        return `
         <section>
           <h2 class="month">${escape(monthNameFmt.format(items[0]._day))} <span class="year">${items[0]._day.getFullYear()}</span></h2>
-          <ul class="shows">${items.map(renderShow).join("")}</ul>
-        </section>`,
-      )
+          <div class="shows">${renderDays(items, { weekendRule })}</div>
+        </section>`;
+      })
       .join("");
   }
 
@@ -439,6 +525,19 @@
       ? monthFmt.format(first)
       : `${monthFmt.format(first)} – ${monthFmt.format(last)}`;
   }
+
+  // HEUTE / MORGEN, the coming weekend and «vorbei» depend on the clock: when the tab comes back on
+  // another day (or the data has gone stale meanwhile), the list is rendered again.
+  let renderedStamp = "";
+  const renderStamp = () => `${todayStart().getTime()}:${isFresh() ? "fresh" : "stale"}`;
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || !shows.length) return;
+    if (renderStamp() === renderedStamp) return;
+    const today = todayStart();
+    for (const s of shows) s._past = s._day < today;
+    pastCount = shows.filter((s) => s._past).length;
+    render();
+  });
 
   // Tagline: one of the slogans (same lines as on the stickers), rotating by day.
   fetch(SLOGANS_URL, { cache: "no-cache" })
@@ -499,6 +598,7 @@
         .sort((a, b) => a._day - b._day || (a.time || "").localeCompare(b.time || ""));
 
       pastCount = shows.filter((s) => s._past).length;
+      dataUpdated = data.updated ? Date.parse(data.updated) || 0 : 0;
       setupWhen();
       // Canton chips (multi-select, with counts) inside the Wo panel: Swiss cantons A–Z, the
       // neighbouring countries at the end.
@@ -1116,6 +1216,8 @@
   const whenCount = el("when-count");
   const togglePast = el("toggle-past");
   const pastLabel = togglePast.closest("label");
+  const listFoot = el("list-foot");
+  const pastFoot = el("past-foot");
   let rangeFrom = null; // local day (Date) or null – set by a quick pick
   let rangeTo = null;
   const months = new Set(); // selected months as "YYYY-M" keys – set by the month chips
@@ -1136,11 +1238,30 @@
     if (months.size) return months.has(monthKey(s._day));
     return !(rangeFrom && rangeTo) || (s._day >= rangeFrom && s._day <= rangeTo);
   };
+  // Quick picks (§7 S3: Heute · Morgen · Wochenende · 7 Tage), one exclusive choice; the badge, the chips
+  // and the empty state name the pick rather than its dates.
+  const QUICK = { today: "Heute", tomorrow: "Morgen", weekend: "Wochenende", 7: "7 Tage" };
+  const QUICK_EMPTY = {
+    today: "Heute",
+    tomorrow: "Morgen",
+    weekend: "Am Wochenende",
+    7: "In den nächsten 7 Tagen",
+  };
+  const quickActive = () =>
+    (!months.size &&
+      rangeFrom &&
+      Object.keys(QUICK).find((k) => {
+        const [a, b] = quickRange(k);
+        return sameDay(a, rangeFrom) && sameDay(b, rangeTo);
+      })) ||
+    "";
   function rangeLabel() {
     if (months.size) {
       const picked = monthList.filter((d) => months.has(monthKey(d)));
       return picked.length > 2 ? `${picked.length} Monate` : picked.map(monthLabel).join(", ");
     }
+    const quick = quickActive();
+    if (quick) return QUICK[quick];
     return sameDay(rangeFrom, rangeTo) ? dm(rangeFrom) : `${dm(rangeFrom)}–${dm(rangeTo)}`;
   }
 
@@ -1184,6 +1305,7 @@
     const today = todayStart();
     const dow = today.getDay(); // 0 = Sunday
     if (kind === "today") return [today, today];
+    if (kind === "tomorrow") return [addDays(today, 1), addDays(today, 1)];
     if (kind === "weekend")
       return [dow === 0 || dow >= 5 ? today : addDays(today, 5 - dow), addDays(today, (7 - dow) % 7)];
     return [today, addDays(today, Number(kind) - 1)];
@@ -1222,13 +1344,9 @@
         return `<button type="button" class="${cls.join(" ")}" data-month="${k}" aria-pressed="${months.has(k)}" title="${escape(title)}" style="--h:${Math.round((n / max) * 100)}%"><b>${n || ""}</b><i></i><span>${monthLabel(d)}</span></button>`;
       })
       .join("");
-    for (const chip of whenPanel.querySelectorAll("[data-quick]")) {
-      const [qa, qb] = quickRange(chip.dataset.quick);
-      chip.setAttribute(
-        "aria-pressed",
-        String(!months.size && rangeFrom && sameDay(qa, rangeFrom) && sameDay(qb, rangeTo)),
-      );
-    }
+    const quick = quickActive();
+    for (const chip of whenPanel.querySelectorAll("[data-quick]"))
+      chip.setAttribute("aria-pressed", String(chip.dataset.quick === quick));
     const n = shows.filter(isVisible).length;
     whenCount.textContent = active
       ? `${n} ${n === 1 ? "Konzert" : "Konzerte"} im Zeitraum`
@@ -1240,9 +1358,8 @@
     const quick = e.target.closest("[data-quick]");
     const month = e.target.closest("[data-month]");
     if (quick) {
-      const [a, b] = quickRange(quick.dataset.quick);
-      if (!months.size && rangeFrom && sameDay(a, rangeFrom) && sameDay(b, rangeTo)) clearRange();
-      else setRange(a, b);
+      if (quickActive() === quick.dataset.quick) clearRange();
+      else setRange(...quickRange(quick.dataset.quick));
     } else if (month) {
       rangeFrom = rangeTo = null;
       if (months.has(month.dataset.month)) months.delete(month.dataset.month);
@@ -1259,6 +1376,16 @@
     showPast = togglePast.checked;
     pastAuto = false;
     renderAndKeepInView();
+  });
+  // The footer row: the past days appear above it, so the page scrolls up to the first of them; hiding
+  // them again keeps the results in view.
+  pastFoot.addEventListener("click", () => {
+    showPast = !showPast;
+    pastAuto = false;
+    if (!showPast) return renderAndKeepInView();
+    render();
+    const first = list.querySelector(".day.past");
+    if (first) first.scrollIntoView({ block: "start", behavior: reducedMotion.matches ? "auto" : "smooth" });
   });
 
   // --- Views: Liste | Kalender | Karte ---
@@ -1379,7 +1506,7 @@
         <h2 class="month">${escape(longDayFmt.format(parseDay(calDay)))}</h2>
         ${
           selected.length
-            ? `<ul class="shows">${selected.map(renderShow).join("")}</ul>`
+            ? `<div class="shows">${renderDays(selected)}</div>`
             : `<p class="cal-empty">Keine Konzerte an diesem Tag.</p>`
         }
       </section>`;
@@ -1563,7 +1690,7 @@
       `<p class="map-legend"><span class="pin-mini"></span>Venue mit Shows (Zahl = Anzahl) ` +
       `<span class="pin-mini star">★</span>«Ich gehe»${here ? ` <span class="pin-mini you"></span>du` : ""}</p>` +
       (rest.length
-        ? `<section><h2 class="month">Ohne Standort</h2><ul class="shows">${rest.map(renderShow).join("")}</ul></section>`
+        ? `<section><h2 class="month">Ohne Standort</h2><div class="shows">${renderDays(rest)}</div></section>`
         : "");
   }
 

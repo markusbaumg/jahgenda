@@ -228,6 +228,9 @@
             <button type="button" class="chip" data-quick="today" aria-pressed="false" title="Nur heute">
               Heute
             </button>
+            <button type="button" class="chip" data-quick="tomorrow" aria-pressed="false" title="Nur morgen">
+              Morgen
+            </button>
             <button
               type="button"
               class="chip"
@@ -379,41 +382,76 @@
           <div id="map-rest"></div>
         </div>
       </div>
-      <!-- Loading state: six skeleton rows in the final row grid, replaced by app.js once the data is in. -->
+      <!-- Loading state: six skeleton day groups in the final grid, replaced by app.js once the data is in. -->
       <div id="status" class="status loading" role="status">
         <p class="sr">Lade Konzerte …</p>
-        <ul class="shows skeleton" aria-hidden="true">
-          <li class="show">
+        <div class="shows skeleton" aria-hidden="true">
+          <section class="day">
             <span class="sk sk-date"></span>
-            <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
-            <span class="sk sk-badge"></span>
-          </li>
-          <li class="show">
+            <ul class="day-shows">
+              <li class="show">
+                <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
+                <span class="sk sk-badge"></span>
+              </li>
+            </ul>
+          </section>
+          <section class="day">
             <span class="sk sk-date"></span>
-            <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
-            <span class="sk sk-badge"></span>
-          </li>
-          <li class="show">
+            <ul class="day-shows">
+              <li class="show">
+                <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
+                <span class="sk sk-badge"></span>
+              </li>
+            </ul>
+          </section>
+          <section class="day">
             <span class="sk sk-date"></span>
-            <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
-            <span class="sk sk-badge"></span>
-          </li>
-          <li class="show">
+            <ul class="day-shows">
+              <li class="show">
+                <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
+                <span class="sk sk-badge"></span>
+              </li>
+            </ul>
+          </section>
+          <section class="day">
             <span class="sk sk-date"></span>
-            <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
-            <span class="sk sk-badge"></span>
-          </li>
-          <li class="show">
+            <ul class="day-shows">
+              <li class="show">
+                <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
+                <span class="sk sk-badge"></span>
+              </li>
+            </ul>
+          </section>
+          <section class="day">
             <span class="sk sk-date"></span>
-            <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
-            <span class="sk sk-badge"></span>
-          </li>
-          <li class="show">
+            <ul class="day-shows">
+              <li class="show">
+                <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
+                <span class="sk sk-badge"></span>
+              </li>
+            </ul>
+          </section>
+          <section class="day">
             <span class="sk sk-date"></span>
-            <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
-            <span class="sk sk-badge"></span>
-          </li>
-        </ul>
+            <ul class="day-shows">
+              <li class="show">
+                <div><span class="sk sk-bar"></span><span class="sk sk-bar short"></span></div>
+                <span class="sk sk-badge"></span>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+      <!-- Past shows: the last row under the list; the past days appear above it when opened. -->
+      <div id="list-foot" class="list-foot" hidden>
+        <button
+          type="button"
+          id="past-foot"
+          class="linkish"
+          title="Auch Konzerte anzeigen, die schon vorbei sind"
+        >
+          Vergangene anzeigen
+        </button>
       </div>
     </main>
 
