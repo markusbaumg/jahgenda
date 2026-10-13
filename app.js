@@ -2,7 +2,6 @@
   const DATA_URL = "data/shows.json";
   const VENUES_URL = "data/venues.json";
   const GENRES_URL = "data/genres.json";
-  const SLOGANS_URL = "data/slogans.json";
   let genreOrder = []; // slugs in display order (from data/genres.json)
   let genreLabel = {}; // slug → label
   let venueSites = {}; // normalised venue name → website/programme URL (from data/venues.json)
@@ -1270,19 +1269,13 @@
     render();
   });
 
-  // Tagline: one of the slogans (same lines as on the stickers), rotating by day.
-  fetch(SLOGANS_URL, { cache: "no-cache" })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => {
-      const list = (d && d.slogans) || [];
-      if (!list.length) return;
-      const line = list[Math.floor(Math.random() * list.length)];
-      const tag = el("tagline");
-      if (tag) tag.textContent = line;
-      const mini = el("mini-tag");
-      if (mini) mini.textContent = line;
-    })
-    .catch(() => {});
+  // Tagline: the inline script in index.html picked one of the slogans before the first paint (a fetch
+  // used to replace the default line ~2 s after it was painted on slow 4G); the sticky bar mirrors it.
+  {
+    const mini = el("mini-tag");
+    const tag = el("tagline");
+    if (mini && tag) mini.textContent = tag.textContent;
+  }
 
   // The venue database (large: it carries the scraper's notes) is not needed for the first paint –
   // the venue names become links and the SBB start town is known a moment later. render() is

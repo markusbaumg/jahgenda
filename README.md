@@ -46,7 +46,7 @@ data/venues.json                       Venue database: coordinates, canton, prog
 data/genres.json                       Allowed genre slugs with labels, in filter display order. Single source of truth.
 data/artists.json                      Genre cache per act (Wikipedia / band website).
 data/runs.json                         One entry per scraper run (counts, failed sources, dropped candidates).
-data/slogans.json                      Taglines (header, sticky bar, stickers).
+data/slogans.json                      Taglines (stickers; the same list is inline in index.html for the header).
 data/status.json                       Heartbeat of the last run (ok, at, counts). Written by every skill run.
 scraper/criteria.md                    What counts as reggae? Nearby places abroad.
 scraper/bands.md                       Which bands are in, which are out, suggestions to review. Hand-curated.

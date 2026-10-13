@@ -35,8 +35,8 @@
 
   /* typography (16 px base; nothing in the agenda below --fs-1) */
   --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-display: "JahDisplay", "JahDisplay Fallback", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial,
-    sans-serif;
+  --font-display: "JahDisplay", "JahDisplay Fallback", "JahDisplay Fallback Condensed",
+    "JahDisplay Fallback Sans", Impact, "Arial Narrow Bold", "Helvetica Neue", Arial, sans-serif;
   --fs-0: 0.78rem;
   --fs-1: 0.8125rem;
   --fs-2: 0.875rem;
@@ -121,6 +121,29 @@
   src: local("Impact"), local("Arial Narrow Bold"), local("ArialNarrow-Bold");
   font-weight: 400 900;
   size-adjust: 95%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+/* Phones have neither Impact nor Arial Narrow, so the face above never matched there and the lockup
+ * painted 39 % too wide in a light sans until the woff2 arrived. One face per platform, each with its
+ * own size-adjust (measured on «JAHGENDA» against Anton: Helvetica Neue Condensed Bold 88 %, Helvetica /
+ * Arial Bold 69 %, Roboto Bold taken as Arial's); the line-box overrides are shared. */
+@font-face {
+  font-family: "JahDisplay Fallback Condensed";
+  src: local("HelveticaNeue-CondensedBold"), local("Helvetica Neue Condensed Bold");
+  font-weight: 400 900;
+  size-adjust: 88%;
+  ascent-override: 124%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "JahDisplay Fallback Sans";
+  src: local("Roboto Bold"), local("Roboto-Bold"), local("Arial Bold"), local("Arial-BoldMT"),
+    local("Helvetica Neue Bold"), local("HelveticaNeue-Bold");
+  font-weight: 400 900;
+  size-adjust: 69%;
   ascent-override: 124%;
   descent-override: 35%;
   line-gap-override: 0%;

@@ -22,9 +22,8 @@
     <link rel="icon" href="img/icons/icon-192.png" type="image/png" sizes="192x192" />
     <link rel="icon" href="img/logo/jahgenda.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <!-- The agenda itself starts downloading with the HTML, not after style.css and app.js have run. -->
-    <link rel="preload" href="data/shows.json" as="fetch" crossorigin />
-    <link rel="preload" href="data/genres.json" as="fetch" crossorigin />
+    <!-- No preload for the JSON: WebKit never matches <link rel=preload as=fetch> against fetch() and
+         downloaded shows.json and genres.json twice on every load (Chromium gained a few ms at most). -->
     <!-- Karte: Leaflet and the tiles come from two other origins; the handshakes start now, not on the tap. -->
     <link rel="preconnect" href="https://unpkg.com" crossorigin />
     <link rel="preconnect" href="https://tile.openstreetmap.org" />
@@ -56,8 +55,40 @@
           ><i></i><i></i><i></i></span
         >Ska <span>— Schweiz</span>
       </p>
-      <!-- One of the slogans in data/slogans.json per page load (app.js); the first one is the default. -->
+      <!-- One of the slogans per page load, picked right here before the first paint (an async fetch used to
+           swap the line while the visitor was already reading it). The same lines go on the stickers:
+           data/slogans.json – tests/test_contract.py keeps the two lists equal. The first one is the default. -->
       <p class="slogan" id="tagline">Reggae, Dub &amp; Ska in der Schweiz</p>
+      <script type="application/json" id="slogans">
+        [
+          "Reggae, Dub & Ska in der Schweiz",
+          "Alli Reggae-Shows. Ei Site.",
+          "Jah weiss, wo's lauft.",
+          "Kei Show meh verpasse.",
+          "Dub. Ska. Reggae. Alles uf eim Blatt.",
+          "Vo Genf bis Chur: alli Riddims.",
+          "Hüt Abig Reggae? Lueg nah.",
+          "Dis Soundsystem für d'Agenda.",
+          "Roots, Rock, Reggae – und du mittedrin.",
+          "Wo lauft Dub? Jahgenda weiss es.",
+          "Ei Site. Alli Bässe.",
+          "Skank it. Jede Wuche neu.",
+          "Vom Club bis zum Openair – alles drin.",
+          "Irie Abig gsuecht? Gfunde.",
+          "Reggae-Agenda für d'Schwiiz. Ohni Bullshit."
+        ]
+      </script>
+      <script>
+        (function () {
+          try {
+            var lines = JSON.parse(document.getElementById("slogans").textContent);
+            var line = lines[Math.floor(Math.random() * lines.length)];
+            if (line) document.getElementById("tagline").textContent = line;
+          } catch (e) {
+            /* the default line stays */
+          }
+        })();
+      </script>
     </header>
 
     <main class="wrap">

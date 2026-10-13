@@ -32,7 +32,9 @@ const SHELL = [
 ];
 // The agenda itself: fetched into the data cache on install, so the first visit (whose own data
 // requests ran before this worker controlled the page) already leaves an offline-readable agenda.
-const DATA = ["data/shows.json", "data/genres.json", "data/venues.json", "data/slogans.json"];
+// runs.json feeds log.html / review.html, which are in the shell: without it they opened offline to
+// «Log konnte nicht geladen werden». The slogans are inline in index.html (no request any more).
+const DATA = ["data/shows.json", "data/genres.json", "data/venues.json", "data/runs.json"];
 // How long the network gets before the cached agenda is served instead (a stalled mobile connection
 // is otherwise worse than airplane mode: nothing at all would appear). The fetch goes on in the
 // background and refreshes the cache for the next visit.
