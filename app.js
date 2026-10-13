@@ -321,9 +321,9 @@
       const list = (days[key] || []).map(String);
       const d = parseDay(key);
       out.push(`${dowFmt.format(d).replace(".", "")} ${dmy(d)}: ${list.join(", ")}`);
-      for (const a of list) placed.add(a.toLowerCase());
+      for (const a of list) placed.add(venueKey(a));
     }
-    const rest = s.acts.filter((a) => !placed.has(a.toLowerCase()));
+    const rest = s.acts.filter((a) => !placed.has(venueKey(a)));
     if (rest.length) out.push(`Tag offen: ${rest.join(", ")}`);
     return out;
   }
@@ -497,15 +497,17 @@
       `<span class="a">${list.map((a) => `<span>${markHit(String(a), q)}</span>`).join("")}</span>`;
     let body;
     if (keys.length) {
+      // «Tag offen» = acts that sit in no day; compared like the validator's artist_key (venueKey is the
+      // same rule), so «DUB INC.» in days matches «Dub Inc» in acts.
       const placed = new Set();
       body = keys
         .map((k) => {
-          for (const a of days[k]) placed.add(String(a).toLowerCase());
+          for (const a of days[k]) placed.add(venueKey(String(a)));
           const d = parseDay(k);
           return `<span class="d">${dowFmt.format(d).replace(".", "")} ${d.getDate()}.</span>${actList(days[k])}`;
         })
         .join("");
-      const rest = s.acts.filter((a) => !placed.has(a.toLowerCase()));
+      const rest = s.acts.filter((a) => !placed.has(venueKey(a)));
       if (rest.length) body += `<span class="d">Tag offen</span>${actList(rest)}`;
     } else body = `<span class="d sr">Acts</span>${actList(s.acts)}`;
     const label = keys.length ? `Alle ${n} Acts nach Tag` : `Alle ${n} Acts`;
@@ -958,9 +960,9 @@
       })
       .join("");
   }
-  // «So 1. Aug.» – the last day of a festival for the ghost row.
+  // «So 1. Aug.» – the last day of a festival for the ghost row (non-breaking, so it never wraps to «Aug.»).
   const endLabel = (s) =>
-    `${dowFmt.format(s._end).replace(".", "")} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
+    `${dowFmt.format(s._end).replace(".", "")} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
 
   // "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
   function monthSpan(visible) {

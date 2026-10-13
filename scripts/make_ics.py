@@ -13,6 +13,7 @@ Usage: python3 scripts/make_ics.py [outdir]
 """
 
 import json
+import re
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -51,6 +52,11 @@ def fold(line):
 DOW = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 
+def act_key(name):
+    """Same rule as validate_shows.artist_key: «DUB INC.» in days is «Dub Inc» in acts."""
+    return re.sub(r"[^a-z0-9]+", "", str(name).lower())
+
+
 def lineup(s):
     """The line-up as text lines: one per day from `days` («Fr 13.11.: A, B»), then the acts without a
     day («Tag offen: …»), or the flat list when there are no days. Empty without acts."""
@@ -64,8 +70,8 @@ def lineup(s):
     for key in sorted(days):
         day = datetime.strptime(key, "%Y-%m-%d")
         out.append(f"{DOW[day.weekday()]} {day.day}.{day.month}.: {', '.join(days[key])}")
-        placed |= {a.casefold() for a in days[key]}
-    rest = [a for a in acts if a.casefold() not in placed]
+        placed |= {act_key(a) for a in days[key]}
+    rest = [a for a in acts if act_key(a) not in placed]
     if rest:
         out.append("Tag offen: " + ", ".join(rest))
     return out

@@ -197,6 +197,10 @@ test("lineupLines and dateText", () => {
     lib.lineupLines({ acts: ["A", "B", "C"], days: { "2027-07-18": ["C"], "2027-07-16": ["a"] } }),
     ["Fr 16.7.: a", "So 18.7.: C", "Tag offen: B"],
   );
+  // a day's spelling may differ in case and punctuation (the validator's artist_key rule): no «Tag offen»
+  assert.deepEqual(lib.lineupLines({ acts: ["Dub Inc"], days: { "2027-07-16": ["DUB INC."] } }), [
+    "Fr 16.7.: DUB INC.",
+  ]);
   assert.equal(lib.dateText(show()), "Fr 16.10.2026");
   assert.equal(lib.dateText(show({ date: "2027-07-16", end_date: "2027-07-18" })), "Fr 16.7. – So 18.7.2027");
 });

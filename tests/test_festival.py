@@ -211,6 +211,11 @@ class Feed(unittest.TestCase):
         )
         self.assertEqual(M.lineup(s), ["Fr 16.7.: Dub Inc", "Sa 17.7.: Alborosie", "Tag offen: Iration"])
         self.assertEqual(M.lineup(reeds(acts=[], days=None)), [])
+        # a day's spelling may differ in case and punctuation (artist_key rule): no «Tag offen»
+        tolerant = reeds(
+            date="2027-07-16", end_date="2027-07-18", acts=["Dub Inc"], days={"2027-07-16": ["DUB INC."]}
+        )
+        self.assertEqual(M.lineup(tolerant), ["Fr 16.7.: DUB INC."])
 
     def test_running_festival_stays_in_the_feed(self):
         with tempfile.TemporaryDirectory() as tmp:

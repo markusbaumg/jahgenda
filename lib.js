@@ -99,9 +99,9 @@
       const list = (days[key] || []).map(String);
       const d = parseDay(key);
       out.push(`${dowShort(d)} ${dm(d)}: ${list.join(", ")}`);
-      for (const a of list) placed.add(a.toLowerCase());
+      for (const a of list) placed.add(venueKey(a)); // the validator's artist_key rule
     }
-    const rest = acts.filter((a) => !placed.has(a.toLowerCase()));
+    const rest = acts.filter((a) => !placed.has(venueKey(a)));
     if (rest.length) out.push(`Tag offen: ${rest.join(", ")}`);
     return out;
   }
