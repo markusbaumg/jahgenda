@@ -3,36 +3,12 @@
    * - The filter state lives in the hash (#q=…&g=…&f=…&wo=…&r=…&wann=…&past=1&view=…), written with
    *   replaceState on every change (a filter tap never adds a history entry), read once when the data is
    *   in, applied again when such a hash arrives on the open page.
-   * - Back closes an open panel and returns from a view switch (popstate).
-   * - Reload, tab restore and Back from log.html land where the visitor was: the scroll offset travels in
-   *   the history entry and is restored after the first render (the browser's own restoration lands in
-   *   the skeleton and scroll anchoring then drags the visitor to the footer).
+   * - Back (closing a panel, returning from a view switch) and the scroll restoration are the history
+   *   store's (src/stores/history.js); the filter store plugs its panels and the view into it.
    * - The rows' canton badge toggles the Wo filter; their «Distanz & Zug anzeigen» asks for the position. */
   import { tick } from "svelte";
   import { agenda } from "../../stores/agenda.svelte.js";
-  import { ui, parseHash } from "../../stores/filters.svelte.js";
-
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  let savedScrollY = history.state && history.state.jah ? Number(history.state.sy) || 0 : 0;
-  history.replaceState(ui.histState(), "");
-
-  const rememberScroll = () => {
-    if (!history.state || !history.state.jah || history.state.sy === Math.round(window.scrollY)) return;
-    try {
-      history.replaceState({ ...history.state, sy: Math.round(window.scrollY) }, "");
-    } catch {
-      /* Safari caps replaceState at 100 per 30 s – then the last written offset stands */
-    }
-  };
-  // Written once the scrolling stops (a reload discards what pagehide writes) and when the tab goes away.
-  let scrollMemo = 0;
-  function onScroll() {
-    clearTimeout(scrollMemo);
-    scrollMemo = setTimeout(rememberScroll, 400);
-  }
-  function onVisibility() {
-    if (document.visibilityState === "hidden") rememberScroll();
-  }
+  import { ui } from "../../stores/filters.svelte.js";
 
   const ready = $derived(agenda.loadState === "ready");
   let landed = false;
@@ -46,15 +22,11 @@
     void ui.stateParams();
     ui.syncFilterHash();
   });
+  // A granted position comes in silently once the rows are drawn (the scroll restoration is nav's, App).
   $effect(() => {
     if (!ready || landed) return;
     landed = true;
-    tick().then(() => {
-      const h = parseHash();
-      if (savedScrollY && !h.id && !h.mine) window.scrollTo(0, savedScrollY); // back to the rows the visitor saw
-      savedScrollY = 0;
-      ui.autoLocate();
-    });
+    tick().then(() => ui.autoLocate());
   });
 
   function onClick(e) {
@@ -67,5 +39,4 @@
   }
 </script>
 
-<svelte:window onscroll={onScroll} onpagehide={rememberScroll} onpopstate={(e) => ui.onPopState(e)} />
-<svelte:document onvisibilitychange={onVisibility} onclick={onClick} />
+<svelte:document onclick={onClick} />

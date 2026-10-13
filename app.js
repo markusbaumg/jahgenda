@@ -350,20 +350,7 @@
   const findShow = (token) => shows.find((s) => s._short === token) || shows.find((s) => s.id === token);
 
   const showUrl = (s) => `${location.origin}${location.pathname}#${s._short}`;
-  // callout.js loads after this file: always look it up when needed.
-  const callout = () => window.jahCallout;
-  let nudgeQuietUntil = 0; // no nudge for a moment after a filter interaction or a deep-link landing
-  // A nudge (install, subscribe) waits while the visitor is busy with a panel, the map, a filter they
-  // just touched, or has just landed on a shared show. callout.js is the last script on the page, and
-  // the agenda can be in before it has run (a cached or fixture response beats a busy server): the
-  // blocker is handed over once both are there, whichever comes last.
-  const nudgeBlocked = () =>
-    Boolean(openPanel) || view === "map" || Date.now() < nudgeQuietUntil || !undoToast.hidden;
-  function armCallout() {
-    if (callout()) callout().setBlocker(nudgeBlocked);
-    else if (document.readyState === "loading")
-      document.addEventListener("DOMContentLoaded", armCallout, { once: true });
-  }
+  // The callout blocker (nudgeBlocked / armCallout): ported to src/components/callout/nudges.svelte.js (M6).
 
   // «Fr 16.7.2026» for a show, «Fr 16.7. – So 18.7.2027» for a festival (same as lib.dateText).
   const dmy = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
@@ -899,11 +886,7 @@
       }
       status.classList.remove("loading"); // the skeleton rows make way for the list
       render();
-      if (savedScrollY && !parseHash().id && !parseHash().mine) {
-        quietScrollUntil = Date.now() + 1500;
-        window.scrollTo(0, savedScrollY); // back to the rows the visitor was looking at (history, above)
-      }
-      savedScrollY = 0;
+      // Scroll restoration after the first render: App.svelte → nav.restoreScroll (M6).
       revealFromHash();
       loadVenues();
       autoLocate();
@@ -1103,89 +1086,8 @@
   }
   window.addEventListener("hashchange", revealFromHash);
 
-  // --- History: the Back button (or swipe) closes an open Wo/Wann panel and returns
-  // from a view switch or a calendar/map → list jump, instead of leaving the site – the reflex on phones.
-  // Overlays and view switches push one entry each; filters never do (they live in the hash, see
-  // syncFilterHash, written with replaceState so a filter click does not flood the history).
-  const histState = (extra) => ({ jah: 1, view, ...extra });
-  // Reload, tab restore (iOS evicts tabs freely) and Back from log.html: left to the browser, the scroll
-  // offset is restored into the skeleton page (clamped to its bottom, footer in view) and scroll anchoring
-  // then keeps the footer in view while the list is inserted above it – the visitor lands in April. So the
-  // offset travels in the history entry (written when the page goes away) and is restored after the
-  // first render, before a show link (if any) takes over.
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  let savedScrollY = history.state && history.state.jah ? Number(history.state.sy) || 0 : 0;
-  history.replaceState(histState(), "");
-  const rememberScroll = () => {
-    if (!history.state || !history.state.jah || history.state.sy === Math.round(window.scrollY)) return;
-    try {
-      history.replaceState({ ...history.state, sy: Math.round(window.scrollY) }, "");
-    } catch {
-      /* Safari caps replaceState at 100 per 30 s – then the last written offset stands */
-    }
-  };
-  // Written once the scrolling stops (a reload discards what pagehide writes) and when the tab goes away.
-  let scrollMemo = 0;
-  window.addEventListener(
-    "scroll",
-    () => {
-      clearTimeout(scrollMemo);
-      scrollMemo = setTimeout(rememberScroll, 400);
-    },
-    { passive: true },
-  );
-  window.addEventListener("pagehide", rememberScroll);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") rememberScroll();
-  });
-  let overlayEntry = false; // the current entry is one we pushed for an overlay
-  let pendingBack = 0; // history.back() calls of our own: their popstate must not close what opened since
-  let fromHistory = false; // closing because the visitor went back, not by ×/Esc/outside click
-  function pushOverlay(name) {
-    if (overlayEntry) history.replaceState(histState({ overlay: name }), "");
-    else history.pushState(histState({ overlay: name }), "");
-    overlayEntry = true;
-  }
-  function popOverlay() {
-    if (fromHistory || !overlayEntry) return;
-    overlayEntry = false;
-    pendingBack++;
-    history.back();
-  }
-  window.addEventListener("popstate", (e) => {
-    if (pendingBack > 0) {
-      pendingBack--;
-      syncFilterHash(); // a filter picked while the panel was open lived on the entry just left
-      return;
-    }
-    const st = e.state && e.state.jah ? e.state : null;
-    fromHistory = true;
-    if (openPanel) {
-      // Back behaves like Escape: the focus returns to the toggle, the next Tab continues from there.
-      const btn = PANELS[openPanel][0];
-      setPanel(null);
-      el(btn).focus({ preventScroll: true });
-    }
-    // Meine Shows pushed an entry of its own (★): Back closes it – unless the entry landed on IS that one
-    // (returning from a view switch made while the list was open).
-    const onMine = Boolean(st && st.overlay === "mine" && mineOnly);
-    overlayEntry = onMine;
-    if (mineOnly && !onMine) {
-      mineOnly = false;
-      renderAndKeepInView();
-      toggleMine.focus({ preventScroll: true });
-    }
-    fromHistory = false;
-    if (st && st.view && st.view !== view && !listMode()) setView(st.view);
-    // An entry without our state is a navigation the page did not make (a URL typed, a link tapped in
-    // this tab): a state hash is applied here; a show or list link is left for revealFromHash (the
-    // hashchange event follows) instead of being written over with the filters.
-    if (!st) {
-      applyStateHash();
-      if (location.hash && !isStateHash(location.hash)) return;
-    }
-    syncFilterHash();
-  });
+  // --- History (Back button, scroll restoration): ported to src/stores/history.js (M6); the panels, Meine
+  // Shows and the views call nav.pushOverlay / nav.popOverlay / nav.pushView there. ---
 
   // --- Meine Shows (§7 S5): the star is Merken on / off, the state «Interessiert | Ich gehe» is a separate
   // two-segment toggle inside every marked row – nothing cycles, so a tap never un-marks by accident. A
@@ -1628,64 +1530,7 @@
   );
   // --- Views: Liste | Kalender | Karte → src/stores/views.svelte.js, src/components/views/ (story #33 M4) ---
 
-  // --- Kalender abonnieren: the same callout as the install nudge --------------------------------
-  const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
-  const feedUrl = (region) => FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
-  function showSubscribe(force) {
-    const canton = cantons.size === 1 ? [...cantons][0] : "";
-    const url = feedUrl(canton);
-    callout().show({
-      id: "subscribe",
-      force,
-      title: canton ? `Shows in ${regionName(canton)} in deinem Kalender` : "Alle Shows in deinem Kalender",
-      text: "Einmal abonnieren – danach hält sich der Kalender selbst aktuell.",
-      actions: [
-        {
-          label: "Apple / Outlook",
-          primary: true,
-          href: url.replace("https://", "webcal://"),
-          title: "In Apple Kalender oder Outlook abonnieren",
-        },
-        {
-          label: "Google",
-          href: `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(url)}`,
-          external: true,
-          title: "In Google Kalender abonnieren",
-        },
-        {
-          label: "Adresse kopieren",
-          title: "Feed-Adresse kopieren (für jede Kalender-App)",
-          onClick: async () => {
-            try {
-              await navigator.clipboard.writeText(url);
-              const b = document.querySelector('.callout [data-callout-action="2"]');
-              if (b) b.textContent = "Kopiert";
-            } catch {
-              prompt("Feed-Adresse:", url);
-            }
-          },
-        },
-      ],
-    });
-  }
-  document.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-subscribe]");
-    if (!b) return;
-    e.preventDefault();
-    showSubscribe(true);
-  });
-  // Nudge once: after the visitor has scrolled into the list (not on the first second).
-  let nudged = false;
-  let quietScrollUntil = 0; // a scroll the page made itself (deep link, view switch) is not the visitor's
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (nudged || window.scrollY < 600 || !shows.length || Date.now() < quietScrollUntil) return;
-      nudged = true;
-      setTimeout(() => showSubscribe(false), 1500); // callout.js holds it while the page is busy
-    },
-    { passive: true },
-  );
+  // --- Kalender abonnieren + the nudges: ported to src/components/callout/nudges.svelte.js (M6). ---
 
   // Ported to src/components/filters (story #33 M1): the sticky bar, note pill, chip row, search,
   // filter panels, Wo / Wann, the view switch, the filter hash, pills, counts and the empty state.
@@ -1695,6 +1540,5 @@
   // scrollUnderBar; story #33 M4).
   // Format chips (setFormat, the #formats click) and the line-up disclosure animation: ported to
   // src/components/festival/FormatChips.svelte + Lineup.svelte and src/stores/festival.svelte.js (M5).
-  armCallout();
   init();
 })();

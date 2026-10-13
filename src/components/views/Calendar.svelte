@@ -9,7 +9,6 @@
   import { tick } from "svelte";
   import { agenda } from "../../stores/agenda.svelte.js";
   import { views } from "../../stores/views.svelte.js";
-  import { showSubscribe } from "./subscribe.js";
   import "./views.css";
   import { quietScroll } from "./scroll.js";
   import { pad2, parseDay } from "../../lib/text.js";
@@ -204,10 +203,7 @@
         class="linkish cal-subscribe"
         data-subscribe
         title="Alle Shows als Kalender abonnieren – aktualisiert sich von selbst"
-        onclick={(e) => {
-          e.preventDefault();
-          showSubscribe(true);
-        }}><Icon name="rss" /> Abonnieren</button
+        ><Icon name="rss" /> Abonnieren</button
       >
     </div>
     <div class="cal-grid">

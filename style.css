@@ -1966,7 +1966,7 @@ a[href]:focus-visible,
   justify-content: space-between;
   gap: 6px 16px;
   padding-top: 14px;
-  /* --callout-h: height of the visible callout (callout.js), so the bar is never hidden behind it. */
+  /* --callout-h: height of the visible callout (stores/callout.svelte.js), so the bar is never hidden behind it. */
   padding-bottom: calc(14px + var(--callout-h, 0px));
   font-size: 0.82rem;
 }
@@ -2561,7 +2561,7 @@ a[href]:focus-visible,
   }
 }
 
-/* Update toast (pwa.js); the install nudge is a callout (callout.js, below). */
+/* Update toast (pwa.js); the install nudge is a callout (src/components/callout/Callout.svelte). */
 .toast {
   position: fixed;
   left: 50%;
@@ -3073,145 +3073,7 @@ a {
   }
 }
 
-/* Callout: one sticker style for every nudge (install, calendar subscription, …) */
-.callout {
-  position: fixed;
-  left: 12px;
-  right: 12px;
-  /* --toast-h: a visible update toast (pwa.js) sits at the bottom edge; the callout docks above it. */
-  bottom: calc(12px + var(--toast-h, 0px) + env(safe-area-inset-bottom, 0px));
-  z-index: 20;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 14px 10px 14px 14px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-top: 3px solid var(--gold);
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-  transform: translateY(24px);
-  opacity: 0;
-  touch-action: pan-x; /* a vertical swipe on the sticker is ours (swipe down = close) */
-  transition:
-    transform var(--t-3) var(--ease-skank),
-    opacity var(--t-3) var(--ease-tape);
-}
-.callout.show {
-  transform: translateY(var(--drag, 0px));
-  opacity: 1;
-}
-.callout.drag {
-  transition: none;
-}
-.callout[hidden] {
-  display: none;
-}
-.callout-icon img {
-  display: block;
-  border-radius: 9px;
-  margin-top: 2px;
-}
-.callout-body {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.9rem;
-  line-height: 1.35;
-}
-.callout-body strong {
-  display: block;
-  line-height: 1.25;
-  margin-bottom: 2px;
-}
-.callout-body > span {
-  color: var(--muted);
-}
-.callout-body svg {
-  width: 16px;
-  height: 16px;
-  vertical-align: -3px;
-  color: var(--text);
-}
-.callout-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 10px;
-  margin-top: 10px;
-}
-.callout-btn {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text);
-  background: none;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0 14px;
-  cursor: pointer;
-  text-decoration: none;
-}
-.callout-btn.primary {
-  color: var(--bg);
-  background: var(--gold);
-  border-color: var(--gold);
-}
-/* «Nie mehr zeigen» is the quiet text option beside the real action (design/ui-revamp.md §3.9) – not a
- * red button that reads as the sticker's call to action. */
-.callout-never {
-  margin-left: auto;
-  min-height: 40px;
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  padding: 0 4px;
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-/* The smallest phones (320 px): the sticker stays a sticker (no icon, so the text runs the full width),
- * not a sheet over the whole first row. */
-@media (max-width: 360px) {
-  .callout-icon {
-    display: none;
-  }
-}
-/* × is a 44 px target; the negative margins keep it in the corner where the 26 px glyph box was. */
-.callout-close {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  margin: -12px -10px 0 -8px;
-  padding: 0;
-  font: inherit;
-  font-size: 1.4rem;
-  line-height: 1;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
-@media (hover: hover) {
-  .callout-btn:hover {
-    border-color: var(--gold);
-  }
-  .callout-never:hover {
-    color: var(--text);
-  }
-  .callout-close:hover {
-    color: var(--text);
-  }
-}
+/* Callout: the sticker's rules live in src/components/callout/Callout.svelte. */
 .sub-sticker {
   transform: none;
   box-shadow: none;
@@ -3640,13 +3502,9 @@ html {
     animation: none;
     background: var(--gold-tint); /* a static 3 s gold edge instead of the flash */
   }
-  .callout,
   .filters,
   .shows .show {
     transition: none;
-  }
-  .callout {
-    transform: none;
   }
   .sk,
   .list-head,

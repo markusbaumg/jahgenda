@@ -13,25 +13,44 @@
   import ResultsRow from "./components/filters/ResultsRow.svelte";
   import PastFoot from "./components/filters/PastFoot.svelte";
   import UrlState from "./components/filters/UrlState.svelte";
-  import { ui } from "./stores/filters.svelte.js";
   // M2: the stale-link note, the feedback words and the deep links #<short>.
   import LinkNote from "./components/list/LinkNote.svelte";
-  import { feedback } from "./stores/feedback.svelte.js";
   import { initReveal } from "./stores/reveal.svelte.js";
 
   // M4: the calendar and the map (the view switch itself sits in the results row, M1).
   import Calendar from "./components/views/Calendar.svelte";
   import MapView from "./components/views/MapView.svelte";
   import { views } from "./stores/views.svelte.js";
+  // M6: callouts, the Back button and scroll restoration, live regions.
+  import { tick } from "svelte";
+  import Callout from "./components/callout/Callout.svelte";
+  import { startNudges } from "./components/callout/nudges.svelte.js";
+  import { quietScroll } from "./components/views/scroll.js";
+  import { nav } from "./stores/history.js";
+  import { live } from "./stores/live.svelte.js";
+  import { parseHash } from "./lib/hash.js";
 
+  nav.start(); // before the data: the saved scroll offset is read off the entry the browser restored
   agenda.load();
   // Rows & deep links (M2): #<short> lands on the row.
   initReveal();
   views.start();
+  startNudges();
 
   const hasRows = $derived(agenda.loadState === "ready" && agenda.visible.length > 0);
-  // The screen reader hears the results line after every filter change (#status announces an empty state).
-  const resultsLive = $derived(hasRows ? ui.resultsText : "");
+
+  // After the first render: back to the rows the visitor was looking at (reload, tab restore, Back from
+  // log.html) – unless a show or list link takes over.
+  let restored = false;
+  $effect(() => {
+    if (restored || agenda.loadState !== "ready") return;
+    restored = true;
+    tick().then(() => {
+      const { id, mine } = parseHash(location.hash);
+      // A filter state (#q=…&g=…) is no show link: the offset is restored under it.
+      if (nav.restoreScroll({ id: id.includes("=") ? "" : id, mine })) quietScroll(1500);
+    });
+  });
 
   // HEUTE / MORGEN, the coming weekend and «vorbei» depend on the clock: when the tab comes back on
   // another day, the list is rendered again.
@@ -56,9 +75,10 @@
   <FilterBar />
   <ResultsRow />
   <LinkNote />
-  <p class="sr" id="results-live" role="status" aria-live="polite">{resultsLive}</p>
+  <!-- Screen readers hear the result count after every filter change (the visible count is in the footer). -->
+  <p class="sr" id="results-live" role="status" aria-live="polite">{live.resultsText}</p>
   <!-- Feedback words of the row actions («Kopiert», «Gespeichert» …) for screen readers. -->
-  <p class="sr" id="feedback" role="status" aria-live="polite">{feedback.text}</p>
+  <p class="sr" id="feedback" role="status" aria-live="polite">{live.feedback}</p>
   <div
     id="views"
     tabindex="-1"
@@ -77,6 +97,9 @@
   <Status onretry={() => agenda.load()} />
   <PastFoot />
 </main>
+
+<!-- The sticker sits right before the footer: a keyboard user reaches it a few Tabs after the list. -->
+<Callout />
 
 <Footer />
 

@@ -2,13 +2,11 @@
   /* The footer: «Über Jahgenda» and the bottom bar with the result count + data stamp. Markup and copy
    * from index.html; the texts from app.js renderInner() / updateStamp(). */
   import { agenda } from "../stores/agenda.svelte.js";
-  import { ui } from "../stores/filters.svelte.js";
+  import { live } from "../stores/live.svelte.js";
   import { stampFmt } from "../lib/dates.js";
 
   let online = $state(typeof navigator === "undefined" || navigator.onLine !== false);
 
-  // «12 Shows · 1 Festival für diese Auswahl · Juli 2027 · Heute» – derived in the filter store.
-  const resultsText = $derived(ui.resultsText);
   // "Offline · Stand: …": the service worker serves the last copy without a connection; the stamp says
   // so, so the visitor knows the list may have moved on. A stamp older than two days means the data may
   // be stale (a cached copy, or the routine failed – the watchdog knows, the visitor should too).
@@ -59,7 +57,9 @@
   </div>
   <div class="foot-bar">
     <div class="wrap foot-bar-inner">
-      <p class="updated"><span id="results-text">{resultsText}</span><span id="updated">{stamp}</span></p>
+      <p class="updated">
+        <span id="results-text">{live.resultsText}</span><span id="updated">{stamp}</span>
+      </p>
       <p class="foot-links">
         <a
           href="webcal://markusbaumg.github.io/jahgenda/jahgenda.ics"

@@ -20,6 +20,7 @@ import {
 } from "../lib/dates.js";
 import { CANTONS, ABROAD, shortRegion } from "../lib/regions.js";
 import { quietScroll } from "../components/views/scroll.js";
+import { nav } from "./history.js";
 
 export const VIEWS = ["list", "calendar", "map"];
 
@@ -409,48 +410,31 @@ function createFilterUi() {
     return true;
   }
 
-  // --- History: overlays (the open panel) push one entry each; Back closes them. -------------------
+  // --- History: the Back button is the history store's (src/stores/history.js). The filter store plugs
+  // in: every entry records the view; an open panel is an overlay (its own entry, Back closes it like
+  // Escape and gives the focus back to its toggle); an entry of ours with another view switches to it;
+  // an entry the page did not write applies a state hash (a show or list link is left alone); after
+  // every Back – and after our own history.back() – the hash follows the filters again.
   const histState = (extra) => ({ jah: 1, view, ...extra });
-  let overlayEntry = false; // the current entry is one we pushed for an overlay
-  let pendingBack = 0; // history.back() calls of our own: their popstate must not close what opened since
-  let fromHistory = false; // closing because the visitor went back, not by ×/Esc/outside click
-  function pushOverlay(name) {
-    if (overlayEntry) history.replaceState(histState({ overlay: name }), "");
-    else history.pushState(histState({ overlay: name }), "");
-    overlayEntry = true;
-  }
-  function popOverlay() {
-    if (fromHistory || !overlayEntry) return;
-    overlayEntry = false;
-    pendingBack++;
-    history.back();
-  }
-  function onPopState(e) {
-    if (pendingBack > 0) {
-      pendingBack--;
-      syncFilterHash(); // a filter picked while the panel was open lived on the entry just left
-      return;
-    }
-    const st = e.state && e.state.jah ? e.state : null;
-    fromHistory = true;
-    if (openPanel) {
-      // Back behaves like Escape: the focus returns to the toggle, the next Tab continues from there.
-      const btn = PANELS[openPanel];
-      setPanel(null);
-      el(btn).focus({ preventScroll: true });
-    }
-    // Meine Shows keeps an overlay entry of its own; a panel entry left by Back is gone.
-    overlayEntry = false;
-    fromHistory = false;
-    if (st && st.view && st.view !== view && !listMode) setView(st.view);
-    // An entry without our state is a navigation the page did not make (a URL typed, a link tapped in
-    // this tab): a state hash is applied here; a show or list link is left alone.
-    if (!st) {
-      if (applyStateHash()) return;
-      if (location.hash && !isStateHash(location.hash)) return;
-    }
-    syncFilterHash();
-  }
+  nav.setView(() => view);
+  for (const name of ["where", "when"])
+    nav.registerOverlay(name, {
+      isOpen: () => openPanel === name,
+      close: () => {
+        const btn = PANELS[name];
+        setPanel(null);
+        el(btn).focus({ preventScroll: true });
+      },
+    });
+  nav.on("view", (v) => {
+    if (v !== view && !listMode) setView(v);
+  });
+  nav.on("foreign", () => {
+    if (applyStateHash()) return true;
+    return Boolean(location.hash && !isStateHash(location.hash));
+  });
+  nav.on("settle", () => syncFilterHash());
+  nav.on("ownBack", () => syncFilterHash()); // a filter picked while the panel was open lived on the entry just left
 
   // --- Panels (Wo / Wann): dropdowns under the sticky bar, only one open at a time. ------------------
   const PANELS = { where: "toggle-where", when: "toggle-when" };
@@ -469,12 +453,12 @@ function createFilterUi() {
     flushSync();
     if (name) {
       fitPanel();
-      pushOverlay(name);
+      nav.pushOverlay(name);
       if (callout()) callout().suspend(); // a sticker never covers the panel's last rows
       // Keyboard and screen-reader users land in the panel, not 12 Tabs away from it.
       const first = el(PANEL_IDS[name]).querySelector(".chip:not([hidden])");
       if (first) first.focus({ preventScroll: true });
-    } else if (was) popOverlay();
+    } else if (was) nav.popOverlay();
   }
   const togglePanel = (name) => setPanel(openPanel === name ? null : name);
   // Close and give the focus back to the panel's toggle (×, Escape).
@@ -494,8 +478,8 @@ function createFilterUi() {
     // reload or a shared link shows what the visitor saw; a show or list link in the hash stays as it is.
     const h = location.hash;
     const url = agenda.loadState === "ready" && (!h || isStateHash(h)) ? stateUrl() : undefined;
-    if (opts.push) history.pushState(histState(), "", url);
-    else history.replaceState(histState(), "", url);
+    if (opts.push) nav.pushView(url);
+    else nav.replaceView(url);
     if (callout() && opts.push) {
       callout().suspend(); // a nudge steps aside (the map must stay tappable)
       callout().hide(); // a callout opened on purpose closes with the view it belonged to
@@ -730,7 +714,6 @@ function createFilterUi() {
     applyStateHash,
     stateParams,
     histState,
-    onPopState,
     setPanel,
     togglePanel,
     closePanel,

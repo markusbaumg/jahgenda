@@ -8,6 +8,7 @@ import { agenda } from "./agenda.svelte.js";
 import { ui, VIEWS } from "./filters.svelte.js";
 import { revealFromHash } from "./reveal.svelte.js";
 import { quietScroll } from "../components/views/scroll.js";
+import { nav } from "./history.js";
 
 export { VIEWS };
 // Leaflet 1.9.4 from unpkg: pinned by hash, so a tampered CDN copy never runs (and never gets cached).
@@ -29,7 +30,7 @@ export function createViews() {
   function goToShow(id) {
     const s = agenda.shows.find((x) => x.id === id);
     if (!s) return;
-    history.pushState(ui.histState({ view: "list" }), "", `#${s._short}`);
+    nav.pushJump(`#${s._short}`);
     ui.setView("list");
     quietScroll(2000);
     revealFromHash();
