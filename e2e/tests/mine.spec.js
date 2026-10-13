@@ -1,6 +1,6 @@
 // Meine Shows: star → toolbar counter → own list → share link (#m=…) → .ics export.
 const { test, expect, devices } = require("@playwright/test");
-const { useFixture, openList } = require("./helpers");
+const { FIXTURE, useFixture, openList } = require("./helpers");
 
 test.use({ permissions: ["clipboard-read", "clipboard-write"] });
 
@@ -42,6 +42,8 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
   // carries the same #m=<short>g link that «Link» copies.
   const wa = await page.locator("#mine-wa").getAttribute("href");
   expect(decodeURIComponent(wa)).toMatch(/#m=[a-z0-9]+g$/);
+  // The message names the shows (date · title, city), not just «Meine Reggae-Shows» + link.
+  expect(decodeURIComponent(wa)).toMatch(/Meine Reggae-Shows\n\S+ \d+\.\d+\. Roots Night, Bern\nhttp/);
   const copy = panel.locator('[data-mine="link"]');
   await copy.click();
   await expect(copy.locator(".fb")).toHaveText(/^Kopiert|Link in Adresszeile/);
@@ -50,7 +52,7 @@ test("marks a show, filters to it, shares it and exports .ics", async ({ page, b
 
   // The shared link opens a read-only view of exactly those shows – for a friend, i.e. in another
   // browser (in the own browser the same link is just «Meine Shows» again).
-  const link = decodeURIComponent(wa).replace(/^.*(?=#m=)/, "");
+  const link = decodeURIComponent(wa).replace(/^[\s\S]*(?=#m=)/, ""); // the last line of the message
   const friend = await browser.newContext({ ...devices[isMobile ? "iPhone 13" : "Desktop Chrome"] });
   const fp = await friend.newPage();
   await useFixture(fp);
@@ -79,4 +81,25 @@ test("the per-show calendar button downloads one .ics", async ({ page, isMobile 
   const download = page.waitForEvent("download");
   await row.locator('[data-act="cal"]').click();
   expect((await download).suggestedFilename()).toMatch(/\.ics$/);
+});
+
+test("a stale #m= link opened while in Meine Shows leaves the list mode and says so", async ({
+  page,
+  isMobile,
+}) => {
+  await useFixture(page);
+  await openList(page);
+  const row = page.locator("#list .show").first();
+  if (!isMobile) await row.hover();
+  await row.locator(".act.star").click();
+  await page.click("#toggle-mine");
+  await expect(page.locator("body")).toHaveClass(/list-mode/);
+  await page.evaluate(() => {
+    location.hash = "#m=zzzzzzzi,yyyyyyyg"; // a friend's old link, tapped in this tab
+  });
+  await expect(page.locator("body")).not.toHaveClass(/list-mode/);
+  await expect(page.locator(".link-note")).toContainText("Die Shows aus diesem Link sind vorbei");
+  await expect(page.locator(".link-note")).toBeInViewport();
+  await expect(page.locator("#list .show")).toHaveCount(FIXTURE.upcoming); // «hier ist alles, was kommt»
+  await expect(page).not.toHaveURL(/#/);
 });

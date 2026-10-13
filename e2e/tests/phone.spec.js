@@ -57,7 +57,9 @@ test("every row action is reachable inline: icon-only 44 px targets with names",
   expect(cw).toBeGreaterThanOrEqual(TAP);
   expect(ch).toBeGreaterThanOrEqual(TAP);
   // The star and the external «Infos» link share the side column: at least 8 px of dead space between
-  // their hit boxes, so a low tap on the star never opens the organiser's page.
+  // their hit boxes, so a low tap on the star never opens the organiser's page. Measured once the rows'
+  // staggered enter animation (a scale) is over – a box read mid-way is a few percent short.
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
   const starBox = await star.boundingBox();
   const infos = await row.locator('.actions a[href*="example.org/event"]').boundingBox();
   expect(infos.y - (starBox.y + starBox.height)).toBeGreaterThanOrEqual(8);
@@ -154,4 +156,20 @@ test("the .ics action in the row starts a download and says «Gespeichert»", as
   await cal.click();
   expect((await download).suggestedFilename()).toMatch(/\.ics$/);
   await expect(cal.locator(".fb")).toHaveText("Gespeichert");
+});
+
+test("at 320 px the Meine-Shows head keeps its title readable: the ✕ drops the word «Zurück»", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.locator("#list .show .act.star").first().click();
+  await page.click("#toggle-mine");
+  await expect(page.locator("#list-head")).toBeVisible();
+  const title = page.locator("#list-title .t");
+  await expect(title).toHaveText("Meine Shows");
+  expect(await title.evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true); // no ellipsis
+  const close = page.locator("#list-close");
+  await expect(close).toHaveAttribute("aria-label", "Zurück zur Agenda");
+  expect((await close.boundingBox()).width).toBeGreaterThanOrEqual(TAP);
+  await expect(close.locator("span")).toBeHidden();
 });

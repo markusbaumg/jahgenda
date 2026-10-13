@@ -4073,6 +4073,19 @@ a:visited {
     display: none; /* phones: "✕ Zurück", "Liste von Kusi", no month span; wider: "✕ Zurück zur Agenda", "Geteilte Liste von Kusi · Oktober 2026" */
   }
 }
+/* 320 px: the ✕ alone (44 px round, aria-label «Zurück zur Agenda»), so «Meine Shows» and «Liste von
+ * Seraina» – the one thing the head has to say – are not the part that gets the ellipsis. */
+@media (max-width: 359px) {
+  .list-close {
+    justify-content: center;
+    min-width: 44px;
+    padding: 0;
+    gap: 0;
+  }
+  .list-close span {
+    display: none;
+  }
+}
 
 /* The word next to the pin and the calendar icon: from tablet width up, until a badge takes its place. */
 .icon-word {

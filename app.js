@@ -1722,8 +1722,13 @@
     }
     fromHistory = false;
     if (st && st.view && st.view !== view && !listMode()) setView(st.view);
-    // An entry without our state is a navigation the page did not make: the hash in it is applied.
-    if (!st) applyStateHash();
+    // An entry without our state is a navigation the page did not make (a URL typed, a link tapped in
+    // this tab): a state hash is applied here; a show or list link is left for revealFromHash (the
+    // hashchange event follows) instead of being written over with the filters.
+    if (!st) {
+      applyStateHash();
+      if (location.hash && !isStateHash(location.hash)) return;
+    }
     syncFilterHash();
   });
 
@@ -2191,7 +2196,11 @@
       const url = listUrl();
       if (!shared) history.replaceState(history.state, "", url);
       try {
-        await navigator.share({ title: listTitle(), text: listTitle(), url });
+        await navigator.share({
+          title: listTitle(),
+          text: `${listTitle()}\n${listShareLines().join("\n")}`,
+          url,
+        });
         flashWord(btn, "Geteilt");
       } catch (err) {
         if (!err || err.name !== "AbortError") flashWord(btn, "Teilen nicht möglich");
@@ -2249,6 +2258,7 @@
         );
         history.replaceState(history.state, "", location.pathname + location.search);
       }
+      mineOnly = false; // «hier ist alles, was kommt» must be true: a Meine-Shows mode on screen goes too
       render(); // a list that was on screen before (hashchange) goes
       return;
     }
@@ -2286,7 +2296,15 @@
   const listShows = () => shows.filter(inList);
   const listUrl = () => (shared ? `${location.origin}${location.pathname}${location.hash}` : mineUrl());
   const listTitle = () => (shared ? "Reggae-Shows" : "Meine Reggae-Shows");
-  const listShareText = () => `${listTitle()}: ${listUrl()}`;
+  // The message names the shows («Fr 16.10. Rude & Rebel Ska Fest, Luzern», the first five, «+n weitere»)
+  // and ends with the link – a bare «Meine Reggae-Shows» + link told the friend nothing.
+  const listShareLines = () => {
+    const l = listShows();
+    const lines = l.slice(0, 5).map((s) => `${dayShort(s)} ${s.title}, ${s.city}`);
+    if (l.length > 5) lines.push(`+${l.length - 5} weitere`);
+    return lines;
+  };
+  const listShareText = () => `${listTitle()}\n${listShareLines().join("\n")}\n${listUrl()}`;
   // The only hook: every render() ends here (via updateMine).
   function syncListMode() {
     const on = listMode();
