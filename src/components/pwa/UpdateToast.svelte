@@ -2,6 +2,7 @@
   /* «Neue Version von Jahgenda · Aktualisieren» (ported from public/pwa.js): shown when a new service
    * worker waits; the button lets it take over and reloads the page once (src/stores/pwa.svelte.js). */
   import { pwa } from "../../stores/pwa.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   let toast = $state(null);
 
@@ -16,10 +17,9 @@
 
 {#if pwa.update}
   <div class="toast" role="status" bind:this={toast}>
-    Neue Version von Jahgenda <button
-      type="button"
-      title="Seite neu laden und die neue Version verwenden"
-      onclick={() => pwa.applyUpdate()}>Aktualisieren</button
+    {t("update.text")}
+    <button type="button" title={t("update.title")} onclick={() => pwa.applyUpdate()}
+      >{t("update.button")}</button
     >
   </div>
 {/if}

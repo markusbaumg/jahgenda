@@ -6,6 +6,7 @@
   import { flushSync } from "svelte";
   import { agenda } from "../../stores/agenda.svelte.js";
   import { ui } from "../../stores/filters.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const f = agenda.filters;
   const past = $derived(
@@ -27,17 +28,11 @@
 
 <!-- Past shows: the last row under the list; the past days appear above it when opened. -->
 <div id="list-foot" class="list-foot" hidden={!past || ui.view !== "list"}>
-  <button
-    type="button"
-    id="past-foot"
-    class="linkish"
-    title="Auch Shows anzeigen, die schon vorbei sind"
-    onclick={toggle}
-  >
-    {#if f.showPast}<span class="arrow" aria-hidden="true">↓</span> Vergangene ausblenden{:else}<span
+  <button type="button" id="past-foot" class="linkish" title={t("past.title")} onclick={toggle}>
+    {#if f.showPast}<span class="arrow" aria-hidden="true">↓</span> {t("past.hide")}{:else}<span
         class="arrow"
         aria-hidden="true">↑</span
       >
-      {past} vergangene {past === 1 ? "Show" : "Shows"} anzeigen{/if}
+      {t("past.show", { n: past })}{/if}
   </button>
 </div>

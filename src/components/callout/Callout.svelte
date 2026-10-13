@@ -5,6 +5,7 @@
    * asked for (role=dialog, focus inside, Escape closes it and hands the focus back). */
   import { onMount } from "svelte";
   import { callout } from "../../stores/callout.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   let host;
   onMount(() => callout.setHost(host));
@@ -86,8 +87,8 @@
             type="button"
             class="callout-never"
             data-callout-action="never"
-            title="Diesen Hinweis nie mehr anzeigen"
-            onclick={() => callout.act("never")}>Nie mehr zeigen</button
+            title={t("callout.neverTitle")}
+            onclick={() => callout.act("never")}>{t("callout.never")}</button
           >
         {/if}
       </span>
@@ -96,8 +97,8 @@
   <button
     type="button"
     class="callout-close"
-    title="Später wieder zeigen (30 Tage)"
-    aria-label="Schliessen – in 30 Tagen wieder zeigen"
+    title={t("callout.closeTitle")}
+    aria-label={t("callout.closeAria")}
     onclick={() => callout.close("snooze")}>&times;</button
   >
 </aside>

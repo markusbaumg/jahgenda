@@ -36,6 +36,8 @@
   import MinePanel from "./components/mine/MinePanel.svelte";
   import UndoToast from "./components/mine/UndoToast.svelte";
   import { mine } from "./stores/marks.svelte.js";
+  // Story #48: every visible string goes through t() (src/i18n), DE · FR · EN.
+  import { t } from "./i18n/i18n.svelte.js";
 
   nav.start(); // before the data: the saved scroll offset is read off the entry the browser restored
   agenda.load();
@@ -73,8 +75,8 @@
 <svelte:document onvisibilitychange={onVisibility} />
 
 <!-- Keyboard: ~10 tab stops per row – jump straight to the agenda or past it to the footer. -->
-<a class="skip" href="#views">Zur Agenda</a>
-<a class="skip" href="#foot">Zum Seitenende</a>
+<a class="skip" href="#views">{t("skip.agenda")}</a>
+<a class="skip" href="#foot">{t("skip.footer")}</a>
 <div class="stripe" aria-hidden="true"><span></span><span></span><span></span></div>
 
 <Header />

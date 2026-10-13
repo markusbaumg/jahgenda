@@ -64,9 +64,13 @@ src/stores/live.svelte.js              Live regions: the results line (#results-
 src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
-src/lib/dates.js / regions.js          … de-CH formatters and calendar arithmetic; cantons, nearby places, region groups.
+src/lib/dates.js / regions.js          … the formatters (in the page language) and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
+src/i18n/core.js                       Languages (see «Languages»): the locale, t(key, params) with plurals, the Intl date formatters.
+src/i18n/i18n.svelte.js                … the runes store: first-visit choice, the switch (jahStore «lang»), <html lang> and the head.
+src/i18n/de.js / fr.js / en.js         … the message tables: German is the source, French and English translate it.
+src/components/LangSwitch.svelte       The DE · FR · EN switch in the header.
 public/                                Static files, copied as they are into dist/ (img/, fonts, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 src/sw.js                              Service worker source (vite-plugin-pwa injectManifest → dist/sw.js): shell precache, data network-first (4 s).

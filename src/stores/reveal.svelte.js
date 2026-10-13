@@ -60,7 +60,7 @@ export async function revealFromHash() {
   if (!target) {
     // An in-page anchor (the skip links, «Nach oben») is no show link.
     if (document.getElementById(token)) return;
-    reveal.note = "Diese Show ist nicht mehr in der Agenda – hier ist alles, was kommt.";
+    reveal.note = "link.stale"; // a key of src/i18n (LinkNote.svelte says it)
     history.replaceState(history.state, "", location.pathname + location.search);
     return;
   }

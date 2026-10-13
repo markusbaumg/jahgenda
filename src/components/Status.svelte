@@ -5,6 +5,7 @@
   import { agenda } from "../stores/agenda.svelte.js";
   import EmptyState from "./filters/EmptyState.svelte";
   import { mine } from "../stores/marks.svelte.js";
+  import { t } from "../i18n/i18n.svelte.js";
 
   let { onretry } = $props();
   const offline = $derived(agenda.loadState === "error" && navigator.onLine === false);
@@ -38,7 +39,7 @@
   hidden={agenda.loadState === "ready" && agenda.visible.length > 0}
 >
   {#if agenda.loadState === "loading"}
-    <p class="sr">Lade Shows …</p>
+    <p class="sr">{t("status.loading")}</p>
     <div class="shows skeleton" aria-hidden="true">
       {#each { length: 6 } as _}
         <section class="day">
@@ -63,14 +64,10 @@
         /></svg
       >
     </p>
-    <p class="big">{offline ? "Kein Empfang" : "Daten konnten nicht geladen werden"}</p>
-    <p>
-      {offline
-        ? "Ohne Verbindung gibt es keine Agenda – sobald du wieder Netz hast, klappt es."
-        : "Die Shows konnten nicht geladen werden. Bitte später nochmals versuchen."}
-    </p>
-    <button type="button" class="primary" id="retry" title="Shows nochmals laden" onclick={onretry}
-      >Nochmals versuchen</button
+    <p class="big">{t(offline ? "status.offline" : "status.error")}</p>
+    <p>{t(offline ? "status.offlineText" : "status.errorText")}</p>
+    <button type="button" class="primary" id="retry" title={t("status.retryTitle")} onclick={onretry}
+      >{t("status.retry")}</button
     >
   {:else if !agenda.visible.length}
     {#if agenda.list}
@@ -82,14 +79,14 @@
           /></svg
         >
       </p>
-      <p class="big">Diese Liste ist leer</p>
-      <p>Keine der Shows ist mehr in der Agenda.</p>
+      <p class="big">{t("status.listEmpty")}</p>
+      <p>{t("status.listEmptyText")}</p>
       <button
         type="button"
         class="primary"
         id="reset"
-        title="Zurück zur Agenda"
-        onclick={() => mine.closeListMode()}>Zurück zur Agenda</button
+        title={t("status.back")}
+        onclick={() => mine.closeListMode()}>{t("status.back")}</button
       >
     {:else if !agenda.hasUpcoming}
       <p class="state-icon">
@@ -97,8 +94,8 @@
           ><path fill="currentColor" d="M7 2h2v2h6V2h2v2h3v18H4V4h3V2zM6 8v12h12V8H6zm2 2h3v3H8v-3z" /></svg
         >
       </p>
-      <p class="big">Noch nichts im Kalender</p>
-      <p>Sobald der Scraper etwas findet, steht es hier.</p>
+      <p class="big">{t("status.noShows")}</p>
+      <p>{t("status.noShowsText")}</p>
     {:else}
       <EmptyState />
     {/if}

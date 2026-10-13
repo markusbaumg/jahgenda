@@ -6,6 +6,7 @@
   import { agenda } from "../../stores/agenda.svelte.js";
   import { ui, nShows } from "../../stores/filters.svelte.js";
   import { dayShort } from "../../lib/dates.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const headline = $derived(ui.emptyHeadline());
   const dims = $derived([...ui.dims].sort((a, b) => b.count - a.count)); // the richest removal first
@@ -37,13 +38,11 @@
   >
 </p>
 <p class="big">{headline}</p>
-<p>Für diese Auswahl gibt es gerade nichts.</p>
+<p>{t("empty.none")}</p>
 {#if next}
   <p>
-    Nächste Show: <a href="#{next._short}" title="Zur Show in der Liste springen"
-      ><strong>{next.title}</strong></a
-    >,
-    {dayShort(next)} in {next.city}
+    {t("empty.next")} <a href="#{next._short}" title={t("empty.nextTitle")}><strong>{next.title}</strong></a>,
+    {t("empty.dayIn", { day: dayShort(next), city: next.city })}
   </p>
 {/if}
 {#if dims.length}
@@ -54,14 +53,14 @@
         class:none={!d.count}
         data-remove={d.kind}
         data-value={d.value || undefined}
-        title="Filter «{d.label}» entfernen"
+        title={t("pills.removeTitle", { label: d.label })}
         onclick={() => ui.removeFilter(d.kind, d.value)}
-        >{d.label} entfernen <b>→ {nShows(d.count)}</b></button
+        >{t("empty.remove", { label: d.label })} <b>→ {nShows(d.count)}</b></button
       >{/each}
   </div>
 {/if}
 {#if dims.length >= 2}
-  <button type="button" class="linkish reset" id="reset" title="Alle Filter zurücksetzen" onclick={reset}
-    >Alles zurücksetzen</button
+  <button type="button" class="linkish reset" id="reset" title={t("pills.resetTitle")} onclick={reset}
+    >{t("pills.reset")}</button
   >
 {/if}

@@ -2,18 +2,19 @@
   /* The segmented control Liste | Kalender | Karte. A switch writes #view=calendar / #view=map (nothing
    * for the list) next to the filters and pushes a history entry of its own (Back returns). */
   import { ui } from "../../stores/filters.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   function pick(v) {
     if (v !== ui.view) ui.setView(v, { push: true });
   }
 </script>
 
-<span id="view-switch" class="seg" role="group" aria-label="Ansicht">
+<span id="view-switch" class="seg" role="group" aria-label={t("view.label")}>
   <button
     type="button"
     data-view="list"
     aria-pressed={String(ui.view === "list")}
-    title="Als Liste anzeigen"
+    title={t("view.listTitle")}
     onclick={() => pick("list")}
   >
     <svg
@@ -32,13 +33,13 @@
       <line x1="3" x2="3.01" y1="6" y2="6" />
       <line x1="3" x2="3.01" y1="12" y2="12" />
       <line x1="3" x2="3.01" y1="18" y2="18" /></svg
-    ><span>Liste</span>
+    ><span>{t("view.list")}</span>
   </button>
   <button
     type="button"
     data-view="calendar"
     aria-pressed={String(ui.view === "calendar")}
-    title="Als Kalender anzeigen"
+    title={t("view.calendarTitle")}
     onclick={() => pick("calendar")}
   >
     <svg
@@ -61,13 +62,13 @@
       <path d="M8 18h.01" />
       <path d="M12 18h.01" />
       <path d="M16 18h.01" /></svg
-    ><span>Kalender</span>
+    ><span>{t("view.calendar")}</span>
   </button>
   <button
     type="button"
     data-view="map"
     aria-pressed={String(ui.view === "map")}
-    title="Auf der Karte anzeigen"
+    title={t("view.mapTitle")}
     onclick={() => pick("map")}
   >
     <svg
@@ -85,6 +86,6 @@
       />
       <path d="M15 5.764v15" />
       <path d="M9 3.236v15" /></svg
-    ><span>Karte</span>
+    ><span>{t("view.map")}</span>
   </button>
 </span>

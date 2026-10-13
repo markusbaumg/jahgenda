@@ -7,6 +7,7 @@
   import { agenda, FORMAT_LABEL } from "../../stores/agenda.svelte.js";
   import { ui } from "../../stores/filters.svelte.js";
   import ChipCount from "./ChipCount.svelte";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const f = agenda.filters;
   let row;
@@ -78,8 +79,8 @@
     type="button"
     class="scroll-btn left"
     data-dir="-1"
-    aria-label="Genres nach links scrollen"
-    title="Genres nach links scrollen"
+    aria-label={t("chips.left")}
+    title={t("chips.left")}
     hidden={!canLeft}
     onclick={() => scrollBy(-1)}
   >
@@ -97,7 +98,7 @@
     onpointerleave={endDrag}
     onpointercancel={endDrag}
   >
-    <div id="genres" class="chip-group" role="group" aria-label="Genre">
+    <div id="genres" class="chip-group" role="group" aria-label={t("chips.genre")}>
       {#if ready}
         {@const all = count({ genre: "" })}
         <button
@@ -106,8 +107,8 @@
           class:is-empty={all === 0 && f.genre !== ""}
           data-genre=""
           aria-pressed={String(f.genre === "")}
-          title="Alle Genres anzeigen ({all})"
-          onclick={(e) => pickGenre("", e.currentTarget)}>Alle</button
+          title={t("chips.allTitle", { n: all })}
+          onclick={(e) => pickGenre("", e.currentTarget)}>{t("chips.all")}</button
         >
         {#each agenda.genres as g (g)}
           {@const n = count({ genre: g })}
@@ -117,7 +118,7 @@
             class:is-empty={n === 0 && f.genre !== g}
             data-genre={g}
             aria-pressed={String(f.genre === g)}
-            title="Nur {agenda.genreLabel[g] || g} anzeigen ({n})"
+            title={t("chips.onlyTitle", { name: agenda.genreLabel[g] || g, n })}
             onclick={(e) => pickGenre(g, e.currentTarget)}
             >{agenda.genreLabel[g] || g}<small><ChipCount {n} /></small></button
           >
@@ -125,7 +126,7 @@
       {/if}
     </div>
     <!-- Formats (Festival) are a chip group of their own, not a genre (design/ui-revamp.md §3.3). -->
-    <div id="formats" class="chip-group" role="group" aria-label="Format">
+    <div id="formats" class="chip-group" role="group" aria-label={t("chips.format")}>
       {#if ready}
         {#each agenda.formats as v (v)}
           {@const n = count({ format: v })}
@@ -135,7 +136,7 @@
             class:is-empty={n === 0 && f.format !== v}
             data-format={v}
             aria-pressed={String(f.format === v)}
-            title="Nur Festivals anzeigen ({n})"
+            title={t("chips.festivalsTitle", { n })}
             onclick={(e) => pickFormat(v, e.currentTarget)}
             >{FORMAT_LABEL[v]}<small><ChipCount {n} /></small></button
           >
@@ -147,8 +148,8 @@
     type="button"
     class="scroll-btn right"
     data-dir="1"
-    aria-label="Genres nach rechts scrollen"
-    title="Genres nach rechts scrollen"
+    aria-label={t("chips.right")}
+    title={t("chips.right")}
     hidden={!canRight}
     onclick={() => scrollBy(1)}
   >

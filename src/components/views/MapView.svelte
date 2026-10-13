@@ -12,7 +12,9 @@
   import { views, LEAFLET, LEAFLET_SRI } from "../../stores/views.svelte.js";
   import { escape, distanceKm } from "../../lib/index.js";
   import { CANTONS } from "../../lib/regions.js";
-  import { dow } from "../../lib/dates.js";
+  import { dow, dm } from "../../lib/dates.js";
+  import { nShows } from "../../stores/filters.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   let {
     shows, // the filtered shows (the same the list shows)
@@ -25,7 +27,7 @@
   let leafletReady = $state(typeof window !== "undefined" && Boolean(window.L));
 
   const hasPos = (s) => typeof s.lat === "number" && typeof s.lon === "number";
-  const shortDate = (d) => `${dow(d)} ${d.getDate()}.${d.getMonth() + 1}.`;
+  const shortDate = (d) => `${dow(d)} ${dm(d)}`;
   const touch = typeof matchMedia === "function" && matchMedia("(hover: none)").matches; // zoom bottom right, popups sized for a thumb
   const rest = $derived(shows.filter((s) => !hasPos(s)));
   const anyFestival = $derived(shows.some(isFestival));
@@ -64,8 +66,10 @@
   }
 
   // «Karte braucht Netz» (§3.12): offline, or Leaflet could not be fetched – with the way to the list.
-  const OFFLINE_NOTE =
-    '<p class="map-note offline"><strong>Karte braucht Netz</strong>Ohne Verbindung gibt es keine Karte – die Shows stehen alle in der <a href="#" data-view-link="list">Liste</a>.</p>';
+  const offlineNote = () =>
+    `<p class="map-note offline"><strong>${t("map.offlineTitle")}</strong>${t("map.offlineText", {
+      list: `<a href="#" data-view-link="list">${t("map.offlineList")}</a>`,
+    })}</p>`;
 
   // --- The map ----------------------------------------------------------------------------------
   let map = null;
@@ -104,7 +108,7 @@
       const n = g.members.reduce((sum, p) => sum + p.shows, 0);
       const lat = g.members.reduce((sum, p) => sum + p.lat, 0) / g.members.length;
       const lon = g.members.reduce((sum, p) => sum + p.lon, 0) / g.members.length;
-      const title = `${g.members.length} Clubs mit ${n} Shows: hineinzoomen`;
+      const title = t("map.cluster", { clubs: g.members.length, shows: n });
       const cluster = L.marker([lat, lon], {
         icon: L.divIcon({
           className: "cluster-icon",
@@ -136,13 +140,13 @@
     // where no popup is ever panned underneath them (popups open at the top left).
     L.control
       .zoom({
-        zoomInTitle: "Hineinzoomen",
-        zoomOutTitle: "Herauszoomen",
+        zoomInTitle: t("map.zoomIn"),
+        zoomOutTitle: t("map.zoomOut"),
         position: touch ? "bottomright" : "topleft",
       })
       .addTo(map);
     map.attributionControl.setPrefix(
-      '<a href="https://leafletjs.com" title="Leaflet-Website öffnen" target="_blank" rel="noopener">Leaflet</a>',
+      `<a href="https://leafletjs.com" title="${t("map.leafletTitle")}" target="_blank" rel="noopener">Leaflet</a>`,
     );
     // Until the first tiles are painted the frame is a plain dark square with pins floating on it: a
     // «Karte lädt …» corner note (CSS .map.tiles-pending) says that the map is still on its way.
@@ -150,8 +154,9 @@
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       className: "map-tiles",
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright" title="OpenStreetMap-Lizenz öffnen">OpenStreetMap</a>-Mitwirkende',
+      attribution: `&copy; ${t("map.osm", {
+        osm: `<a href="https://www.openstreetmap.org/copyright" title="${t("map.osmTitle")}">OpenStreetMap</a>`,
+      })}`,
     })
       .once("load", () => mapEl.classList.remove("tiles-pending"))
       .addTo(map);
@@ -166,8 +171,8 @@
       if (!popup) return;
       const close = popup.querySelector(".leaflet-popup-close-button");
       if (close) {
-        close.title = "Schliessen";
-        close.setAttribute("aria-label", "Schliessen");
+        close.title = t("close");
+        close.setAttribute("aria-label", t("close"));
       }
       const first = popup.querySelector("a[data-id]");
       if (first && popupPin && popupPin.contains(document.activeElement))
@@ -219,7 +224,7 @@
     `<ul class="popup-shows">${items
       .map(
         (x) =>
-          `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="Zur Show in der Liste springen"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
+          `<li><a href="#${x._short}" data-id="${escape(x.id)}" title="${t("map.jump")}"><time>${shortDate(x._day)}</time> ${escape(x.title)}</a></li>`,
       )
       .join("")}</ul>`;
 
@@ -251,7 +256,7 @@
     for (const { s, venues: vs } of places) {
       const items = vs.flatMap((v) => v.items);
       const names = vs.map((v) => v.s.venue).join(", ");
-      const title = `${names}, ${s.city}: ${items.length === 1 ? "1 Show" : `${items.length} Shows`} anzeigen`;
+      const title = t("map.pinTitle", { names, city: s.city, count: nShows(items.length) });
       const marker = L.marker([s.lat, s.lon], {
         icon: pinIcon(pinKind(items), items.length),
         riseOnHover: true,
@@ -293,8 +298,8 @@
         iconAnchor: [11, 11],
         popupAnchor: [0, -12],
       });
-      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000, title: "Dein Standort" })
-        .bindPopup("Du bist hier")
+      L.marker([here.lat, here.lon], { icon: youIcon, zIndexOffset: 1000, title: t("map.you") })
+        .bindPopup(t("map.youHere"))
         .addTo(markerLayer);
       points.push([here.lat, here.lon]);
     }
@@ -316,14 +321,14 @@
     if (!leafletReady) {
       if (map) return; // (never: the map exists only once Leaflet is in)
       if (!online) {
-        mapEl.innerHTML = OFFLINE_NOTE;
+        mapEl.innerHTML = offlineNote();
         return;
       }
-      mapEl.innerHTML = '<p class="map-note">Karte wird geladen …</p>';
+      mapEl.innerHTML = `<p class="map-note">${t("map.loading")}</p>`;
       loadLeaflet().then(
         () => (leafletReady = true),
         () => {
-          if (!window.L) mapEl.innerHTML = OFFLINE_NOTE;
+          if (!window.L) mapEl.innerHTML = offlineNote();
         },
       );
       return;
@@ -360,18 +365,21 @@
 
 <div id="map-view" class="map-view" hidden={!active}>
   <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions (only the «Liste» link inside the offline note) -->
-  <div id="map" class="map" role="region" aria-label="Karte der Clubs" bind:this={mapEl} {onclick}></div>
+  <div id="map" class="map" role="region" aria-label={t("map.label")} bind:this={mapEl} {onclick}></div>
   <div id="map-rest">
     {#if active && leafletReady}
       <p class="map-legend">
-        <span class="legend-item"><span class="pin-mini"></span>Club mit Shows (Zahl = Anzahl Shows)</span>
-        <span class="legend-item"><span class="pin-mini star">★</span>«Ich gehe»</span
-        >{#if anyFestival}{" "}<span class="legend-item"><span class="pin-mini fest"></span>Festival</span
-          >{/if}{#if here}{" "}<span class="legend-item"><span class="pin-mini you"></span>du</span>{/if}
+        <span class="legend-item"><span class="pin-mini"></span>{t("map.legendClub")}</span>
+        <span class="legend-item"><span class="pin-mini star">★</span>{t("map.legendGoing")}</span
+        >{#if anyFestival}{" "}<span class="legend-item"
+            ><span class="pin-mini fest"></span>{t("map.legendFestival")}</span
+          >{/if}{#if here}{" "}<span class="legend-item"
+            ><span class="pin-mini you"></span>{t("map.legendYou")}</span
+          >{/if}
       </p>
       {#if rest.length}
         <section>
-          <h2 class="month">Ohne Standort</h2>
+          <h2 class="month">{t("map.noPosition")}</h2>
           <div class="shows"><DayGroup items={rest} {geoHintId} /></div>
         </section>
       {/if}

@@ -17,7 +17,9 @@ import {
   monthNameFmt,
   shortMonthFmt,
   dow,
+  dm,
 } from "../lib/dates.js";
+import { t } from "../i18n/core.js";
 import { CANTONS, ABROAD, shortRegion } from "../lib/regions.js";
 import { quietScroll } from "../components/views/scroll.js";
 import { nav } from "./history.js";
@@ -26,29 +28,30 @@ import { callout as calloutStore } from "./callout.svelte.js";
 export const VIEWS = ["list", "calendar", "map"];
 
 // --- Labels -----------------------------------------------------------------------------------------
-export const nShows = (n) => `${n} ${n === 1 ? "Show" : "Shows"}`;
+export const nShows = (n) => t("n.shows", { n });
 // A search term as a label (pill, offer, headline): long input is cut so nothing overflows a phone.
 export const qLabel = (q) => (q.length > 24 ? `${q.slice(0, 22).trimEnd()}…` : q);
-export const dm = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
+export { dm }; // «16.10.» in the page's locale (lib/dates.js)
 // The histogram's month key «2026-10» – unpadded, the same as in the #wann= hash.
 export const monthKey = (d) => `${d.getFullYear()}-${d.getMonth() + 1}`;
 
 // Quick picks (§7 S3: Heute · Morgen · Wochenende · 7 Tage), one exclusive choice; the badge, the chips
 // and the empty state name the pick rather than its dates.
-export const QUICK = { today: "Heute", tomorrow: "Morgen", weekend: "Wochenende", 7: "7 Tage" };
-const QUICK_EMPTY = {
-  today: "Heute",
-  tomorrow: "Morgen",
-  weekend: "Am Wochenende",
-  7: "In den nächsten 7 Tagen",
+// Getters: the words follow the page's language (src/i18n; the empty state's words are empty.*).
+export const QUICK = {
+  get today() {
+    return t("quick.today");
+  },
+  get tomorrow() {
+    return t("quick.tomorrow");
+  },
+  get weekend() {
+    return t("quick.weekend");
+  },
+  get 7() {
+    return t("quick.7");
+  },
 };
-const QUICK_WHEN = {
-  today: "heute",
-  tomorrow: "morgen",
-  weekend: "am Wochenende",
-  7: "in den nächsten 7 Tagen",
-};
-const IM = new Set(["AG", "TG", "TI", "VS", "JU"]); // cantons that take «im», the rest take «in»
 
 // "Oktober 2026" or "Oktober 2026 – Dezember 2026": the months a (sorted) list of shows spans.
 export function monthSpan(visible) {
@@ -156,7 +159,9 @@ function createFilterUi() {
   function rangeLabel() {
     if (f.months.size) {
       const picked = monthList.filter((d) => f.months.has(monthKey(d)));
-      return picked.length > 2 ? `${picked.length} Monate` : picked.map((d) => monthLabel(d)).join(", ");
+      return picked.length > 2
+        ? t("n.months", { n: picked.length })
+        : picked.map((d) => monthLabel(d)).join(", ");
     }
     const quick = quickActive();
     if (quick) return QUICK[quick];
@@ -225,7 +230,7 @@ function createFilterUi() {
     const out = [];
     const countWith = agenda.countWith;
     const q = f.q.trim();
-    if (q) out.push({ kind: "q", label: `«${qLabel(q)}»`, count: countWith({ q: "" }) });
+    if (q) out.push({ kind: "q", label: t("q.quoted", { q: qLabel(q) }), count: countWith({ q: "" }) });
     if (f.genre)
       out.push({
         kind: "genre",
@@ -287,29 +292,34 @@ function createFilterUi() {
     const q = f.q.trim();
     // «Kein Dub», «Kein Festival», «Kein Dub-Festival»
     const genreWord = f.genre && (agenda.genreLabel[f.genre] || f.genre);
-    const genre = f.format ? `${genreWord ? `${genreWord}-` : ""}${FORMAT_LABEL[f.format]}` : genreWord;
-    const what = q ? ` zu «${qLabel(q)}»` : "";
+    const genre = f.format
+      ? genreWord
+        ? t("empty.genreFormat", { genre: genreWord, format: FORMAT_LABEL[f.format] })
+        : FORMAT_LABEL[f.format]
+      : genreWord;
+    const what = q ? t("empty.q", { q: qLabel(q) }) : "";
     // Where: «im Tessin», «in Bern, Zürich», «in 4 Kantonen», «im Umkreis von 25 km».
     const codes = [...f.cantons];
     let where = "";
-    if (codes.length === 1) where = ` ${IM.has(codes[0]) ? "im" : "in"} ${shortRegion(codes[0])}`;
-    else if (codes.length && codes.length <= 3) where = ` in ${codes.map(shortRegion).join(", ")}`;
-    else if (codes.length) where = ` in ${codes.length} Kantonen`;
-    if (agenda.here && f.radius) where += ` im Umkreis von ${f.radius} km`;
+    if (codes.length === 1) where = t("empty.inRegion", { code: codes[0], name: shortRegion(codes[0]) });
+    else if (codes.length && codes.length <= 3)
+      where = t("empty.inRegions", { names: codes.map(shortRegion).join(", ") });
+    else if (codes.length) where = t("empty.inCantons", { n: codes.length });
+    if (agenda.here && f.radius) where += t("empty.radius", { km: f.radius });
     // When: «heute», «am Wochenende», «im November», «in den gewählten Monaten», «vom 16.10. bis 20.10.».
     let when = "";
-    if (quick) when = ` ${QUICK_WHEN[quick]}`;
+    if (quick) when = t(`empty.when.${quick}`);
     else if (f.months.size === 1) {
       const d = monthList.find((m) => f.months.has(monthKey(m)));
-      if (d) when = ` im ${monthNameFmt.format(d)}`;
-    } else if (f.months.size) when = " in den gewählten Monaten";
+      if (d) when = t("empty.inMonth", { month: monthNameFmt.format(d) });
+    } else if (f.months.size) when = t("empty.inMonths");
     else if (f.range)
       when = sameDay(f.range[0], f.range[1])
-        ? ` am ${dm(f.range[0])}`
-        : ` vom ${dm(f.range[0])} bis ${dm(f.range[1])}`;
-    if (genre) return `Kein ${genre}${where}${when}${what}`;
-    if (!where && quick) return `${QUICK_EMPTY[quick]} läuft nichts${what}`;
-    return where || when || what ? `Nichts${where}${when}${what}` : "Nichts gefunden";
+        ? t("empty.onDay", { day: dm(f.range[0]) })
+        : t("empty.fromTo", { from: dm(f.range[0]), to: dm(f.range[1]) });
+    if (genre) return t("empty.genre", { genre, where, when, what });
+    if (!where && quick) return t("empty.quick", { quick: t(`empty.quick.${quick}`), what });
+    return where || when || what ? t("empty.other", { where, when, what }) : t("empty.nothing");
   }
 
   // «12 Shows · 1 Festival für diese Auswahl · Juli 2027 · Heute» – the footer line and the live region.
@@ -319,12 +329,12 @@ function createFilterUi() {
     const rangeNote = rangeActive() ? ` · ${rangeLabel()}` : "";
     const nFest = visible.filter((s) => Boolean(s._end)).length;
     const nConc = visible.length - nFest;
-    const festNote = nFest ? `${nConc ? " · " : ""}${nFest} ${nFest === 1 ? "Festival" : "Festivals"}` : "";
+    const festNote = nFest ? `${nConc ? " · " : ""}${t("n.festivals", { n: nFest })}` : "";
     const concerts = nConc ? nShows(nConc) : "";
     // A friend's list says what it is: «Geteilte Liste · 3 Shows · Oktober 2026».
     if (agenda.list && agenda.list.shared)
-      return `Geteilte Liste · ${nShows(visible.length)} · ${monthSpan(visible)}${rangeNote}`;
-    return `${concerts}${festNote}${agenda.filtered ? " für diese Auswahl" : ""} · ${monthSpan(visible)}${rangeNote}`;
+      return `${t("results.shared", { count: nShows(visible.length), span: monthSpan(visible) })}${rangeNote}`;
+    return `${concerts}${festNote}${agenda.filtered ? t("results.selection") : ""} · ${monthSpan(visible)}${rangeNote}`;
   });
 
   // --- The hash -------------------------------------------------------------------------------------
@@ -617,7 +627,7 @@ function createFilterUi() {
     if (locating || !hasGeo()) return;
     locating = true;
     if (!silent) {
-      geoText = "Suche dich …";
+      geoText = "geo.searching"; // keys of src/i18n: the getter says them in the page's language
       geoNear = null;
     }
     navigator.geolocation.getCurrentPosition(
@@ -639,7 +649,7 @@ function createFilterUi() {
           geoText = "";
         } else {
           geoNear = null;
-          geoText = "Standort gefunden – die Distanzen stehen jetzt bei jeder Show.";
+          geoText = "geo.foundNoShow";
         }
       },
       (err) => {
@@ -650,9 +660,7 @@ function createFilterUi() {
         if (blocked) agenda.geoDeclined = true;
         if (!silent) {
           geoNear = null;
-          geoText = blocked
-            ? "Standort im Browser blockiert. In den Website-Einstellungen freigeben, dann nochmals «Mein Standort» tippen."
-            : "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+          geoText = blocked ? "geo.blocked" : "geo.unavailable";
         }
         // Asked from a row: the message lives in the Wo panel (next to «Mein Standort», which it names).
         if (opts.fromRow && !openPanel) setPanel("where");
@@ -700,7 +708,7 @@ function createFilterUi() {
       return located;
     },
     get geoText() {
-      return geoText;
+      return geoText ? t(geoText) : "";
     },
     get geoNear() {
       return geoNear;

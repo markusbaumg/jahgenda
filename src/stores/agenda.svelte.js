@@ -5,12 +5,17 @@
 import { parseDay, shortId, distanceKm, venueKey } from "../lib/index.js";
 import { fold, searchText, matchesSearch } from "../lib/search.js";
 import { todayStart, setTimeFlags, monthStart, addDays } from "../lib/dates.js";
+import { t } from "../i18n/core.js";
 
 const DATA_URL = "data/shows.json";
 const VENUES_URL = "data/venues.web.json"; // venues.json trimmed to city/lat/lon/url (format_data.py)
 const GENRES_URL = "data/genres.json";
 
-export const FORMAT_LABEL = { festival: "Festival" };
+export const FORMAT_LABEL = {
+  get festival() {
+    return t("format.festival");
+  },
+};
 export const isFestival = (s) => Boolean(s._end);
 
 // A range entry (festival-spec.md): end_date after date, else it is a normal show.

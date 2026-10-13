@@ -5,6 +5,7 @@
    * changes while it is visible. */
   import { tick } from "svelte";
   import { mine } from "../../stores/marks.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   let title = $state("");
   $effect(() => {
@@ -25,9 +26,9 @@
   onpointerleave={() => mine.undoClock()}
   onfocusout={() => mine.undoClock()}
 >
-  <span><b class="t">{title}</b> entfernt</span><button
+  <span><b class="t">{title}</b> {t("undo.removed")}</span><button
     type="button"
-    title="Markierung wiederherstellen"
-    onclick={() => mine.restore()}>Rückgängig</button
+    title={t("undo.restoreTitle")}
+    onclick={() => mine.restore()}>{t("undo.restore")}</button
   >
 </div>

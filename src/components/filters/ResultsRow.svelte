@@ -6,6 +6,7 @@
   import { agenda } from "../../stores/agenda.svelte.js";
   import { ui, nShows } from "../../stores/filters.svelte.js";
   import ViewSwitch from "./ViewSwitch.svelte";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const dims = $derived(ui.dims);
   const count = $derived(
@@ -55,18 +56,19 @@
   }
 
   // «Link zu dieser Auswahl»: the address bar already holds it – into the clipboard it goes.
-  let shareLabel = $state("Link zu dieser Auswahl");
+  // (Message keys: the label follows a language switch.)
+  let shareLabel = $state("share.filters");
   let shareTimer = 0;
   async function share() {
     ui.syncFilterHash();
     try {
       await navigator.clipboard.writeText(location.href);
-      shareLabel = "Kopiert";
+      shareLabel = "fb.copied";
     } catch {
-      shareLabel = "Link in Adresszeile";
+      shareLabel = "fb.inAddressBar";
     }
     clearTimeout(shareTimer);
-    shareTimer = setTimeout(() => (shareLabel = "Link zu dieser Auswahl"), 1500);
+    shareTimer = setTimeout(() => (shareLabel = "share.filters"), 1500);
   }
 </script>
 
@@ -82,17 +84,16 @@
           d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm-1 6h2v7h-2v-7zm0-3h2v2h-2V7z"
         />
       </svg>
-      <span class="note-short">KI-gesammelt</span>
-      <span class="note-long">Von KI-Agenten gesammelt · beim Veranstalter prüfen</span>
+      <span class="note-short">{t("note.short")}</span>
+      <span class="note-long">{t("note.long")}</span>
       <svg class="chev" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
         <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
     </summary>
     <div class="note-body" bind:this={noteBody}>
       <p>
-        Die Shows werden von KI-Agenten im Netz gesucht und zusammengetragen. Wirf vor der Show kurz einen
-        Blick auf die Seite des Veranstalters – dort sind Datum, Zeit und Ort immer topaktuell.
-        <a href="#about-title">Mehr unter «Über uns»</a>
+        {t("note.body")}
+        <a href="#about-title">{t("note.more")}</a>
       </p>
     </div>
   </details>
@@ -103,7 +104,7 @@
     class="results"
     class:empty={!dims.length}
     role="group"
-    aria-label="Aktive Filter"
+    aria-label={t("pills.label")}
     tabindex="-1"
   >
     {#each dims as d (d.kind + ":" + (d.value || ""))}<button
@@ -111,16 +112,16 @@
         class="fpill"
         data-remove={d.kind}
         data-value={d.value || undefined}
-        title="Filter «{d.label}» entfernen"
-        aria-label="Filter {d.label} entfernen"
+        title={t("pills.removeTitle", { label: d.label })}
+        aria-label={t("pills.removeAria", { label: d.label })}
         onclick={() => ui.removeFilter(d.kind, d.value)}
         >{d.label}<span class="x" aria-hidden="true">✕</span></button
       >{/each}{#if dims.length >= 2}<button
         type="button"
         class="linkish clear"
         data-remove="all"
-        title="Alle Filter zurücksetzen"
-        onclick={() => ui.removeFilter("all")}>Alles zurücksetzen</button
+        title={t("pills.resetTitle")}
+        onclick={() => ui.removeFilter("all")}>{t("pills.reset")}</button
       >{/if}
   </p>
   <!-- The count where the list begins (the full line with the span sits in the footer bar). -->
@@ -130,10 +131,10 @@
     type="button"
     id="share-filters"
     class="linkish share-filters"
-    title="Link zu dieser Auswahl kopieren – zum Teilen oder als Lesezeichen"
+    title={t("share.filtersTitle")}
     hidden={!agenda.filtered || ui.listMode || agenda.loadState !== "ready"}
     onclick={share}
   >
-    <span>{shareLabel}</span>
+    <span>{t(shareLabel)}</span>
   </button>
 </div>

@@ -11,6 +11,7 @@
   import { lineups } from "../../stores/festival.svelte.js";
   import { lineupDays, lineupLabel } from "../../lib/festival.js";
   import { dow } from "../../lib/dates.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   // marked: the row's snippet that wraps the search hit in a <mark>.
   let { show: s, hit = false, marked } = $props();
@@ -67,7 +68,7 @@
 
 <details class={anim ? "lineup is-open" : "lineup"} bind:open {ontoggle}>
   <summary title={label} {onclick}
-    ><span class="open">{label}</span><span class="close">Weniger</span></summary
+    ><span class="open">{label}</span><span class="close">{t("lineup.less")}</span></summary
   >
   <div class="lineup-body" bind:this={body}>
     <div>
@@ -76,9 +77,9 @@
           {#each byDay.days as d (d.key)}
             <span class="d">{dow(d.day)} {d.day.getDate()}.</span>{@render actList(d.acts)}
           {/each}
-          {#if byDay.rest.length}<span class="d">Tag offen</span>{@render actList(byDay.rest)}{/if}
+          {#if byDay.rest.length}<span class="d">{t("lineup.open")}</span>{@render actList(byDay.rest)}{/if}
         {:else}
-          <span class="d sr">Acts</span>{@render actList(s.acts)}
+          <span class="d sr">{t("lineup.acts")}</span>{@render actList(s.acts)}
         {/if}
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { t } from "../i18n/core.js";
+
 // Straight-line distance in km (haversine) between two { lat, lon } points.
 export function distanceKm(a, b) {
   const rad = (x) => (x * Math.PI) / 180;
@@ -9,4 +11,4 @@ export function distanceKm(a, b) {
 
 // The row's distance word: «≈ 2.4 km», «≈ 31 km», «gleich um die Ecke» under one km.
 export const formatKm = (km) =>
-  km < 1 ? "gleich um die Ecke" : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+  km < 1 ? t("geo.nearby") : `≈ ${km < 10 ? km.toFixed(1) : Math.round(km)} km`;

@@ -8,6 +8,7 @@
   import FestivalDate from "./festival/FestivalDate.svelte";
   import { agenda } from "../stores/agenda.svelte.js";
   import { addDays, sameDay, weekendRange, dow, fullDayFmt } from "../lib/dates.js";
+  import { t } from "../i18n/i18n.svelte.js";
 
   let { items, weekendRule = false, indexOf = () => 0, geoHintId = "" } = $props();
 
@@ -45,9 +46,11 @@
       const g = { rows, s0, d, end, cls: cls.join(" "), rule, pill: "", label: "" };
       // A festival's range cell is FestivalDate.svelte (M5).
       if (!s0._end) {
-        g.pill = fresh && (isToday || isTomorrow) ? (isToday ? "Heute" : "Morgen") : "";
+        g.pill = fresh && (isToday || isTomorrow) ? t(isToday ? "day.today" : "day.tomorrow") : "";
         // The aria-label replaces the cell's text for screen readers, so the pill word goes in front of it.
-        g.label = `${g.pill ? `${g.pill}, ` : ""}${fullDayFmt.format(d)}`;
+        g.label = g.pill
+          ? t("day.label", { pill: g.pill, date: fullDayFmt.format(d) })
+          : fullDayFmt.format(d);
       }
       return g;
     });
@@ -56,7 +59,7 @@
 
 {#each groups as g (g.s0._end ? `${g.s0.date}/${g.s0.id}` : g.s0.date)}
   {#if g.rule}
-    <p class="rule-weekend"><span>Wochenende</span></p>
+    <p class="rule-weekend"><span>{t("day.weekend")}</span></p>
   {/if}
   <section class={g.cls} data-date={g.s0.date}>
     {#if g.s0._end}
