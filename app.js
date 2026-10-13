@@ -1553,6 +1553,13 @@
   function revealFromHash() {
     const h = parseHash();
     if (h.mine) return showShared(h.mine);
+    if (shared) {
+      // The #m= link left the address bar (Back, or a new link): the friend's list goes with it.
+      shared = null;
+      sharedBy = "";
+      sharedMissing = 0;
+      render();
+    }
     if (h.view && h.view !== view && !listMode()) setView(h.view);
     if (!h.id) return; // nothing, or the filter state
     const target = findShow(h.id);
@@ -1623,11 +1630,24 @@
       syncFilterHash(); // a filter picked while the panel was open lived on the entry just left
       return;
     }
-    overlayEntry = false;
-    fromHistory = true;
-    if (openPanel) setPanel(null);
-    fromHistory = false;
     const st = e.state && e.state.jah ? e.state : null;
+    fromHistory = true;
+    if (openPanel) {
+      // Back behaves like Escape: the focus returns to the toggle, the next Tab continues from there.
+      const btn = PANELS[openPanel][0];
+      setPanel(null);
+      el(btn).focus({ preventScroll: true });
+    }
+    // Meine Shows pushed an entry of its own (★): Back closes it – unless the entry landed on IS that one
+    // (returning from a view switch made while the list was open).
+    const onMine = Boolean(st && st.overlay === "mine" && mineOnly);
+    overlayEntry = onMine;
+    if (mineOnly && !onMine) {
+      mineOnly = false;
+      renderAndKeepInView();
+      toggleMine.focus({ preventScroll: true });
+    }
+    fromHistory = false;
     if (st && st.view && st.view !== view && !listMode()) setView(st.view);
     syncFilterHash();
   });
@@ -1919,7 +1939,10 @@
     else delete marks[s.id];
     saveMarks();
     if (mineOnly && !next) {
-      if (!markedShows().length) mineOnly = false;
+      if (!markedShows().length) {
+        popOverlay(); // the last mark went: the list closes, its history entry with it
+        mineOnly = false;
+      }
       render();
       return;
     }
@@ -1990,7 +2013,10 @@
     if (!s) return;
     // The list was left because its last show went: open it again. In any list (Meine Shows opened since, or
     // a shared one) the row has to be rendered, so the list is drawn again; in the agenda the row is patched.
-    if (wasMine && !shared) mineOnly = true;
+    if (wasMine && !shared && !mineOnly) {
+      mineOnly = true;
+      pushOverlay("mine");
+    }
     if (listMode()) {
       marks[s.id] = state;
       saveMarks();
@@ -2035,10 +2061,18 @@
   });
 
   toggleMine.addEventListener("click", () => {
-    if (!markedShows().length) return; // nothing marked yet: the tooltip says what the star does
+    if (!markedShows().length) {
+      // Nothing marked yet: on a touch screen the tooltip never shows, so the button says it itself.
+      flashWord(toggleMine, "Zuerst bei einer Show ★ tippen");
+      return;
+    }
     mineOnly = !mineOnly;
-    renderAndKeepInView();
-    if (mineOnly) scrollViewsUnderBar(); // the list of marked shows comes up, not just the gold star
+    // The list is a full-screen mode with its own «Zurück»: Back closes it like a panel (one entry; an
+    // open Wo/Wann panel's entry is taken over, the panel folds away in syncListMode).
+    if (mineOnly) pushOverlay("mine");
+    else popOverlay();
+    // The list actions (Kalender · Teilen · Link) and the rows come up under the bar, not just the gold star.
+    renderAndKeepInView(() => mineOnly && scrollUnderBar(minePanel.hidden ? views : minePanel));
   });
 
   minePanel.addEventListener("click", async (e) => {
@@ -2166,7 +2200,13 @@
       if (was && parseHash().mine) setHash("");
       return;
     }
-    if (!was && openPanel) setPanel(null); // fold Wo/Wann away; their settings survive
+    if (!was && openPanel) {
+      // Fold Wo/Wann away; their settings survive. Without popping the history entry: the list mode took
+      // it over (pushOverlay("mine") in the ★ handler) or came from a #m= hash navigation.
+      fromHistory = true;
+      setPanel(null);
+      fromHistory = false;
+    }
     const l = listShows();
     const n = l.length;
     const span = n ? `<i> · ${monthSpan(l)}</i>` : ""; // phones drop the months (the heading below has them)
@@ -2175,6 +2215,7 @@
       : `${ICONS.star}<span class="t">Meine Shows</span><b class="n">${n}${span}</b>`;
   }
   function closeListMode() {
+    if (mineOnly) popOverlay(); // the ★ entry goes with the list (a #m= list came from a hash navigation)
     mineOnly = false;
     shared = null;
     sharedBy = "";
@@ -2988,8 +3029,10 @@
 
   // After filtering, the list may get shorter than the current scroll position;
   // jump back to the start of the results so the user doesn't land in empty space.
-  const viewsTop = () => views.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
-  function renderAndKeepInView() {
+  const resultsRow = resultsEl.closest(".results-row");
+  const underBar = (elm) => elm.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
+  const viewsTop = () => underBar(views);
+  function renderAndKeepInView(after) {
     nudgeQuietUntil = Date.now() + 3000; // mid-task: no sticker over the result
     filterTouched = true;
     // Filter change (§4): the swap runs inside a view transition where the browser has one (a --t-2
@@ -2998,22 +3041,31 @@
       render();
       filterTouched = false;
     };
+    // `after` runs once the new DOM is in (the transition's callback is asynchronous), e.g. a scroll
+    // to a panel that only exists after the render.
+    const settle = () => {
+      keepInView();
+      if (after) after();
+    };
     if (document.startViewTransition && !reducedMotion.matches) {
-      document.startViewTransition(swap).updateCallbackDone.then(keepInView, keepInView);
+      document.startViewTransition(swap).updateCallbackDone.then(settle, settle);
     } else {
       list.classList.remove("dip");
       void list.offsetWidth; // restart the dip
       list.classList.add("dip");
       swap();
-      keepInView();
+      settle();
     }
   }
   function keepInView() {
     // No result: the «Nichts gefunden» box takes the list's place and must come into view the same
     // way – otherwise a search typed while scrolled leaves the visitor staring at the footer.
-    const target = views.hidden ? status : views;
+    // The start of the results is the results row: the count, the view switch and the filter pills
+    // («Bern ✕») must be in view after a tap on a row's coat of arms, otherwise the filter cannot be
+    // undone where it was made. In the list mode the row is folded away: the list actions start it.
+    const target = views.hidden ? status : listMode() ? minePanel : resultsRow;
     if (views.hidden && !status.textContent.trim()) return;
-    const top = () => target.getBoundingClientRect().top + window.scrollY - filters.offsetHeight - 8;
+    const top = () => underBar(target.hidden ? views : target);
     if (window.scrollY > top()) {
       quietScrollUntil = Date.now() + 1000;
       window.scrollTo({ top: top() });
@@ -3023,16 +3075,17 @@
       }, 80);
     }
   }
-  // Scroll down (never up) until the views start right under the bar. The bar grows by a row once
-  // it sticks, so the target is checked again a moment later.
-  function scrollViewsUnderBar() {
-    if (views.hidden || window.scrollY >= viewsTop()) return;
+  // Scroll down (never up) until the target (the views, or the Meine-Shows panel above them) starts right
+  // under the bar. The bar grows by a row once it sticks, so the target is checked again a moment later.
+  function scrollUnderBar(target) {
+    if (views.hidden || window.scrollY >= underBar(target)) return;
     quietScrollUntil = Date.now() + 1500;
-    window.scrollTo({ top: viewsTop() });
+    window.scrollTo({ top: underBar(target) });
     setTimeout(() => {
-      if (Math.abs(window.scrollY - viewsTop()) > 2) window.scrollTo({ top: viewsTop() });
+      if (Math.abs(window.scrollY - underBar(target)) > 2) window.scrollTo({ top: underBar(target) });
     }, 80);
   }
+  const scrollViewsUnderBar = () => scrollUnderBar(views);
 
   // Scroll arrows for the chip row: only shown when there is something hidden in that direction.
   const chipWrap = chipRow.parentElement;
