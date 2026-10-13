@@ -109,6 +109,23 @@ class Slogans(unittest.TestCase):
             ],
         )
 
+    def test_translated_lists(self):
+        # fr / en are optional; when present they follow the same rules as the German list.
+        self.assertEqual(V.check_slogans({"slogans": ["Irie"], "fr": ["Irie"], "en": ["Irie"]}), [])
+        errs = V.check_slogans({"slogans": ["Irie"], "fr": [], "en": ["One", "One", ""], "it": ["x"]})
+        self.assertEqual(
+            errs,
+            [
+                "slogans.json: 'fr' is empty",
+                "en[1]: duplicate 'One'",
+                "en[2]: must be a non-empty string",
+                "slogans.json: unknown field 'it'",
+            ],
+        )
+        self.assertEqual(
+            V.check_slogans({"slogans": ["Irie"], "fr": "x"}), ["slogans.json: 'fr' must be a list"]
+        )
+
 
 def show(**over):
     base = {

@@ -5,16 +5,11 @@
   import { agenda } from "../../stores/agenda.svelte.js";
   import { mine } from "../../stores/marks.svelte.js";
   import { createFlasher } from "../../stores/feedback.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const ready = $derived(agenda.loadState === "ready");
   const n = $derived(mine.markedCount);
-  const title = $derived(
-    n === 0
-      ? "Shows merken · nur in diesem Browser"
-      : mine.mineOnly
-        ? "Wieder alle Shows anzeigen"
-        : "Nur meine Shows anzeigen",
-  );
+  const title = $derived(t(n === 0 ? "mine.titleEmpty" : mine.mineOnly ? "mine.titleOff" : "mine.titleOn"));
   const { flashes, flash } = createFlasher();
   function onclick(e) {
     flash("mine", mine.toggleMine());
@@ -28,7 +23,7 @@
   aria-pressed={String(mine.mineOnly)}
   aria-disabled={String(n === 0)}
   {title}
-  aria-label={ready ? `Meine Shows (${n})` : "Meine Shows anzeigen"}
+  aria-label={ready ? t("mine.aria", { n }) : t("mine.ariaLoading")}
   {onclick}
 >
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">

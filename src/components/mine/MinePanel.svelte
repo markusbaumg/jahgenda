@@ -5,6 +5,7 @@
   import Icon from "../Icon.svelte";
   import { mine } from "../../stores/marks.svelte.js";
   import { createFlasher } from "../../stores/feedback.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const canShare = typeof navigator !== "undefined" && Boolean(navigator.share);
   const hidden = $derived(!mine.listMode || !mine.listShows.length);
@@ -12,16 +13,8 @@
   const waHref = $derived(hidden ? "#" : `https://wa.me/?text=${encodeURIComponent(mine.listShareText())}`);
   const note = $derived.by(() => {
     const k = mine.sharedMissing;
-    const gone = k
-      ? ` ${k === 1 ? "1 Show aus dem Link ist" : `${k} Shows aus dem Link sind`} vorbei oder nicht mehr in der Agenda.`
-      : "";
-    return (
-      (!mine.shared
-        ? "Gespeichert in diesem Browser. Aufs andere Handy oder zu Freunden: «Liste teilen» und dort «Alle merken»."
-        : taken
-          ? "Diese Shows sind in deinen Shows (★) gespeichert."
-          : "Aus einem Link geöffnet. Bei dir ist nichts gespeichert, bis du «Alle merken» drückst.") + gone
-    );
+    const gone = k ? t("mine.gone", { n: k }) : "";
+    return t(!mine.shared ? "mine.noteOwn" : taken ? "mine.noteTaken" : "mine.noteShared") + gone;
   });
 
   const { flashes, flash } = createFlasher();
@@ -42,35 +35,31 @@
     type="button"
     class="act take"
     data-mine="take"
-    title="Alle Shows dieser Liste in meine Shows übernehmen"
+    title={t("mine.takeTitle")}
     hidden={!mine.shared}
     disabled={taken}
     onclick={() => mine.takeAll()}
-    ><Icon name="star" /><span class="lbl">{taken ? "Alle gemerkt ✓" : "Alle merken"}</span></button
+    ><Icon name="star" /><span class="lbl">{t(taken ? "mine.taken" : "mine.take")}</span></button
   ><button
     type="button"
     class="act"
     data-mine="ics"
-    title="Diese Liste als .ics speichern (Apple, Outlook …)"
-    onclick={() => mine.saveListIcs()}><Icon name="cal" /><span class="lbl">Kalender (.ics)</span></button
+    title={t("mine.icsTitle")}
+    onclick={() => mine.saveListIcs()}><Icon name="cal" /><span class="lbl">{t("mine.ics")}</span></button
   >{#if canShare}<button
       type="button"
       class="act{flashes.share ? ' fb-on' : ''}"
       data-mine="share"
-      title="Liste teilen (WhatsApp, Mail, …)"
-      onclick={share}><Icon name="share" /><span class="lbl">Teilen</span>{@render fb("share")}</button
-    >{:else}<a
-      class="act"
-      id="mine-wa"
-      href={waHref}
-      target="_blank"
-      rel="noopener"
-      title="Liste per WhatsApp teilen"><Icon name="wa" /><span class="lbl">Teilen</span></a
+      title={t("mine.shareTitle")}
+      onclick={share}
+      ><Icon name="share" /><span class="lbl">{t("row.share")}</span>{@render fb("share")}</button
+    >{:else}<a class="act" id="mine-wa" href={waHref} target="_blank" rel="noopener" title={t("mine.waTitle")}
+      ><Icon name="wa" /><span class="lbl">{t("row.share")}</span></a
     >{/if}<button
     type="button"
     class="act{flashes.link ? ' fb-on' : ''}"
     data-mine="link"
-    title="Link zu dieser Liste kopieren"
-    onclick={link}><Icon name="link" /><span class="lbl">Link</span>{@render fb("link")}</button
+    title={t("mine.linkTitle")}
+    onclick={link}><Icon name="link" /><span class="lbl">{t("row.link")}</span>{@render fb("link")}</button
   >
 </div>

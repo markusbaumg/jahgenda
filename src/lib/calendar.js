@@ -2,6 +2,8 @@
  * text of share messages. Everything that varies (the show's page URL, the clock) is an argument, so
  * tests/lib.test.mjs can pin the exact output. */
 import { pad2, parseDay, venueKey, safeUrl } from "./text.js";
+import { dow, dm as dayMonth, dayMonthYearFmt } from "./dates.js";
+import { t, getLocale } from "../i18n/core.js";
 
 const SHOW_HOURS = 3; // shows have no end time in the data: a calendar entry lasts three hours
 
@@ -50,8 +52,9 @@ const icsEscape = (t) =>
 // A show with `end_date` is a range entry. Its line-up as text lines: one per day from `days`
 // («Fr 16.7.: Dub Inc, Mellow Mood»), then the acts without a day («Tag offen: …»); without days the
 // flat list. Empty without acts. Used by the calendar export (.ics, Google) and the share text.
-const dowShort = (d) => new Intl.DateTimeFormat("de-CH", { weekday: "short" }).format(d).replace(".", "");
-const dm = (d) => `${d.getDate()}.${d.getMonth() + 1}.`;
+// In the locale of the page (German in the tests): «Fr 16.7.», «Fri 16/7».
+const dowShort = dow;
+const dm = dayMonth;
 export function lineupLines(show) {
   const acts = (show.acts || []).map(String);
   const days = show.days && typeof show.days === "object" ? show.days : {};
@@ -67,16 +70,16 @@ export function lineupLines(show) {
     for (const a of list) placed.add(venueKey(a)); // the validator's artist_key rule
   }
   const rest = acts.filter((a) => !placed.has(venueKey(a)));
-  if (rest.length) out.push(`Tag offen: ${rest.join(", ")}`);
+  if (rest.length) out.push(`${t("lineup.open")}: ${rest.join(", ")}`);
   return out;
 }
 
 // «Fr 16.7.2026» for a show, «Fr 16.7. – So 18.7.2027» for a range entry.
 export function dateText(show) {
   const a = parseDay(show.date);
-  if (!show.end_date) return `${dowShort(a)} ${dm(a)}${a.getFullYear()}`;
+  if (!show.end_date) return `${dowShort(a)} ${dayMonthYearFmt.format(a)}`;
   const b = parseDay(show.end_date);
-  return `${dowShort(a)} ${dm(a)} – ${dowShort(b)} ${dm(b)}${b.getFullYear()}`;
+  return `${dowShort(a)} ${dm(a)} – ${dowShort(b)} ${dayMonthYearFmt.format(b)}`;
 }
 
 // The day after a calendar day as YYYYMMDD (exclusive DTEND of an all-day event).
@@ -164,5 +167,5 @@ export function sbbUrl(show, from, opts) {
   const arrive = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m - lead);
   const time = `${pad2(arrive.getHours())}:${pad2(arrive.getMinutes())}`;
   const p = `von=${encodeURIComponent(from)}&nach=${encodeURIComponent(show.city)}&date=${show.date}&time=${encodeURIComponent(time)}&moment=ARRIVAL`;
-  return `https://www.sbb.ch/de?${p}`;
+  return `https://www.sbb.ch/${getLocale()}?${p}`;
 }

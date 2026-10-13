@@ -1,6 +1,8 @@
 /* Cantons and nearby places abroad (criteria.md → Nearby): codes, German names and the groups of the Wo
  * panel. The codes must agree with scripts/validate_shows.py and public/img/cantons/*.svg
- * (tests/test_contract.py checks). */
+ * (tests/test_contract.py checks). French and English names: src/i18n (region.<code>, regionShort.<code>). */
+import { t } from "../i18n/core.js";
+
 export const CANTONS = {
   AG: "Aargau",
   AI: "Appenzell I.Rh.",
@@ -70,12 +72,23 @@ export const REGIONS = [
   ["Grenznah", ["D", "F", "I", "A", "FL"]],
 ];
 
-export const regionName = (c) => CANTONS[c] || ABROAD[c] || c;
+// The name in the page's language: a table entry region.<code> (fr / en, src/i18n), else the German name.
+const local = (key) => {
+  const v = t(key);
+  return v === key ? "" : v;
+};
+export const regionName = (c) => local(`region.${c}`) || CANTONS[c] || ABROAD[c] || c;
 // Region name for pills and headlines: «Bern», «Deutschland» (no «(grenznah)» – the row says that).
-export const shortRegion = (c) => (ABROAD[c] ? ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c));
+export const shortRegion = (c) =>
+  ABROAD[c] ? local(`regionShort.${c}`) || ABROAD[c].replace(/ \(grenznah\)$/, "") : regionName(c);
+// The name of a region group of the Wo panel (Deutschschweiz, Romandie, Ticino, Grenznah).
+export const groupName = (name) => t(`region.group.${name}`);
 // Accessible name of the canton button in a row (§5): «Nur Bern anzeigen», abroad «Deutschland, grenznah».
 // The visible code is part of the name, so what is read matches what is seen (Lighthouse).
 export const cantonLabel = (c) =>
   ABROAD[c]
-    ? `${ABROAD[c].replace(" (grenznah)", ", grenznah")} – nur diese Shows anzeigen (${c})`
-    : `Nur ${CANTONS[c] || c} anzeigen (${c})`;
+    ? t(ABROAD[c].includes("(grenznah)") ? "row.abroadOnly" : "row.abroadOnlyPlain", {
+        name: shortRegion(c),
+        code: c,
+      })
+    : t("row.cantonOnly", { name: regionName(c), code: c });

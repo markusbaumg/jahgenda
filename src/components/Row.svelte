@@ -17,6 +17,7 @@
 
   // Meine Shows (M3): the star, the state toggle and the friend's «geht hin» come from the marks store.
   import { mine, MARK_LABEL, MARK_TITLE, LONG_PRESS } from "../stores/marks.svelte.js";
+  import { t } from "../i18n/i18n.svelte.js";
 
   let {
     show: s,
@@ -126,7 +127,7 @@
 {/snippet}
 
 {#snippet extNote()}
-  <span class="ext-mark" aria-hidden="true">↗</span><span class="sr">{" (öffnet externe Seite)"}</span>
+  <span class="ext-mark" aria-hidden="true">↗</span><span class="sr">{t("row.external")}</span>
 {/snippet}
 
 {#snippet dist()}
@@ -136,23 +137,19 @@
            The separator travels with the button (both only show on hover), so no lone «·» ends the line. -->
       {#if !agenda.geoDeclined && geoHint}
         <span class="geo-hint"
-          >{" · "}<button
-            type="button"
-            class="geo-ask"
-            title="Standort freigeben: dann steht hier die Distanz zu dir und ein Link zur Zugverbindung"
-            >Distanz &amp; Zug anzeigen</button
+          >{" · "}<button type="button" class="geo-ask" title={t("row.geoAskTitle")}>{t("row.geoAsk")}</button
           ></span
         >
       {/if}
     {:else}
-      {" · "}<span class="dist" title="Luftlinie von deinem Standort"
+      {" · "}<span class="dist" title={t("row.dist")}
         >{km}{#if sbb}<a
             class="sbb"
             href={sbb}
             target="_blank"
             rel="noopener"
-            title="SBB-Fahrplan {agenda.homeCity} → {s.city}, Ankunft eine Stunde vor der Show"
-            aria-label="SBB-Fahrplan nach {s.city}">SBB</a
+            title={t("row.sbbTitle", { from: agenda.homeCity, to: s.city })}
+            aria-label={t("row.sbbAria", { to: s.city })}>SBB</a
           >{/if}</span
       >
     {/if}
@@ -172,7 +169,7 @@
     <h3 class="title">
       {#if url}
         <!-- A title with a URL is recognisable as a link: dotted gold underline, «↗» and sr text. -->
-        <a class="ext" href={url} target="_blank" rel="noopener" title="Seite des Veranstalters öffnen"
+        <a class="ext" href={url} target="_blank" rel="noopener" title={t("row.titleLink")}
           >{s.title}{@render extNote()}</a
         >
       {:else}{s.title}{/if}
@@ -185,21 +182,23 @@
     {#if long}
       <Lineup show={s} {hit} {marked} />
     {:else if s._end && !s.acts.length}
-      <p class="acts none">Line-up folgt</p>
+      <p class="acts none">{t("lineup.soon")}</p>
     {/if}
     <!-- With a known position the distance sits before the genres (§3.6); the hover-only placeholder
          that asks for the position goes last, so its invisible width leaves no hole in the line. -->
     <p class="meta">
-      {#if nDays}<span class="ndays">{nDays} Tage</span>{" · "}{/if}{#if s.time}<time>{s.time}</time
+      {#if nDays}<span class="ndays">{t("n.days", { n: nDays })}</span>{" · "}{/if}{#if s.time}<time
+          >{s.time}</time
         >{" · "}{/if}{#if venueUrl}<a
           class="venue-link"
           href={venueUrl}
           target="_blank"
           rel="noopener"
-          title="Website von {s.venue} öffnen">{s.venue}</a
+          title={t("row.venueLink", { venue: s.venue })}>{s.venue}</a
         >{:else}{s.venue}{/if}{" · "}{s.city}{#if here}{@render dist()}{/if}{#each genreWords as g}{" · "}<span
           class="genre">{g}</span
-        >{/each}{#if s._past}{" · "}<span class="vorbei">vorbei</span>{/if}{#if !here}{@render dist()}{/if}
+        >{/each}{#if s._past}{" · "}<span class="vorbei">{t("row.past")}</span
+        >{/if}{#if !here}{@render dist()}{/if}
     </p>
   </div>
   <div class="side">
@@ -209,7 +208,7 @@
       data-canton={s.canton}
       aria-pressed={agenda.filters.cantons.has(s.canton)}
       aria-label={cantonLabel(s.canton)}
-      title="{regionName(s.canton)} als Filter ein-/ausschalten"
+      title={t("row.cantonTitle", { name: regionName(s.canton) })}
       ><img src="img/cantons/{s.canton}.svg" alt="" loading="lazy" decoding="async" />{s.canton}</button
     >
     <button
@@ -228,12 +227,12 @@
     >
   </div>
   <div class="foot-row">
-    {#if shared && shared[s.id] === "going"}<span class="goes"><Icon name="star" />geht hin</span>{/if}
+    {#if shared && shared[s.id] === "going"}<span class="goes"><Icon name="star" />{t("row.goes")}</span>{/if}
     <div class="mark-slot">
       {#if mark}
         <!-- The state toggle of a marked row (§5): a role="group" of two aria-pressed buttons with visible
              words, so the state is readable without colour. -->
-        <div class="mark-seg" role="group" aria-label="Status der Markierung">
+        <div class="mark-seg" role="group" aria-label={t("row.markState")}>
           <button
             type="button"
             class="act"
@@ -241,7 +240,7 @@
             data-state="interested"
             aria-pressed={mark === "interested"}
             onclick={() => mine.setState(s, "interested")}
-            title="Vielleicht – ich schaue es mir an">Interessiert</button
+            title={t("row.interestedTitle")}>{t("row.interested")}</button
           ><button
             type="button"
             class="act"
@@ -249,7 +248,7 @@
             data-state="going"
             aria-pressed={mark === "going"}
             onclick={() => mine.setState(s, "going")}
-            title="Ich bin dabei">Ich gehe</button
+            title={t("row.goingTitle")}>{t("row.going")}</button
           >
         </div>
       {/if}
@@ -263,61 +262,62 @@
         class="act{flashes.cal ? ' fb-on' : ''}"
         data-act="cal"
         onclick={() => act("cal")}
-        aria-label="In Kalender speichern (.ics)"
-        title="Als .ics speichern (Apple, Outlook …)"
-        ><Icon name="cal" /><span class="lbl">Kalender</span>{@render fbWord("cal")}</button
+        aria-label={t("row.calAria")}
+        title={t("row.calTitle")}
+        ><Icon name="cal" /><span class="lbl">{t("row.cal")}</span>{@render fbWord("cal")}</button
       ><a
         class="act"
         href={gcalUrl(s, { url: showUrl() })}
         target="_blank"
         rel="noopener"
-        aria-label="In Google Kalender eintragen"
-        title="In Google Kalender eintragen"><Icon name="gcal" /><span class="lbl">Google</span></a
+        aria-label={t("row.googleTitle")}
+        title={t("row.googleTitle")}><Icon name="gcal" /><span class="lbl">{t("row.google")}</span></a
       >{#if canShare}<button
           type="button"
           class="act{flashes.share ? ' fb-on' : ''}"
           data-act="share"
           onclick={() => act("share")}
-          aria-label="Show teilen"
-          title="Teilen (WhatsApp, Mail, …)"
-          ><Icon name="share" /><span class="lbl">Teilen</span>{@render fbWord("share")}</button
+          aria-label={t("row.shareAria")}
+          title={t("row.shareTitle")}
+          ><Icon name="share" /><span class="lbl">{t("row.share")}</span>{@render fbWord("share")}</button
         >{:else}<a
           class="act"
           href={waUrl()}
           target="_blank"
           rel="noopener"
-          aria-label="Per WhatsApp teilen"
-          title="Per WhatsApp teilen"><Icon name="wa" /><span class="lbl">Teilen</span></a
+          aria-label={t("row.wa")}
+          title={t("row.wa")}><Icon name="wa" /><span class="lbl">{t("row.share")}</span></a
         >{/if}<button
         type="button"
         class="act{flashes.link ? ' fb-on' : ''}"
         data-act="link"
         onclick={() => act("link")}
-        aria-label="Link zu dieser Show kopieren"
-        title="Link zu dieser Show kopieren"
-        ><Icon name="link" /><span class="lbl">Link</span>{@render fbWord("link")}</button
+        aria-label={t("row.linkTitle")}
+        title={t("row.linkTitle")}
+        ><Icon name="link" /><span class="lbl">{t("row.link")}</span>{@render fbWord("link")}</button
       >{#if tickets}<a
           class="act tickets"
           href={tickets}
           target="_blank"
           rel="noopener"
-          aria-label="Tickets kaufen (öffnet externe Seite)"
-          title="Tickets kaufen"><Icon name="ticket" /><span class="lbl">Tickets</span>{@render extNote()}</a
+          aria-label={t("row.ticketsAria")}
+          title={t("row.ticketsTitle")}
+          ><Icon name="ticket" /><span class="lbl">{t("row.tickets")}</span>{@render extNote()}</a
         >{/if}{#if url}<a
           class="act event"
           href={url}
           target="_blank"
           rel="noopener"
-          aria-label="Infos beim Veranstalter (öffnet externe Seite)"
-          title="Event-Seite des Veranstalters öffnen"
-          ><Icon name="event" /><span class="lbl">Infos</span>{@render extNote()}</a
+          aria-label={t("row.infoAria")}
+          title={t("row.infoTitle")}
+          ><Icon name="event" /><span class="lbl">{t("row.info")}</span>{@render extNote()}</a
         >{/if}{#if sbb}<a
           class="act sbb-act"
           href={sbb}
           target="_blank"
           rel="noopener"
-          aria-label="SBB-Fahrplan nach {s.city} (öffnet externe Seite)"
-          title="SBB-Fahrplan {agenda.homeCity} → {s.city}, Ankunft eine Stunde vor der Show"
+          aria-label={t("row.sbbActAria", { to: s.city })}
+          title={t("row.sbbTitle", { from: agenda.homeCity, to: s.city })}
           ><Icon name="train" /><span class="lbl">SBB</span>{@render extNote()}</a
         >{/if}
     </div>

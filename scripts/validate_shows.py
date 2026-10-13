@@ -145,23 +145,35 @@ def check_genres_file(data):
     return errs
 
 
+SLOGAN_LANGS = ("fr", "en")  # the translated taglines (story #48); the German list stays "slogans"
+
+
 def check_slogans(data):
-    """data/slogans.json: {"slogans": [non-empty strings]} - anything else makes the page silently
-    keep its static tagline."""
+    """data/slogans.json: {"slogans": [non-empty strings], "fr": [...], "en": [...]} - "slogans" is the German
+    default (stickers, the page without a language); "fr" / "en" are optional translated lists with the same
+    rules. Anything else makes the page silently keep its static tagline."""
     if not isinstance(data, dict) or not isinstance(data.get("slogans"), list):
         return ["slogans.json: must be an object with a 'slogans' list"]
-    errs, seen = [], set()
-    for i, line in enumerate(data["slogans"]):
-        if not isinstance(line, str) or not line.strip():
-            errs.append(f"slogans[{i}]: must be a non-empty string")
-        elif line.strip() in seen:
-            errs.append(f"slogans[{i}]: duplicate '{line}'")
-        else:
-            seen.add(line.strip())
-    if not data["slogans"]:
-        errs.append("slogans.json: 'slogans' is empty")
+    errs = []
+    for key in ("slogans", *SLOGAN_LANGS):
+        if key not in data:
+            continue
+        lines = data[key]
+        if not isinstance(lines, list):
+            errs.append(f"slogans.json: '{key}' must be a list")
+            continue
+        seen = set()
+        for i, line in enumerate(lines):
+            if not isinstance(line, str) or not line.strip():
+                errs.append(f"{key}[{i}]: must be a non-empty string")
+            elif line.strip() in seen:
+                errs.append(f"{key}[{i}]: duplicate '{line}'")
+            else:
+                seen.add(line.strip())
+        if not lines:
+            errs.append(f"slogans.json: '{key}' is empty")
     for key in data:
-        if key not in ("note", "slogans"):
+        if key not in ("note", "slogans", *SLOGAN_LANGS):
             errs.append(f"slogans.json: unknown field '{key}'")
     return errs
 

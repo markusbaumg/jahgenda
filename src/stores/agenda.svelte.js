@@ -5,9 +5,14 @@
 import { parseDay, shortId, distanceKm, venueKey } from "../lib/index.js";
 import { fold, searchText, matchesSearch } from "../lib/search.js";
 import { todayStart, setTimeFlags, monthStart, addDays } from "../lib/dates.js";
+import { t } from "../i18n/core.js";
 import { DATA, fetchJson, tryJson } from "../lib/load.js";
 
-export const FORMAT_LABEL = { festival: "Festival" };
+export const FORMAT_LABEL = {
+  get festival() {
+    return t("format.festival");
+  },
+};
 export const isFestival = (s) => Boolean(s._end);
 
 // A range entry (festival-spec.md): end_date after date, else it is a normal show.

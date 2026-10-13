@@ -14,6 +14,7 @@
   import MineToggle from "../mine/MineToggle.svelte";
   import ListHead from "../mine/ListHead.svelte";
   import { mine } from "../../stores/marks.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   let form;
 
@@ -67,14 +68,10 @@
 >
   <ListHead />
   <div class="toolbar">
-    <label class="sr" for="q">Suche</label>
+    <label class="sr" for="q">{t("search.label")}</label>
     <div class="search">
-      <a
-        class="mini-brand"
-        href="./"
-        aria-label="Zum Anfang"
-        title="Zum Anfang: Agenda ohne Filter"
-        onclick={toTop}><img src="img/logo/jahgenda.svg" alt="" width="22" height="22" /></a
+      <a class="mini-brand" href="./" aria-label={t("bar.top")} title={t("header.home")} onclick={toTop}
+        ><img src="img/logo/jahgenda.svg" alt="" width="22" height="22" /></a
       >
       <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
         <path
@@ -85,9 +82,9 @@
       <input
         id="q"
         type="search"
-        placeholder="Band, Club, Ort …"
+        placeholder={t("search.placeholder")}
         autocomplete="off"
-        title="Nach Band, Club oder Ort suchen"
+        title={t("search.title")}
         value={agenda.filters.q}
         oninput={onSearch}
       />

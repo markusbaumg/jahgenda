@@ -1,17 +1,23 @@
-/* Calendar arithmetic and the de-CH formatters of the page. Local calendar days throughout. */
+/* Calendar arithmetic and the formatters of the page – in the locale of the page (de-CH / fr-CH / en-GB,
+ * src/i18n/core.js; German by default and in the node tests). Local calendar days throughout. */
 import { pad2 } from "./text.js";
+import { localeFmt, getLocale } from "../i18n/core.js";
 
-export const monthFmt = new Intl.DateTimeFormat("de-CH", { month: "long", year: "numeric" });
-export const monthNameFmt = new Intl.DateTimeFormat("de-CH", { month: "long" });
-export const shortMonthFmt = new Intl.DateTimeFormat("de-CH", { month: "short" });
-export const dowFmt = new Intl.DateTimeFormat("de-CH", { weekday: "short" });
-export const fullDayFmt = new Intl.DateTimeFormat("de-CH", {
+export const monthFmt = localeFmt({ month: "long", year: "numeric" });
+export const monthNameFmt = localeFmt({ month: "long" });
+export const shortMonthFmt = localeFmt({ month: "short" });
+export const dowFmt = localeFmt({ weekday: "short" });
+export const fullDayFmt = localeFmt({
   weekday: "long",
   day: "numeric",
   month: "long",
   year: "numeric",
 });
-export const stampFmt = new Intl.DateTimeFormat("de-CH", { dateStyle: "medium", timeStyle: "short" });
+export const stampFmt = localeFmt({ dateStyle: "medium", timeStyle: "short" });
+// «16.10.» (de-CH, fr-CH) / «16/10» (en-GB); with the year «16.7.2026».
+export const dayMonthFmt = localeFmt({ day: "numeric", month: "numeric" });
+export const dayMonthYearFmt = localeFmt({ day: "numeric", month: "numeric", year: "numeric" });
+export const dm = (d) => dayMonthFmt.format(d);
 
 // «Fr» – the short weekday without its dot.
 export const dow = (d) => dowFmt.format(d).replace(".", "");
@@ -42,7 +48,9 @@ export function setTimeFlags(s, today) {
 }
 
 // «Fr 16.7.» for the empty-state hint and the Meine-Shows panel.
-export const dayShort = (s) => `${dow(s._day)} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
+export const dayShort = (s) => `${dow(s._day)} ${dm(s._day)}`;
 // «So 1. Aug.» – the end of a festival in a ghost row, non-breaking (\u00a0), so it never wraps to «Aug.».
 export const endLabel = (s) =>
-  `${dow(s._end)}\u00a0${s._end.getDate()}.\u00a0${shortMonthFmt.format(s._end)}`;
+  getLocale() === "de"
+    ? `${dow(s._end)}\u00a0${s._end.getDate()}.\u00a0${shortMonthFmt.format(s._end)}`
+    : localeFmt({ weekday: "short", day: "numeric", month: "short" }).format(s._end).replace(/ /g, "\u00a0");

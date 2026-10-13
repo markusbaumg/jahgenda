@@ -66,13 +66,17 @@ src/stores/live.svelte.js              Live regions: the results line (#results-
 src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
-src/lib/dates.js / regions.js          … de-CH formatters and calendar arithmetic; cantons, nearby places, region groups.
+src/lib/dates.js / regions.js          … the formatters (in the page language) and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
 src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
 src/lib/load.js                        … the one fetch helper (data/*.json paths, raw.githubusercontent.com) for the agenda and the Mischpult.
 src/lib/health.js / drops.js           … Mischpult: the watchdog verdict (mirrors check_freshness.py), the dropped-candidate dedupe
                                        (mirrors quality_review.py) and the «Gehört rein» issue link.
 src/lib/markdown.js                    … minimal, escaping Markdown renderer for the repo files the Mischpult shows.
+src/i18n/core.js                       Languages (see «Languages»): the locale, t(key, params) with plurals, the Intl date formatters.
+src/i18n/i18n.svelte.js                … the runes store: first-visit choice, the switch (jahStore «lang»), <html lang> and the head.
+src/i18n/de.js / fr.js / en.js         … the message tables: German is the source, French and English translate it.
+src/components/LangSwitch.svelte       The DE · FR · EN switch at the end of the footer's link line.
 public/                                Static files, copied as they are into dist/ (img/, fonts, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 src/sw.js                              Service worker source (vite-plugin-pwa injectManifest → dist/sw.js): shell precache, data network-first (4 s).
@@ -424,6 +428,32 @@ the manifest (`vite.config.js`) / the PWA icons (`make icons` re-renders those).
 `public/img/logo/NN-name.svg` (icon) and `NN-name-wordmark.svg` (icon + wordmark); the picker page is
 `design/logos.html` (https://markusbaumg.github.io/jahgenda/design/logos.html). To switch: copy the chosen
 icon over `public/img/logo/jahgenda.svg`, run `make icons`, commit.
+
+### Languages
+
+The agenda speaks German, French and English (story #48); the owner pages (`log.html`, `review.html`,
+`mischpult.html`) and the stickers stay German.
+
+- **Which language:** `?lang=fr|en|de` (the hreflang alternates in `index.html`) → the visitor's choice in
+  the DE · FR · EN switch (footer link line, saved in jahStore under `lang`) → on the first visit the browser's first
+  language (`fr*` → French, `en*` → English) → German. The URL hash (filters, show links, `#m=` lists) never
+  carries the language, so every link works in every language.
+- **Where the words are:** `src/i18n/de.js` is the source (Swiss spelling, «Show»), `fr.js` and `en.js`
+  translate it key by key; a key missing there falls back to German. Components call `t("key", params)`
+  from `src/i18n/i18n.svelte.js`, plain modules (`src/lib`, stores) the same `t` from `src/i18n/core.js`.
+  Dates go through the formatters in `src/lib/dates.js` (Intl, de-CH / fr-CH / en-GB).
+- **Edit a string:** change the value in all three tables. Placeholders are `{name}`; a plural is
+  `{ one: "{n} Show", other: "{n} Shows" }` (picked by `params.n`); grammar that a template cannot carry
+  (French prepositions: «au Tessin», «à Genève») is a function `(params) => string`.
+- **Add a string:** add the key to `de.js`, `fr.js` and `en.js`, then use `t("area.name")` in the
+  component (literal key, so the e2e scan in `e2e/tests/i18n.spec.js` knows it). Canton names are
+  `region.<code>` in fr / en (German: `src/lib/regions.js`).
+- **Taglines:** `data/slogans.json` has `slogans` (German, also the stickers) and `fr` / `en`; the same
+  lists sit inline in `index.html` (`#slogans`, `#slogans-fr`, `#slogans-en`) – `tests/test_contract.py`
+  keeps them equal, the validator checks all three.
+- **Head and app:** `<html lang>`, description, og/canonical follow the language at runtime; the build
+  writes `manifest.webmanifest` (German) plus `manifest.fr.webmanifest` / `manifest.en.webmanifest`
+  (`vite.config.js`, name and description from the tables).
 
 ### Contributing (for Seraina and everyone else)
 

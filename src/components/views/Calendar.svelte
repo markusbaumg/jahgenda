@@ -11,7 +11,10 @@
   import { views } from "../../stores/views.svelte.js";
   import { quietScroll } from "./scroll.js";
   import { pad2, parseDay } from "../../lib/text.js";
-  import { addDays, monthFmt, monthStart, dow, todayStart } from "../../lib/dates.js";
+  import { addDays, monthFmt, monthStart, dow, dm, todayStart } from "../../lib/dates.js";
+  import { localeFmt } from "../../i18n/core.js";
+  import { nShows } from "../../stores/filters.svelte.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   let {
     shows, // the filtered shows (the same the list shows)
@@ -32,9 +35,10 @@
   const genreColor = (s) =>
     s._end ? "var(--gold)" : GENRE_COLORS[s.genres.find((g) => GENRE_COLORS[g])] || "var(--gold)";
   const dayKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-  const longDayFmt = new Intl.DateTimeFormat("de-CH", { weekday: "long", day: "numeric", month: "long" });
-  const shortDate = (d) => `${dow(d)} ${d.getDate()}.${d.getMonth() + 1}.`;
-  const nShows = (n) => `${n} ${n === 1 ? "Show" : "Shows"}`;
+  const longDayFmt = localeFmt({ weekday: "long", day: "numeric", month: "long" });
+  const shortDate = (d) => `${dow(d)} ${dm(d)}`;
+  // Mo … So in the page's language (2024-01-01 was a Monday).
+  const weekdays = $derived(Array.from({ length: 7 }, (_, i) => dow(new Date(2024, 0, 1 + i))));
   const going = (s) => marks[s.id] === "going";
 
   const today = $derived(agenda.today || todayStart());
@@ -175,8 +179,8 @@
         type="button"
         class="cal-nav"
         data-cal="-1"
-        aria-label="Vorheriger Monat"
-        title="Vorheriger Monat"
+        aria-label={t("cal.prev")}
+        title={t("cal.prev")}
         disabled={!prevOk}
         onclick={() => nav(-1)}>&lsaquo;</button
       >
@@ -185,8 +189,8 @@
         type="button"
         class="cal-nav"
         data-cal="1"
-        aria-label="Nächster Monat"
-        title="Nächster Monat"
+        aria-label={t("cal.next")}
+        title={t("cal.next")}
         disabled={!nextOk}
         onclick={() => nav(1)}>&rsaquo;</button
       >
@@ -194,19 +198,15 @@
         type="button"
         class="linkish cal-today"
         data-cal="0"
-        title="Zum aktuellen Monat springen"
-        onclick={() => nav(0)}>Heute</button
+        title={t("cal.todayTitle")}
+        onclick={() => nav(0)}>{t("cal.today")}</button
       >
-      <button
-        type="button"
-        class="linkish cal-subscribe"
-        data-subscribe
-        title="Alle Shows als Kalender abonnieren – aktualisiert sich von selbst"
-        ><Icon name="rss" /> Abonnieren</button
+      <button type="button" class="linkish cal-subscribe" data-subscribe title={t("cal.subscribeTitle")}
+        ><Icon name="rss" /> {t("cal.subscribe")}</button
       >
     </div>
     <div class="cal-grid">
-      {#each ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"] as w}<span class="cal-dow">{w}</span>{/each}
+      {#each weekdays as w}<span class="cal-dow">{w}</span>{/each}
       {#each cells as c (c.key)}
         <div class={c.cls} data-day={c.key}>
           {#if c.other}
@@ -217,7 +217,7 @@
               class="cal-num"
               aria-pressed={c.key === selDay}
               aria-label={c.label}
-              title="Tag auswählen: {c.label}">{c.num}</button
+              title={t("cal.pick", { label: c.label })}>{c.num}</button
             >
           {/if}
           <span class="cal-dots" aria-hidden="true"
@@ -232,7 +232,7 @@
                 class="pill{going(s) ? ' going' : ''}"
                 data-id={s.id}
                 style="--pill:{genreColor(s)}"
-                title="{s.title} · {s.venue}, {s.city} – zur Show in der Liste springen"
+                title={t("cal.pillTitle", { title: s.title, venue: s.venue, city: s.city })}
                 >{going(s) ? "★ " : ""}{s.title}</button
               >{/each}
           </div>
@@ -241,15 +241,17 @@
     </div>
     {#if emptyMonth}
       <p class="cal-empty cal-month-empty">
-        Keine Shows im {monthFmt.format(month)}.{#if pointTo}{" "}{after ? "Nächste" : "Letzte"} Show:
+        {t("cal.emptyMonth", { month: monthFmt.format(month) })}{#if pointTo}{" "}{t(
+            after ? "cal.nextShow" : "cal.lastShow",
+          )}
           <a href="#{pointTo._short}" data-id={pointTo.id}>{pointTo.title}</a>, {shortDate(pointTo._day)}{/if}
       </p>
     {/if}
     <p class="cal-legend" aria-hidden="true">
-      <span><i style="background:var(--red)"></i>Ska, Ska-Punk, Rocksteady</span><span
-        ><i style="background:var(--green-text)"></i>Dub, Soundsystem</span
-      ><span><i style="background:var(--gold)"></i>Reggae &amp; mehr, Festival</span>{#if anyGoing}<span
-          ><i class="going" style="background:var(--green-text)"></i>★ Ich gehe</span
+      <span><i style="background:var(--red)"></i>{t("cal.legendSka")}</span><span
+        ><i style="background:var(--green-text)"></i>{t("cal.legendDub")}</span
+      ><span><i style="background:var(--gold)"></i>{t("cal.legendReggae")}</span>{#if anyGoing}<span
+          ><i class="going" style="background:var(--green-text)"></i>{t("cal.legendGoing")}</span
         >{/if}
     </p>
     <section class="cal-day">
@@ -257,7 +259,7 @@
       {#if selected.length}
         <div class="shows"><DayGroup items={selected} {geoHintId} /></div>
       {:else}
-        <p class="cal-empty">Keine Shows an diesem Tag.</p>
+        <p class="cal-empty">{t("cal.emptyDay")}</p>
       {/if}
     </section>
   {/if}

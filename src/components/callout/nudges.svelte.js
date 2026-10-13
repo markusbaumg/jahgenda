@@ -19,6 +19,7 @@ import { agenda } from "../../stores/agenda.svelte.js";
 import { regionName } from "../../lib/regions.js";
 import { parseHash } from "../../lib/hash.js";
 import { quietScroll, isQuietScroll } from "../views/scroll.js";
+import { t } from "../../i18n/core.js";
 
 const FEED_BASE = "https://markusbaumg.github.io/jahgenda/";
 const feedUrl = (region) => FEED_BASE + (region ? `jahgenda-${region}.ics` : "jahgenda.ics");
@@ -61,30 +62,30 @@ export function showSubscribe(force) {
   callout.show({
     id: "subscribe",
     force,
-    title: canton ? `Shows in ${regionName(canton)} in deinem Kalender` : "Alle Shows in deinem Kalender",
-    text: "Einmal abonnieren – danach hält sich der Kalender selbst aktuell.",
+    title: canton ? t("sub.titleRegion", { name: regionName(canton) }) : t("sub.title"),
+    text: t("sub.text"),
     actions: [
       {
-        label: "Apple / Outlook",
+        label: t("sub.apple"),
         primary: true,
         href: url.replace("https://", "webcal://"),
-        title: "In Apple Kalender oder Outlook abonnieren",
+        title: t("sub.appleTitle"),
       },
       {
-        label: "Google",
+        label: t("sub.google"),
         href: `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(url)}`,
         external: true,
-        title: "In Google Kalender abonnieren",
+        title: t("sub.googleTitle"),
       },
       {
-        label: "Adresse kopieren",
-        title: "Feed-Adresse kopieren (für jede Kalender-App)",
+        label: t("sub.copy"),
+        title: t("sub.copyTitle"),
         onClick: async () => {
           try {
             await navigator.clipboard.writeText(url);
-            callout.relabel(2, "Kopiert");
+            callout.relabel(2, t("fb.copied"));
           } catch {
-            prompt("Feed-Adresse:", url);
+            prompt(t("sub.prompt"), url);
           }
         },
       },
@@ -115,13 +116,13 @@ function startInstall() {
     if (visits < 2) return;
     callout.show({
       id: "install",
-      title: "Jahgenda als App",
-      text: "Aufs Handy holen: eigenes Icon, Vollbild, geht auch offline.",
+      title: t("install.title"),
+      text: t("install.text"),
       actions: [
         {
-          label: "Installieren",
+          label: t("install.button"),
           primary: true,
-          title: "Jahgenda als App installieren",
+          title: t("install.buttonTitle"),
           onClick: async (close) => {
             if (!deferredPrompt) return close("done");
             deferredPrompt.prompt();
@@ -142,17 +143,20 @@ function startInstall() {
       if (deferredPrompt) return;
       callout.show({
         id: "install",
-        title: `Jahgenda als App aufs ${isIPad ? "iPad" : "iPhone"}`,
-        text:
-          `Tippe ${isIPad ? "oben rechts" : "unten"} auf <b>Teilen</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg> ` +
-          `und dann auf <b>«Zum Home-Bildschirm»</b> <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3z"/></svg>. Markierungen gelten pro App.`,
+        title: t("install.iosTitle", { device: isIPad ? "iPad" : "iPhone" }),
+        // The message carries {where}, {share} and {add}: the place of the button and the two icons.
+        text: t("install.iosText", {
+          where: t(isIPad ? "install.iosWhereIpad" : "install.iosWherePhone"),
+          share: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 7.5 6.5l1.4 1.4L11 5.8V15h2V5.8l2.1 2.1 1.4-1.4zM5 10h4v2H7v9h10v-9h-2v-2h4v13H5z"/></svg>`,
+          add: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5zm6 3h2v3h3v2h-3v3h-2v-3H8v-2h3z"/></svg>`,
+        }),
         // A friendly primary (snooze), so «Nie mehr zeigen» is not the only – and the biggest – button of
         // a nudge that wants the opposite.
         actions: [
           {
-            label: "Alles klar",
+            label: t("install.ok"),
             primary: true,
-            title: "Verstanden – später wieder erinnern",
+            title: t("install.okTitle"),
             onClick: (close) => close("snooze"),
           },
         ],

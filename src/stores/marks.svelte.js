@@ -21,15 +21,40 @@ import { vevent, icsWrap } from "../lib/index.js";
 import { dayShort } from "../lib/dates.js";
 import { showUrl, downloadIcs } from "../components/list/actions.js";
 import { FLASH_MS } from "./feedback.svelte.js";
+import { t } from "../i18n/core.js";
 
-export const MARK_LABEL = { "": "Merken", interested: "Gemerkt: Interessiert", going: "Gemerkt: Ich gehe" };
+// Getters: the words follow the page's language (src/i18n).
+export const MARK_LABEL = {
+  get ""() {
+    return t("mark.label");
+  },
+  get interested() {
+    return t("mark.labelInterested");
+  },
+  get going() {
+    return t("mark.labelGoing");
+  },
+};
 // Tooltip of the star button: what a click does.
 export const MARK_TITLE = {
-  "": "Merken (lang drücken: Ich gehe)",
-  interested: "Nicht mehr merken",
-  going: "Nicht mehr merken",
+  get ""() {
+    return t("mark.title");
+  },
+  get interested() {
+    return t("mark.unmark");
+  },
+  get going() {
+    return t("mark.unmark");
+  },
 };
-export const STATE_WORD = { interested: "Interessiert", going: "Ich gehe" };
+export const STATE_WORD = {
+  get interested() {
+    return t("row.interested");
+  },
+  get going() {
+    return t("row.going");
+  },
+};
 export const UNDO_MS = 8000;
 export const LONG_PRESS = 500;
 
@@ -142,7 +167,7 @@ export function createMarks() {
     if (marks[s.id]) unmark(s);
     else {
       setMark(s, "interested");
-      flashStar(s.id, "Gemerkt");
+      flashStar(s.id, t("mark.marked"));
     }
   }
   // A pressed segment stays pressed: the toggle never un-marks (that is the star's job).
@@ -155,7 +180,7 @@ export function createMarks() {
   function longPress(s) {
     if (marks[s.id] === "going") return;
     setMark(s, "going");
-    flashStar(s.id, "Ich gehe");
+    flashStar(s.id, t("row.going"));
   }
 
   // --- Undo toast «‹Titel› entfernt · Rückgängig» (WCAG 2.2.1: the clock stops while the toast is hovered
@@ -166,7 +191,7 @@ export function createMarks() {
     clearTimeout(undoTimer);
     undo = { id: s.id, state, mineOnly, title: s.title };
     setMark(s, "");
-    flashStar(s.id, "Entfernt");
+    flashStar(s.id, t("mark.removed"));
     callout.suspend(); // one thing at the bottom edge at a time (the nudge comes back later)
     undoClock();
   }
@@ -203,7 +228,7 @@ export function createMarks() {
       save();
     } else setMark(s, state);
     flushSync();
-    flashStar(s.id, "Wieder gemerkt");
+    flashStar(s.id, t("mark.again"));
   }
 
   // --- The list mode --------------------------------------------------------------------------------
@@ -219,7 +244,7 @@ export function createMarks() {
 
   // The ★ in the toolbar. Returns the word the button says when there is nothing to show yet.
   function toggleMine() {
-    if (!markedShows.length) return "Zuerst bei einer Show ★ tippen";
+    if (!markedShows.length) return t("mine.first");
     // The list is a full-screen mode with its own «Zurück»: Back closes it like a panel (one entry; an
     // open Wo/Wann panel's entry is taken over, the panel folds away).
     const on = !mineOnly;
@@ -278,8 +303,7 @@ export function createMarks() {
     if (!ids.length) {
       // Shows pass and are removed daily: an old list link ends up here. Say so, show everything.
       if (missing) {
-        reveal.note =
-          "Die Shows aus diesem Link sind vorbei oder nicht mehr in der Agenda – hier ist alles, was kommt.";
+        reveal.note = "link.staleList"; // a key of src/i18n (LinkNote.svelte says it)
         history.replaceState(history.state, "", location.pathname + location.search);
       }
       const leave = () => {
@@ -341,12 +365,12 @@ export function createMarks() {
     `${location.origin}${location.pathname}#m=` +
     markedShows.map((s) => `${s._short}${marks[s.id][0]}`).join(",");
   const listUrl = () => (shared ? `${location.origin}${location.pathname}${location.hash}` : mineUrl());
-  const listTitle = () => (shared ? "Reggae-Shows" : "Meine Reggae-Shows");
+  const listTitle = () => t(shared ? "mine.listTitleShared" : "mine.listTitle");
   // The message names the shows («Fr 16.10. Rude & Rebel Ska Fest, Luzern», the first five, «+n weitere»)
   // and ends with the link – a bare «Meine Reggae-Shows» + link told the friend nothing.
   const listShareLines = () => {
     const lines = listShows.slice(0, 5).map((s) => `${dayShort(s)} ${s.title}, ${s.city}`);
-    if (listShows.length > 5) lines.push(`+${listShows.length - 5} weitere`);
+    if (listShows.length > 5) lines.push(t("mine.more", { n: listShows.length - 5 }));
     return lines;
   };
   const listShareText = () => `${listTitle()}\n${listShareLines().join("\n")}\n${listUrl()}`;
@@ -357,7 +381,7 @@ export function createMarks() {
           vevent(s, { url: showUrl(s), status: listMap[s.id] === "going" ? "CONFIRMED" : "TENTATIVE" }),
         ),
       ),
-      shared ? "geteilte-shows.ics" : "meine-shows.ics",
+      t(shared ? "mine.icsFileShared" : "mine.icsFile"),
     );
   }
   // Teilen (navigator.share) of the list; the #m= link goes into the address bar first.
@@ -370,9 +394,9 @@ export function createMarks() {
         text: `${listTitle()}\n${listShareLines().join("\n")}`,
         url,
       });
-      return "Geteilt";
+      return t("fb.shared");
     } catch (err) {
-      return !err || err.name !== "AbortError" ? "Teilen nicht möglich" : "";
+      return !err || err.name !== "AbortError" ? t("fb.shareFailed") : "";
     }
   }
   // Link: the #m= link is the shareable artefact – it goes to the clipboard and into the address bar.
@@ -384,9 +408,9 @@ export function createMarks() {
         navigator.clipboard.writeText(url),
         new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 1000)),
       ]);
-      return "Kopiert";
+      return t("fb.copied");
     } catch {
-      return "Link in Adresszeile";
+      return t("fb.inAddressBar");
     }
   }
 

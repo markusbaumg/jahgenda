@@ -4,6 +4,7 @@
  * pins them. Ported from app.js (renderDays, lineupHtml, the month groups, renderCalendar, emptyHeadline). */
 import { venueKey, parseDay } from "./text.js";
 import { addDays, monthStart } from "./dates.js";
+import { t } from "../i18n/core.js";
 
 // With more than 5 acts (festival or not) the acts line shows the first 4 and a <details class="lineup">
 // holds the rest (§3.1).
@@ -48,8 +49,13 @@ export function lineupDays(s) {
 }
 
 // The summary of the line-up disclosure: «Alle 12 Acts nach Tag» with days, else «Alle 12 Acts».
-export const lineupLabel = (s, byDay) => `Alle ${(s.acts || []).length} Acts${byDay ? " nach Tag" : ""}`;
+export const lineupLabel = (s, byDay) =>
+  t(byDay ? "lineup.allByDay" : "lineup.all", { n: (s.acts || []).length });
 
 // The genre word of the empty-state headline with an active format: «Kein Festival», «Kein Dub-Festival».
 export const formatWord = (genreWord, formatLabel) =>
-  formatLabel ? `${genreWord ? `${genreWord}-` : ""}${formatLabel}` : genreWord;
+  formatLabel
+    ? genreWord
+      ? t("empty.genreFormat", { genre: genreWord, format: formatLabel })
+      : formatLabel
+    : genreWord;

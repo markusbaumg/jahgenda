@@ -1,5 +1,5 @@
 {
-  "note": "Taglines shown under the logo (one per page load) and in the collapsed sticky bar; the same lines go on the stickers (design/promo-plan.md). Swiss German is intended.",
+  "note": "Taglines shown under the logo (one per page load) and in the collapsed sticky bar; the same lines go on the stickers (design/promo-plan.md). Swiss German is intended. 'fr' and 'en' are the French and English lines of the page (story #48), same spirit; the stickers stay German.",
   "slogans": [
     "Reggae, Dub & Ska in der Schweiz",
     "Alli Reggae-Shows. Ei Site.",
@@ -16,5 +16,39 @@
     "Vom Club bis zum Openair – alles drin.",
     "Irie Abig gsuecht? Gfunde.",
     "Reggae-Agenda für d'Schwiiz. Ohni Bullshit."
+  ],
+  "fr": [
+    "Reggae, dub & ska en Suisse",
+    "Tous les concerts reggae. Un seul site.",
+    "Jah sait où ça se passe.",
+    "Ne rate plus aucun concert.",
+    "Dub. Ska. Reggae. Tout sur une page.",
+    "De Genève à Coire : tous les riddims.",
+    "Du reggae ce soir ? Jette un œil.",
+    "Ton soundsystem pour l'agenda.",
+    "Roots, rock, reggae – et toi au milieu.",
+    "Où ça joue du dub ? Jahgenda le sait.",
+    "Un site. Toutes les basses.",
+    "Skank it. Du neuf chaque semaine.",
+    "Du club à l'open air – tout y est.",
+    "Une soirée irie ? Trouvée.",
+    "L'agenda reggae de Suisse. Sans bullshit."
+  ],
+  "en": [
+    "Reggae, dub & ska in Switzerland",
+    "Every reggae show. One site.",
+    "Jah knows where it's at.",
+    "Never miss a show again.",
+    "Dub. Ska. Reggae. All on one page.",
+    "From Geneva to Chur: every riddim.",
+    "Reggae tonight? Take a look.",
+    "Your soundsystem for the agenda.",
+    "Roots, rock, reggae – and you right in the middle.",
+    "Where's the dub at? Jahgenda knows.",
+    "One site. All the bass.",
+    "Skank it. Fresh every week.",
+    "From the club to the open air – it's all here.",
+    "Looking for an irie night? Found.",
+    "The reggae agenda for Switzerland. No bullshit."
   ]
 }

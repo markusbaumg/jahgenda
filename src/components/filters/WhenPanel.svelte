@@ -7,6 +7,7 @@
   import { agenda } from "../../stores/agenda.svelte.js";
   import { ui, QUICK, quickRange, monthKey, dm, nShows } from "../../stores/filters.svelte.js";
   import { monthFmt, monthStart, todayStart, sameDay } from "../../lib/dates.js";
+  import { t } from "../../i18n/i18n.svelte.js";
 
   const f = agenda.filters;
   let months;
@@ -24,7 +25,7 @@
       const k = monthKey(d);
       const n = counts.get(k) || 0;
       const past = d < thisMonth;
-      const count = n === 1 ? "1 Show" : `${n} Shows`;
+      const count = nShows(n);
       return {
         k,
         n,
@@ -39,7 +40,11 @@
           .filter(Boolean)
           .join(" "),
         aria: `${monthFmt.format(d)}, ${count}`,
-        title: `${monthFmt.format(d)}: ${count}${past ? " (vergangen)" : ""} – anklicken zum Ein-/Ausschalten`,
+        title: t("when.monthTitle", {
+          month: monthFmt.format(d),
+          count,
+          past: past ? t("when.monthPast") : "",
+        }),
         h: (n / max).toFixed(2),
         label: ui.monthLabel(d, i),
       };
@@ -54,12 +59,12 @@
   const weekendTitle = $derived.by(() => {
     void agenda.today;
     const [a, b] = quickRange("weekend");
-    return `Wochenende ${dm(a)}–${dm(b)} (Freitag bis Sonntag)`;
+    return t("quick.weekendTitle", { from: dm(a), to: dm(b) });
   });
   const whenCount = $derived.by(() => {
     if (!open || !ui.monthList.length) return "";
     const n = agenda.visible.length;
-    return active ? `${nShows(n)} im Zeitraum` : n === 1 ? "1 kommende Show" : `Alle ${n} kommenden Shows`;
+    return active ? t("when.countRange", { count: nShows(n) }) : t("when.countAll", { n });
   });
   const pastCount = $derived(agenda.pastCount);
 
@@ -80,30 +85,28 @@
   }
 </script>
 
-<div id="when-panel" class="panel when-panel" role="group" aria-label="Wann" hidden={!open}>
+<div id="when-panel" class="panel when-panel" role="group" aria-label={t("when.word")} hidden={!open}>
   <div class="panel-head">
-    <strong>Wann</strong>
+    <strong>{t("when.word")}</strong>
     <button
       type="button"
       class="panel-close"
       data-close
-      title="Schliessen"
-      aria-label="Wann schliessen"
+      title={t("close")}
+      aria-label={t("when.close")}
       onclick={() => ui.closePanel()}
     >
       &times;
     </button>
   </div>
-  <div class="when-quick" role="group" aria-label="Schnellauswahl">
+  <div class="when-quick" role="group" aria-label={t("when.quick")}>
     {#each ["today", "tomorrow", "weekend", "7"] as kind (kind)}
       <button
         type="button"
         class="chip"
         data-quick={kind}
         aria-pressed={String(pressed(kind))}
-        title={kind === "weekend"
-          ? weekendTitle
-          : { today: "Nur heute", tomorrow: "Nur morgen", 7: "Die nächsten 7 Tage" }[kind]}
+        title={kind === "weekend" ? weekendTitle : t(`quick.${kind}Title`)}
         onclick={() => pickQuick(kind)}
       >
         {QUICK[kind]}
@@ -115,7 +118,7 @@
     class="when-months"
     class:can-scroll={canScroll}
     role="group"
-    aria-label="Monate (Mehrfachauswahl)"
+    aria-label={t("when.months")}
     bind:this={months}
   >
     {#each bars as b (b.k)}
@@ -138,12 +141,12 @@
       type="button"
       id="when-reset"
       class="linkish"
-      title="Zeitraum zurücksetzen: alle kommenden Shows"
+      title={t("when.resetTitle")}
       onclick={() => ui.applyFilter(() => ui.resetWhen())}
     >
-      Zurücksetzen
+      {t("when.reset")}
     </button>
-    <label class="when-past" title="Auch Shows anzeigen, die schon vorbei sind" hidden={pastCount === 0}>
+    <label class="when-past" title={t("when.pastTitle")} hidden={pastCount === 0}>
       <input
         type="checkbox"
         id="toggle-past"
@@ -153,7 +156,7 @@
           ui.applyFilter(() => ui.setShowPast(on));
         }}
       />
-      Vergangene einblenden
+      {t("when.past")}
     </label>
   </p>
 </div>
