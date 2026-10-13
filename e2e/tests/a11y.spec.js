@@ -151,3 +151,22 @@ test("at 200 % text size nothing overlaps and nothing reaches past the right edg
   const apart = n.x + n.width <= star.x || n.y >= star.y + star.height || n.y + n.height <= star.y;
   expect(apart, "the count badge sits on the ★ button").toBe(true);
 });
+
+test("row actions name their show, so a screen reader's lists of links and buttons tell the rows apart", async ({
+  page,
+}) => {
+  const rows = page.locator("#list .show");
+  for (const [i, title] of [
+    [0, "Roots Night"],
+    [1, "Dub Station"],
+  ]) {
+    for (const sel of ['[data-act="mark"]', '[data-act="cal"]', '[data-act="link"]', ".act.event"])
+      await expect(rows.nth(i).locator(sel)).toHaveAttribute("aria-label", new RegExp(title));
+  }
+  const cal = rows.first().locator('[data-act="cal"]');
+  await expect(cal).toHaveAttribute("aria-label", "Roots Night in Kalender speichern (.ics)");
+  await expect(rows.first().locator('[data-act="mark"]')).toHaveAttribute(
+    "aria-label",
+    "Merken – Roots Night",
+  );
+});
