@@ -67,8 +67,17 @@ test("iPhone: the install sticker waits for the second visit; after a closed nud
   const install = page.locator(".callout.show");
   await expect(install).toBeVisible({ timeout: 5000 });
   await expect(install).toContainText("als App");
-  await install.locator(".callout-close").click();
+  // A friendly primary («Alles klar» = snooze) carries the sticker; «Nie mehr zeigen» is the quiet text
+  // option, not a red button; the × says what it does; and it all sits before the footer in the DOM.
+  await expect(install.locator(".callout-btn.primary")).toHaveText("Alles klar");
+  await expect(install.locator(".callout-never")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(install.locator(".callout-close")).toHaveAttribute("aria-label", /30 Tagen/);
+  expect(await install.evaluate((c) => c.nextElementSibling && c.nextElementSibling.id)).toBe("foot");
+  // Closed from the keyboard, the focus does not vanish into <body>.
+  await install.locator(".callout-close").focus();
+  await page.keyboard.press("Enter");
   await expect(page.locator(".callout.show")).toHaveCount(0);
+  expect(await page.evaluate(() => document.activeElement === document.body)).toBe(false);
   await tall(page);
   await page.mouse.wheel(0, 900);
   await page.waitForTimeout(2500);

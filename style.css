@@ -2814,11 +2814,23 @@ a[href]:focus-visible,
   border: 1px solid var(--line);
   box-shadow: var(--sh-2);
 }
+/* One line, also at 320 px: a long title is the part that gets the ellipsis, the verb «entfernt» and the
+ * Rückgängig button always survive. */
+.toast.undo {
+  flex-wrap: nowrap;
+}
 .toast.undo span {
-  max-width: 60vw;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  max-width: calc(100vw - 180px); /* what is left beside the button */
+  white-space: nowrap;
+}
+.toast.undo .t {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 600;
 }
 .toast.undo button {
   min-height: 32px;
@@ -3775,19 +3787,29 @@ a {
   background: var(--gold);
   border-color: var(--gold);
 }
+/* «Nie mehr zeigen» is the quiet text option beside the real action (design/ui-revamp.md §3.9) – not a
+ * red button that reads as the sticker's call to action. */
 .callout-never {
   margin-left: auto;
   min-height: 40px;
   font: inherit;
   font-size: 0.8rem;
-  font-weight: 700;
-  color: #fff;
-  background: var(--red);
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
   border: 0;
-  border-radius: 999px;
-  padding: 0 12px;
+  padding: 0 4px;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
   cursor: pointer;
   white-space: nowrap;
+}
+/* The smallest phones (320 px): the sticker stays a sticker (no icon, so the text runs the full width),
+ * not a sheet over the whole first row. */
+@media (max-width: 360px) {
+  .callout-icon {
+    display: none;
+  }
 }
 /* × is a 44 px target; the negative margins keep it in the corner where the 26 px glyph box was. */
 .callout-close {
@@ -3810,7 +3832,7 @@ a {
     border-color: var(--gold);
   }
   .callout-never:hover {
-    filter: brightness(1.1);
+    color: var(--text);
   }
   .callout-close:hover {
     color: var(--text);

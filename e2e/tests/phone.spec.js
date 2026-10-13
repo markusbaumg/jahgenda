@@ -93,6 +93,13 @@ test("the star marks the row; the state toggle and the ★ count mirror it; a se
   const undo = page.locator("#undo");
   await expect(undo).toBeVisible();
   await expect(undo).toContainText("entfernt");
+  await expect(star.locator(".fb")).toHaveText("Entfernt"); // the star says what happened, too
+  // One line, the title ellipsised, never the verb; the clock stops while Rückgängig has the focus.
+  const box = await undo.boundingBox();
+  expect(box.height).toBeLessThan(60);
+  await undo.locator("button").focus();
+  await page.waitForTimeout(4500);
+  await expect(undo).toBeVisible();
   await undo.locator("button").click();
   await expect(row).toHaveClass(/going/);
   await expect(count).toHaveText("1");

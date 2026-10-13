@@ -377,7 +377,8 @@
   // just touched, or has just landed on a shared show. callout.js is the last script on the page, and
   // the agenda can be in before it has run (a cached or fixture response beats a busy server): the
   // blocker is handed over once both are there, whichever comes last.
-  const nudgeBlocked = () => Boolean(openPanel) || view === "map" || Date.now() < nudgeQuietUntil;
+  const nudgeBlocked = () =>
+    Boolean(openPanel) || view === "map" || Date.now() < nudgeQuietUntil || !undoToast.hidden;
   function armCallout() {
     if (callout()) callout().setBlocker(nudgeBlocked);
     else if (document.readyState === "loading")
@@ -2027,28 +2028,47 @@
       setTimeout(() => g.remove(), 1500); // whatever happens to the animation
     }
   }
-  // Undo toast «Entfernt · Rückgängig» (4 s): one at a time, the newest un-mark wins.
+  // Undo toast «‹Titel› entfernt · Rückgängig» (8 s, WCAG 2.2.1: the clock stops while the toast is hovered
+  // or focused): one at a time, the newest un-mark wins. It sits right after the views in the DOM, so a
+  // keyboard user reaches Rückgängig a few Tabs after the row, not behind the footer.
+  const UNDO_MS = 8000;
   let undo = null; // { id, state, mineOnly, timer }
   const undoToast = document.createElement("div");
   undoToast.id = "undo";
   undoToast.className = "toast undo";
   undoToast.setAttribute("role", "status");
   undoToast.hidden = true;
-  undoToast.innerHTML = `<span></span><button type="button" title="Markierung wiederherstellen">Rückgängig</button>`;
-  document.body.appendChild(undoToast);
+  undoToast.innerHTML = `<span><b class="t"></b> entfernt</span><button type="button" title="Markierung wiederherstellen">Rückgängig</button>`;
+  views.after(undoToast);
   function unmark(s, row) {
     const state = marks[s.id];
     if (!state) return;
     undo = { id: s.id, state, mineOnly, timer: 0 };
     setMark(s, "", row);
+    if (row) flashWord(row.querySelector(".star"), "Entfernt");
     undoToast.hidden = false; // shown first, then filled: a live region announces only what changes while visible
-    undoToast.querySelector("span").textContent = `«${s.title}» entfernt`;
-    clearTimeout(undo.timer);
-    undo.timer = setTimeout(hideUndo, 4000);
+    undoToast.querySelector(".t").textContent = `«${s.title}»`;
+    if (callout()) callout().suspend(); // one thing at the bottom edge at a time (the nudge comes back later)
+    undoClock();
   }
+  function undoClock() {
+    if (!undo) return;
+    clearTimeout(undo.timer);
+    undo.timer = setTimeout(hideUndo, UNDO_MS);
+  }
+  undoToast.addEventListener("pointerenter", () => undo && clearTimeout(undo.timer));
+  undoToast.addEventListener("focusin", () => undo && clearTimeout(undo.timer));
+  undoToast.addEventListener("pointerleave", undoClock);
+  undoToast.addEventListener("focusout", undoClock);
   function hideUndo() {
     if (undo) clearTimeout(undo.timer);
+    const id = undo && undo.id;
     undo = null;
+    // The focus never vanishes with the toast: back to the row's star (or the ★ in the bar).
+    if (undoToast.contains(document.activeElement)) {
+      const star = id && document.querySelector(`.show[data-id="${CSS.escape(id)}"] .star`);
+      (star || toggleMine).focus({ preventScroll: true });
+    }
     undoToast.hidden = true;
   }
   undoToast.querySelector("button").addEventListener("click", () => {
