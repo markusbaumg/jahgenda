@@ -626,7 +626,7 @@
     const label = keys.length ? `Alle ${n} Acts nach Tag` : `Alle ${n} Acts`;
     return (
       `<details class="lineup${open ? " is-open" : ""}"${open ? " open" : ""}>` +
-      `<summary aria-label="Line-up anzeigen (${n} Acts)" title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
+      `<summary title="${escape(label)}"><span class="open">${escape(label)}</span><span class="close">Weniger</span></summary>` +
       `<div class="lineup-body"><div><div class="days">${body}</div></div></div></details>`
     );
   }
@@ -896,10 +896,15 @@
     // name still contains the visible words (an aria-label with the same words would not).
     const count = (n) =>
       `<span class="sr">, </span>${n}<span class="sr"> ${n === 1 ? "Konzert" : "Konzerte"}</span>`;
+    // A chip with nothing behind it under the other filters (Wo under «Heute»: 20 of 21 cantons at 0) is
+    // dimmed, so the live ones stand out; it stays tappable – the empty state then offers the way back.
+    const dimEmpty = (c, n) =>
+      c.classList.toggle("is-empty", n === 0 && c.getAttribute("aria-pressed") !== "true");
     for (const c of genreBar.querySelectorAll(".chip[data-genre]")) {
       const n = countWith({ genre: c.dataset.genre });
       const sm = c.querySelector("small");
       if (sm) sm.innerHTML = count(n);
+      dimEmpty(c, n);
       const name = genreLabel[c.dataset.genre] || c.dataset.genre;
       c.title = c.dataset.genre ? `Nur ${name} anzeigen (${n})` : `Alle Genres anzeigen (${n})`;
     }
@@ -907,6 +912,7 @@
       const n = countWith({ format: c.dataset.format });
       const sm = c.querySelector("small");
       if (sm) sm.innerHTML = count(n);
+      dimEmpty(c, n);
       c.title = `Nur Festivals anzeigen (${n})`;
     }
     for (const c of cantonChips.querySelectorAll(".chip[data-canton]")) {
@@ -914,6 +920,7 @@
       const n = countWith({ cantons: new Set(code ? [code] : []) });
       const sm = c.querySelector("small");
       if (sm) sm.innerHTML = count(n);
+      dimEmpty(c, n);
       c.title = code
         ? `${regionName(code)}: ${nShows(n)} – anklicken zum Ein-/Ausschalten`
         : `Alle Kantone anzeigen (${n})`;
@@ -1440,12 +1447,18 @@
         `<button type="button" class="primary" id="retry" title="Konzerte nochmals laden">Nochmals versuchen</button>`;
       // The only recovery must be on screen: on a 320 px phone and in landscape the card (header + bar +
       // results row above it) ends below the fold – the page scrolls just far enough to show the button.
-      const retryBtn = el("retry");
-      const below = retryBtn.getBoundingClientRect().bottom + 16 - innerHeight;
-      if (below > 0) {
+      const revealRetry = () => {
+        const btn = el("retry");
+        if (!btn) return;
+        const below = btn.getBoundingClientRect().bottom + 16 - innerHeight;
+        if (below <= 0) return;
         quietScrollUntil = Date.now() + 1500;
         window.scrollTo({ top: Math.min(underBar(status), window.scrollY + below) });
-      }
+      };
+      revealRetry();
+      // The display face may still be loading: once it is in, the heading is a few px taller.
+      document.fonts.ready.then(revealRetry);
+      setTimeout(revealRetry, 300);
     }
   }
   function retry() {
@@ -1894,6 +1907,9 @@
           geoStatus.textContent = blocked
             ? "Standort im Browser blockiert. In den Website-Einstellungen freigeben, dann nochmals «Mein Standort» tippen."
             : "Standort nicht verfügbar. Kein Stress, die Agenda geht auch so.";
+        // Asked from a row: the message lives in the Wo panel (next to «Mein Standort», which it names) –
+        // without opening it, the only visible effect of the tap was the placeholder vanishing.
+        if (opts.fromRow && !openPanel) setPanel("where");
         render();
         keepRevealed();
       },
@@ -1902,7 +1918,7 @@
   }
   locateBtn.addEventListener("click", () => locate());
   list.addEventListener("click", (e) => {
-    if (e.target.closest(".geo-ask")) locate();
+    if (e.target.closest(".geo-ask")) locate({ fromRow: true });
   });
   // On start: silently when permission was granted before – nothing else. A browser that has never been
   // asked waits for a tap on «Mein Standort» or «Distanz & Zug anzeigen»; one that said no is left alone.
@@ -2539,6 +2555,10 @@
     if (quick) {
       if (quickActive() === quick.dataset.quick) clearRange();
       else setRange(...quickRange(quick.dataset.quick));
+      // A single-choice pick is done with one tap: the panel closes and the rows are in view (the month
+      // bars are a multi-select and keep it open). The focus goes to the toggle, as after Escape.
+      setPanel(null);
+      toggleWhen.focus({ preventScroll: true });
     } else if (month) {
       rangeFrom = rangeTo = null;
       if (months.has(month.dataset.month)) months.delete(month.dataset.month);

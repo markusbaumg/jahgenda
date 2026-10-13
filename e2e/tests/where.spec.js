@@ -124,3 +124,21 @@ test("the open panel never runs past the fold – also at the top of the page an
   ]);
   expect(sw).toBe(cw);
 });
+
+test("cantons with nothing behind them under the other filters are dimmed, still tappable", async ({
+  page,
+}) => {
+  await page.click("#toggle-when");
+  await page.locator('#when-panel [data-quick="today"]').click(); // one show today, in Bern
+  await expect(page.locator("#when-panel")).toBeHidden();
+  await page.click("#toggle-where");
+  const chips = page.locator("#canton-chips .chip[data-canton]");
+  await expect(chips.filter({ hasText: "Bern" })).not.toHaveClass(/is-empty/);
+  await expect(chips.filter({ hasText: "Zürich" })).toHaveClass(/is-empty/);
+  await expect(chips.filter({ hasText: "Zürich" })).toHaveCSS("opacity", "0.45");
+  await expect(page.locator('#canton-chips .chip[data-canton=""]')).not.toHaveClass(/is-empty/); // «Alle»
+  await chips.filter({ hasText: "Zürich" }).click(); // still a filter: the empty state offers the way back
+  await expect(chips.filter({ hasText: "Zürich" })).toHaveAttribute("aria-pressed", "true");
+  await expect(chips.filter({ hasText: "Zürich" })).not.toHaveClass(/is-empty/); // pressed never dims
+  await expect(page.locator("#status .big")).toHaveText(/Zürich/);
+});

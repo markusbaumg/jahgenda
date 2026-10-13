@@ -42,6 +42,7 @@ test("a filter link opens filtered; «Link zu dieser Auswahl» copies it", async
   await expect(results(page)).toHaveText(/^2 Konzerte für diese Auswahl/);
   await expect(page.locator("#toggle-where b")).toHaveText("BE · LU");
   const share = page.locator("#share-filters");
+  await expect(share).toHaveCSS("text-decoration-line", "underline"); // the page's dotted action affordance, not a caption
   await share.click();
   await expect(share.locator("span")).toHaveText(/^Kopiert|Link in Adresszeile/);
   const copied = await page.evaluate(() => navigator.clipboard.readText()).catch(() => "");

@@ -274,7 +274,7 @@ Kein horizontales Scrollen: Karte liegt in `.wrap` (16px Gutter), negative Margi
     <h3 class="title"><a href="…" target="_blank" rel="noopener">Reeds Festival 2027</a></h3>
     <p class="acts"><span>Alborosie</span><span>Dub Inc</span><span>Gentleman</span><span>Protoje</span></p>
     <details class="lineup">
-      <summary aria-label="Line-up anzeigen (12 Acts)"><span class="open">Alle 12 Acts nach Tag</span><span class="close">Weniger</span></summary>
+      <summary><span class="open">Alle 12 Acts nach Tag</span><span class="close">Weniger</span></summary>
       <div class="days">
         <span class="d">FR 16.</span><span class="a"><span>Dub Inc</span><span>Mellow Mood</span>…</span>
         …
@@ -311,7 +311,7 @@ Kein horizontales Scrollen: Karte liegt in `.wrap` (16px Gutter), negative Margi
 | **Distanz** | Unverändert: `lat/lon` = Gelände, haversine, «≈ 23 km» in der Meta-Zeile. «Am nächsten bei dir» kann ein Festival nennen (Titel enthält «Festival»; Datum = Tag 1). |
 | **Eintägiges Open Air** | Kein `end_date` → normale Datumsspalte, keine Karte; nur die Vorschau/Aufklapp-Regel greift (`acts > 5`). |
 | **Datum unbekannt** | Kein Eintrag (Scraper-Regel). Nichts im UI. |
-| **Accessibility** | `<summary aria-label="Line-up anzeigen (12 Acts)">`, `<time datetime="2027-07-16/2027-07-18">`, Tastatur/Screenreader via natives `<details>`. |
+| **Accessibility** | `<summary>` mit sichtbarem Text als Name (kein `aria-label`: «Weniger» hiess sonst weiter «Line-up anzeigen», WCAG 2.5.3), `<time datetime="2027-07-16/2027-07-18">`, Tastatur/Screenreader via natives `<details>`. |
 
 ---
 

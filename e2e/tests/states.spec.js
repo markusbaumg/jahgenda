@@ -115,3 +115,18 @@ test("the error's «Nochmals versuchen» is on screen without scrolling – also
     expect(box.y, `${width}×${height}`).toBeGreaterThanOrEqual(0);
   }
 });
+
+test("«Distanz & Zug anzeigen» in a row with the position blocked opens the Wo panel with the message", async ({
+  page,
+  context,
+}) => {
+  await context.clearPermissions(); // never granted: the browser answers the request with a denial
+  await useFixture(page);
+  await openList(page);
+  const ask = page.locator("#list .show .geo-ask").first();
+  await expect(ask).toHaveCount(1);
+  await ask.click({ force: true }); // hover-only on the desktop
+  await expect(page.locator("#where-panel")).toBeVisible();
+  await expect(page.locator("#geo-status")).toContainText("Standort im Browser blockiert");
+  await expect(page.locator("#list .show .geo-ask")).toHaveCount(0); // the placeholders go, the panel says why
+});

@@ -261,12 +261,16 @@ body::after {
 /* Every link gets the same gold ring as the buttons (not the browser's blue one). */
 a[href]:focus-visible,
 .leaflet-container a:focus-visible,
-#views:focus-visible,
 #foot:focus-visible,
 .show:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
   border-radius: 4px;
+}
+/* The skip link lands on the whole agenda: no ring around 14 000 px of list (its top edge peeked out
+ * under the bar as a stray gold bar); the next Tab is the first row. */
+#views:focus-visible {
+  outline: none;
 }
 #q::placeholder {
   color: var(--muted); /* the browser grey was 3.8:1 */
@@ -653,6 +657,9 @@ a[href]:focus-visible,
     border-color: var(--muted);
   }
 }
+.chip.is-empty {
+  opacity: 0.45; /* 0 under the other filters: dimmed, still tappable (updateCounts) */
+}
 .chip:active {
   transform: scale(0.96);
 }
@@ -944,8 +951,17 @@ a[href]:focus-visible,
 }
 .results-row .share-filters {
   order: 4;
+  position: relative;
   font-size: var(--fs-1);
   min-height: 24px;
+  /* The same dotted rule as «Alles zurücksetzen» right above it: muted text without it read as a caption. */
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.results-row .share-filters::after {
+  content: ""; /* 44 px hit area on touch, like the pills */
+  position: absolute;
+  inset: -10px -4px;
 }
 .results-row .share-filters[hidden] {
   display: none;
