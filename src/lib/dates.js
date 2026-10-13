@@ -43,5 +43,6 @@ export function setTimeFlags(s, today) {
 
 // «Fr 16.7.» for the empty-state hint and the Meine-Shows panel.
 export const dayShort = (s) => `${dow(s._day)} ${s._day.getDate()}.${s._day.getMonth() + 1}.`;
-// «So 1. Aug.» – the end of a festival in a ghost row.
-export const endLabel = (s) => `${dow(s._end)} ${s._end.getDate()}. ${shortMonthFmt.format(s._end)}`;
+// «So 1. Aug.» – the end of a festival in a ghost row, non-breaking (\u00a0), so it never wraps to «Aug.».
+export const endLabel = (s) =>
+  `${dow(s._end)}\u00a0${s._end.getDate()}.\u00a0${shortMonthFmt.format(s._end)}`;

@@ -44,12 +44,15 @@ src/components/Row.svelte              One show: title, acts / line-up, meta lin
 src/components/Status.svelte           Loading skeleton, error state with retry, empty states.
 src/components/Footer.svelte           «Über Jahgenda» and the bottom bar (result count, data stamp, links).
 src/components/Icon.svelte             The inline SVG icons of the row actions.
+src/components/festival/               Festival card parts: range date cell (LÄUFT), line-up by day, ghost row, Festival format chip, festival.css.
 src/stores/agenda.svelte.js            The reactive store: shows + derived fields, genres, venues, filters, visible list.
+src/stores/festival.svelte.js          Open line-ups (kept across re-renders, deep links) and the format toggle + counts.
 src/lib/index.js                       Pure helpers behind the link/file contract (short hashes, .ics, Google Calendar); tested in node.
 src/lib/hash.js / text.js / geo.js     … split by topic: hashes and the hash parser, text/date helpers, distances.
 src/lib/calendar.js                    … .ics / Google Calendar / SBB links, festival line-up text.
 src/lib/dates.js / regions.js          … de-CH formatters and calendar arithmetic; cantons, nearby places, region groups.
 src/lib/search.js                      … search folding, aliases, the haystack per show.
+src/lib/festival.js                    … festival rules: day count, calendar days, ghost months, line-up by day / «Tag offen».
 public/                                Static files, copied as they are into dist/ (img/, fonts, manifest, robots.txt, the pages below).
 public/store.js                        Client storage abstraction (marks, view, banner) — localStorage today, swappable later.
 public/pwa.js / sw.js                  Installable app: install banner, offline cache, update toast (sw.js is stamped by the build).
