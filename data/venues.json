@@ -979,6 +979,15 @@
       "scrape": true,
       "hint": "Summer festival on the Strandboden (next 28.07.–07.08.2027); server-rendered WordPress site, line-up under 'Tagesprogramm' once announced in spring, dates in the page title. Reggae relevance: unknown — listed by a reggae-festival aggregator, no reggae acts verified."
     },
+    "Lakesplash": {
+      "city": "Twann",
+      "canton": "BE",
+      "lat": 47.0943,
+      "lon": 7.1567,
+      "url": "https://lakesplash.ch/",
+      "scrape": false,
+      "hint": "Koordinaten: Stadtmitte (Festivalgelände am Seeufer Twann, exakte Adresse nicht publiziert). Reggae open air in July; dates on the homepage, acts at /portfolio_category/band/. Reggae relevance: high (festival, listed in sources.json → festivals)."
+    },
     "Le Brise Glace": {
       "city": "Annecy",
       "canton": "F",

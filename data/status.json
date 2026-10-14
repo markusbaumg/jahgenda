@@ -1,11 +1,14 @@
 {
   "ok": true,
-  "skill": "harvest-bands",
-  "at": "2026-10-13T22:12:39+02:00",
+  "skill": "scrape-shows",
+  "at": "2026-10-14T06:15:15+02:00",
   "runner": "cloud",
   "counts": {
-    "added": 60,
-    "total": 232
+    "added": 5,
+    "updated": 2,
+    "removed": 1,
+    "total": 103
   },
+  "failed_sources": 9,
   "error": null
 }

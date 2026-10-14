@@ -49,7 +49,8 @@
       "festivals": [
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Ami Warning": {
       "genres": [
@@ -80,7 +81,8 @@
       "festivals": [
         "Plein-les-Watts 2026",
         "Summerjam 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Basement Roots": {
       "genres": [
@@ -106,7 +108,8 @@
       "festivals": [
         "No Logo Festival 2026",
         "Reggae Jam 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Bazzassine": {
       "genres": [],
@@ -136,7 +139,8 @@
         "Summerjam 2025",
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Biga Ranx": {
       "genres": [
@@ -157,7 +161,8 @@
         "reggae"
       ],
       "source": "https://www.kuppel-basel.ch/programm/boundless-vibes-hifi",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-14"
     },
     "Boxmen Family": {
       "genres": [],
@@ -219,7 +224,8 @@
         "Summerjam 2026",
         "Rototom Sunsplash 2025",
         "Reggae Jam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Bush Doctors Sound System": {
       "genres": [
@@ -240,7 +246,8 @@
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Cali P": {
       "genres": [
@@ -306,7 +313,8 @@
       "festivals": [
         "Rototom Sunsplash 2026",
         "Summerjam 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Chris Biomassa": {
       "genres": [],
@@ -323,7 +331,8 @@
       "festivals": [
         "Plein-les-Watts 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Culcha Candela": {
       "genres": [
@@ -347,7 +356,8 @@
         "Plein-les-Watts 2026",
         "Summerjam 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Current Swell": {
       "genres": [],
@@ -409,6 +419,11 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "DJ Vincent Vega": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-14"
     },
     "DoubleTrouble": {
       "genres": [],
@@ -478,7 +493,8 @@
       "festivals": [
         "Reeds Festival 2025",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "EKR": {
       "genres": [],
@@ -530,7 +546,8 @@
         "Summerjam 2025",
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Famara": {
       "genres": [
@@ -540,7 +557,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Reeds Festival 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Fast Food Orchestra": {
       "genres": [
@@ -554,7 +572,8 @@
         "Mighty Sounds 2026",
         "Mighty Sounds 2025",
         "Mighty Sounds 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-14"
     },
     "Fleuve Congo": {
       "genres": [
@@ -577,7 +596,8 @@
         "dub"
       ],
       "source": "https://rumpeltum.ch/portfolio/17-10-forrest-children-sound-system/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-14"
     },
     "Frères Cirad": {
       "genres": [],
@@ -1337,9 +1357,11 @@
       "checked": "2026-10-13"
     },
     "Peek-A-Boo": {
-      "genres": [],
-      "source": "",
-      "checked": "2026-10-13"
+      "genres": [
+        "ska"
+      ],
+      "source": "https://kammgarn.ch/event/el-flecha-negra-2/",
+      "checked": "2026-10-14"
     },
     "Phenomden": {
       "genres": [
