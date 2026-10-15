@@ -137,11 +137,18 @@
     var(--sun) fixed no-repeat,
     var(--bg);
 }
-/* Short phones: the month label scrolls with the content, the bar alone is enough chrome. */
+/* Short phones (most phones in portrait): the month head stays sticky but shrinks to one compact line –
+ * the visitor always knows which month the rows belong to (#60, owner decision 2026-10-15), and the
+ * chrome costs about 30 px instead of 60. */
 @media (max-height: 700px) {
   #list .month {
-    position: static;
-    padding-top: 0;
+    padding-top: var(--s-1);
+    padding-bottom: 2px;
+    margin-bottom: 0;
+    font-size: var(--fs-4);
+  }
+  #list .month .year {
+    font-size: var(--fs-0);
   }
 }
 #list section:first-child .month {
