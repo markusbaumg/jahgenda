@@ -165,3 +165,5 @@ Setting: **Search suggestions automatically: yes**
 - Junior Kelly — reggae, roots · Summerjam 2026, Summerjam 2025
 - Twinkle Brothers — roots, reggae · Rototom 2026, Rototom 2024
 - Peek-A-Boo — ska, found via Kammgarn
+- Roots Treatment — roots, dub, soundsystem, found via Neubad
+- Domb Vibration Sound System — soundsystem, dub, reggae, found via Rocking Chair

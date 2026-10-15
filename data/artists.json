@@ -425,6 +425,15 @@
       "source": "",
       "checked": "2026-10-14"
     },
+    "Domb Vibration Sound System": {
+      "genres": [
+        "soundsystem",
+        "dub",
+        "reggae"
+      ],
+      "source": "https://www.petzi.ch/en/events/63977-rocking-chair-mad-professor-guyuk-domb-vibration-sound-system-ch/",
+      "checked": "2026-10-15"
+    },
     "DoubleTrouble": {
       "genres": [],
       "source": "",
@@ -618,7 +627,8 @@
       "festivals": [
         "Reggae Jam 2026",
         "Reggae Jam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Genep'high": {
       "genres": [],
@@ -634,7 +644,8 @@
       "festivals": [
         "Reggae Jam 2026",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Gentleman": {
       "genres": [
@@ -658,7 +669,8 @@
         "dub"
       ],
       "source": "https://cafete.ch/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-15"
     },
     "Goulamas'K": {
       "genres": [
@@ -711,7 +723,8 @@
       "festivals": [
         "Reggae Jam 2026",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Iration Steppas": {
       "genres": [
@@ -723,7 +736,8 @@
       "festivals": [
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Irie Révoltés": {
       "genres": [
@@ -736,7 +750,8 @@
       "festivals": [
         "Mighty Sounds 2025",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Ironworks Dread": {
       "genres": [
@@ -744,7 +759,8 @@
         "roots"
       ],
       "source": "https://legroove.ch/agenda/sub-a-dub-2/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-15"
     },
     "Israel Vibration": {
       "genres": [
@@ -756,7 +772,8 @@
       "festivals": [
         "Plein-les-Watts 2026",
         "Rototom Sunsplash 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Jah Lil": {
       "genres": [
@@ -769,7 +786,8 @@
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Jahcoustix": {
       "genres": [
@@ -803,7 +821,8 @@
       "festivals": [
         "Chiemsee Reggae Summer 2026",
         "Reggae Jam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Jesse Royal": {
       "genres": [
@@ -816,7 +835,8 @@
         "Reeds Festival 2025",
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Joe Yorke": {
       "genres": [
@@ -828,7 +848,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Johnny Clarke": {
       "genres": [
@@ -840,7 +861,8 @@
       "festivals": [
         "Plein-les-Watts 2024",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Jonah Dan": {
       "genres": [
@@ -849,7 +871,8 @@
         "nyabinghi"
       ],
       "source": "https://eventbook.ro/music/bilete-ctrl-riddim-bandits-sound-system-presents-nomadix-jonah-dan-stepper-one-bass-healing-hi-fi?lang=ro",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-15"
     },
     "Julian Marley": {
       "genres": [
@@ -861,7 +884,8 @@
         "Summerjam 2026",
         "Rototom Sunsplash 2025",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-15"
     },
     "Junior Kelly": {
       "genres": [
@@ -1493,6 +1517,15 @@
       ],
       "source": "https://m.soundcloud.com/root-block-sound",
       "checked": "2026-10-13"
+    },
+    "Roots Treatment": {
+      "genres": [
+        "roots",
+        "dub",
+        "soundsystem"
+      ],
+      "source": "https://www.neubad.org/node/9538",
+      "checked": "2026-10-15"
     },
     "Ruff Pack Int.": {
       "genres": [],
