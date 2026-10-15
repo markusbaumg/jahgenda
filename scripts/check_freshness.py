@@ -14,7 +14,7 @@ the owner a "workflow failed" notification as well.
 Stdlib only. Needs GITHUB_TOKEN (issues: write) and GITHUB_REPOSITORY in the environment.
 Set DRY_RUN=1 to print the verdict without touching GitHub.
 
-Usage: python3 scripts/check_freshness.py [--max-age-hours 36]
+Usage: python3 scripts/check_freshness.py [--max-age-hours 30]
 """
 
 import json
@@ -244,7 +244,7 @@ def report(healthy, lines, now):
 
 
 def main(argv):
-    max_h = 36.0
+    max_h = 30.0
     if "--max-age-hours" in argv:
         i = argv.index("--max-age-hours") + 1
         try:

@@ -6,7 +6,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { assessHealth, parseTs } from "../src/lib/health.js";
+import { assessHealth, parseTs, MAX_AGE_H } from "../src/lib/health.js";
 import { dropKey, dedupeDrops, issueUrl } from "../src/lib/drops.js";
 import { markdown } from "../src/lib/markdown.js";
 
@@ -43,18 +43,18 @@ test("assessHealth: fresh and ok is healthy", () => {
   assert.ok(Math.abs(h.ageH - 1) < 1e-9);
 });
 
-test("assessHealth: older than 36 h is stale (the newest of the three stamps counts)", () => {
+test(`assessHealth: older than ${MAX_AGE_H} h is stale (the newest of the three stamps counts)`, () => {
   const files = {
-    status: { ok: true, at: ago(40) },
-    runs: { runs: [{ at: ago(37) }] },
-    shows: shows(3, { updated: ago(50) }),
+    status: { ok: true, at: ago(MAX_AGE_H + 4) },
+    runs: { runs: [{ at: ago(MAX_AGE_H + 1) }] },
+    shows: shows(3, { updated: ago(MAX_AGE_H + 14) }),
   };
   const h = assessHealth(files, NOW);
   assert.equal(h.healthy, false);
   assert.equal(h.stale, true);
   assert.equal(h.newestFrom, "runs.json");
-  assert.match(h.problems[0], /^Daten veraltet: 37\.0 h/);
-  assert.equal(assessHealth({ ...files, runs: { runs: [{ at: ago(35) }] } }, NOW).healthy, true);
+  assert.match(h.problems[0], new RegExp(`^Daten veraltet: ${MAX_AGE_H + 1}\\.0 h`));
+  assert.equal(assessHealth({ ...files, runs: { runs: [{ at: ago(MAX_AGE_H - 1) }] } }, NOW).healthy, true);
 });
 
 test("assessHealth: ok:false, zero shows, future stamps and no stamps are red; mock data with zero shows is not", () => {

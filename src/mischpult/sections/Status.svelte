@@ -1,6 +1,6 @@
 <script>
   /* Status: the heartbeat (data/status.json), the watchdog's verdict mirrored (src/lib/health.js – red when
-   * the data is older than 36 h or the last run reported ok: false), the data stamp and the links to the
+   * the data is older than 30 h or the last run reported ok: false), the data stamp and the links to the
    * routine and the watchdog issues. */
   import { assessHealth, MAX_AGE_H } from "../../lib/health.js";
   import { stamp, ago, RUNNER, SKILL, plural } from "../format.js";

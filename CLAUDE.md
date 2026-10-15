@@ -66,9 +66,9 @@ headline at 200 % text size).
   it must have **Network access = Full** (verified 2026-10-13 21:50: the first cloud run fetched skalender.net
   fine). The earlier routines on the personal gmail account were deleted by Kusi (2026-10-13 21:55). Fallback:
   `make cron-install` (launchd 06:10 on the Mac).
-- **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17 and 14:17 Zurich — GitHub dropped both cron fires on 2026-10-13; when no run shows up,
+- **Monitoring:** `.github/workflows/watchdog.yml` + `scripts/check_freshness.py` (daily 08:17, 14:17 and 20:17 Zurich; max age 30 h since #58 — GitHub dropped both cron fires on 2026-10-13; when no run shows up,
   `gh workflow run watchdog.yml` fires it by hand, `make watchdog` runs the check locally): stale
-  > 36 h or `status.json` ok:false → issue labelled `scraper-failed`; README badges. Skills write
+  > 30 h or `status.json` ok:false → issue labelled `scraper-failed`; README badges. Skills write
   > `data/status.json` every run and commit even without changes.
 - **Scraper proof:** a local run (`claude -p "/scrape-shows"`, branch `scrape-test`, worktree
   `../reggae-scrape-test`) found 29 real shows with sources, coordinates and genres — the skill works; the

@@ -108,7 +108,7 @@ quality-review: ## Preview the weekly quality-review issue (dropped candidates +
 	DRY_RUN=1 python3 scripts/quality_review.py --days 7 --links
 
 watchdog: ## Freshness check (same as the GitHub watchdog), without touching GitHub
-	DRY_RUN=1 python3 scripts/check_freshness.py --max-age-hours 36
+	DRY_RUN=1 python3 scripts/check_freshness.py --max-age-hours 30
 
 status: ## Show the last deploys and the last scraper run
 	gh run list -R markusbaumg/jahgenda -L 5

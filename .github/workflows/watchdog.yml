@@ -7,6 +7,8 @@ on:
     # Second fire at noon UTC: GitHub drops or delays scheduled runs at busy hours (the 06:17 fire was
     # skipped on 2026-10-13); the script is idempotent, so a second pass never duplicates the issue.
     - cron: "17 12 * * *"
+    # 20:17 Zurich (18:17 UTC): a 06:06 run that never happened is flagged the same evening (#58).
+    - cron: "17 18 * * *"
   workflow_dispatch:
 
 permissions:
@@ -26,5 +28,5 @@ jobs:
       - name: Check data freshness and sync the scraper-failed issue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAX_AGE_HOURS: "36"
+          MAX_AGE_HOURS: "30"
         run: python3 scripts/check_freshness.py --max-age-hours "$MAX_AGE_HOURS"

@@ -1,7 +1,7 @@
 /* The scraper's health as the watchdog sees it – a mirror of assess() in scripts/check_freshness.py, so
  * the Mischpult turns red exactly when the watchdog opens its `scraper-failed` issue:
  *   - the newest sign of life of the daily scraper (status.json `at` while it holds a scrape-shows heartbeat,
- *     the newest scrape-shows run in runs.json, shows.json `updated`) is older than 36 h, or lies more than
+ *     the newest scrape-shows run in runs.json, shows.json `updated`) is older than 30 h, or lies more than
  *     2 h in the future (clock or timezone bug) – a harvest-bands run or a hand correction (runner
  *     "manual") is no sign of life;
  *   - the newest scrape-shows verdict (status.json or that run's own runs.json entry) says ok: false;
@@ -9,7 +9,7 @@
  *   - there is no timestamp at all.
  * Pure: the files and the clock come in as arguments (tests/console.test.mjs). */
 
-export const MAX_AGE_H = 36;
+export const MAX_AGE_H = 30;
 const H = 3600 * 1000;
 
 /** ISO 8601 → epoch ms; a date-time without an offset counts as UTC (like parse_ts). Unparsable → null. */

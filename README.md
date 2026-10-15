@@ -269,10 +269,10 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   `data/runs.json`; the scraper commits even when nothing changed, and commits `ok: false` on failure.
   `scripts/validate_shows.py` checks the shape of `status.json` like that of the other data files, so a
   malformed heartbeat cannot be committed and silently blind the watchdog.
-- **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine) and again at 14:17 (GitHub sometimes skips a scheduled fire) and executes
+- **Watchdog:** `.github/workflows/watchdog.yml` runs daily at 08:17 Zurich (after the routine), 14:17 and 20:17 (GitHub sometimes skips a scheduled fire) and executes
   `scripts/check_freshness.py`: if the newest scrape-shows timestamp (status.json while it holds the
   scrape-shows heartbeat, the newest scrape-shows run, shows.json `updated` – a harvest-bands run or a hand
-  correction with runner `manual` does not count) is older than 36 h, the newest scrape-shows run reported
+  correction with runner `manual` does not count) is older than 30 h, the newest scrape-shows run reported
   failure (`ok: false` in status.json or in its runs.json entry), or shows.json is empty, it opens (or comments on) one issue labelled `scraper-failed`, @-mentions the owner
   and turns the badge above red; when healthy again it closes the issue. `make watchdog` runs the same check
   locally without touching GitHub.
@@ -280,7 +280,7 @@ at 06:10 (logs in `~/Library/Logs/jahgenda/`); `make cron-uninstall` removes it.
   log at https://claude.ai/code/routines.
 - **Mischpult (the owners' console, hidden):** https://markusbaumg.github.io/jahgenda/mischpult.html is one
   Svelte page (second Vite entry, `src/mischpult/`) with six tabs, each reachable by hash: **Status** (`#status`:
-  the heartbeat, the watchdog verdict mirrored from `check_freshness.py` – red when the data is older than 36 h or
+  the heartbeat, the watchdog verdict mirrored from `check_freshness.py` – red when the data is older than 30 h or
   the last run said `ok: false` – the data stamp, links to the routines and the `scraper-failed` issues),
   **Läufe** (`#laeufe`: every run of `runs.json`, collapsible, with the per-source table), **Aussortiert**
   (`#aussortiert`), **Quellen & Venues** (`#quellen`), **Prompt & Regeln** (`#prompt`: SKILL.md, criteria.md,
