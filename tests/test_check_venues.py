@@ -1,6 +1,10 @@
 """Tests for the judgement in scripts/check_venues.py (no network: nominatim() is faked). Run: make test"""
 
+import io
+import json
+import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from _scripts import load_script
@@ -103,3 +107,57 @@ class Lookup(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Verified(unittest.TestCase):
+    """A venue with "checked" is reported VERIFIED without a Nominatim request; --recheck asks anyway."""
+
+    def setUp(self):
+        self._nominatim, self._venues = C.nominatim, C.VENUES
+        self.calls = []
+
+        def nominatim(query, limit=3):
+            self.calls.append(query)
+            return [dict(hit("Dachstock, Bern, Schweiz"), lat="46.953", lon="7.4407")]
+
+        C.nominatim = nominatim
+        self.tmp = tempfile.TemporaryDirectory()
+        C.VENUES = Path(self.tmp.name) / "venues.json"
+        C.VENUES.write_text(
+            json.dumps(
+                {
+                    "venues": {
+                        "Dachstock": {"city": "Bern", "canton": "BE", "lat": 46.953, "lon": 7.4407},
+                        "Gurten": {
+                            "city": "Bern",
+                            "canton": "BE",
+                            "lat": 46.9196,
+                            "lon": 7.4397,
+                            "checked": "2026-10-15",
+                        },
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def tearDown(self):
+        C.nominatim, C.VENUES = self._nominatim, self._venues
+        self.tmp.cleanup()
+
+    def run_main(self, *argv):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = C.main(list(argv))
+        return code, out.getvalue()
+
+    def test_checked_venue_is_verified_without_a_request(self):
+        code, out = self.run_main()
+        self.assertEqual(code, 0, out)
+        self.assertIn("VERIFIED 2026-10-15", out)
+        self.assertEqual(self.calls, ["Dachstock, Bern"])  # only the unverified venue was looked up
+
+    def test_recheck_asks_nominatim_for_verified_venues_too(self):
+        code, out = self.run_main("--recheck")
+        self.assertNotIn("VERIFIED", out)
+        self.assertEqual(len(self.calls), 2)

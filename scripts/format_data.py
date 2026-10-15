@@ -89,7 +89,7 @@ def format_runs(data):
     return json.dumps(out, ensure_ascii=False, indent=2) + "\n"
 
 
-VENUE_ORDER = ["city", "canton", "lat", "lon", "url", "scrape", "hint"]
+VENUE_ORDER = ["city", "canton", "lat", "lon", "url", "scrape", "checked", "hint"]
 
 
 def format_venues(data):

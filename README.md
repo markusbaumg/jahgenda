@@ -376,8 +376,10 @@ make harvest      # suggest bands from festival line-ups
 `source` is `mock` (sample data, the page shows a notice) or `scraper`.
 
 `data/venues.json`: `{ "venues": { "Dachstock": { "city": "Bern", "canton": "BE", "lat": 46.953, "lon": 7.4407,
-"url": "https://www.dachstock.ch/events", "scrape": true, "hint": "…" } } }` – `scrape: true` means the
-scraper reads this venue's programme on every run; `hint` tells it where the events are on the page.
+"url": "https://www.dachstock.ch/events", "scrape": true, "checked": "2026-10-15", "hint": "…" } } }` –
+`scrape: true` means the scraper reads this venue's programme on every run; `hint` tells it where the events
+are on the page; `checked` (optional, YYYY-MM-DD) says a human verified the coordinates, so
+`scripts/check_venues.py` reports the venue as VERIFIED instead of asking OpenStreetMap (`--recheck` asks anyway).
 
 `data/artists.json`: `{ "artists": { "Dub Inc": { "genres": ["reggae", "dub"], "source": "https://fr.wikipedia.org/wiki/Dub_Inc",
 "checked": "2026-10-13", "festivals": ["Summerjam 2026"], "tour_checked": "2026-10-13" } } }` – `source`

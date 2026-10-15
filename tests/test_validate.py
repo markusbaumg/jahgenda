@@ -195,6 +195,13 @@ class VenueChecks(unittest.TestCase):
         self.assertTrue(any("near-duplicate" in e for e in errs))
         self.assertTrue(V.check_venues({"venues": []})[0])
 
+    def test_venue_checked_is_an_iso_date(self):
+        base = {"city": "Bern", "canton": "BE", "lat": 46.95, "lon": 7.44}
+        ok, _ = V.check_venues({"venues": {"A": dict(base, checked="2026-10-15")}})
+        self.assertEqual(ok, [])
+        bad, _ = V.check_venues({"venues": {"A": dict(base, checked="yesterday")}})
+        self.assertTrue(any("'checked' must be YYYY-MM-DD" in e for e in bad), bad)
+
 
 class RunChecks(unittest.TestCase):
     def test_runs(self):

@@ -259,6 +259,7 @@
       "lon": 9.7233,
       "url": "https://www.club-vaudeville.de/",
       "scrape": true,
+      "checked": "2026-10-13",
       "hint": "Lindau (Bodensee), nearby region D. Von-Behring-Strasse 6-8, Reutin (Nominatim amenity/nightclub), not on the island. Programme on the homepage. Reggae relevance: high — books ska/reggae touring acts (Dubioza Kolektiv)."
     },
     "Conrad Sohm": {
@@ -385,6 +386,7 @@
       "lon": 7.6075,
       "url": "https://www.elysia.ch/",
       "scrape": false,
+      "checked": "2026-10-13",
       "hint": "Frankfurt-Strasse 36 on the Dreispitz, 4142 Münchenstein (BL), not Basel city. Next.js page with an empty events div; the JSON API https://www.elysia.ch/api/events returns [{slug,title,date 'YYYY-MM-DD',presstext}]. Reggae relevance: low — house/techno club nights."
     },
     "ESSE Musicbar": {
@@ -421,6 +423,7 @@
       "lon": 6.9568,
       "url": "https://chantdugros.ch/",
       "scrape": false,
+      "checked": "2026-10-15",
       "hint": "Homepage currently only has dates/news (next 8-11 Sept 2027); line-up appears in spring at /programmation/ grouped by day, re-check from March. Reggae relevance: medium — past editions booked Dub Inc, Danakil, Tryo. Koordinaten geprüft 2026-10-15 (#59): Le Noirmont Dorf (OSM 47.2243,6.9567) – der 104-km-CHECK war ein Nominatim-Fehltreffer."
     },
     "flon": {
@@ -547,6 +550,7 @@
       "lon": 7.4397,
       "url": "https://gurtenfestival.ch/de/",
       "scrape": false,
+      "checked": "2026-10-15",
       "hint": "Line-up is rendered client-side (HTML only has early-bird ticket text); check news or ticketing announcements instead. Reggae relevance: low — big July pop/rock festival, reggae acts rare. Koordinaten geprüft 2026-10-15 (#59): Gurten Kulm (OSM 46.9192,7.4397) = Festivalgelände, nicht das Stadtzentrum – der Nominatim-CHECK ist ein Fehltreffer."
     },
     "Haberhaus Bühne": {
@@ -799,6 +803,7 @@
       "lon": 7.5376,
       "url": "https://kreuzkultur.ch/home/",
       "scrape": false,
+      "checked": "2026-10-15",
       "hint": "Programme on /home/ is server-rendered: '<Title> DO 15 October 2026 ... 20.00 Uhr CHF ...' (English month names). Reggae relevance: low — Kleinkunst, quizzes, small concerts in the Kreuzsaal. Koordinaten geprüft 2026-10-15 (#59): Kreuzgasse 4, Solothurn laut OSM 47.2068,7.5376."
     },
     "KUFA": {
@@ -1254,6 +1259,7 @@
       "lon": 9.3321,
       "url": "https://www.openairsg.ch/",
       "scrape": false,
+      "checked": "2026-10-15",
       "hint": "Site is script-rendered, curl shows only navigation; line-up page needs a browser or press coverage. Festival site is the Sittertobel valley west of the city (coordinates are the city centre). Reggae relevance: medium — regularly books reggae/dancehall acts in late June. Koordinaten geprüft 2026-10-15 (#59): Festivalgelände Sittertobel (openairsg.ch/de/info/anreise: «Das Sittertobel, in dem das Festival stattfindet»; OSM Sittertobelweg 47.4224,9.3321), vorher stand hier das Stadtzentrum."
     },
     "OXIL": {
@@ -1353,6 +1359,7 @@
       "lon": 9.5944,
       "url": "https://www.poolbar.at/programm",
       "scrape": true,
+      "checked": "2026-10-15",
       "hint": "Altes Hallenbad Feldkirch, 10 km from Liechtenstein; programme and news text (artist names, German prose) are in the server-delivered HTML/embedded JSON, dates as 'Fr. 01.08.' or in prose, festival July-August with the line-up from March. Reggae relevance: high — Alborosie and GReeeN in 2026, Patrice in 2025. Koordinaten geprüft 2026-10-15 (#59): Altes Hallenbad, Reichenfeldgasse 10 (OSM 47.2345,9.5944) exakt."
     },
     "Presswerk Arbon": {
@@ -1605,6 +1612,7 @@
       "lon": 9.0679,
       "url": "https://soundofglarus.ch/",
       "scrape": false,
+      "checked": "2026-10-15",
       "hint": "Open-air on the Zaunplatz in late August; line-up on the homepage as 'DONNERSTAG, 27.08.2026' then 'Act (CC) | stage | time', check in spring. Reggae relevance: low — Swiss pop/rock mainstream. Koordinaten geprüft 2026-10-15 (#59): Zaunplatz Glarus (OSM 47.0384,9.0679) exakt."
     },
     "Sous Soul": {

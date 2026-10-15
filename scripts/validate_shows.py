@@ -90,7 +90,7 @@ SHOW_OPTIONAL = {
 }
 ARTIST_FIELDS = {"genres", "source", "checked", "festivals", "tour_checked"}
 VENUE_REQUIRED = {"city": str, "canton": str, "lat": (int, float), "lon": (int, float)}
-VENUE_OPTIONAL = {"url": str, "scrape": bool, "hint": str}
+VENUE_OPTIONAL = {"url": str, "scrape": bool, "hint": str, "checked": str}
 SKILLS = ("scrape-shows", "harvest-bands")
 STATUS_FIELDS = {"ok", "skill", "at", "runner", "counts", "failed_sources", "error"}
 COUNT_KEYS = {"added", "updated", "removed", "total"}
@@ -407,6 +407,11 @@ def check_venues(data):
                 errs.append(f"{where}: coordinates are outside Switzerland and its border region")
         if v.get("url") and not URL_RE.match(v["url"]):
             errs.append(f"{where}: url must start with http(s)://")
+        if "checked" in v:  # the day a human verified the coordinates (check_venues.py then skips OSM)
+            try:
+                datetime.strptime(str(v["checked"]), "%Y-%m-%d")
+            except ValueError:
+                errs.append(f"{where}: 'checked' must be YYYY-MM-DD")
     return errs, keys
 
 

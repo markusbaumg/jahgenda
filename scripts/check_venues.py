@@ -11,6 +11,9 @@ prints one line per venue:
     name | stored | nominatim | distance_m | OK/CHECK
 
 OK     the chosen hit lies within --max-distance metres (default 150).
+VERIFIED  a human verified the point (venue has "checked": "YYYY-MM-DD"); Nominatim is not
+       asked unless --recheck is given. Festival grounds and clubs OSM does not know by name
+       live here, so they stop showing up as CHECK on every run.
 CITY   OSM does not know the venue by name; the stored point was compared with
        the city centre and is within 1500 m of it (also used for venues whose
        hint says "Koordinaten: Stadtmitte"). Fine, but verify once by hand.
@@ -24,7 +27,8 @@ Usage: python3 scripts/check_venues.py [--max-distance M] [--only NAME ...] [--j
   --max-distance M   OK threshold in metres (default 150)
   --only NAME        check only the venues named (repeatable, case-insensitive)
   --json FILE        also write the raw Nominatim hits (up to 3 per query) to FILE
-Exit code 0 = everything OK/CITY, 1 = at least one CHECK or lookup error.
+  --recheck          also ask Nominatim about venues a human already verified ("checked")
+Exit code 0 = everything OK/CITY/VERIFIED, 1 = at least one CHECK or lookup error.
 If Nominatim keeps answering 429/503 (rate limit) the run stops early - wait a few minutes.
 """
 
@@ -159,6 +163,7 @@ def main(argv):
     ap.add_argument("--max-distance", type=float, default=150, metavar="M")
     ap.add_argument("--only", action="append", default=[], metavar="NAME")
     ap.add_argument("--json", metavar="FILE")
+    ap.add_argument("--recheck", action="store_true")
     args = ap.parse_args(argv)
 
     data = json.loads(VENUES.read_text(encoding="utf-8"))
@@ -177,6 +182,9 @@ def main(argv):
     print("-" * len(header))
     for checked, (name, v) in enumerate(venues.items()):
         stored = fmt_point(v["lat"], v["lon"])
+        if v.get("checked") and not args.recheck:
+            print(f"{name:{width}} | {stored:15} | {'-':15} | {'-':>10} | VERIFIED {v['checked']}")
+            continue
         city_centre = CITY_CENTRE_MARK in (v.get("hint") or "")
         try:
             if city_centre:
