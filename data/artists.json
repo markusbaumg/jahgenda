@@ -432,7 +432,8 @@
         "reggae"
       ],
       "source": "https://www.petzi.ch/en/events/63977-rocking-chair-mad-professor-guyuk-domb-vibration-sound-system-ch/",
-      "checked": "2026-10-15"
+      "checked": "2026-10-15",
+      "tour_checked": "2026-10-16"
     },
     "DoubleTrouble": {
       "genres": [],
@@ -617,6 +618,13 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Galas": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://www.reggae.be/en/magazine/archive/2024-09-03-de-strangers-chant-away-la-tempesta-dischi/",
+      "checked": "2026-10-16"
     },
     "Ganjaman": {
       "genres": [
@@ -897,7 +905,8 @@
       "festivals": [
         "Summerjam 2026",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "K. Evans": {
       "genres": [],
@@ -938,7 +947,8 @@
         "reggae"
       ],
       "source": "https://www.kalleskaviar.ch",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-16"
     },
     "Kaya": {
       "genres": [],
@@ -956,7 +966,8 @@
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Kumar Fyah": {
       "genres": [
@@ -968,7 +979,8 @@
       "festivals": [
         "Rototom Sunsplash 2025",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Ky-Mani Marley": {
       "genres": [
@@ -982,7 +994,8 @@
         "Rototom Sunsplash 2025",
         "Plein-les-Watts 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "L'Entourloop": {
       "genres": [
@@ -996,7 +1009,8 @@
         "Reeds Festival 2025",
         "Rototom Sunsplash 2025",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Lagwada": {
       "genres": [],
@@ -1010,7 +1024,8 @@
         "reggae"
       ],
       "source": "https://lebirrette.bandcamp.com/music",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-16"
     },
     "Leah Farmer": {
       "genres": [],
@@ -1032,7 +1047,8 @@
         "Chiemsee Reggae Summer 2026",
         "Summerjam 2026",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Limitless Soundsystem": {
       "genres": [],
@@ -1052,7 +1068,8 @@
         "Ruhr Reggae Summer 2026",
         "Plein-les-Watts 2024",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Los Billtones": {
       "genres": [
@@ -1063,7 +1080,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Reeds Festival 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Los Fastidios": {
       "genres": [],
@@ -1081,7 +1099,8 @@
         "Rototom Sunsplash 2026",
         "Summerjam 2026",
         "Reggae Jam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Macka B": {
       "genres": [
@@ -1093,7 +1112,8 @@
       "festivals": [
         "Chiemsee Reggae Summer 2026",
         "Rototom Sunsplash 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Mad Professor": {
       "genres": [
@@ -1105,7 +1125,8 @@
       "festivals": [
         "Afro-Pfingsten 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Mango Wood": {
       "genres": [
@@ -1117,7 +1138,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-16"
     },
     "Marcus Gad": {
       "genres": [
