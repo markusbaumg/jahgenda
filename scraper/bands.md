@@ -167,3 +167,5 @@ Setting: **Search suggestions automatically: yes**
 - Peek-A-Boo — ska, found via Kammgarn
 - Roots Treatment — roots, dub, soundsystem, found via Neubad
 - Domb Vibration Sound System — soundsystem, dub, reggae, found via Rocking Chair
+- David Rodigan — soundsystem, reggae, dancehall, found via Alte Kaserne Zürich
+- Joe Ariwa — dub, reggae, found via Alte Kaserne Zürich

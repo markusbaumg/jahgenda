@@ -364,6 +364,15 @@
       "source": "https://en.wikipedia.org/wiki/Current_Swell",
       "checked": "2026-10-13"
     },
+    "David Rodigan": {
+      "genres": [
+        "soundsystem",
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://en.wikipedia.org/wiki/David_Rodigan",
+      "checked": "2026-10-18"
+    },
     "De Strangers": {
       "genres": [
         "roots",
@@ -540,6 +549,11 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Sins%C3%A9milia",
       "checked": "2026-10-13"
+    },
+    "Enzout": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-18"
     },
     "Esteban Rey": {
       "genres": [],
@@ -846,6 +860,14 @@
       ],
       "tour_checked": "2026-10-15"
     },
+    "Joe Ariwa": {
+      "genres": [
+        "dub",
+        "reggae"
+      ],
+      "source": "https://oye-records.com/releases/alpha-steppa-joe-ariwa-lee-scratch-perry-open-door-ra-ta-ta-ta",
+      "checked": "2026-10-18"
+    },
     "Joe Yorke": {
       "genres": [
         "reggae",
@@ -894,6 +916,11 @@
         "Summerjam 2024"
       ],
       "tour_checked": "2026-10-15"
+    },
+    "Junior Indian": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-18"
     },
     "Junior Kelly": {
       "genres": [
@@ -1393,7 +1420,8 @@
         "roots"
       ],
       "source": "https://it.wikipedia.org/wiki/Paolo_Baldini",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Paolo Baldini DubFiles": {
       "genres": [
@@ -1415,7 +1443,8 @@
         "ska"
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/alternativ/rubigen/pedestrians-goodbye-tour_AWraJA8",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Peek-A-Boo": {
       "genres": [
@@ -1429,7 +1458,8 @@
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Phenomden",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Pow Pow Movement": {
       "genres": [
@@ -1494,7 +1524,8 @@
         "dub"
       ],
       "source": "https://www.passetonbillet.fr/en/artists/rakoon",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Ras Sherby": {
       "genres": [
@@ -1502,7 +1533,8 @@
         "dub"
       ],
       "source": "https://soundshelter.net/vinyl/ras-sherby-jah-thomas-channel-one-players-of-instruments-live-in-love",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Rat Race": {
       "genres": [],
@@ -1525,14 +1557,16 @@
         "soundsystem"
       ],
       "source": "https://fribourg.ch/fr/fribourg/evenements/dub-arena/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Refrigerators": {
       "genres": [
         "ska"
       ],
       "source": "https://www.last.fm/de/music/Refrigerators/Kompressor",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Romain Virgo": {
       "genres": [
@@ -1553,7 +1587,8 @@
         "reggae"
       ],
       "source": "https://m.soundcloud.com/root-block-sound",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Roots Treatment": {
       "genres": [
@@ -1602,7 +1637,8 @@
         "rocksteady"
       ],
       "source": "https://www.swissinfo.ch/eng/culture/open-season-get-ready/1133424",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Sara Lugo": {
       "genres": [
@@ -1672,6 +1708,11 @@
         "Rototom Sunsplash 2025"
       ]
     },
+    "Silva Stone Sound": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-18"
+    },
     "Sinai Sound System": {
       "genres": [
         "soundsystem",
@@ -1681,7 +1722,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-18"
     },
     "Sinsemilia": {
       "genres": [
@@ -1689,14 +1731,16 @@
         "ska"
       ],
       "source": "https://fr.wikipedia.org/wiki/Sinsemilia",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Sir Jean": {
       "genres": [
         "dub"
       ],
       "source": "https://fr.wikipedia.org/wiki/Sir_Jean",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Sixyka": {
       "genres": [],
@@ -1726,7 +1770,8 @@
         "ska"
       ],
       "source": "https://fr.wikipedia.org/wiki/Skarface",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Skarra Mucci": {
       "genres": [
@@ -1758,7 +1803,8 @@
         "reggae"
       ],
       "source": "https://www.haute-savoie-tourisme.org/evenements/musique/reggae/7922577-club-sound-system",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Soul Rebel Sound": {
       "genres": [
@@ -1767,7 +1813,8 @@
         "dancehall"
       ],
       "source": "https://www.mixcloud.com/SoulRebelSound/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-18"
     },
     "Soul Vibes": {
       "genres": [],
