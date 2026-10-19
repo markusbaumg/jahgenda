@@ -371,7 +371,8 @@
         "dancehall"
       ],
       "source": "https://en.wikipedia.org/wiki/David_Rodigan",
-      "checked": "2026-10-18"
+      "checked": "2026-10-18",
+      "tour_checked": "2026-10-19"
     },
     "De Strangers": {
       "genres": [
@@ -866,7 +867,8 @@
         "reggae"
       ],
       "source": "https://oye-records.com/releases/alpha-steppa-joe-ariwa-lee-scratch-perry-open-door-ra-ta-ta-ta",
-      "checked": "2026-10-18"
+      "checked": "2026-10-18",
+      "tour_checked": "2026-10-19"
     },
     "Joe Yorke": {
       "genres": [
@@ -1155,6 +1157,15 @@
       ],
       "tour_checked": "2026-10-16"
     },
+    "Mal Élevé": {
+      "genres": [
+        "reggae",
+        "dancehall",
+        "ska"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Mal_%C3%89lev%C3%A9",
+      "checked": "2026-10-19"
+    },
     "Mango Wood": {
       "genres": [
         "ska",
@@ -1413,6 +1424,11 @@
       ],
       "tour_checked": "2026-10-17"
     },
+    "Osy": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-19"
+    },
     "Paolo Baldini": {
       "genres": [
         "dub",
@@ -1451,7 +1467,8 @@
         "ska"
       ],
       "source": "https://kammgarn.ch/event/el-flecha-negra-2/",
-      "checked": "2026-10-14"
+      "checked": "2026-10-14",
+      "tour_checked": "2026-10-19"
     },
     "Phenomden": {
       "genres": [
@@ -1473,7 +1490,8 @@
         "Reggae Jam 2026",
         "Ruhr Reggae Summer 2026",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Protoje": {
       "genres": [
@@ -1485,7 +1503,8 @@
         "Rototom Sunsplash 2026",
         "Ruhr Reggae Summer 2026",
         "Summerjam 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Quatre in Toulouse": {
       "genres": [],
@@ -1508,7 +1527,8 @@
         "Plein-les-Watts 2025",
         "Reeds Festival 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Radio Rhum Reggae": {
       "genres": [
@@ -1517,7 +1537,8 @@
         "dub"
       ],
       "source": "https://bikinitest.ch/1232/voir/2026/10/17",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-19"
     },
     "Rakoon": {
       "genres": [
@@ -1579,7 +1600,8 @@
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Root Block Sound": {
       "genres": [
@@ -1597,7 +1619,8 @@
         "soundsystem"
       ],
       "source": "https://www.neubad.org/node/9538",
-      "checked": "2026-10-15"
+      "checked": "2026-10-15",
+      "tour_checked": "2026-10-19"
     },
     "Ruff Pack Int.": {
       "genres": [],
@@ -1617,7 +1640,8 @@
         "Summerjam 2026",
         "Reggae Jam 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Samory I": {
       "genres": [
@@ -1629,7 +1653,8 @@
       "festivals": [
         "Reggae Jam 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Santosh Aerthott": {
       "genres": [
@@ -1649,7 +1674,8 @@
       "festivals": [
         "Lakesplash 2026",
         "Reggae Jam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Savage Dub": {
       "genres": [],
@@ -1680,7 +1706,8 @@
       "festivals": [
         "Rototom Sunsplash 2026",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Sika Rlion": {
       "genres": [
@@ -1692,7 +1719,8 @@
       "festivals": [
         "Plein-les-Watts 2025",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Silly Walks Discotheque": {
       "genres": [
@@ -1706,7 +1734,8 @@
         "Chiemsee Reggae Summer 2026",
         "Reggae Jam 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-19"
     },
     "Silva Stone Sound": {
       "genres": [],

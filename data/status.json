@@ -1,14 +1,14 @@
 {
   "ok": true,
   "skill": "scrape-shows",
-  "at": "2026-10-18T06:17:18+02:00",
+  "at": "2026-10-19T06:14:19+02:00",
   "runner": "cloud",
   "counts": {
-    "added": 2,
-    "updated": 9,
-    "removed": 7,
-    "total": 95
+    "added": 1,
+    "updated": 0,
+    "removed": 0,
+    "total": 96
   },
-  "failed_sources": 12,
+  "failed_sources": 5,
   "error": null
 }

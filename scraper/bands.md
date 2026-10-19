@@ -169,3 +169,4 @@ Setting: **Search suggestions automatically: yes**
 - Domb Vibration Sound System — soundsystem, dub, reggae, found via Rocking Chair
 - David Rodigan — soundsystem, reggae, dancehall, found via Alte Kaserne Zürich
 - Joe Ariwa — dub, reggae, found via Alte Kaserne Zürich
+- Mal Élevé — reggae, dancehall, ska, found via Dachstock
