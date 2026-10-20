@@ -170,3 +170,5 @@ Setting: **Search suggestions automatically: yes**
 - David Rodigan — soundsystem, reggae, dancehall, found via Alte Kaserne Zürich
 - Joe Ariwa — dub, reggae, found via Alte Kaserne Zürich
 - Mal Élevé — reggae, dancehall, ska, found via Dachstock
+- Prince Jamo — reggae, roots, found via Le Groove
+- Zongo Sound — dub, roots, found via Le Groove

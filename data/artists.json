@@ -1164,7 +1164,8 @@
         "ska"
       ],
       "source": "https://de.wikipedia.org/wiki/Mal_%C3%89lev%C3%A9",
-      "checked": "2026-10-19"
+      "checked": "2026-10-19",
+      "tour_checked": "2026-10-20"
     },
     "Mango Wood": {
       "genres": [
@@ -1493,6 +1494,14 @@
       ],
       "tour_checked": "2026-10-19"
     },
+    "Prince Jamo": {
+      "genres": [
+        "reggae",
+        "roots"
+      ],
+      "source": "https://www.welcometosheffield.co.uk/content/events/dubcentral-prince-jamo",
+      "checked": "2026-10-20"
+    },
     "Protoje": {
       "genres": [
         "reggae"
@@ -1791,7 +1800,8 @@
         "ska"
       ],
       "source": "https://skalender.net/artists/skaboom/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-20"
     },
     "Skarface": {
       "genres": [
@@ -1875,7 +1885,8 @@
         "Chiemsee Reggae Summer 2026",
         "Summerjam 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "Sr. Wilson": {
       "genres": [
@@ -1887,14 +1898,16 @@
       "checked": "2026-10-13",
       "festivals": [
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "Steel Alive": {
       "genres": [
         "dub"
       ],
       "source": "https://www.haute-savoie-tourisme.org/evenements/musique/reggae/7922577-club-sound-system",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-20"
     },
     "Steel Pulse": {
       "genres": [
@@ -1907,7 +1920,8 @@
         "Rototom Sunsplash 2025",
         "Plein-les-Watts 2024",
         "Summerjam 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "Stormise": {
       "genres": [],
@@ -1923,7 +1937,8 @@
       "festivals": [
         "Reggae Jam 2026",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "Subsanity Soundsystem": {
       "genres": [
@@ -1931,7 +1946,8 @@
         "soundsystem"
       ],
       "source": "https://subsanitysoundsystem.bandcamp.com",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-20"
     },
     "Talco": {
       "genres": [
@@ -1954,7 +1970,8 @@
         "Reeds Festival 2026",
         "Reggae Jam 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "The Busters": {
       "genres": [
@@ -1964,7 +1981,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Mighty Sounds 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "The Congos": {
       "genres": [
@@ -1976,7 +1994,8 @@
       "festivals": [
         "Summerjam 2026",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "The Fags": {
       "genres": [],
@@ -1988,7 +2007,8 @@
         "ska-punk"
       ],
       "source": "https://thefallingdice.bandcamp.com",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-20"
     },
     "The Scrucialists": {
       "genres": [
@@ -1997,7 +2017,8 @@
         "dub"
       ],
       "source": "https://de.wikipedia.org/wiki/The_Scrucialists",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-20"
     },
     "The Skatalites": {
       "genres": [
@@ -2023,7 +2044,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Mighty Sounds 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-20"
     },
     "The Troublemakers": {
       "genres": [
@@ -2031,7 +2053,8 @@
         "ska"
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/musik/zofingen/the-upsessions-nl-the-troublemakers-it_Aed8QBF",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-20"
     },
     "The Upsessions": {
       "genres": [
@@ -2214,6 +2237,14 @@
       ],
       "source": "https://www.guidle.com/it/veranstaltungen/musik/bern/zion-step_Ap7EQP7",
       "checked": "2026-10-13"
+    },
+    "Zongo Sound": {
+      "genres": [
+        "dub",
+        "roots"
+      ],
+      "source": "https://zongosound1.bandcamp.com",
+      "checked": "2026-10-20"
     },
     "Zoo Escape": {
       "genres": [],
