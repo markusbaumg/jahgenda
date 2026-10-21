@@ -172,3 +172,7 @@ Setting: **Search suggestions automatically: yes**
 - Mal Élevé — reggae, dancehall, ska, found via Dachstock
 - Prince Jamo — reggae, roots, found via Le Groove
 - Zongo Sound — dub, roots, found via Le Groove
+- Jô — reggae, dancehall, found via Le Rez-Usine
+- Derrick Sound — soundsystem, dancehall, reggae, found via Le Rez-Usine
+- Riders Connection — reggae, found via Schüür
+- Ami Warning — reggae, found via Rössli

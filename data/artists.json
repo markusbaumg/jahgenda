@@ -383,6 +383,15 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-13"
     },
+    "Derrick Sound": {
+      "genres": [
+        "soundsystem",
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://www.petzi.ch/en/events/65298-kalvingrad-usine-jo-ptbr-little-lion-sound-ch-derrick-sound-ch/",
+      "checked": "2026-10-21"
+    },
     "Dj Doctor Belise": {
       "genres": [],
       "source": "",
@@ -936,6 +945,14 @@
         "Summerjam 2025"
       ],
       "tour_checked": "2026-10-16"
+    },
+    "Jô": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.petzi.ch/en/events/65298-kalvingrad-usine-jo-ptbr-little-lion-sound-ch-derrick-sound-ch/",
+      "checked": "2026-10-21"
     },
     "K. Evans": {
       "genres": [],
@@ -1500,7 +1517,8 @@
         "roots"
       ],
       "source": "https://www.welcometosheffield.co.uk/content/events/dubcentral-prince-jamo",
-      "checked": "2026-10-20"
+      "checked": "2026-10-20",
+      "tour_checked": "2026-10-21"
     },
     "Protoje": {
       "genres": [
@@ -1597,6 +1615,13 @@
       "source": "https://www.last.fm/de/music/Refrigerators/Kompressor",
       "checked": "2026-10-13",
       "tour_checked": "2026-10-18"
+    },
+    "Riders Connection": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://filtermusicgroup.com/collections/riders-connection",
+      "checked": "2026-10-21"
     },
     "Romain Virgo": {
       "genres": [
@@ -2063,7 +2088,8 @@
         "reggae"
       ],
       "source": "https://www.themissingsync.nl/artists/the-upsessions",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Theylovepiet": {
       "genres": [],
@@ -2079,7 +2105,8 @@
       "festivals": [
         "Rototom Sunsplash 2025",
         "Summerjam 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-21"
     },
     "Tiken Jah Fakoly": {
       "genres": [
@@ -2090,7 +2117,8 @@
       "festivals": [
         "Ruhr Reggae Summer 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-21"
     },
     "Tobin Taxi": {
       "genres": [],
@@ -2102,7 +2130,8 @@
         "ska-punk"
       ],
       "source": "https://todosdestinos.bandcamp.com",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Treesha": {
       "genres": [
@@ -2114,7 +2143,8 @@
         "Chiemsee Reggae Summer 2026",
         "Plein-les-Watts 2026",
         "Summerjam 2026"
-      ]
+      ],
+      "tour_checked": "2026-10-21"
     },
     "Tribute Sound System": {
       "genres": [],
@@ -2126,7 +2156,8 @@
         "reggae"
       ],
       "source": "https://fr.wikipedia.org/wiki/Tryo",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Tuzi Sound System": {
       "genres": [],
@@ -2143,7 +2174,8 @@
       "festivals": [
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2024"
-      ]
+      ],
+      "tour_checked": "2026-10-21"
     },
     "Two Tone Club": {
       "genres": [
@@ -2151,28 +2183,32 @@
         "rocksteady"
       ],
       "source": "https://fr.wikipedia.org/wiki/Two_Tone_Club",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Tóke": {
       "genres": [
         "reggae"
       ],
       "source": "https://title-mag.com/toke-and-his-new-single-brown-face-take-a-stand-against-racism/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Umberto Echo": {
       "genres": [
         "dub"
       ],
       "source": "https://www.umbertoecho.com",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Vanupié": {
       "genres": [
         "reggae"
       ],
       "source": "https://fr.wikipedia.org/wiki/Vanupié",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Vesper T": {
       "genres": [],
@@ -2189,7 +2225,8 @@
       "checked": "2026-10-13",
       "festivals": [
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-21"
     },
     "Wading Birds Sound System": {
       "genres": [
@@ -2198,7 +2235,8 @@
         "dub"
       ],
       "source": "https://www.lausanne-tourisme.ch/fr/evenement/romandub-2",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-21"
     },
     "Warrior Sound": {
       "genres": [
@@ -2212,7 +2250,8 @@
         "Reggae Jam 2026",
         "Ruhr Reggae Summer 2026",
         "Rototom Sunsplash 2025"
-      ]
+      ],
+      "tour_checked": "2026-10-21"
     },
     "Waskabi": {
       "genres": [
