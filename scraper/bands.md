@@ -176,3 +176,7 @@ Setting: **Search suggestions automatically: yes**
 - Derrick Sound — soundsystem, dancehall, reggae, found via Le Rez-Usine
 - Riders Connection — reggae, found via Schüür
 - Ami Warning — reggae, found via Rössli
+- Collie Herb — reggae, dancehall, found via KultA
+- The Mighty Roots — reggae, found via KultA
+- Curly Bird — reggae, found via KultA
+- Mo'Fyah Sound — soundsystem, reggae, found via KultA

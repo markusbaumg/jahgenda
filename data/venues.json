@@ -833,6 +833,14 @@
       "scrape": false,
       "hint": "Calendar is JavaScript-rendered (curl shows only navigation and a renovation notice); building under renovation in 2026, programme at interim locations. Reggae relevance: low."
     },
+    "KultA": {
+      "city": "Olten",
+      "canton": "SO",
+      "lat": 47.35125,
+      "lon": 7.90354,
+      "scrape": false,
+      "hint": "Kulturlokal KultA, Römerstrasse 7, Olten (Koordinaten aus der Eventfrog-Adresse). Reggae-Abende mit Collie Herb; Tickets via Eventfrog."
+    },
     "Kultur hoch 3": {
       "city": "Herisau",
       "canton": "AR",

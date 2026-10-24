@@ -7,7 +7,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/8°6_Crew",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Akeem Garrison": {
       "genres": [
@@ -16,7 +16,7 @@
       ],
       "source": "https://soundcharts.com/en/artist/0b5a5afe-e562-11e8-a6e0-00163ec5a2fb",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Alborosie": {
       "genres": [
@@ -33,7 +33,7 @@
         "Summerjam 2025",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Alex Dynamite & The Pyrolites": {
       "genres": [],
@@ -57,7 +57,8 @@
         "reggae"
       ],
       "source": "https://de.wikipedia.org/wiki/Ami_Warning",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-24"
     },
     "Arrested Denial": {
       "genres": [
@@ -91,7 +92,7 @@
       ],
       "source": "https://basementroots.bandcamp.com",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Baspa Ricardo": {
       "genres": [],
@@ -122,7 +123,7 @@
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/alternativ/luzern/rude-und-rebel-ska-fest_AcTf6rt",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Bee": {
       "genres": [],
@@ -180,7 +181,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Brain_Damage_(Band)",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Breakfast Mood": {
       "genres": [
@@ -191,7 +192,7 @@
       "festivals": [
         "Plein-les-Watts 2025"
       ],
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-24"
     },
     "Brushy One String": {
       "genres": [
@@ -334,6 +335,14 @@
       ],
       "tour_checked": "2026-10-14"
     },
+    "Collie Herb": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Collie_Herb",
+      "checked": "2026-10-24"
+    },
     "Culcha Candela": {
       "genres": [
         "dancehall",
@@ -358,6 +367,13 @@
         "Rototom Sunsplash 2025"
       ],
       "tour_checked": "2026-10-14"
+    },
+    "Curly Bird": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://eventfrog.ch/de/p/konzerte/reggae-ska/collie-herb-the-mighty-roots-friends-live-kulta-olten-olten-7518631984765083281.html",
+      "checked": "2026-10-24"
     },
     "Current Swell": {
       "genres": [],
@@ -390,7 +406,8 @@
         "reggae"
       ],
       "source": "https://www.petzi.ch/en/events/65298-kalvingrad-usine-jo-ptbr-little-lion-sound-ch-derrick-sound-ch/",
-      "checked": "2026-10-21"
+      "checked": "2026-10-21",
+      "tour_checked": "2026-10-24"
     },
     "Dj Doctor Belise": {
       "genres": [],
@@ -952,7 +969,8 @@
         "dancehall"
       ],
       "source": "https://www.petzi.ch/en/events/65298-kalvingrad-usine-jo-ptbr-little-lion-sound-ch-derrick-sound-ch/",
-      "checked": "2026-10-21"
+      "checked": "2026-10-21",
+      "tour_checked": "2026-10-24"
     },
     "K. Evans": {
       "genres": [],
@@ -1250,6 +1268,14 @@
         "Summerjam 2024"
       ],
       "tour_checked": "2026-10-17"
+    },
+    "Mo'Fyah Sound": {
+      "genres": [
+        "soundsystem",
+        "reggae"
+      ],
+      "source": "https://eventfrog.ch/de/p/konzerte/reggae-ska/collie-herb-the-mighty-roots-friends-live-kulta-olten-olten-7518631984765083281.html",
+      "checked": "2026-10-24"
     },
     "Mo'Kalamity": {
       "genres": [
@@ -1621,7 +1647,8 @@
         "reggae"
       ],
       "source": "https://filtermusicgroup.com/collections/riders-connection",
-      "checked": "2026-10-21"
+      "checked": "2026-10-21",
+      "tour_checked": "2026-10-24"
     },
     "Romain Virgo": {
       "genres": [
@@ -2035,6 +2062,13 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-20"
     },
+    "The Mighty Roots": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://de.wikipedia.org/wiki/Collie_Herb",
+      "checked": "2026-10-24"
+    },
     "The Scrucialists": {
       "genres": [
         "reggae",
@@ -2260,7 +2294,8 @@
         "reggae"
       ],
       "source": "https://www.waskabi.ch",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-24"
     },
     "Zaï": {
       "genres": [
@@ -2268,14 +2303,16 @@
         "roots"
       ],
       "source": "https://www.lausanne-tourisme.ch/fr/evenement/romandub-2",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-24"
     },
     "Zion Step": {
       "genres": [
         "reggae"
       ],
       "source": "https://www.guidle.com/it/veranstaltungen/musik/bern/zion-step_Ap7EQP7",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-10-24"
     },
     "Zongo Sound": {
       "genres": [
@@ -2283,7 +2320,8 @@
         "roots"
       ],
       "source": "https://zongosound1.bandcamp.com",
-      "checked": "2026-10-20"
+      "checked": "2026-10-20",
+      "tour_checked": "2026-10-24"
     },
     "Zoo Escape": {
       "genres": [],
