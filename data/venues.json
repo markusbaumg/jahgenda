@@ -370,6 +370,14 @@
       "scrape": true,
       "hint": "/programm redirects to /programm-bilder/, server-rendered: date 'Mo 19. Okt 2026' then title and category. Reggae relevance: medium — mixed theatre/concert house that books world, reggae and ska acts occasionally."
     },
+    "El Cannario": {
+      "city": "Konolfingen",
+      "canton": "BE",
+      "lat": 46.87962,
+      "lon": 7.62189,
+      "scrape": false,
+      "hint": "Café/bar, Emmentalstrasse 6, Konolfingen (OSM node El Cannario). Own website elcannario.ch did not resolve (2026-10-25); date known from collieherb.ch."
+    },
     "Elefantehuus": {
       "city": "Liestal",
       "canton": "BL",
@@ -982,6 +990,15 @@
       "url": "https://lagraviere.ch/",
       "scrape": false,
       "hint": "Homepage = programme, server-rendered: title, 'jeudi 15 octobre' (no year), then a slash-separated genre list (e.g. 'Afrobeats / Dancehall / Dembow'); event pages under /evenement/. Reggae relevance: low — dancehall only inside afro/urban mixes."
+    },
+    "La Jonquille": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.203,
+      "lon": 6.13474,
+      "url": "https://www.lajonquille.ch/evenements/",
+      "scrape": false,
+      "hint": "Bar/club, Chemin du 23-Août 3, Jonction (OSM node La Jonquille). Events on /evenements/; occasional reggae/dub nights (Cali P + Little Lion Sound 2026-11-07)."
     },
     "Lakelive Festival": {
       "city": "Nidau",
