@@ -1162,6 +1162,15 @@
       "scrape": false,
       "hint": "Server-rendered list: 'DD MM DD.MM.YYYY Weekday HH:MM Klub', title and a genre word (Jazz, Pop...). Reggae relevance: low — ZHdK music club, almost entirely jazz/pop/experimental."
     },
+    "MIAM": {
+      "city": "Fribourg",
+      "canton": "FR",
+      "lat": 46.8133,
+      "lon": 7.1573,
+      "url": "https://www.petzi.ch/en/search/?q=miam",
+      "scrape": false,
+      "hint": "Club/Bunker an der Avenue du Général-Guisan 1, Fribourg (Koordinaten: OSM-Knoten «Miam», nightclub). Reggae-Sessions von Redubtion; Events über Petzi."
+    },
     "Moods": {
       "city": "Zürich",
       "canton": "ZH",

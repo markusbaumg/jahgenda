@@ -50,7 +50,7 @@
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Ami Warning": {
       "genres": [
@@ -66,6 +66,11 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Arrested_Denial",
       "checked": "2026-10-13"
+    },
+    "Backyard Riddims": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-26"
     },
     "Balack": {
       "genres": [],
@@ -83,7 +88,7 @@
         "Plein-les-Watts 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Basement Roots": {
       "genres": [
@@ -110,7 +115,7 @@
         "No Logo Festival 2026",
         "Reggae Jam 2026"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Bazzassine": {
       "genres": [],
@@ -141,7 +146,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Biga Ranx": {
       "genres": [
@@ -163,7 +168,7 @@
       ],
       "source": "https://www.kuppel-basel.ch/programm/boundless-vibes-hifi",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Boxmen Family": {
       "genres": [],
@@ -226,7 +231,7 @@
         "Rototom Sunsplash 2025",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Bush Doctors Sound System": {
       "genres": [
@@ -248,7 +253,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-26"
     },
     "Cali P": {
       "genres": [
@@ -463,6 +468,11 @@
       "source": "",
       "checked": "2026-10-14"
     },
+    "Djiman": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-26"
+    },
     "Domb Vibration Sound System": {
       "genres": [
         "soundsystem",
@@ -507,7 +517,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Dub_Spencer_%26_Trance_Hill",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Dubioza Kolektiv": {
       "genres": [
@@ -521,7 +531,7 @@
         "Mighty Sounds 2024",
         "Reeds Festival 2024"
       ],
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Dubkasm": {
       "genres": [
@@ -530,7 +540,7 @@
       ],
       "source": "https://dubkasm.bandcamp.com/music",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Eesah": {
       "genres": [
@@ -564,7 +574,7 @@
       "festivals": [
         "Reeds Festival 2026"
       ],
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Elimb'a Mbo": {
       "genres": [],
@@ -635,7 +645,7 @@
       ],
       "source": "https://www.swissinfo.ch/eng/fleuve-congo-airlines/8221226",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Fluffy Machine": {
       "genres": [],
@@ -730,7 +740,7 @@
       ],
       "source": "https://www.jds.fr/artistes/goulamas-k-8342_N",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Groundation": {
       "genres": [
@@ -850,7 +860,7 @@
         "Chiemsee Reggae Summer 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Jahneration": {
       "genres": [
@@ -861,7 +871,7 @@
       "festivals": [
         "Plein-les-Watts 2025"
       ],
-      "tour_checked": "2026-10-13"
+      "tour_checked": "2026-10-26"
     },
     "Jamaram": {
       "genres": [
@@ -874,6 +884,15 @@
         "Reggae Jam 2024"
       ],
       "tour_checked": "2026-10-15"
+    },
+    "Jaya the Cat": {
+      "genres": [
+        "reggae",
+        "ska",
+        "ska-punk"
+      ],
+      "source": "https://en.wikipedia.org/wiki/Jaya_the_Cat",
+      "checked": "2026-10-26"
     },
     "Jesse Royal": {
       "genres": [
@@ -1675,6 +1694,15 @@
       "source": "https://m.soundcloud.com/root-block-sound",
       "checked": "2026-10-13",
       "tour_checked": "2026-10-18"
+    },
+    "Rootical Youths Sound System": {
+      "genres": [
+        "soundsystem",
+        "roots",
+        "dub"
+      ],
+      "source": "https://ned.ch/evento/vendredub-10/",
+      "checked": "2026-10-26"
     },
     "Roots Treatment": {
       "genres": [
