@@ -181,3 +181,4 @@ Setting: **Search suggestions automatically: yes**
 - Curly Bird — reggae, found via KultA
 - Mo'Fyah Sound — soundsystem, reggae, found via KultA
 - Rootical Youths Sound System — soundsystem, roots, dub, found via Ned
+- Nguru — ska, ska-punk, reggae, found via CUADRO22

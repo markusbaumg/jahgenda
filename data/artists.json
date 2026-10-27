@@ -320,7 +320,7 @@
         "Rototom Sunsplash 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Chris Biomassa": {
       "genres": [],
@@ -338,7 +338,7 @@
         "Plein-les-Watts 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Collie Herb": {
       "genres": [
@@ -372,7 +372,7 @@
         "Summerjam 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Curly Bird": {
       "genres": [
@@ -552,7 +552,7 @@
         "Reeds Festival 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "EKR": {
       "genres": [],
@@ -610,7 +610,7 @@
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Famara": {
       "genres": [
@@ -621,7 +621,7 @@
       "festivals": [
         "Reeds Festival 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Fast Food Orchestra": {
       "genres": [
@@ -636,7 +636,7 @@
         "Mighty Sounds 2025",
         "Mighty Sounds 2024"
       ],
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Fleuve Congo": {
       "genres": [
@@ -660,7 +660,7 @@
       ],
       "source": "https://rumpeltum.ch/portfolio/17-10-forrest-children-sound-system/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-14"
+      "tour_checked": "2026-10-27"
     },
     "Frères Cirad": {
       "genres": [],
@@ -689,7 +689,7 @@
         "Reggae Jam 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-27"
     },
     "Genep'high": {
       "genres": [],
@@ -706,7 +706,7 @@
         "Reggae Jam 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-27"
     },
     "Gentleman": {
       "genres": [
@@ -731,7 +731,7 @@
       ],
       "source": "https://cafete.ch/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-27"
     },
     "Goulamas'K": {
       "genres": [
@@ -785,7 +785,7 @@
         "Reggae Jam 2026",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-27"
     },
     "Iration Steppas": {
       "genres": [
@@ -798,7 +798,7 @@
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-27"
     },
     "Irie Révoltés": {
       "genres": [
@@ -812,7 +812,7 @@
         "Mighty Sounds 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-27"
     },
     "Ironworks Dread": {
       "genres": [
@@ -1409,10 +1409,24 @@
       ],
       "tour_checked": "2026-10-17"
     },
+    "Nguru": {
+      "genres": [
+        "ska",
+        "ska-punk",
+        "reggae"
+      ],
+      "source": "https://eventfrog.ch/de/p/konzerte/reggae-ska/nguru-chur-7517107418561528784.html",
+      "checked": "2026-10-27"
+    },
     "Nightmanager": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Nik Treedom": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-27"
     },
     "Nosliw": {
       "genres": [
@@ -1702,7 +1716,8 @@
         "dub"
       ],
       "source": "https://ned.ch/evento/vendredub-10/",
-      "checked": "2026-10-26"
+      "checked": "2026-10-26",
+      "tour_checked": "2026-10-27"
     },
     "Roots Treatment": {
       "genres": [
@@ -2032,6 +2047,11 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-20"
     },
+    "Suehiro Commander": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-27"
+    },
     "Talco": {
       "genres": [
         "ska-punk"
@@ -2055,6 +2075,11 @@
         "Rototom Sunsplash 2025"
       ],
       "tour_checked": "2026-10-20"
+    },
+    "TASHEENO": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-27"
     },
     "The Busters": {
       "genres": [

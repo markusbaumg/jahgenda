@@ -280,6 +280,15 @@
       "scrape": false,
       "hint": "AJZ Biel (Chessu), Grosser Saal/Kleiner Saal; Programm auf ajz.ch, Tickets via Petzi."
     },
+    "CUADRO22": {
+      "city": "Chur",
+      "canton": "GR",
+      "lat": 46.85179,
+      "lon": 9.51342,
+      "url": "https://www.cuadro22.com/",
+      "scrape": false,
+      "hint": "Kulturlokal, Ringstrasse 22, Chur (Koordinaten: Nominatim für die Adresse). Gelegentlich Ska/Reggae; Events via Eventfrog."
+    },
     "D! Club": {
       "city": "Lausanne",
       "canton": "VD",
@@ -1170,6 +1179,15 @@
       "url": "https://www.petzi.ch/en/search/?q=miam",
       "scrape": false,
       "hint": "Club/Bunker an der Avenue du Général-Guisan 1, Fribourg (Koordinaten: OSM-Knoten «Miam», nightclub). Reggae-Sessions von Redubtion; Events über Petzi."
+    },
+    "Montana – Après Snow Culture": {
+      "city": "Davos",
+      "canton": "GR",
+      "lat": 46.80892,
+      "lon": 9.84092,
+      "url": "https://songbirdfestival.ch/",
+      "scrape": false,
+      "hint": "Après-Ski-Bar/Club, Bahnhofstrasse 2, Davos Dorf (Koordinaten: Nominatim für die Adresse). Reggae-Abend im Rahmen des SongBirdFestival.ch; Events via Eventfrog."
     },
     "Moods": {
       "city": "Zürich",
