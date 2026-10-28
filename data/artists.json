@@ -481,7 +481,7 @@
       ],
       "source": "https://www.petzi.ch/en/events/63977-rocking-chair-mad-professor-guyuk-domb-vibration-sound-system-ch/",
       "checked": "2026-10-15",
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-28"
     },
     "DoubleTrouble": {
       "genres": [],
@@ -821,7 +821,7 @@
       ],
       "source": "https://legroove.ch/agenda/sub-a-dub-2/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Israel Vibration": {
       "genres": [
@@ -834,7 +834,7 @@
         "Plein-les-Watts 2026",
         "Rototom Sunsplash 2026"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Jah Lil": {
       "genres": [
@@ -848,7 +848,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Jahcoustix": {
       "genres": [
@@ -883,7 +883,7 @@
         "Chiemsee Reggae Summer 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Jaya the Cat": {
       "genres": [
@@ -906,7 +906,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Joe Ariwa": {
       "genres": [
@@ -928,7 +928,7 @@
       "festivals": [
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Johnny Clarke": {
       "genres": [
@@ -941,7 +941,7 @@
         "Plein-les-Watts 2024",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Jonah Dan": {
       "genres": [
@@ -951,7 +951,7 @@
       ],
       "source": "https://eventbook.ro/music/bilete-ctrl-riddim-bandits-sound-system-presents-nomadix-jonah-dan-stepper-one-bass-healing-hi-fi?lang=ro",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Julian Marley": {
       "genres": [
@@ -964,7 +964,7 @@
         "Rototom Sunsplash 2025",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-15"
+      "tour_checked": "2026-10-28"
     },
     "Junior Indian": {
       "genres": [],
@@ -982,7 +982,7 @@
         "Summerjam 2026",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-28"
     },
     "Jô": {
       "genres": [
@@ -1033,7 +1033,7 @@
       ],
       "source": "https://www.kalleskaviar.ch",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-28"
     },
     "Kaya": {
       "genres": [],
@@ -1052,7 +1052,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-28"
     },
     "Kumar Fyah": {
       "genres": [
@@ -1065,7 +1065,7 @@
         "Rototom Sunsplash 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-28"
     },
     "Ky-Mani Marley": {
       "genres": [
@@ -1416,7 +1416,8 @@
         "reggae"
       ],
       "source": "https://eventfrog.ch/de/p/konzerte/reggae-ska/nguru-chur-7517107418561528784.html",
-      "checked": "2026-10-27"
+      "checked": "2026-10-27",
+      "tour_checked": "2026-10-28"
     },
     "Nightmanager": {
       "genres": [],
@@ -1733,6 +1734,11 @@
       "genres": [],
       "source": "https://www.mixcloud.com/LionPowaSoundsystem/",
       "checked": "2026-10-13"
+    },
+    "Safisya": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-10-28"
     },
     "Samora": {
       "genres": [
