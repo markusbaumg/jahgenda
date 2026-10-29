@@ -1080,7 +1080,7 @@
         "Plein-les-Watts 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "L'Entourloop": {
       "genres": [
@@ -1095,7 +1095,7 @@
         "Rototom Sunsplash 2025",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Lagwada": {
       "genres": [],
@@ -1110,7 +1110,7 @@
       ],
       "source": "https://lebirrette.bandcamp.com/music",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Leah Farmer": {
       "genres": [],
@@ -1133,7 +1133,7 @@
         "Summerjam 2026",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Limitless Soundsystem": {
       "genres": [],
@@ -1154,7 +1154,7 @@
         "Plein-les-Watts 2024",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Los Billtones": {
       "genres": [
@@ -1166,7 +1166,7 @@
       "festivals": [
         "Reeds Festival 2026"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Los Fastidios": {
       "genres": [],
@@ -1185,7 +1185,7 @@
         "Summerjam 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Macka B": {
       "genres": [
@@ -1198,7 +1198,7 @@
         "Chiemsee Reggae Summer 2026",
         "Rototom Sunsplash 2026"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Mad Professor": {
       "genres": [
@@ -1211,7 +1211,7 @@
         "Afro-Pfingsten 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Mal Élevé": {
       "genres": [
@@ -1234,7 +1234,7 @@
       "festivals": [
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-16"
+      "tour_checked": "2026-10-29"
     },
     "Marcus Gad": {
       "genres": [
@@ -1247,7 +1247,7 @@
         "No Logo Festival 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-10-29"
     },
     "Marley's Ghost": {
       "genres": [
@@ -1260,7 +1260,7 @@
         "Chiemsee Reggae Summer 2026",
         "Reeds Festival 2026"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-10-29"
     },
     "Mighty Children": {
       "genres": [],
@@ -1288,7 +1288,7 @@
         "Summerjam 2025",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-10-29"
     },
     "Mo'Fyah Sound": {
       "genres": [
@@ -1328,7 +1328,7 @@
         "Rototom Sunsplash 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-10-29"
     },
     "Mortimer": {
       "genres": [
@@ -1341,7 +1341,7 @@
         "Rototom Sunsplash 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-10-29"
     },
     "Mother Dubber": {
       "genres": [
@@ -1929,6 +1929,15 @@
         "Ruhr Reggae Summer 2026",
         "Rototom Sunsplash 2024"
       ]
+    },
+    "Skassapunka": {
+      "genres": [
+        "ska-punk",
+        "ska",
+        "reggae"
+      ],
+      "source": "https://it.wikipedia.org/wiki/Skassapunka",
+      "checked": "2026-10-29"
     },
     "Sondaschule": {
       "genres": [

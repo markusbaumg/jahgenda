@@ -182,3 +182,4 @@ Setting: **Search suggestions automatically: yes**
 - Mo'Fyah Sound — soundsystem, reggae, found via KultA
 - Rootical Youths Sound System — soundsystem, roots, dub, found via Ned
 - Nguru — ska, ska-punk, reggae, found via CUADRO22
+- Skassapunka — ska-punk, ska, reggae, found via Sedel
