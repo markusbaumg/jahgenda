@@ -953,6 +953,11 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-28"
     },
+    "JoRed": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-04"
+    },
     "Julian Marley": {
       "genres": [
         "reggae"
@@ -1352,7 +1357,7 @@
       "festivals": [
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Mr. Vegas": {
       "genres": [
@@ -1367,7 +1372,7 @@
         "Summerjam 2025",
         "Plein-les-Watts 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Mr. Williamz": {
       "genres": [
@@ -1376,7 +1381,7 @@
       ],
       "source": "https://www.shambalafestival.org/2026/act/mr-williamz-ignition-high-power-backed-by-friendly-fire-band/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "MØNTY": {
       "genres": [],
@@ -1394,7 +1399,7 @@
         "Rototom Sunsplash 2025",
         "Plein-les-Watts 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Nattali Rize": {
       "genres": [
@@ -1407,7 +1412,7 @@
         "Plein-les-Watts 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Nguru": {
       "genres": [
@@ -1440,7 +1445,7 @@
         "Reggae Jam 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Nucha": {
       "genres": [],
@@ -1463,7 +1468,7 @@
         "Rototom Sunsplash 2025",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Omar Perry": {
       "genres": [
@@ -1476,7 +1481,7 @@
         "Rototom Sunsplash 2026",
         "Plein-les-Watts 2025"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Open Season": {
       "genres": [
@@ -1491,7 +1496,7 @@
         "Mighty Sounds 2024",
         "Plein-les-Watts 2024"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Original Koffee": {
       "genres": [
@@ -1503,7 +1508,7 @@
         "Summerjam 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-17"
+      "tour_checked": "2026-11-04"
     },
     "Osy": {
       "genres": [],
@@ -1518,7 +1523,7 @@
       ],
       "source": "https://it.wikipedia.org/wiki/Paolo_Baldini",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-04"
     },
     "Paolo Baldini DubFiles": {
       "genres": [
@@ -1541,7 +1546,7 @@
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/alternativ/rubigen/pedestrians-goodbye-tour_AWraJA8",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-04"
     },
     "Peek-A-Boo": {
       "genres": [
@@ -1557,7 +1562,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Phenomden",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-04"
     },
     "Pow Pow Movement": {
       "genres": [
@@ -1636,7 +1641,7 @@
       ],
       "source": "https://www.passetonbillet.fr/en/artists/rakoon",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-04"
     },
     "Ras Sherby": {
       "genres": [
@@ -1937,7 +1942,8 @@
         "reggae"
       ],
       "source": "https://it.wikipedia.org/wiki/Skassapunka",
-      "checked": "2026-10-29"
+      "checked": "2026-10-29",
+      "tour_checked": "2026-11-04"
     },
     "Sondaschule": {
       "genres": [
@@ -2040,6 +2046,14 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Straight Sound": {
+      "genres": [
+        "soundsystem",
+        "dancehall"
+      ],
+      "source": "https://www.largeup.com/2017/05/01/mixtape-mondays-27/",
+      "checked": "2026-11-04"
     },
     "Stylo G": {
       "genres": [
@@ -2307,6 +2321,15 @@
       "source": "https://www.umbertoecho.com",
       "checked": "2026-10-13",
       "tour_checked": "2026-10-21"
+    },
+    "Unity Sound System": {
+      "genres": [
+        "soundsystem",
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://legroove.ch/agenda/reggae-dancehall-community-the-final/",
+      "checked": "2026-11-04"
     },
     "Vanupié": {
       "genres": [

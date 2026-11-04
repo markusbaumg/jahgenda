@@ -183,3 +183,5 @@ Setting: **Search suggestions automatically: yes**
 - Rootical Youths Sound System — soundsystem, roots, dub, found via Ned
 - Nguru — ska, ska-punk, reggae, found via CUADRO22
 - Skassapunka — ska-punk, ska, reggae, found via Sedel
+- Straight Sound — soundsystem, dancehall, found via Le Groove
+- Unity Sound System — soundsystem, dancehall, reggae, found via Le Groove
