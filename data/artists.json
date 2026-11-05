@@ -67,6 +67,15 @@
       "source": "https://de.wikipedia.org/wiki/Arrested_Denial",
       "checked": "2026-10-13"
     },
+    "B.I.D Hi-Fi": {
+      "genres": [
+        "soundsystem",
+        "reggae",
+        "ska"
+      ],
+      "source": "https://www.jumeaux.club/evenements/radc5",
+      "checked": "2026-11-05"
+    },
     "Backyard Riddims": {
       "genres": [],
       "source": "",
@@ -276,6 +285,13 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-10-25"
     },
+    "Camaro Involtaire": {
+      "genres": [
+        "ska"
+      ],
+      "source": "https://www.jazzhaus.de/programm/2026-12-26-refrigerators-6398.html",
+      "checked": "2026-11-05"
+    },
     "Canastron": {
       "genres": [
         "ska",
@@ -395,7 +411,7 @@
       ],
       "source": "https://en.wikipedia.org/wiki/David_Rodigan",
       "checked": "2026-10-18",
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-05"
     },
     "De Strangers": {
       "genres": [
@@ -915,7 +931,7 @@
       ],
       "source": "https://oye-records.com/releases/alpha-steppa-joe-ariwa-lee-scratch-perry-open-door-ra-ta-ta-ta",
       "checked": "2026-10-18",
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-05"
     },
     "Joe Yorke": {
       "genres": [
@@ -1650,7 +1666,7 @@
       ],
       "source": "https://soundshelter.net/vinyl/ras-sherby-jah-thomas-channel-one-players-of-instruments-live-in-love",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Rat Race": {
       "genres": [],
@@ -1674,7 +1690,7 @@
       ],
       "source": "https://fribourg.ch/fr/fribourg/evenements/dub-arena/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Refrigerators": {
       "genres": [
@@ -1682,7 +1698,7 @@
       ],
       "source": "https://www.last.fm/de/music/Refrigerators/Kompressor",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Riders Connection": {
       "genres": [
@@ -1713,7 +1729,7 @@
       ],
       "source": "https://m.soundcloud.com/root-block-sound",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Rootical Youths Sound System": {
       "genres": [
@@ -1781,7 +1797,7 @@
       ],
       "source": "https://www.swissinfo.ch/eng/culture/open-season-get-ready/1133424",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Sara Lugo": {
       "genres": [
@@ -1870,7 +1886,7 @@
       "festivals": [
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Sinsemilia": {
       "genres": [
@@ -1879,7 +1895,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Sinsemilia",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Sir Jean": {
       "genres": [
@@ -1887,7 +1903,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Sir_Jean",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Sixyka": {
       "genres": [],
@@ -1919,7 +1935,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Skarface",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Skarra Mucci": {
       "genres": [
@@ -1962,7 +1978,7 @@
       ],
       "source": "https://www.haute-savoie-tourisme.org/evenements/musique/reggae/7922577-club-sound-system",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Soul Rebel Sound": {
       "genres": [
@@ -1972,7 +1988,7 @@
       ],
       "source": "https://www.mixcloud.com/SoulRebelSound/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-18"
+      "tour_checked": "2026-11-05"
     },
     "Soul Vibes": {
       "genres": [],
@@ -2053,7 +2069,8 @@
         "dancehall"
       ],
       "source": "https://www.largeup.com/2017/05/01/mixtape-mondays-27/",
-      "checked": "2026-11-04"
+      "checked": "2026-11-04",
+      "tour_checked": "2026-11-05"
     },
     "Stylo G": {
       "genres": [
@@ -2080,6 +2097,14 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-27"
+    },
+    "Supersonic Sound": {
+      "genres": [
+        "soundsystem",
+        "reggae"
+      ],
+      "source": "https://www.jumeaux.club/evenements/radc5",
+      "checked": "2026-11-05"
     },
     "Talco": {
       "genres": [
@@ -2329,7 +2354,8 @@
         "reggae"
       ],
       "source": "https://legroove.ch/agenda/reggae-dancehall-community-the-final/",
-      "checked": "2026-11-04"
+      "checked": "2026-11-04",
+      "tour_checked": "2026-11-05"
     },
     "Vanupié": {
       "genres": [

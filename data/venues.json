@@ -696,6 +696,15 @@
       "scrape": true,
       "hint": "Squarespace events page, server-rendered: 'Okt. | 15', title, 'Donnerstag, 15. Oktober 2026', times, description with 'Doors:'/'Konzert:'/'Eintritt:', no genre tags. Reggae relevance: medium — occasional reggae/ska nights (TAWB: Waskabi & Funky Python 14.11.2026); mostly jazz, folk, world."
     },
+    "Jumeaux Jazz Club": {
+      "city": "Lausanne",
+      "canton": "VD",
+      "lat": 46.52166,
+      "lon": 6.62796,
+      "url": "https://www.jumeaux.club/",
+      "scrape": false,
+      "hint": "Rue de Genève 19, Le Flon (OSM nightclub «Les Jumeaux Jazz Club»). Jazz club with the B.I.D Hi-Fi «Rub-a-Dub Club» sound-system nights; event pages /evenements/<slug> (Webflow: «Annulé»/«COMPLET» badges are in the HTML with class w-condition-invisible when NOT active)."
+    },
     "KAFF": {
       "city": "Frauenfeld",
       "canton": "TG",

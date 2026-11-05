@@ -185,3 +185,6 @@ Setting: **Search suggestions automatically: yes**
 - Skassapunka — ska-punk, ska, reggae, found via Sedel
 - Straight Sound — soundsystem, dancehall, found via Le Groove
 - Unity Sound System — soundsystem, dancehall, reggae, found via Le Groove
+- B.I.D Hi-Fi — soundsystem, reggae, ska, found via Jumeaux Jazz Club
+- Supersonic Sound — soundsystem, reggae, found via Jumeaux Jazz Club
+- Camaro Involtaire — ska, found via Jazzhaus Freiburg
