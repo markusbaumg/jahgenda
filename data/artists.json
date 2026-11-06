@@ -74,7 +74,8 @@
         "ska"
       ],
       "source": "https://www.jumeaux.club/evenements/radc5",
-      "checked": "2026-11-05"
+      "checked": "2026-11-05",
+      "tour_checked": "2026-11-06"
     },
     "Backyard Riddims": {
       "genres": [],
@@ -290,7 +291,8 @@
         "ska"
       ],
       "source": "https://www.jazzhaus.de/programm/2026-12-26-refrigerators-6398.html",
-      "checked": "2026-11-05"
+      "checked": "2026-11-05",
+      "tour_checked": "2026-11-06"
     },
     "Canastron": {
       "genres": [
@@ -1570,7 +1572,7 @@
       ],
       "source": "https://kammgarn.ch/event/el-flecha-negra-2/",
       "checked": "2026-10-14",
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Phenomden": {
       "genres": [
@@ -1593,7 +1595,7 @@
         "Ruhr Reggae Summer 2026",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Prince Jamo": {
       "genres": [
@@ -1615,7 +1617,7 @@
         "Ruhr Reggae Summer 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Quatre in Toulouse": {
       "genres": [],
@@ -1639,7 +1641,7 @@
         "Reeds Festival 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Radio Rhum Reggae": {
       "genres": [
@@ -1649,7 +1651,7 @@
       ],
       "source": "https://bikinitest.ch/1232/voir/2026/10/17",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Rakoon": {
       "genres": [
@@ -1720,7 +1722,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Root Block Sound": {
       "genres": [
@@ -1749,7 +1751,7 @@
       ],
       "source": "https://www.neubad.org/node/9538",
       "checked": "2026-10-15",
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Ruff Pack Int.": {
       "genres": [],
@@ -1775,7 +1777,7 @@
         "Reggae Jam 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Samory I": {
       "genres": [
@@ -1788,7 +1790,7 @@
         "Reggae Jam 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Santosh Aerthott": {
       "genres": [
@@ -1809,7 +1811,7 @@
         "Lakesplash 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Savage Dub": {
       "genres": [],
@@ -1841,7 +1843,7 @@
         "Rototom Sunsplash 2026",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Sika Rlion": {
       "genres": [
@@ -1854,7 +1856,7 @@
         "Plein-les-Watts 2025",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-19"
+      "tour_checked": "2026-11-06"
     },
     "Silly Walks Discotheque": {
       "genres": [
@@ -2104,7 +2106,8 @@
         "reggae"
       ],
       "source": "https://www.jumeaux.club/evenements/radc5",
-      "checked": "2026-11-05"
+      "checked": "2026-11-05",
+      "tour_checked": "2026-11-06"
     },
     "Talco": {
       "genres": [
