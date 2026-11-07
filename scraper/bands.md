@@ -188,3 +188,4 @@ Setting: **Search suggestions automatically: yes**
 - B.I.D Hi-Fi — soundsystem, reggae, ska, found via Jumeaux Jazz Club
 - Supersonic Sound — soundsystem, reggae, found via Jumeaux Jazz Club
 - Camaro Involtaire — ska, found via Jazzhaus Freiburg
+- MAGIC! — reggae, found via Mühle Hunziken
