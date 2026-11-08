@@ -1784,6 +1784,14 @@
       "scrape": false,
       "hint": "City festival in mid-August (next 13.–15.08.2027); server-rendered one-pager with dates as '13. – 15. August 2027', line-up under 'Programm' in early summer only. Reggae relevance: low — Swiss reggae artist Dodo headlined 2026."
     },
+    "Tommasini": {
+      "city": "Lenzburg",
+      "canton": "AG",
+      "lat": 47.3832522,
+      "lon": 8.1754886,
+      "scrape": false,
+      "hint": "Koordinaten: Eventfrog-Geodaten (Seonerstrasse 23, 5600 Lenzburg). Kulturlokal des Vereins Tommasini Lenzburg; Programm via Eventfrog (tommasini.ch: fehlerhaftes TLS-Zertifikat). Reggae relevance: low."
+    },
     "Treibhaus": {
       "city": "Luzern",
       "canton": "LU",

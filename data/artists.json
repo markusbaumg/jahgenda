@@ -265,6 +265,13 @@
       ],
       "tour_checked": "2026-10-26"
     },
+    "Buzz": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://www.moods.ch/en/program/samuel-blaser-routes-2027-03-02",
+      "checked": "2026-11-08"
+    },
     "Cali P": {
       "genres": [
         "dancehall",
@@ -1241,7 +1248,8 @@
         "reggae"
       ],
       "source": "https://en.wikipedia.org/wiki/Magic!",
-      "checked": "2026-11-07"
+      "checked": "2026-11-07",
+      "tour_checked": "2026-11-08"
     },
     "Mal Élevé": {
       "genres": [
@@ -1611,7 +1619,7 @@
       ],
       "source": "https://www.welcometosheffield.co.uk/content/events/dubcentral-prince-jamo",
       "checked": "2026-10-20",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Protoje": {
       "genres": [
@@ -1798,6 +1806,14 @@
         "Summerjam 2024"
       ],
       "tour_checked": "2026-11-06"
+    },
+    "Samuel Blaser Routes": {
+      "genres": [
+        "ska",
+        "reggae"
+      ],
+      "source": "https://www.moods.ch/en/program/samuel-blaser-routes-2027-03-02",
+      "checked": "2026-11-08"
     },
     "Santosh Aerthott": {
       "genres": [
@@ -2234,7 +2250,7 @@
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/musik/zofingen/the-upsessions-nl-the-troublemakers-it_Aed8QBF",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-20"
+      "tour_checked": "2026-11-08"
     },
     "The Upsessions": {
       "genres": [
@@ -2244,7 +2260,7 @@
       ],
       "source": "https://www.themissingsync.nl/artists/the-upsessions",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Theylovepiet": {
       "genres": [],
@@ -2261,7 +2277,7 @@
         "Rototom Sunsplash 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Tiken Jah Fakoly": {
       "genres": [
@@ -2273,7 +2289,7 @@
         "Ruhr Reggae Summer 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Tobin Taxi": {
       "genres": [],
@@ -2286,7 +2302,7 @@
       ],
       "source": "https://todosdestinos.bandcamp.com",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Treesha": {
       "genres": [
@@ -2299,7 +2315,7 @@
         "Plein-les-Watts 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Tribute Sound System": {
       "genres": [],
@@ -2312,7 +2328,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Tryo",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Tuzi Sound System": {
       "genres": [],
@@ -2330,7 +2346,7 @@
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Two Tone Club": {
       "genres": [
@@ -2339,7 +2355,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Two_Tone_Club",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Tóke": {
       "genres": [
@@ -2347,7 +2363,7 @@
       ],
       "source": "https://title-mag.com/toke-and-his-new-single-brown-face-take-a-stand-against-racism/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Umberto Echo": {
       "genres": [
@@ -2355,7 +2371,7 @@
       ],
       "source": "https://www.umbertoecho.com",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Unity Sound System": {
       "genres": [
@@ -2373,7 +2389,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/Vanupié",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Vesper T": {
       "genres": [],
@@ -2391,7 +2407,7 @@
       "festivals": [
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-08"
     },
     "Wading Birds Sound System": {
       "genres": [

@@ -189,3 +189,5 @@ Setting: **Search suggestions automatically: yes**
 - Supersonic Sound — soundsystem, reggae, found via Jumeaux Jazz Club
 - Camaro Involtaire — ska, found via Jazzhaus Freiburg
 - MAGIC! — reggae, found via Mühle Hunziken
+- Samuel Blaser Routes — ska, reggae, found via Moods
+- Buzz — reggae, found via Moods
