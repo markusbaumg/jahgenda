@@ -191,3 +191,6 @@ Setting: **Search suggestions automatically: yes**
 - MAGIC! — reggae, found via Mühle Hunziken
 - Samuel Blaser Routes — ska, reggae, found via Moods
 - Buzz — reggae, found via Moods
+- Yaniss Odua — reggae, dancehall, found via Le Brise Glace
+- Omani Sound System — soundsystem, dub, found via Le Brise Glace
+- Wise Up Hi-Fi — soundsystem, roots, found via Cafete

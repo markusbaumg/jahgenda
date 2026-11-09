@@ -7,7 +7,7 @@
       ],
       "source": "https://fr.wikipedia.org/wiki/8°6_Crew",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Akeem Garrison": {
       "genres": [
@@ -16,7 +16,7 @@
       ],
       "source": "https://soundcharts.com/en/artist/0b5a5afe-e562-11e8-a6e0-00163ec5a2fb",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Alborosie": {
       "genres": [
@@ -33,7 +33,7 @@
         "Summerjam 2025",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Alex Dynamite & The Pyrolites": {
       "genres": [],
@@ -58,7 +58,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Ami_Warning",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Arrested Denial": {
       "genres": [
@@ -107,7 +107,7 @@
       ],
       "source": "https://basementroots.bandcamp.com",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Baspa Ricardo": {
       "genres": [],
@@ -138,7 +138,7 @@
       ],
       "source": "https://www.guidle.com/de/veranstaltungen/alternativ/luzern/rude-und-rebel-ska-fest_AcTf6rt",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Bee": {
       "genres": [],
@@ -196,7 +196,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Brain_Damage_(Band)",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Breakfast Mood": {
       "genres": [
@@ -207,7 +207,7 @@
       "festivals": [
         "Plein-les-Watts 2025"
       ],
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Brushy One String": {
       "genres": [
@@ -270,7 +270,8 @@
         "reggae"
       ],
       "source": "https://www.moods.ch/en/program/samuel-blaser-routes-2027-03-02",
-      "checked": "2026-11-08"
+      "checked": "2026-11-08",
+      "tour_checked": "2026-11-09"
     },
     "Cali P": {
       "genres": [
@@ -439,7 +440,7 @@
       ],
       "source": "https://www.petzi.ch/en/events/65298-kalvingrad-usine-jo-ptbr-little-lion-sound-ch-derrick-sound-ch/",
       "checked": "2026-10-21",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Dj Doctor Belise": {
       "genres": [],
@@ -1021,7 +1022,7 @@
       ],
       "source": "https://www.petzi.ch/en/events/65298-kalvingrad-usine-jo-ptbr-little-lion-sound-ch-derrick-sound-ch/",
       "checked": "2026-10-21",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "K. Evans": {
       "genres": [],
@@ -1503,6 +1504,14 @@
       ],
       "tour_checked": "2026-11-04"
     },
+    "Omani Sound System": {
+      "genres": [
+        "soundsystem",
+        "dub"
+      ],
+      "source": "https://www.haute-savoie-tourisme.org/evenements/culturels-artistiques/concerts/7997029-channel-one-omani-sound-system",
+      "checked": "2026-11-09"
+    },
     "Omar Perry": {
       "genres": [
         "reggae",
@@ -1723,7 +1732,7 @@
       ],
       "source": "https://filtermusicgroup.com/collections/riders-connection",
       "checked": "2026-10-21",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-09"
     },
     "Romain Virgo": {
       "genres": [
@@ -1813,7 +1822,8 @@
         "reggae"
       ],
       "source": "https://www.moods.ch/en/program/samuel-blaser-routes-2027-03-02",
-      "checked": "2026-11-08"
+      "checked": "2026-11-08",
+      "tour_checked": "2026-11-09"
     },
     "Santosh Aerthott": {
       "genres": [
@@ -2417,7 +2427,7 @@
       ],
       "source": "https://www.lausanne-tourisme.ch/fr/evenement/romandub-2",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-09"
     },
     "Warrior Sound": {
       "genres": [
@@ -2432,7 +2442,7 @@
         "Ruhr Reggae Summer 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-21"
+      "tour_checked": "2026-11-09"
     },
     "Waskabi": {
       "genres": [
@@ -2443,6 +2453,22 @@
       "source": "https://www.waskabi.ch",
       "checked": "2026-10-13",
       "tour_checked": "2026-10-24"
+    },
+    "Wise Up Hi-Fi": {
+      "genres": [
+        "soundsystem",
+        "roots"
+      ],
+      "source": "https://cafete.ch/",
+      "checked": "2026-11-09"
+    },
+    "Yaniss Odua": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://www.haute-savoie-tourisme.org/7854263-yaniss-odua",
+      "checked": "2026-11-09"
     },
     "Zaï": {
       "genres": [

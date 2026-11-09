@@ -1459,6 +1459,15 @@
       "scrape": false,
       "hint": "Site is behind a CrowdSec bot challenge for curl and WebFetch; use the Reitschule programme overview (reitschule.ch, room name 'Queerfeministischer Raum') or Petzi instead. Reggae relevance: low — parties and concerts, no known reggae series."
     },
+    "Reeds Festival": {
+      "city": "Pfäffikon",
+      "canton": "ZH",
+      "lat": 47.3637,
+      "lon": 8.7816,
+      "url": "https://www.reeds-festival.ch/",
+      "scrape": false,
+      "hint": "Festivalgelände am Pfäffiker Seequai (Koordinaten: OSM-Weg «Seequai», Pfäffikon ZH). Reggae-Festival im Juli, Line-up unter /line-up; in sources.json → festivals."
+    },
     "Reitschule": {
       "city": "Bern",
       "canton": "BE",
