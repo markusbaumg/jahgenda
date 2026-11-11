@@ -284,7 +284,7 @@
         "Lakesplash 2026",
         "Reeds Festival 2025"
       ],
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Call Me Malcolm": {
       "genres": [
@@ -292,7 +292,7 @@
       ],
       "source": "https://www.billigpeoplebooking.de/en/band/call-me-malcolm-gb/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Camaro Involtaire": {
       "genres": [
@@ -309,7 +309,7 @@
       ],
       "source": "https://www.festivalinfo.nl/artist/133728/Canastron/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Candela": {
       "genres": [],
@@ -334,7 +334,7 @@
       ],
       "source": "https://53.festivalcervantino.gob.mx/artista/1663/channel-one-sound-system?lan=en",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Charly Black": {
       "genres": [
@@ -373,7 +373,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Collie_Herb",
       "checked": "2026-10-24",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Culcha Candela": {
       "genres": [
@@ -406,7 +406,7 @@
       ],
       "source": "https://eventfrog.ch/de/p/konzerte/reggae-ska/collie-herb-the-mighty-roots-friends-live-kulta-olten-olten-7518631984765083281.html",
       "checked": "2026-10-24",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Current Swell": {
       "genres": [],
@@ -430,7 +430,7 @@
       ],
       "source": "https://www.rockit.it/de-strangers/biografia",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "Derrick Sound": {
       "genres": [
@@ -482,7 +482,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Jugglerz",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-11"
     },
     "DJ Tarsi": {
       "genres": [],
@@ -1218,6 +1218,14 @@
       ],
       "tour_checked": "2026-10-29"
     },
+    "Lyricson": {
+      "genres": [
+        "reggae",
+        "dancehall"
+      ],
+      "source": "https://fr.wikipedia.org/wiki/Lyricson",
+      "checked": "2026-11-11"
+    },
     "Macka B": {
       "genres": [
         "reggae",
@@ -1510,7 +1518,8 @@
         "dub"
       ],
       "source": "https://www.haute-savoie-tourisme.org/evenements/culturels-artistiques/concerts/7997029-channel-one-omani-sound-system",
-      "checked": "2026-11-09"
+      "checked": "2026-11-09",
+      "tour_checked": "2026-11-11"
     },
     "Omar Perry": {
       "genres": [
@@ -2452,7 +2461,7 @@
       ],
       "source": "https://www.waskabi.ch",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-11"
     },
     "Wise Up Hi-Fi": {
       "genres": [
@@ -2460,7 +2469,8 @@
         "roots"
       ],
       "source": "https://cafete.ch/",
-      "checked": "2026-11-09"
+      "checked": "2026-11-09",
+      "tour_checked": "2026-11-11"
     },
     "Yaniss Odua": {
       "genres": [
@@ -2468,7 +2478,8 @@
         "dancehall"
       ],
       "source": "https://www.haute-savoie-tourisme.org/7854263-yaniss-odua",
-      "checked": "2026-11-09"
+      "checked": "2026-11-09",
+      "tour_checked": "2026-11-11"
     },
     "Zaï": {
       "genres": [
@@ -2477,7 +2488,7 @@
       ],
       "source": "https://www.lausanne-tourisme.ch/fr/evenement/romandub-2",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-11"
     },
     "Zion Step": {
       "genres": [
@@ -2485,7 +2496,7 @@
       ],
       "source": "https://www.guidle.com/it/veranstaltungen/musik/bern/zion-step_Ap7EQP7",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-11"
     },
     "Zongo Sound": {
       "genres": [
@@ -2494,7 +2505,7 @@
       ],
       "source": "https://zongosound1.bandcamp.com",
       "checked": "2026-10-20",
-      "tour_checked": "2026-10-24"
+      "tour_checked": "2026-11-11"
     },
     "Zoo Escape": {
       "genres": [],

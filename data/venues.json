@@ -1063,6 +1063,14 @@
       "scrape": true,
       "hint": "/agenda/ is server-rendered: date DD.MM.YYYY + title with little description, genre category only on the event detail page; watch for titles with 'Dub', 'Sound', 'Corner 25', 'Unity Sound'. Reggae relevance: high — home of the Corner 25 reggae/sound-system crew, 'Sound system' category filter."
     },
+    "Le Météore": {
+      "city": "Annecy",
+      "canton": "F",
+      "lat": 45.9184,
+      "lon": 6.0892,
+      "scrape": false,
+      "hint": "Salle Le Météore, 27 route de Frangy, Meythet (Annecy) – Nominatim."
+    },
     "Le Port Franc": {
       "city": "Sion",
       "canton": "VS",
@@ -1431,6 +1439,14 @@
       "url": "https://presswerk-arbon.ch/",
       "scrape": false,
       "hint": "Homepage shows the next few events in caps: 'FREITAG, 16. OKTOBER' (no year), title, blurb. Reggae relevance: low — event hall mostly rented out (orchestra, dinner events)."
+    },
+    "Provitreff": {
+      "city": "Zürich",
+      "canton": "ZH",
+      "lat": 47.3876,
+      "lon": 8.5301,
+      "scrape": false,
+      "hint": "Sihlquai 240, 8005 Zürich (Nominatim, Gebäude). Veranstaltungen via Eventfrog."
     },
     "PTR": {
       "city": "Genève",

@@ -194,3 +194,4 @@ Setting: **Search suggestions automatically: yes**
 - Yaniss Odua — reggae, dancehall, found via Le Brise Glace
 - Omani Sound System — soundsystem, dub, found via Le Brise Glace
 - Wise Up Hi-Fi — soundsystem, roots, found via Cafete
+- Lyricson — reggae, dancehall, found via Le Météore
