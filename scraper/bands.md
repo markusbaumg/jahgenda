@@ -195,3 +195,7 @@ Setting: **Search suggestions automatically: yes**
 - Omani Sound System — soundsystem, dub, found via Le Brise Glace
 - Wise Up Hi-Fi — soundsystem, roots, found via Cafete
 - Lyricson — reggae, dancehall, found via Le Météore
+- Manudigital — dancehall, reggae, found via Coupole
+- Famos175 — dub, reggae, found via Cafete
+- Bloody Soundsystem — soundsystem, dub, found via Cafete
+- Bush Doctors Sound System — soundsystem, dub, found via Ned

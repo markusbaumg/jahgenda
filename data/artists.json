@@ -50,7 +50,7 @@
         "Rototom Sunsplash 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Ami Warning": {
       "genres": [
@@ -98,7 +98,7 @@
         "Plein-les-Watts 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Basement Roots": {
       "genres": [
@@ -125,7 +125,7 @@
         "No Logo Festival 2026",
         "Reggae Jam 2026"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Bazzassine": {
       "genres": [],
@@ -156,7 +156,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Biga Ranx": {
       "genres": [
@@ -171,6 +171,14 @@
         "Summerjam 2026"
       ]
     },
+    "Bloody Soundsystem": {
+      "genres": [
+        "soundsystem",
+        "dub"
+      ],
+      "source": "https://cafete.ch/",
+      "checked": "2026-11-12"
+    },
     "Boundless Vibes Hifi": {
       "genres": [
         "soundsystem",
@@ -178,7 +186,7 @@
       ],
       "source": "https://www.kuppel-basel.ch/programm/boundless-vibes-hifi",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Boxmen Family": {
       "genres": [],
@@ -241,7 +249,7 @@
         "Rototom Sunsplash 2025",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Bush Doctors Sound System": {
       "genres": [
@@ -263,7 +271,7 @@
         "Rototom Sunsplash 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-12"
     },
     "Buzz": {
       "genres": [
@@ -526,7 +534,7 @@
         "Rototom Sunsplash 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "Dub Pistols": {
       "genres": [
@@ -649,6 +657,14 @@
       ],
       "tour_checked": "2026-10-27"
     },
+    "Famos175": {
+      "genres": [
+        "dub",
+        "reggae"
+      ],
+      "source": "https://cafete.ch/",
+      "checked": "2026-11-12"
+    },
     "Fast Food Orchestra": {
       "genres": [
         "ska",
@@ -747,7 +763,7 @@
         "Plein-les-Watts 2025",
         "Reeds Festival 2024"
       ],
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "Golden Roots Soundsystem": {
       "genres": [
@@ -1224,7 +1240,8 @@
         "dancehall"
       ],
       "source": "https://fr.wikipedia.org/wiki/Lyricson",
-      "checked": "2026-11-11"
+      "checked": "2026-11-11",
+      "tour_checked": "2026-11-12"
     },
     "Macka B": {
       "genres": [
@@ -1282,6 +1299,14 @@
         "Rototom Sunsplash 2025"
       ],
       "tour_checked": "2026-10-29"
+    },
+    "Manudigital": {
+      "genres": [
+        "dancehall",
+        "reggae"
+      ],
+      "source": "https://www.petzi.ch/en/events/65141-ajz-caj-ragga-blasta-tour/",
+      "checked": "2026-11-12"
     },
     "Marcus Gad": {
       "genres": [
@@ -1344,7 +1369,7 @@
       ],
       "source": "https://eventfrog.ch/de/p/konzerte/reggae-ska/collie-herb-the-mighty-roots-friends-live-kulta-olten-olten-7518631984765083281.html",
       "checked": "2026-10-24",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "Mo'Kalamity": {
       "genres": [
@@ -1961,7 +1986,7 @@
       ],
       "source": "https://en.wikipedia.org/wiki/Ska-P",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "Skaboom": {
       "genres": [
@@ -2004,6 +2029,11 @@
       "source": "https://it.wikipedia.org/wiki/Skassapunka",
       "checked": "2026-10-29",
       "tour_checked": "2026-11-04"
+    },
+    "Soldia Sound": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-12"
     },
     "Sondaschule": {
       "genres": [
@@ -2160,7 +2190,7 @@
       "festivals": [
         "Mighty Sounds 2026"
       ],
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "Tarrus Riley": {
       "genres": [
@@ -2223,7 +2253,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Collie_Herb",
       "checked": "2026-10-24",
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "The Scrucialists": {
       "genres": [
@@ -2247,7 +2277,7 @@
         "No Logo Festival 2026",
         "Rototom Sunsplash 2026"
       ],
-      "tour_checked": "2026-10-25"
+      "tour_checked": "2026-11-12"
     },
     "The Slackers": {
       "genres": [
@@ -2462,6 +2492,11 @@
       "source": "https://www.waskabi.ch",
       "checked": "2026-10-13",
       "tour_checked": "2026-11-11"
+    },
+    "Will and the people": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-12"
     },
     "Wise Up Hi-Fi": {
       "genres": [
