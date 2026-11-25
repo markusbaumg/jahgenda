@@ -946,6 +946,15 @@
       "scrape": false,
       "hint": "Kulturkarussell im Rössli, Bahnhofstrasse 1 (OSM Gasthaus Rössli). Programme on the homepage: weekday + day without year, time, price, See Tickets link. Reggae relevance: medium — Famara 12.12.2026, Dub Spencer & Trance Hill 29.01.2027."
     },
+    "Kulturladen": {
+      "city": "Konstanz",
+      "canton": "D",
+      "lat": 47.6789851,
+      "lon": 9.1633214,
+      "url": "https://www.kulturladen.de/",
+      "scrape": false,
+      "hint": "Kulturladen Konstanz, Joseph-Belli-Weg 5 (Nominatim). Nearby D. Website blockiert Bots (403)."
+    },
     "Kulturrausch": {
       "city": "Bürglen",
       "canton": "TG",
@@ -1115,6 +1124,15 @@
       "url": "https://www.cafe-du-soleil.ch/",
       "scrape": false,
       "hint": "Café du Soleil – Centre culturel, Saignelégier; Konzerte via Petzi."
+    },
+    "Le Zoo": {
+      "city": "Genève",
+      "canton": "GE",
+      "lat": 46.204,
+      "lon": 6.136,
+      "url": "https://www.lezoo.ch",
+      "scrape": false,
+      "hint": "Club im Usine-Gebäude (Place des Volontaires 4); Koordinaten wie L'Usine. Veranstalter u. a. L'Animalerie (Dubquake), Tickets via Petzi."
     },
     "Les Amis": {
       "city": "Bern",

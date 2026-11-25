@@ -199,3 +199,9 @@ Setting: **Search suggestions automatically: yes**
 - Famos175 — dub, reggae, found via Cafete
 - Bloody Soundsystem — soundsystem, dub, found via Cafete
 - Bush Doctors Sound System — soundsystem, dub, found via Ned
+- Justice Rivah Sound System — soundsystem, dub, reggae, found via Rümpeltum
+- Atili — dub, found via Gaskessel
+- Bam Bam Soundsystem — soundsystem, dub, found via Gaskessel
+- Quatre in Toulouse — ska, found via Café Mokka
+- Los Fastidios — ska-punk, ska, found via Café Mokka
+- TASHEENO — dub, reggae, found via Coupole

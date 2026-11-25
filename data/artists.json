@@ -67,6 +67,13 @@
       "source": "https://de.wikipedia.org/wiki/Arrested_Denial",
       "checked": "2026-10-13"
     },
+    "Atili": {
+      "genres": [
+        "dub"
+      ],
+      "source": "https://www.petzi.ch/en/events/65692-gaskessel-atili-fr-bloody-soundsystem-bam-bam-soundsystem-i-gaskessel-bern/",
+      "checked": "2026-11-25"
+    },
     "B.I.D Hi-Fi": {
       "genres": [
         "soundsystem",
@@ -86,6 +93,14 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Bam Bam Soundsystem": {
+      "genres": [
+        "soundsystem",
+        "dub"
+      ],
+      "source": "https://www.petzi.ch/en/events/65692-gaskessel-atili-fr-bloody-soundsystem-bam-bam-soundsystem-i-gaskessel-bern/",
+      "checked": "2026-11-25"
     },
     "Barrington Levy": {
       "genres": [
@@ -177,7 +192,8 @@
         "dub"
       ],
       "source": "https://cafete.ch/",
-      "checked": "2026-11-12"
+      "checked": "2026-11-12",
+      "tour_checked": "2026-11-25"
     },
     "Boundless Vibes Hifi": {
       "genres": [
@@ -257,7 +273,8 @@
         "dub"
       ],
       "source": "https://legroove.ch/agenda/sub-a-dub-2/",
-      "checked": "2026-10-13"
+      "checked": "2026-10-13",
+      "tour_checked": "2026-11-25"
     },
     "Busy Signal": {
       "genres": [
@@ -354,7 +371,7 @@
         "Rototom Sunsplash 2026",
         "Summerjam 2026"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-25"
     },
     "Chris Biomassa": {
       "genres": [],
@@ -372,7 +389,7 @@
         "Plein-les-Watts 2024",
         "Summerjam 2024"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-25"
     },
     "Collie Herb": {
       "genres": [
@@ -406,7 +423,7 @@
         "Summerjam 2026",
         "Rototom Sunsplash 2025"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-25"
     },
     "Curly Bird": {
       "genres": [
@@ -551,7 +568,7 @@
       ],
       "source": "https://de.wikipedia.org/wiki/Dub_Spencer_%26_Trance_Hill",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Dubioza Kolektiv": {
       "genres": [
@@ -565,7 +582,7 @@
         "Mighty Sounds 2024",
         "Reeds Festival 2024"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Dubkasm": {
       "genres": [
@@ -574,7 +591,7 @@
       ],
       "source": "https://dubkasm.bandcamp.com/music",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Eesah": {
       "genres": [
@@ -608,7 +625,7 @@
       "festivals": [
         "Reeds Festival 2026"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Elimb'a Mbo": {
       "genres": [],
@@ -646,6 +663,11 @@
       ],
       "tour_checked": "2026-10-27"
     },
+    "EZÉ": {
+      "genres": [],
+      "source": "https://www.jazzhaus.de/programm/2026-12-30-jamaram-meets-jahcoustix-5793.html",
+      "checked": "2026-11-25"
+    },
     "Famara": {
       "genres": [
         "reggae"
@@ -663,7 +685,8 @@
         "reggae"
       ],
       "source": "https://cafete.ch/",
-      "checked": "2026-11-12"
+      "checked": "2026-11-12",
+      "tour_checked": "2026-11-25"
     },
     "Fast Food Orchestra": {
       "genres": [
@@ -687,7 +710,7 @@
       ],
       "source": "https://www.swissinfo.ch/eng/fleuve-congo-airlines/8221226",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Fluffy Machine": {
       "genres": [],
@@ -782,7 +805,7 @@
       ],
       "source": "https://www.jds.fr/artistes/goulamas-k-8342_N",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Groundation": {
       "genres": [
@@ -902,7 +925,7 @@
         "Chiemsee Reggae Summer 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Jahneration": {
       "genres": [
@@ -913,7 +936,7 @@
       "festivals": [
         "Plein-les-Watts 2025"
       ],
-      "tour_checked": "2026-10-26"
+      "tour_checked": "2026-11-25"
     },
     "Jamaram": {
       "genres": [
@@ -1030,6 +1053,15 @@
         "Summerjam 2025"
       ],
       "tour_checked": "2026-10-28"
+    },
+    "Justice Rivah Sound System": {
+      "genres": [
+        "soundsystem",
+        "dub",
+        "reggae"
+      ],
+      "source": "https://soundcloud.com/justicerivah",
+      "checked": "2026-11-25"
     },
     "Jô": {
       "genres": [
@@ -1216,9 +1248,12 @@
       "tour_checked": "2026-10-29"
     },
     "Los Fastidios": {
-      "genres": [],
-      "source": "https://it.wikipedia.org/wiki/Los_Fastidios",
-      "checked": "2026-10-13"
+      "genres": [
+        "ska-punk",
+        "ska"
+      ],
+      "source": "https://mokka.ch/event/quatre-in-toulouse-los-fastidios/",
+      "checked": "2026-11-25"
     },
     "Luciano": {
       "genres": [
@@ -1306,7 +1341,8 @@
         "reggae"
       ],
       "source": "https://www.petzi.ch/en/events/65141-ajz-caj-ragga-blasta-tour/",
-      "checked": "2026-11-12"
+      "checked": "2026-11-12",
+      "tour_checked": "2026-11-25"
     },
     "Marcus Gad": {
       "genres": [
@@ -1338,6 +1374,11 @@
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "Missstand": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-25"
     },
     "Mista Sanchez": {
       "genres": [],
@@ -1678,9 +1719,11 @@
       "tour_checked": "2026-11-06"
     },
     "Quatre in Toulouse": {
-      "genres": [],
-      "source": "",
-      "checked": "2026-10-13"
+      "genres": [
+        "ska"
+      ],
+      "source": "https://mokka.ch/event/quatre-in-toulouse-los-fastidios/",
+      "checked": "2026-11-25"
     },
     "Queen Omega": {
       "genres": [
@@ -1815,6 +1858,11 @@
       "genres": [],
       "source": "https://www.mixcloud.com/LionPowaSoundsystem/",
       "checked": "2026-10-13"
+    },
+    "Ruffy": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-25"
     },
     "Safisya": {
       "genres": [],
@@ -2084,6 +2132,11 @@
       "source": "",
       "checked": "2026-10-13"
     },
+    "Speedee": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-25"
+    },
     "Spice": {
       "genres": [
         "dancehall"
@@ -2206,9 +2259,12 @@
       "tour_checked": "2026-11-07"
     },
     "TASHEENO": {
-      "genres": [],
-      "source": "",
-      "checked": "2026-10-27"
+      "genres": [
+        "dub",
+        "reggae"
+      ],
+      "source": "https://riddimsworld.com/singles/tasheeno-ft-brother-culture-umberto-echo-enter-the-dancehall-dubmix/",
+      "checked": "2026-11-25"
     },
     "The Busters": {
       "genres": [
