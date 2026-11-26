@@ -72,7 +72,8 @@
         "dub"
       ],
       "source": "https://www.petzi.ch/en/events/65692-gaskessel-atili-fr-bloody-soundsystem-bam-bam-soundsystem-i-gaskessel-bern/",
-      "checked": "2026-11-25"
+      "checked": "2026-11-25",
+      "tour_checked": "2026-11-26"
     },
     "B.I.D Hi-Fi": {
       "genres": [
@@ -100,7 +101,8 @@
         "dub"
       ],
       "source": "https://www.petzi.ch/en/events/65692-gaskessel-atili-fr-bloody-soundsystem-bam-bam-soundsystem-i-gaskessel-bern/",
-      "checked": "2026-11-25"
+      "checked": "2026-11-25",
+      "tour_checked": "2026-11-26"
     },
     "Barrington Levy": {
       "genres": [
@@ -593,6 +595,11 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-11-25"
     },
+    "Earthkeeper Soundsystem": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
+    },
     "Eesah": {
       "genres": [
         "reggae"
@@ -603,7 +610,7 @@
         "Reeds Festival 2025",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "EKR": {
       "genres": [],
@@ -661,7 +668,7 @@
         "Reggae Jam 2024",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "EZÉ": {
       "genres": [],
@@ -677,7 +684,7 @@
       "festivals": [
         "Reeds Festival 2024"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "Famos175": {
       "genres": [
@@ -701,7 +708,7 @@
         "Mighty Sounds 2025",
         "Mighty Sounds 2024"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "Fleuve Congo": {
       "genres": [
@@ -725,7 +732,7 @@
       ],
       "source": "https://rumpeltum.ch/portfolio/17-10-forrest-children-sound-system/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "Frères Cirad": {
       "genres": [],
@@ -754,7 +761,7 @@
         "Reggae Jam 2026",
         "Reggae Jam 2024"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "Genep'high": {
       "genres": [],
@@ -771,7 +778,7 @@
         "Reggae Jam 2026",
         "Rototom Sunsplash 2024"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "Gentleman": {
       "genres": [
@@ -788,6 +795,11 @@
       ],
       "tour_checked": "2026-11-12"
     },
+    "Globetrotter Sound": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
+    },
     "Golden Roots Soundsystem": {
       "genres": [
         "soundsystem",
@@ -796,7 +808,12 @@
       ],
       "source": "https://cafete.ch/",
       "checked": "2026-10-13",
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
+    },
+    "Good Vibes Sound": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
     },
     "Goulamas'K": {
       "genres": [
@@ -850,7 +867,7 @@
         "Reggae Jam 2026",
         "Summerjam 2025"
       ],
-      "tour_checked": "2026-10-27"
+      "tour_checked": "2026-11-26"
     },
     "Iration Steppas": {
       "genres": [
@@ -1061,7 +1078,8 @@
         "reggae"
       ],
       "source": "https://soundcloud.com/justicerivah",
-      "checked": "2026-11-25"
+      "checked": "2026-11-25",
+      "tour_checked": "2026-11-26"
     },
     "Jô": {
       "genres": [
@@ -1176,6 +1194,13 @@
       ],
       "tour_checked": "2026-10-29"
     },
+    "La Substance": {
+      "genres": [
+        "reggae"
+      ],
+      "source": "https://www.jds.fr/annecy/concerts/reggae/la-substance-1862931_A",
+      "checked": "2026-11-26"
+    },
     "Lagwada": {
       "genres": [],
       "source": "",
@@ -1235,6 +1260,11 @@
       ],
       "tour_checked": "2026-10-29"
     },
+    "Lord Ambassador": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
+    },
     "Los Billtones": {
       "genres": [
         "ska",
@@ -1253,7 +1283,8 @@
         "ska"
       ],
       "source": "https://mokka.ch/event/quatre-in-toulouse-los-fastidios/",
-      "checked": "2026-11-25"
+      "checked": "2026-11-25",
+      "tour_checked": "2026-11-26"
     },
     "Luciano": {
       "genres": [
@@ -1370,10 +1401,20 @@
       ],
       "tour_checked": "2026-10-29"
     },
+    "MC Decos": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
+    },
     "Mighty Children": {
       "genres": [],
       "source": "",
       "checked": "2026-10-13"
+    },
+    "MissMcCoconut": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
     },
     "Missstand": {
       "genres": [],
@@ -1723,7 +1764,8 @@
         "ska"
       ],
       "source": "https://mokka.ch/event/quatre-in-toulouse-los-fastidios/",
-      "checked": "2026-11-25"
+      "checked": "2026-11-25",
+      "tour_checked": "2026-11-26"
     },
     "Queen Omega": {
       "genres": [
@@ -1761,6 +1803,11 @@
       "source": "https://www.passetonbillet.fr/en/artists/rakoon",
       "checked": "2026-10-13",
       "tour_checked": "2026-11-04"
+    },
+    "Ras Johnny": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
     },
     "Ras Sherby": {
       "genres": [
@@ -1803,6 +1850,11 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-11-05"
     },
+    "Reggaematic": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
+    },
     "Riders Connection": {
       "genres": [
         "reggae"
@@ -1810,6 +1862,11 @@
       "source": "https://filtermusicgroup.com/collections/riders-connection",
       "checked": "2026-10-21",
       "tour_checked": "2026-11-09"
+    },
+    "Robba Dub": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
     },
     "Romain Virgo": {
       "genres": [
@@ -2045,6 +2102,15 @@
       "checked": "2026-10-13",
       "tour_checked": "2026-11-07"
     },
+    "Skarabaeus & Ensemble Semblant": {
+      "genres": [
+        "reggae",
+        "rocksteady",
+        "ska"
+      ],
+      "source": "https://skarabaeus.fyahstudio.one/",
+      "checked": "2026-11-26"
+    },
     "Skarface": {
       "genres": [
         "ska-punk",
@@ -2264,7 +2330,8 @@
         "reggae"
       ],
       "source": "https://riddimsworld.com/singles/tasheeno-ft-brother-culture-umberto-echo-enter-the-dancehall-dubmix/",
-      "checked": "2026-11-25"
+      "checked": "2026-11-25",
+      "tour_checked": "2026-11-26"
     },
     "The Busters": {
       "genres": [
@@ -2487,6 +2554,11 @@
       "source": "https://legroove.ch/agenda/reggae-dancehall-community-the-final/",
       "checked": "2026-11-04",
       "tour_checked": "2026-11-05"
+    },
+    "UpFull Vibes": {
+      "genres": [],
+      "source": "",
+      "checked": "2026-11-26"
     },
     "Vanupié": {
       "genres": [

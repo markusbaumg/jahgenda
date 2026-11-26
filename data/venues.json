@@ -777,6 +777,15 @@
       "scrape": true,
       "hint": "Events are \"Card Card-Event\" blocks in German, grouped by month headings. Each card has a date like \"Di 13. Okt\" (weekday abbrev, day with period, month abbrev, no year) and a time (doors, e.g. \"19:30\"); the year is reliably derived from the event URL slug /programm/YYYY-MM-DD-slug (beware: a few slugs keep an old date after rescheduling, e.g. nenda 2026-03-18 shown as 18 Dez, so prefer the visible date plus month-heading context, and use the slug only for the year). Title is in h2.Card__Title as span.Act__name plus span.Act__country-code (e.g. \"Sara Hebe\" + \"AR\"); the Card__Byline holds \"Support: X (CH)\", \"Special guests: ...\", \"Line-up: ...\" or a tour name in «guillemets». Genre tags are NOT in the list cards but are on the detail page (e.g. \"Reggae, Dancehall, Dub\") along with Doors/Show times, Location (Foyer/Saal/Club), Mindestalter, Vorverkauf/Abendkasse prices; the simplest approach is to fetch the reggae/dub/dancehall/ska filter URLs and then open each detail page. Ticket link is the a.TicketLink in the card pointing to seetickets.com/ch/event/..., ticketcorner.ch or petzi.ch; sold-out events show \"Ausverkauft\" and no link. Genre-Filter: https://www.kiff.ch/programm?f_filters=all&f_genre=reggae (auch dub, dancehall, ska)."
     },
+    "Knecht Ruprecht": {
+      "city": "St. Gallen",
+      "canton": "SG",
+      "lat": 47.4257076,
+      "lon": 9.3727122,
+      "url": "https://knechtruprecht.ch/",
+      "scrape": false,
+      "hint": "Bahnhofstrasse 10, 9000 St. Gallen; Koordinaten aus Eventfrog-Geodaten der Adresse. Saisonaler Weihnachts-Anlass (14–22 Uhr) mit Konzerten."
+    },
     "Komplex 457": {
       "city": "Zürich",
       "canton": "ZH",

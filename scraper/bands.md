@@ -205,3 +205,5 @@ Setting: **Search suggestions automatically: yes**
 - Quatre in Toulouse — ska, found via Café Mokka
 - Los Fastidios — ska-punk, ska, found via Café Mokka
 - TASHEENO — dub, reggae, found via Coupole
+- Skarabaeus & Ensemble Semblant — reggae, rocksteady, ska, found via Knecht Ruprecht
+- La Substance — reggae, found via Le Brise Glace
